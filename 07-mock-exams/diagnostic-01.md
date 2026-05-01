@@ -7,16 +7,16 @@ Coverage:
 
 | Q | Domain | Sub-area |
 |---|---|---|
-| 1 | 5. Architecture | Coordinator-subagent vs. linear loop |
-| 2 | 5. Architecture | Hook event placement |
-| 3 | 5. Architecture | Bounded loops / session budget |
-| 4 | 1. Core Concepts | CLAUDE.md hygiene |
-| 5 | 1. Core Concepts | Hooks vs. memory for automation |
-| 6 | 4. Tooling / MCP | MCP transport choice |
-| 7 | 4. Tooling / MCP | Tool description quality |
-| 8 | 2. Prompt Engineering | Structured output reliability |
-| 9 | 2. Prompt Engineering | Few-shot placement |
-| 10 | 3. Context & Reliability | Prompt caching strategy |
+| 1 | 1. Agentic Architecture | Coordinator-subagent vs. linear loop |
+| 2 | 1. Agentic Architecture | Hook event placement |
+| 3 | 1. Agentic Architecture | Bounded loops / session budget |
+| 4 | 2. Claude Code | CLAUDE.md hygiene |
+| 5 | 2. Claude Code | Hooks vs. memory for automation |
+| 6 | 3. Tool Design / MCP | MCP transport choice |
+| 7 | 3. Tool Design / MCP | Tool description quality |
+| 8 | 4. Prompt Engineering | Structured output reliability |
+| 9 | 4. Prompt Engineering | Few-shot placement |
+| 10 | 5. Context & Reliability | Prompt caching strategy |
 
 ---
 

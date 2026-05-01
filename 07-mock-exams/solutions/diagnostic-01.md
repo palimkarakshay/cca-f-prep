@@ -24,7 +24,7 @@ it so the abstract idea has a concrete shape.
 
 **Lumivara-site analogy:** the planner / executor split in `.github/workflows/plan-issues.yml` and `execute*.yml` is exactly this pattern — the planner doesn't carry execution scratch into the plan output.
 
-**Domain:** 5. Architecture → sub-area "Coordinator-subagent."
+**Domain:** 1. Agentic Architecture → sub-area "Coordinator-subagent."
 
 ---
 
@@ -39,7 +39,7 @@ it so the abstract idea has a concrete shape.
 
 **Principle:** Pre-execution policy → `PreToolUse`. The blocking-decision capability is what makes it the right primitive for guardrails.
 
-**Domain:** 5. Architecture → sub-area "Hooks." Also touches 1. Core Concepts (settings.json shape).
+**Domain:** 1. Agentic Architecture → sub-area "Hooks." Also touches 2. Claude Code (settings.json shape).
 
 ---
 
@@ -56,7 +56,7 @@ it so the abstract idea has a concrete shape.
 
 **Lumivara-site analogy:** see [`AGENTS.md` § Session charter](https://github.com/palimkarakshay/lumivara-site/blob/main/AGENTS.md) — literally implements the 80%/95% pattern: `BUDGET: 80%, exiting cleanly after current unit` and `BUDGET: 95%, hard exit; resume next run`.
 
-**Domain:** 5. Architecture → sub-area "Bounded loops & session budget."
+**Domain:** 1. Agentic Architecture → sub-area "Bounded loops & session budget."
 
 ---
 
@@ -73,7 +73,7 @@ it so the abstract idea has a concrete shape.
 
 **Lumivara-site analogy:** their `CLAUDE.md` opens with `@AGENTS.md` to pull in the binding charter, then carries only the practical build/test layer. `docs/_deprecated/` and `docs/00-INDEX.md` exist precisely so historical material doesn't bloat the active charter.
 
-**Domain:** 1. Core Concepts → sub-area "CLAUDE.md as evolving context."
+**Domain:** 2. Claude Code → sub-area "CLAUDE.md as evolving context."
 
 ---
 
@@ -90,7 +90,7 @@ it so the abstract idea has a concrete shape.
 
 **Mental model:** ask "who runs this — the model, or the harness?" If you need a guarantee, the harness is the only one that can give one.
 
-**Domain:** 1. Core Concepts → sub-area "Hooks vs. memory vs. CLAUDE.md."
+**Domain:** 2. Claude Code → sub-area "Hooks vs. memory vs. CLAUDE.md."
 
 ---
 
@@ -105,7 +105,7 @@ it so the abstract idea has a concrete shape.
 
 **Principle:** Match transport to deployment shape. Local single-user → `stdio`. Remote / multi-user → HTTP+SSE.
 
-**Domain:** 4. Tooling / MCP → sub-area "MCP transports."
+**Domain:** 3. Tool Design / MCP → sub-area "MCP transports."
 
 ---
 
@@ -120,7 +120,7 @@ it so the abstract idea has a concrete shape.
 
 **Principle:** When the model picks the wrong tool, the tool's description is the first thing to fix. Renames, system nudges, and tool merges are second-order.
 
-**Domain:** 4. Tooling / MCP → sub-area "Tool descriptions and selection."
+**Domain:** 3. Tool Design / MCP → sub-area "Tool descriptions and selection."
 
 ---
 
@@ -135,7 +135,7 @@ it so the abstract idea has a concrete shape.
 
 **Principle:** For machine-consumed output, prefer platform-level constraints over prompt-level requests. The model cannot violate a constraint that isn't sampled.
 
-**Domain:** 2. Prompt Engineering → sub-area "Structured output / tool use as schema."
+**Domain:** 4. Prompt Engineering → sub-area "Structured output / tool use as schema."
 
 ---
 
@@ -150,7 +150,7 @@ it so the abstract idea has a concrete shape.
 
 **Principle:** Few-shots work best in their natural form — conversation turns, not bulleted text. Match training distribution where possible.
 
-**Domain:** 2. Prompt Engineering → sub-area "Few-shot prompting & message structure."
+**Domain:** 4. Prompt Engineering → sub-area "Few-shot prompting & message structure."
 
 ---
 
@@ -165,7 +165,7 @@ it so the abstract idea has a concrete shape.
 
 **Principle:** When a large stable prefix is reused across calls, prompt caching with `cache_control` is the highest-leverage cost lever. Place the cache breakpoint at the boundary between stable and dynamic content.
 
-**Domain:** 3. Context & Reliability → sub-area "Prompt caching."
+**Domain:** 5. Context & Reliability → sub-area "Prompt caching."
 
 ---
 
@@ -175,7 +175,7 @@ it so the abstract idea has a concrete shape.
 |---|---|
 | 9–10 | Strong baseline. We focus training on the **misses' sub-areas only**, plus one full mock per week to keep edges sharp. |
 | 7–8 | Solid. Train the misses' domains in full (notes + 5–10 challenges + a per-domain MCQ set), skim the rest. |
-| 5–6 | Sequence training by exam weight: D5 (Architecture, 27%) → D2 (Prompt Eng., 20%) → D1 (Core, 20%) → D4 (Tooling, 18%) → D3 (Context, 15%). |
+| 5–6 | Sequence training by exam weight: D1 (Agentic Arch, 27%) → D4 (Prompt Eng., 20%) → D2 (Claude Code, 20%) → D3 (Tool/MCP, 18%) → D5 (Context, 15%). |
 | ≤ 4 | We slow down. Notes first, then 1 worked example per sub-area before any MCQs. |
 
 When you've answered, post the 10 letters and we'll mark it together.
