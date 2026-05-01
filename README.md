@@ -11,6 +11,7 @@ Foundations (CCA-F) exam.
 - `05-context-reliability/` — context windows, batching, retries (15%)
 - `full-mock-exams/` — 60-question practice exams
 - `reference/` — glossary, cheatsheets, decision trees
+- `docs/` — single-file MCQ runner, served via GitHub Pages (`/docs` source)
 
 ## How to use
 1. Read `notes.md` in a domain folder.
