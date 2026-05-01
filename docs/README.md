@@ -53,7 +53,7 @@ https://raw.githack.com/palimkarakshay/cca-f-prep/main/docs/index.html
 
 ## What it does
 
-- Renders `Diagnostic 01` (`full-mock-exams/diagnostic-01.md`) one question at
+- Renders `Diagnostic 01` (`07-mock-exams/diagnostic-01.md`) one question at
   a time with A/B/C/D radio cards.
 - Each question has an optional **reasoning textarea** — write why you picked
   what you picked. It surfaces in the result review next to the canonical
@@ -72,4 +72,4 @@ https://raw.githack.com/palimkarakshay/cca-f-prep/main/docs/index.html
 The quiz data is the `QUIZ` constant in `index.html`. To add a second
 diagnostic, lift it to an array of quizzes and add a picker on the start
 screen — that's roughly a 30-line change. Until then, keep the embedded data
-in sync with the source markdown in `full-mock-exams/`.
+in sync with the source markdown in `07-mock-exams/`.
