@@ -17,14 +17,39 @@ python3 -m http.server -d docs 8000
 
 ## Deploy on GitHub Pages
 
-In repo **Settings → Pages**:
+There's a workflow at `.github/workflows/pages.yml` that builds and deploys
+`docs/` on every push to `main`. It does the artifact upload + deploy, but
+**Pages itself has to be enabled once** by hand — the default `GITHUB_TOKEN`
+in Actions has `pages: write` (deploy) but not admin scope (enable), so the
+workflow can't flip the switch for you.
+
+One-time setup:
+
+1. Go to repo **Settings → Pages**.
+2. **Source**: select **GitHub Actions**.
+3. Save (no branch selection needed — the workflow provides the artifact).
+
+Push to `main` after that (or hit **Run workflow** on the Actions tab) and the
+site lands at `https://palimkarakshay.github.io/cca-f-prep/` within ~30s.
+
+### Fallback: branch-based source (if "GitHub Actions" source isn't available)
+
+If your plan/org doesn't expose the GitHub Actions Pages source, switch to:
 
 - **Source**: Deploy from a branch
 - **Branch**: `main` · folder `/docs`
 
-The site lands at `https://palimkarakshay.github.io/cca-f-prep/`.
+…and disable the workflow file (or delete it). Pages will serve
+`/docs/index.html` directly off `main`.
 
-No workflow file needed — Pages serves `/docs/index.html` directly.
+### Zero-config alternative
+
+If you just need to access the app without flipping any settings, the file is
+served as-is by `raw.githack.com`:
+
+```
+https://raw.githack.com/palimkarakshay/cca-f-prep/main/docs/index.html
+```
 
 ## What it does
 

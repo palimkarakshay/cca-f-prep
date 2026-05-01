@@ -27,10 +27,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure Pages (auto-enable on first run)
+      # Prereq (one-time, in repo): Settings → Pages → Source: GitHub Actions.
+      # The default GITHUB_TOKEN has `pages: write` which lets us *deploy* to
+      # an already-enabled Pages site, but it cannot *enable* Pages on a repo
+      # — that needs an admin-scope token. Earlier attempts used `enablement:
+      # true`, which silently relies on admin scope and fails on the default
+      # token. Dropped.
+      - name: Configure Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Upload docs/ as Pages artifact
         uses: actions/upload-pages-artifact@v3
