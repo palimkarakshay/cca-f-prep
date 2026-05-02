@@ -1,0 +1,246 @@
+name: Codex review (OpenAI gpt-5.5)
+
+# Adapted from palimkarakshay/lumivara-site. Posts an OpenAI gpt-5.5 review
+# (with Gemini → GitHub Models → OpenRouter → defer fallback) on every PR
+# to this repo. The review is comment-only — no code commits.
+#
+# Triggers:
+#   1. `pull_request` (opened, reopened, synchronize, ready_for_review) —
+#      every new PR gets a Codex consistency review automatically. Posts
+#      a review comment and labels the PR `codex-reviewed`. Blocker /
+#      major findings additionally label `codex-blockers` so the operator
+#      can use it as a merge gate.
+#   2. `workflow_dispatch` with input `pr=<n>` — manual or recheck-cron
+#      retry of an existing PR.
+#
+# Secrets needed (all OPTIONAL — workflow walks the ladder & defers if
+# every leg is unavailable). Set in repo settings → Secrets and variables
+# → Actions:
+#   OPENAI_API_KEY          ChatGPT primary
+#   OPENAI_API_KEY_BACKUP   second OpenAI account (paid backup)
+#   GEMINI_API_KEY          Google AI Studio
+#   OPENROUTER_API_KEY      OpenRouter (free tier ok)
+# GitHub Models uses the standard GITHUB_TOKEN with `models: read` scope.
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: "PR number to (re-)review"
+        required: true
+      model:
+        description: "OpenAI model id (default gpt-5.5)"
+        required: false
+        default: "gpt-5.5"
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  # GitHub Models leg of scripts/codex-review-fallback.py needs this scope
+  # — without it, models.github.ai/inference returns auth-error and the
+  # ladder falls through to OpenRouter / defer.
+  models: read
+
+concurrency:
+  group: codex-review-${{ github.event.pull_request.number || inputs.pr }}
+  cancel-in-progress: false
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve target PR
+        id: target
+        env:
+          INPUT_PR: ${{ inputs.pr }}
+          INPUT_MODEL: ${{ inputs.model }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          MODEL="${INPUT_MODEL:-gpt-5.5}"
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            PR="$PR_NUMBER"
+          else
+            PR="$INPUT_PR"
+          fi
+          if [ -z "$PR" ]; then
+            echo "::error::Could not resolve PR number." >&2
+            exit 1
+          fi
+          echo "pr=$PR" >> "$GITHUB_OUTPUT"
+          echo "model=$MODEL" >> "$GITHUB_OUTPUT"
+
+      - name: Verify review-engine availability
+        id: verify
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_KEY_BACKUP: ${{ secrets.OPENAI_API_KEY_BACKUP }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          # GitHub Models uses GITHUB_TOKEN, which is always present in
+          # Actions, so there's no "no engine available" hard-fail here:
+          # at worst the script defers and the recheck cron retries.
+          if [ -z "$OPENAI_API_KEY" ] && [ -z "$OPENAI_API_KEY_BACKUP" ] \
+             && [ -z "$GEMINI_API_KEY" ] && [ -z "$OPENROUTER_API_KEY" ]; then
+            echo "::warning::No operator review keys set (OPENAI / GEMINI / OPENROUTER all missing). Falling through to GitHub Models leg only."
+          fi
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Run code review pass
+        if: steps.verify.outputs.ok == 'true'
+        id: review
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_KEY_BACKUP: ${{ secrets.OPENAI_API_KEY_BACKUP }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          REPO_SLUG: ${{ github.repository }}
+          PR: ${{ steps.target.outputs.pr }}
+          MODEL: ${{ steps.target.outputs.model }}
+        run: |
+          set -euo pipefail
+
+          gh pr view "$PR" --repo "$REPO" \
+            --json number,title,body,labels > /tmp/pr.json
+          TITLE=$(python3 -c 'import json; print(json.load(open("/tmp/pr.json"))["title"])')
+          BODY=$(python3 -c 'import json; print(json.load(open("/tmp/pr.json")).get("body") or "(empty)")')
+
+          gh pr diff "$PR" --repo "$REPO" 2>/dev/null \
+            | head -c 60000 > /tmp/diff.txt || true
+          DIFF=$(cat /tmp/diff.txt)
+
+          # Build review prompt. The structured-output schema (sections +
+          # `[severity] path:LN — description` lines) matches the
+          # lumivara-site contract so the same downstream parsers (label
+          # logic below; future codex-pr-fix.yml port) keep working.
+          export TITLE BODY DIFF MODEL PR
+          python3 - <<'PY' > /tmp/prompt.txt
+          import os
+          parts = [
+              "You are the Codex consistency reviewer for the cca-f-prep",
+              "study-material repo (Anthropic CCA-F exam prep). Read the",
+              "change below and produce a focused review with two goals,",
+              "in order:",
+              "",
+              "1. Consistency with project conventions (CLAUDE.md authoring",
+              "   rules, README layout, MCQ format: 4 options A–D + one best",
+              "   answer + 3 plausible distractors, solutions live in a",
+              "   parallel `solutions/` folder, never inline; principle named",
+              "   in each explanation; cite the exam domain + sub-area).",
+              "2. Correctness of content: MCQs have a single defensible best",
+              "   answer; distractors are plausible-but-wrong; solutions",
+              "   match the prompt; no spoilers leaked into question files;",
+              "   no dead links to lumivara-site or other external repos.",
+              "",
+              "Format requirements (downstream parsers depend on this):",
+              "- Use these exact section headers, in this order:",
+              "  `## Consistency findings`, `## Correctness findings`,",
+              "  `## Suggested fixes`, `## Verdict`.",
+              "- Under each findings section, list items as:",
+              "  `- [severity] path/to/file.ext:LN — description`",
+              "  where severity ∈ {blocker, major, minor, nit}.",
+              "- `## Suggested fixes` lists concrete, mechanical edits a bot",
+              "  could apply (one per finding when possible). Each item:",
+              "  `- path/to/file.ext: <what to change, in one sentence>`.",
+              "- `## Verdict` is one of: `approve`, `approve-with-nits`,",
+              "  `request-changes`. One line, no preamble.",
+              "- If a finding is speculative, mark severity `nit` and prefix",
+              "  description with `(speculative)`. Do NOT invent files. If",
+              "  you can't cite a real path, omit the finding.",
+              "",
+              f"## PR #{os.environ['PR']}: {os.environ['TITLE']}",
+              "",
+              os.environ.get("BODY") or "(empty)",
+          ]
+          diff = os.environ.get("DIFF") or ""
+          if diff.strip():
+              parts += ["", "## Diff under review", "```diff", diff, "```"]
+          else:
+              parts += ["", "_No diff available; review the described change against the current repo state._"]
+          print("\n".join(parts))
+          PY
+
+          PROMPT_FILE=/tmp/prompt.txt \
+          REVIEW_OUT=/tmp/review.md \
+          OPENAI_MODEL="$MODEL" \
+          python3 scripts/codex-review-fallback.py \
+            | tee /tmp/engine.txt
+          ENGINE=$(grep -oE 'ENGINE=[a-z]+' /tmp/engine.txt | tail -n1 | cut -d= -f2)
+          ENGINE="${ENGINE:-deferred}"
+          # `|| true` — the deferred path intentionally omits MODEL_USED
+          # and `set -euo pipefail` would otherwise take the step down.
+          MODEL_USED=$(grep -oE 'MODEL_USED=[^[:space:]]+' /tmp/engine.txt | tail -n1 | cut -d= -f2- || true)
+          echo "engine=$ENGINE" >> "$GITHUB_OUTPUT"
+
+          case "$ENGINE" in
+            openai)
+              ENGINE_LABEL="Codex ${MODEL_USED:-$MODEL}" ;;
+            gemini)
+              ENGINE_LABEL="${MODEL_USED:-gemini} (OpenAI unavailable)" ;;
+            github)
+              ENGINE_LABEL="GitHub Models / ${MODEL_USED:-Llama-3.3} (OpenAI + Gemini unavailable)" ;;
+            openrouter)
+              ENGINE_LABEL="OpenRouter / ${MODEL_USED:-deepseek-r1} (all upstream legs unavailable)" ;;
+            deferred)
+              ENGINE_LABEL="DEFERRED — every review leg unavailable" ;;
+            *)
+              ENGINE_LABEL="$ENGINE" ;;
+          esac
+          {
+            echo "## Code review ($ENGINE_LABEL)"
+            echo ""
+            cat /tmp/review.md
+            echo ""
+            echo "---"
+            echo "_Posted by codex-review.yml. Review only — no content changes._"
+          } > /tmp/comment.md
+
+          gh pr comment "$PR" --repo "$REPO" --body-file /tmp/comment.md
+
+          gh label create "codex-reviewed" --repo "$REPO" \
+            --color "0e8a16" --description "Codex consistency review posted" 2>/dev/null || true
+          gh label create "codex-reviewed-by-gemini" --repo "$REPO" \
+            --color "5319e7" --description "Review posted by Gemini fallback (OpenAI unavailable)" 2>/dev/null || true
+          gh label create "codex-blockers" --repo "$REPO" \
+            --color "b60205" --description "Codex flagged blocker/major findings — gates merge" 2>/dev/null || true
+          gh label create "review-deferred" --repo "$REPO" \
+            --color "fbca04" --description "Codex/Gemini review unavailable; will be re-tried by codex-review-recheck.yml" 2>/dev/null || true
+
+          if [ "$ENGINE" = "deferred" ]; then
+            gh pr edit "$PR" --repo "$REPO" --add-label "review-deferred" || true
+          else
+            gh pr edit "$PR" --repo "$REPO" --add-label "codex-reviewed" || true
+            gh pr edit "$PR" --repo "$REPO" --remove-label "review-deferred" || true
+            if [ "$ENGINE" = "gemini" ]; then
+              gh pr edit "$PR" --repo "$REPO" --add-label "codex-reviewed-by-gemini" || true
+            else
+              gh pr edit "$PR" --repo "$REPO" --remove-label "codex-reviewed-by-gemini" || true
+            fi
+
+            BLOCKERS=$(grep -ciE '\[(blocker|major)\]' /tmp/review.md || true)
+            VERDICT=$(grep -iE '^## Verdict' -A 2 /tmp/review.md | tail -n +2 | head -n 1 || true)
+            if [ "${BLOCKERS:-0}" -gt 0 ] || echo "$VERDICT" | grep -qiE 'request-changes'; then
+              gh pr edit "$PR" --repo "$REPO" --add-label "codex-blockers" || true
+            else
+              gh pr edit "$PR" --repo "$REPO" --remove-label "codex-blockers" || true
+            fi
+          fi
+
+          {
+            echo "## Code review summary"
+            echo ""
+            echo "Engine: $ENGINE ($ENGINE_LABEL)"
+            echo "Posted review on PR #$PR."
+          } >> "$GITHUB_STEP_SUMMARY"
