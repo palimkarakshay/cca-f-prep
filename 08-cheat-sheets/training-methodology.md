@@ -6,6 +6,45 @@
 
 ---
 
+## Phase model (basics → architect)
+
+Before you run any of the daily-loop content below, place yourself in
+the right phase. Defined in [`../00-academy-basics/transition-plan.md`](../00-academy-basics/transition-plan.md):
+
+| Phase | What | Exit gate |
+|---|---|---|
+| **A — Intake** | Take Academy courses; read terse notes; recall prompts; generation drill | All B-skills self-rated ≥ 2; basics diagnostic seeded |
+| **B — Bridge** | Worked-example fading (rung 1→2→3) on architect-shape MCQs, interleaved across B-skills | All B-skills measured ≥ 3; calibration gap ≤ 1; diagnostic re-take ≥ 12/15 |
+| **C — Architect drill** | The daily loop below, with B-tagged challenges + predict-then-test | All sub-areas measured ≥ 3; calibration gap ≤ 1 |
+| **D — Mock cycle** | Two full mocks + 4-phase audit | Mock ≥ 78%; calibration gap ≤ 0.5; no F-code repeating ≥ 3 in past 7d |
+
+The daily-loop and weekly-structure sections below describe **Phase C**.
+For Phases A and B, the cadence is in the transition-plan.
+
+---
+
+## Five learning principles in use
+
+These names show up across the rest of the document. Reference, not
+ornament.
+
+- **Andragogy (Knowles)** — self-directed, problem-centered, anchored
+  to existing engineering experience.
+- **Bloom (revised)** — Remember → Understand → Apply → Analyze →
+  Evaluate. The exam tests Analyze/Evaluate. Drill at one rung above
+  current rating; don't drill MCQs at Apply when you're still at
+  Understand on the underlying skill.
+- **Cognitive Load Theory (Sweller)** — *worked-example fading*:
+  fully-worked → partial → solo, three rungs.
+- **Desirable Difficulties (Bjork)** — *spaced retrieval* (1d, 3d,
+  7d, 14d), *interleaving* across domains, *generation* before reading.
+  Easy study feels productive and isn't.
+- **Deliberate Practice (Ericsson)** — every drill names a target
+  B-skill, has a feedback channel (mock %, error-log, calibration gap),
+  and forces revision.
+
+---
+
 ## Daily training loop (60–90 min)
 
 Four steps. Order matters. **AI is OFF for steps 1 and 3.**
@@ -51,9 +90,26 @@ Hand Claude both the challenge and your written attempt. Ask:
 > "Where is my reasoning weak or incomplete? Where did I over-engineer?
 > Where did I miss a tradeoff?"
 
-Log the gaps in `06-failure-analysis/error-log.md` using the F-code taxonomy.
+Log the gaps in `06-failure-analysis/error-log.md` using the F-code
+taxonomy **and the responsible B-code** (from `00-academy-basics/skills-checklist.md`).
+A miss on a B-tagged challenge demotes that B-skill back to rung 2 in
+`09-progress-tracker/skills-matrix.md` and reschedules a +1d
+spaced-review entry.
+
 If a new pattern emerges across ≥3 audits, promote it to
 `08-cheat-sheets/decision-trees.md` § "How I default."
+
+### Step 5 — Predict-then-test (before reading the solution)
+
+Before reading the model solution, write down:
+
+- Your pick + the **one-sentence principle** you used to pick it.
+- For each distractor: the F-code or B-skill failure mode that makes it
+  wrong.
+
+*Then* read the solution. The gap between your prediction and the key
+is the most exam-relevant feedback signal — predicting failure from
+design alone is what the exam tests.
 
 ---
 
@@ -188,11 +244,18 @@ Same systems, increasing depth over weeks.
 
 | Day | Focus |
 |---|---|
-| 1–3 | New sub-areas: concept compression + challenge + solve + audit. One sub-area per day. |
+| 0 (start) | Run any due items from `09-progress-tracker/spaced-review.md` (1–10 min). Update matrix. |
+| 1–3 | New sub-areas: concept compression + challenge + solve + audit. **Interleave** — rotate 2 different sub-areas per day, don't single-track. |
 | 4 | Failure review: re-read open entries in `error-log.md`; promote patterns to `decision-trees.md`; rebuild one challenge from scratch. |
 | 5 | Full mock exam (60 questions, 120 min) + 4-phase audit. |
-| 6 | Deep dive on the weakest sub-area surfaced by the mock. |
-| 7 | Light review: skim `decision-trees.md`, consolidate `error-log.md` (archive resolved entries), update `README.md` status. |
+| 6 | Deep dive on the weakest sub-area surfaced by the mock — and on the lowest-rated **B-skills** feeding it. |
+| 7 | Light review: skim `decision-trees.md`, consolidate `error-log.md` (archive resolved entries), update `README.md` status, **snapshot `09-progress-tracker/skills-matrix.md` to `history.md`**. |
+
+**Interleaving rule (not optional).** Within any day, rotate at least
+two non-adjacent sub-areas / B-skills. Blocked practice (one topic to
+exhaustion) feels productive in the moment and transfers ~30% worse on
+the exam — Bjork's desirable-difficulties effect. The deliberate
+roughness *is* the practice.
 
 ---
 
