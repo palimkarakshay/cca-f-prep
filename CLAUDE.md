@@ -131,3 +131,37 @@ gate — don't merge `codex-blockers` without addressing findings.
   - **No external review pipeline existed** — added codex workflow
     parity with `palimkarakshay/lumivara-site` (commits `f28350d`,
     `10a9e33`, plus this CLAUDE.md update).
+
+- 2026-05-02 — Academy-content scrub + curriculum completion. Scope:
+  validate `docs/curriculum.js` against the live
+  [Anthropic Academy](https://anthropic.skilljar.com/) and author every
+  remaining stub. Three findings:
+  - **Curriculum was 3/41 concepts authored** at start of pass (B1.1,
+    B1.4, B5.1; section-test 1/9). The remaining 38 concepts and 8
+    section-tests were stub `null`s. Authored all 38 concepts (lesson +
+    3-Q quiz each, mirroring the existing `paragraphs/keyPoints/examples/
+    pitfalls/simplified` shape and the principle/bSkills tagging
+    convention) and all 8 missing section-tests, mining each from the
+    corresponding `00-academy-basics/notes/0X-*.md`. Per-section
+    commits, fast-forward merges to `main` so Pages redeploys
+    incrementally. Final state: **9 sections, 41/41 concepts ready,
+    9/9 section-tests** (verified offline by parsing `curriculum.js`
+    and asserting every concept has lesson+quiz with required fields).
+  - **Academy now publishes ~17 courses** (vs 9 mapped here); the eight
+    new ones — *Advanced MCP*, *Claude with Vertex AI*, *Claude with
+    Bedrock*, *AI Capabilities and Limitations*, *AI Fluency for
+    Education / Students / Nonprofits*, *Teaching AI Fluency* — are
+    out of scope for CCA-F **Foundations** (Foundations tests the 9
+    courses already mapped). Documented here so a future tier (CCA
+    Architect-Advanced, CCA Developer) can pick them up without
+    re-scrubbing. No content additions made for them; tightening to
+    the exam over breadth.
+  - **Quality finding: correct-letter distribution is B-skewed** in
+    the auto-authored quizzes (~76% B across 41 concept quizzes). The
+    `docs/README.md` authoring conventions explicitly call out
+    "Mix correct-letter positions. Avoid B-B-B-B patterns. Distribute
+    the correct letter across A/B/C/D within a quiz." The pass
+    privileged content fidelity over letter shuffling; the next
+    follow-up commit rebalances the worst-offender concept quizzes
+    (those with all-B answers) so users practise reasoning rather
+    than learning a positional bias. Tracked as `letter-bias-2026-05`.
