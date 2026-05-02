@@ -1,5 +1,12 @@
 name: Deploy docs/ to GitHub Pages
 
+# This is the ONLY Pages deployer for the repo. The auto-generated
+# `static.yml` (from GitHub's "Static HTML" Pages template) was removed
+# 2026-05-02 because it raced this workflow on the shared `pages`
+# concurrency group and uploaded the entire repo (`path: '.'`) on every
+# push to main — leaving the site at `/cca-f-prep/` 404 because the repo
+# root has no `index.html`. Only `docs/` should ever be uploaded.
+
 on:
   push:
     branches: [main]
