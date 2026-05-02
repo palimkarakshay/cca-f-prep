@@ -176,8 +176,222 @@ const CURRICULUM = {
             ]
           }
         },
-        { id: "b1-2", code: "B1.2", title: "Product-tier vs API-level limit",  bloom: "A", lesson: null, quiz: null },
-        { id: "b1-3", code: "B1.3", title: "Artifact vs inline message",       bloom: "E", lesson: null, quiz: null },
+        {
+          id: "b1-2", code: "B1.2", title: "Product-tier vs API-level limit", bloom: "A",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Claude.ai (the chat product) and the Claude API expose the same underlying models — but Claude.ai sits behind a product-tier envelope that imposes its own caps on top. The model's capacity (e.g. a 200K-token window for Sonnet) is what the API exposes; what you actually get inside Claude.ai depends on your subscription (Free, Pro, Team, Enterprise) and on per-product features the API never sees.",
+              "Three families of limits look identical on the surface but live in different layers. Per-message context length is set by the model on the API side, but trimmed by the product tier on Claude.ai. Daily / hourly message caps are pure product caps — the API has rate limits and credit budgets, not 'you've used your 50 messages today.' Model selection (which models are even pickable from the dropdown) is also tier-bound: a Free user can't pick the same model the API would happily serve their key.",
+              "When a user hits a wall on Claude.ai, the diagnostic question is *which layer is enforcing this?* If the answer changes per subscription tier, it's a product cap and the fix is account-side (upgrade, switch surface, or move to the API). If the answer is identical across all tiers and the API hits the same wall with a different shape (rate-limit error, credit exhaustion), it's a model- or platform-level cap and the fix is architectural (retry, batch, smaller prompt).",
+              "Mis-attributing the layer is the canonical failure. Telling a Free user 'the model has a 50-message limit' is wrong (it's the tier). Telling an API user 'just upgrade to Pro' is also wrong (the API doesn't go through Pro). Naming the layer correctly is what lets you give the right fix."
+            ],
+            keyPoints: [
+              "Claude.ai = product surface on top of the API. Tier-side caps stack on top of model capacity.",
+              "Daily message caps and dropdown model selection are pure tier features. The API has neither.",
+              "Per-message context on Claude.ai = min(model window, tier cap). The API exposes the model number directly.",
+              "Diagnostic question: does the limit change per subscription? If yes, it's product-tier."
+            ],
+            examples: [
+              {
+                title: "'Why is my context smaller on Claude.ai than the docs say?'",
+                body: "User is on Free tier. The model's API-side window may be 200K tokens, but Free clamps the per-message context envelope to a much smaller number. The API will not enforce that clamp. Fix: name it as a tier cap, recommend Pro/Team if they need the bigger envelope, or use the API directly."
+              },
+              {
+                title: "'I hit a daily limit on Claude.ai — does the API have one?'",
+                body: "Daily message caps are tier features. The API has rate limits (per minute / per token) and credit budgets, not a daily message ceiling. Same user, same model, different surface = different cap shape."
+              }
+            ],
+            pitfalls: [
+              "Quoting model-card limits as Claude.ai limits without checking the tier first.",
+              "Telling a user to 'switch to a bigger model' when the binding constraint is a tier cap, not the model.",
+              "Conflating API rate-limits with Claude.ai daily caps — different layer, different remedy."
+            ],
+            notesRef: "00-academy-basics/notes/01-claude-101.md",
+            simplified: {
+              oneLiner: "Claude.ai stacks subscription-tier limits on top of model capacity. The API exposes model capacity directly with no tier in between.",
+              analogy: "Think of the model as the engine and Claude.ai as the rental car. The engine can do 200 mph (model capacity), but the rental contract caps you at 80 (your tier). Renting a different contract changes the cap; switching to your own car (the API) lets the engine run at full.",
+              paragraphs: [
+                "Claude.ai is a product built on top of the API. The model underneath is the same, but the product wraps it in tier-specific caps — message-per-day, context length, which models you can even pick.",
+                "If a user hits a wall, ask: does this limit change if they upgrade their plan? If yes, it's a product cap (fix: upgrade, change tier, or use the API). If no, it's the model itself (fix: shorter prompt, batching, retries)."
+              ],
+              keyPoints: [
+                "Same model can have different visible limits on Claude.ai vs the API.",
+                "Daily message caps and the model dropdown are tier features, not API features.",
+                "When a limit moves with the subscription plan, it's product-tier."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A Pro-tier Claude.ai user notices that the per-message context they actually get is much smaller than the model's API-documented context window. What is the best explanation?",
+                options: {
+                  A: "Claude.ai silently summarizes prompts to save tokens before sending them to the model.",
+                  B: "The Pro tier enforces a per-message context cap that sits on top of the model's API-side window.",
+                  C: "The same model name on Claude.ai is actually a smaller distilled variant.",
+                  D: "Pro tier uses a shared pool that throttles per-message context under load."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Fabricated. Claude.ai doesn't covertly summarize your prompt.",
+                  B: "Right. Per-message context on Claude.ai = min(model window, tier cap). The product surface tightens the envelope; the API would expose the full window.",
+                  C: "Same model, different surface. Claude.ai doesn't swap in a smaller variant of the same name.",
+                  D: "Fabricated mechanism. Tier caps are static, not load-shed."
+                },
+                principle: "Per-message context on Claude.ai is the smaller of the model window and the subscription-tier cap. The API exposes the model directly with no tier in between.",
+                bSkills: ["B1.2"]
+              },
+              {
+                n: 2,
+                question: "A developer says: 'I've hit a 50-messages-a-day limit on Claude.ai. Will my API integration hit the same limit?'",
+                options: {
+                  A: "Yes — the 50/day cap is enforced at the model layer and applies to API calls too.",
+                  B: "No — daily message caps are a Claude.ai product-tier feature; the API uses rate limits and credit budgets instead.",
+                  C: "Only if the API key was issued from the same Claude.ai account.",
+                  D: "Yes, but each API key has an independent 50/day allowance."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Daily message caps live in the product-tier layer, not the model.",
+                  B: "Right. The API has per-minute and per-token rate limits and a credit budget — there is no 'you've used your 50 messages today' counter.",
+                  C: "Account-key linkage doesn't import the tier cap into the API.",
+                  D: "Fabricated. The API has no daily message ceiling at all."
+                },
+                principle: "Daily message caps are pure product-tier features. The API uses rate limits and credit budgets — different layer, different remedy.",
+                bSkills: ["B1.2"]
+              },
+              {
+                n: 3,
+                question: "Which limit is most likely to be a *product-tier* cap rather than an API-level cap?",
+                options: {
+                  A: "The maximum input tokens the model can attend to in a single call.",
+                  B: "Whether the model dropdown lets the user pick the latest Sonnet vs forcing them onto Haiku.",
+                  C: "The per-token billing rate for input vs output tokens.",
+                  D: "The shape of a tool-use loop returned via stop_reason."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Model window is set by the model itself — same on Claude.ai and the API.",
+                  B: "Right. Model selection (which models the dropdown exposes) is a subscription-tier feature on Claude.ai. The API serves any model your account is entitled to without a UI gate.",
+                  C: "Billing rates are platform-side and apply uniformly to a given model.",
+                  D: "stop_reason and the tool-use loop are protocol-level, not product-tier."
+                },
+                principle: "Anything that changes when you switch subscription plan (model dropdown, daily caps, per-message envelope on Claude.ai) is a product-tier feature, not the model's actual capacity.",
+                bSkills: ["B1.2"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b1-3", code: "B1.3", title: "Artifact vs inline message", bloom: "E",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "An Artifact is a separate, isolated, re-renderable output surface inside Claude.ai — code blocks, long documents, diagrams, HTML previews. The point of the Artifact construct isn't visual polish; it's to keep long deliverables *out* of the conversational message stream so the chat thread doesn't bloat with multi-thousand-token blobs every turn.",
+              "When Claude inlines a 4,000-word doc into a chat reply, every subsequent turn carries that doc in the conversation history. By turn five the system is replaying ~20K tokens of duplicated draft content just to maintain the thread. When the same doc is an Artifact, the chat thread holds a small reference / preview while the heavy content lives in its own pane that can be edited, re-rendered, and replaced in place.",
+              "The decision is structural, not aesthetic. Use an Artifact when the output is (a) long enough that replaying it on every turn is wasteful, (b) something the user will iterate on (edit, ask for v2, copy out), or (c) a self-contained deliverable (a doc, a script, a diagram) rather than a piece of the conversation. Use inline when the answer *is* the conversation — short replies, explanations, decisions.",
+              "Two anti-patterns: inlining a 5K-word draft because 'it's just one message' (the cost is the *next* five turns, not this one), and Artifact-everything (short replies wrapped in Artifacts feel formal but break the conversational flow and add UI friction)."
+            ],
+            keyPoints: [
+              "Artifact = isolated, iterable, re-renderable output. Inline = part of the conversation.",
+              "Inlining long output bloats the chat history that replays every turn.",
+              "Artifacts are for deliverables; inline is for conversation.",
+              "Token cost per Artifact is identical to inline — the win is structural, not economic per call."
+            ],
+            examples: [
+              {
+                title: "Drafting a 4,000-word policy doc",
+                body: "Inline: ~5K tokens added to chat history, replayed every subsequent turn — by turn 6 you're paying 30K tokens of duplicated draft just to keep talking. Artifact: the doc lives in its own pane; the chat history references it; iteration replaces the Artifact in place. Same first-turn cost; massively different recurring cost."
+              },
+              {
+                title: "Quick clarifying question",
+                body: "User asks 'what does this error mean?' A two-sentence answer is conversation, not deliverable. Inline. Wrapping it in an Artifact adds UI ceremony and makes the next turn awkward."
+              }
+            ],
+            pitfalls: [
+              "'Make it nicer, put it in an Artifact' — if it's three sentences, no.",
+              "Inlining long output and then asking for 'v2 with one change' — the v2 is also inline, doubling the bloat.",
+              "Treating Artifacts as a magic cost-saver. Per-call token cost is the same; the saving is on subsequent turns of the *same* conversation."
+            ],
+            notesRef: "00-academy-basics/notes/01-claude-101.md",
+            simplified: {
+              oneLiner: "Artifacts park long deliverables in a side pane so they don't replay in the chat history every turn. Use them when the output is something the user will iterate on or carry away.",
+              analogy: "Think of inline replies as talking and Artifacts as handing someone a printout. You wouldn't read a 10-page memo aloud during conversation just to keep talking — you'd hand them the page and say 'see attached.' Artifacts are 'see attached.'",
+              paragraphs: [
+                "Inline messages live in the chat scroll and get replayed on every following turn. Artifacts live in their own pane; the chat just references them.",
+                "If the output is long *and* the user is going to iterate or copy it, Artifact. If the output is just part of the conversation, inline. The wrong choice doesn't break anything immediately — it just makes the rest of the conversation more expensive."
+              ],
+              keyPoints: [
+                "Long + iterable + carry-away → Artifact.",
+                "Short + conversational → inline.",
+                "Inlining long output bloats every following turn."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A user asks Claude to draft a 3,500-word marketing brief and expects to iterate on it across 5–6 turns ('add a section on X', 'tighten paragraph 2'). Why is producing the brief as an Artifact preferable to inlining it?",
+                options: {
+                  A: "Artifacts are billed at a discounted token rate compared to inline messages.",
+                  B: "Inlining the brief replays its full text in chat history on every turn; an Artifact lives in a separate pane and is referenced, not replayed.",
+                  C: "Inline messages are hard-capped at 1,000 words; Artifacts have no such limit.",
+                  D: "Artifacts get a separate review pass from a smaller model."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Per-call token cost is identical. The win is structural.",
+                  B: "Right. The chat thread carries every prior message into context. A 3,500-word inline draft, multiplied by 5–6 iteration turns, is multi-tens-of-thousands of tokens of duplicated content. The Artifact pattern decouples the deliverable from the conversation.",
+                  C: "Fabricated limit. There is no 1,000-word inline cap.",
+                  D: "Fabricated mechanism."
+                },
+                principle: "Artifacts isolate long deliverables from chat history so iteration doesn't multiply context cost on every turn.",
+                bSkills: ["B1.3"]
+              },
+              {
+                n: 2,
+                question: "A teammate suggests wrapping every Claude reply — including two-sentence clarifications and one-line confirmations — in an Artifact 'for cleanliness.' What's the strongest objection?",
+                options: {
+                  A: "Artifacts have a 24-hour retention window; short replies would expire and be lost.",
+                  B: "Artifacts add UI ceremony and break conversational flow; their value is structural for long iterable output, not aesthetic for short replies.",
+                  C: "The Artifact API is rate-limited and would throttle a normal chat.",
+                  D: "Artifacts can't be edited once created, so short replies couldn't be corrected."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Fabricated retention rule.",
+                  B: "Right. The Artifact construct exists to decouple long deliverables from the chat thread. A two-sentence reply gains nothing from that decoupling and loses conversational fluidity.",
+                  C: "Fabricated rate limit.",
+                  D: "False. Artifacts are explicitly editable — that's part of the value for iterable output."
+                },
+                principle: "Use Artifacts where the structural benefit applies (long, iterable, carry-away). Wrapping short replies inverts the construct's purpose.",
+                bSkills: ["B1.3"]
+              },
+              {
+                n: 3,
+                question: "Which of the following is the *worst* fit for an Artifact?",
+                options: {
+                  A: "A 200-line Python script the user will run, edit, and re-paste back for review.",
+                  B: "A one-sentence answer to a yes/no question about how a feature works.",
+                  C: "A long-form report the user will iterate on across multiple turns.",
+                  D: "A self-contained HTML mockup the user will preview in the Artifact pane."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Long, iterable, copy-out — textbook Artifact case.",
+                  B: "Right. A single sentence is conversation, not deliverable. Wrapping it adds friction and breaks flow.",
+                  C: "Iteration across turns is the canonical reason to use an Artifact (avoid replaying the doc every turn).",
+                  D: "HTML preview is one of the construct's intended uses."
+                },
+                principle: "Artifacts pay off for long, iterable, carry-away output. Short conversational answers belong inline.",
+                bSkills: ["B1.3"]
+              }
+            ]
+          }
+        },
         {
           id: "b1-4", code: "B1.4", title: "Context cost of N file uploads", bloom: "A",
           lesson: {
