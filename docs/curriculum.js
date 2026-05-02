@@ -592,13 +592,632 @@ const CURRICULUM = {
       sourceCourse: "Anthropic Academy — AI Fluency: Framework & Foundations",
       blurb: "The 4D framework — Description, Delegation, Discernment, Diligence — for diagnosing AI failures by structural cause, not surface symptom.",
       concepts: [
-        { id: "b2-1", code: "B2.1", title: "Classify failure into a 4D",           bloom: "An", lesson: null, quiz: null },
-        { id: "b2-2", code: "B2.2", title: "Identify mis-delegation",              bloom: "An", lesson: null, quiz: null },
-        { id: "b2-3", code: "B2.3", title: "Write a structured description",       bloom: "A",  lesson: null, quiz: null },
-        { id: "b2-4", code: "B2.4", title: "Run description ↔ discernment loop",   bloom: "A",  lesson: null, quiz: null },
-        { id: "b2-5", code: "B2.5", title: "Name the diligence concern",           bloom: "E",  lesson: null, quiz: null }
+        {
+          id: "b2-1", code: "B2.1", title: "Classify failure into a 4D", bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "The 4D framework — Delegation, Description, Discernment, Diligence — is Anthropic's named taxonomy for diagnosing why an LLM interaction failed. It's not a checklist; it's a *triage* framework. When something goes wrong, naming the D tells you which lever to pull. Pulling the wrong lever (e.g. tweaking the prompt when the task is structurally undelegatable) is the canonical waste-of-day pattern.",
+              "Delegation failures: the task was a bad fit for the model in the first place. Precise multi-step arithmetic without a calculator tool, real-time data without a search tool, exact factual recall outside training cutoff — no prompt rewrites these into success. The fix is a *different task shape*: add a tool, change the surface, decompose, or hand the work to a non-LLM system.",
+              "Description failures: the task was delegatable but the prompt didn't carry enough information — vague role, missing constraints, ambiguous output shape, no examples. The output reflects the gap. The fix is to re-describe — name the role, name the constraint, name the format, add a worked example. Discernment failures: the output was checked too lazily and a wrong-but-plausible answer slipped through. The fix is verification: spot-check facts, validate format, run edge cases. Diligence failures: a deployment-side concern was missed — appropriate human oversight, bias awareness, misuse-risk planning.",
+              "The classification is structural, not by symptom. 'Wrong arithmetic' could be Delegation (no calculator) or Description (didn't ask the model to think step-by-step). 'Hallucinated citation' could be Delegation (no retrieval tool, asked to be authoritative) or Discernment (output was used without verification). Naming which D applies determines whether the fix is architectural, prompt-side, or process-side."
+            ],
+            keyPoints: [
+              "Delegation = wrong task for the model. Fix: change task shape (tools, decomposition, different system).",
+              "Description = right task, weak prompt. Fix: re-describe (role, constraints, format, examples).",
+              "Discernment = output trusted without verification. Fix: check facts, format, edge cases.",
+              "Diligence = deployment-side miss (oversight, bias, misuse). Fix: process and policy.",
+              "Triage by D before reaching for a fix. Wrong-D fix = wasted effort."
+            ],
+            examples: [
+              {
+                title: "'The model fabricated a court ruling citation.'",
+                body: "If you asked it to be authoritative on case law without a retrieval tool: Delegation (give it search). If you asked with retrieval but skipped verification before publishing: Discernment. If both were fine but you deployed it without legal review: Diligence."
+              },
+              {
+                title: "'Output is technically correct but unusable formatting.'",
+                body: "Description. The prompt didn't specify the output shape. Fix: add a format spec, ideally with one worked example."
+              }
+            ],
+            pitfalls: [
+              "Reaching for prompt tweaks (Description fix) when the failure is Delegation. No prompt makes 'multiply 17-digit numbers exactly' work without a tool.",
+              "Calling everything 'Description' because it's the most familiar lever. Misclassification is the trap.",
+              "Skipping Diligence because the output 'looks right' — diligence failures are usually invisible until they're a news story."
+            ],
+            notesRef: "00-academy-basics/notes/02-ai-fluency.md",
+            simplified: {
+              oneLiner: "When an LLM interaction fails, the 4Ds tell you which kind of failure it is — Delegation (wrong task), Description (weak prompt), Discernment (skipped verification), or Diligence (deployment miss).",
+              analogy: "Think of the 4Ds as four different ways a delivery can go wrong: wrong address (Delegation), unclear instructions (Description), didn't check the package (Discernment), or no insurance (Diligence). The fix depends on which one happened.",
+              paragraphs: [
+                "Every LLM failure fits into one of four buckets. Naming the bucket tells you what to do next.",
+                "If the task was wrong for the model, no amount of prompt rewriting helps — change the task. If the prompt was vague, rewrite it. If you didn't check the output, check it. If you missed an oversight or risk concern, fix the process.",
+                "Picking the wrong bucket means you'll fix the wrong thing — common when frustrated, easy to spot once you slow down."
+              ],
+              keyPoints: [
+                "Delegation: did I ask the right thing of the model?",
+                "Description: did I describe it well?",
+                "Discernment: did I check the answer?",
+                "Diligence: did I deploy it responsibly?"
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team uses Claude to compute exact compound-interest schedules across thousands of loan accounts. The model occasionally returns slightly wrong totals. They've already tried more detailed prompts, role definitions, and worked examples. Which D best classifies the failure?",
+                options: {
+                  A: "Description — the prompt still needs to specify rounding rules more precisely.",
+                  B: "Delegation — exact arithmetic at scale is structurally a bad fit for an LLM; the fix is a calculator tool or a different system.",
+                  C: "Discernment — the team needs to spot-check more outputs before accepting them.",
+                  D: "Diligence — the deployment lacked appropriate human review."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Description fixes have already been exhausted, and exact arithmetic isn't a description problem.",
+                  B: "Right. The model is being asked to do something it structurally can't do reliably. Hand it to a calculator tool or a deterministic system. No prompt rewrite fixes a delegation problem.",
+                  C: "Spot-checking would catch the failures but doesn't make the system reliable.",
+                  D: "Diligence applies to oversight processes, not to the choice of what to delegate."
+                },
+                principle: "Exact arithmetic, real-time data, and exact factual recall outside training are Delegation failures. Fix is a different task shape, not a better prompt.",
+                bSkills: ["B2.1", "B2.2"]
+              },
+              {
+                n: 2,
+                question: "An assistant returns valid factual content but in inconsistent JSON-vs-prose formatting that downstream parsers can't handle. Which D applies?",
+                options: {
+                  A: "Delegation — the model can't reliably produce structured output, period.",
+                  B: "Description — the prompt didn't pin down the output shape; specifying the format (and ideally enforcing via tool-use schema) is the fix.",
+                  C: "Discernment — the user needs to read each output more carefully.",
+                  D: "Diligence — there's a process gap around output validation."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Modern LLMs handle structured output well when asked correctly. This isn't structurally undelegatable.",
+                  B: "Right. Inconsistent format = the output shape wasn't specified clearly. Re-describe (and ideally use a tool-schema to enforce). Description, not switching models.",
+                  C: "Reading each output catches mistakes but doesn't fix the source.",
+                  D: "Process-level diligence isn't where this fails."
+                },
+                principle: "Format inconsistency is almost always a Description failure (or Description+Delegation when structured-output tools should be in play).",
+                bSkills: ["B2.1"]
+              },
+              {
+                n: 3,
+                question: "A legal-research assistant returns three citations. Two are real; one is fabricated. The team published the brief without verifying. Which D *most directly* names the operational miss?",
+                options: {
+                  A: "Description — the prompt should have asked the model to flag uncertainty.",
+                  B: "Delegation — legal research without retrieval is structurally underspecified.",
+                  C: "Discernment — the team accepted plausible output without verifying citations before publishing.",
+                  D: "Diligence — the team failed to consult an attorney."
+                },
+                correct: "C",
+                explanations: {
+                  A: "Asking the model to self-flag uncertainty is unreliable.",
+                  B: "True for the underlying architecture, but the question asks for the operational miss.",
+                  C: "Right. The output landed in a public brief without anyone checking the citations. Discernment is the verification step that didn't happen.",
+                  D: "Diligence covers oversight policy; the immediate miss was failing to verify."
+                },
+                principle: "When wrong-but-plausible output is published unverified, name Discernment. Multiple Ds may apply; pick the one closest to the operational moment.",
+                bSkills: ["B2.1"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b2-2", code: "B2.2", title: "Identify mis-delegation", bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Mis-delegation is when work has been handed to the LLM that the LLM is structurally bad at — and no amount of prompt engineering will rescue it. The fix is always architectural: add a tool, change the surface, decompose into a smaller delegatable piece, or hand the task to a deterministic system. Recognising mis-delegation early is high-leverage; it's the failure mode that wastes the most time when missed because the natural reflex (rewrite the prompt) doesn't help.",
+              "The classes of mis-delegation worth memorising: (1) Exact arithmetic / counting at scale — needs a calculator or code execution. (2) Real-time / fresh data — needs retrieval, search, or an API. (3) Authoritative factual recall outside training distribution — needs grounded retrieval. (4) Deterministic transformations on large structured data — usually a script or SQL query, not an LLM. (5) Tasks where the cost of a wrong answer is catastrophic and there's no human checkpoint — the delegation itself is irresponsible regardless of capability.",
+              "The pattern that distinguishes mis-delegation from a Description failure: you've tried better prompts, examples, role definitions, and structured outputs, and the failure rate hasn't moved. That signature — *prompt iteration plateau on a task that should objectively be solvable* — almost always means the task was wrong for the model, not for the prompt.",
+              "The fix vocabulary: 'add a tool' (calculator, code interpreter, search), 'change the surface' (move to a deterministic pipeline with the LLM only at one well-bounded step), 'decompose' (break the work into pieces the LLM is good at — summarisation, classification, reformatting — wrapped around the deterministic piece), or 'don't use an LLM' (some work is just a SQL query)."
+            ],
+            keyPoints: [
+              "Mis-delegation = task structurally bad for an LLM. Architecture problem, not prompt problem.",
+              "Five canonical classes: exact arithmetic, fresh/real-time data, authoritative facts, large deterministic transforms, irreversible high-stakes calls.",
+              "Diagnostic signature: prompt iteration plateau. If quality won't move with better prompts, the task is wrong.",
+              "Fix vocabulary: add a tool, decompose, change the surface, or don't use an LLM."
+            ],
+            examples: [
+              {
+                title: "'Total this 5,000-row CSV by region.'",
+                body: "Mis-delegation. SUM-by-group is a SQL/script job. The LLM at the front of the pipeline is fine for choosing the grouping, but the actual aggregation should run in code. Fix: have the LLM emit the SQL, run it, and feed the results back."
+              },
+              {
+                title: "'Tell me what happened in last night's election.'",
+                body: "Mis-delegation without a search tool. Adding 'and please be accurate' to the prompt does nothing. Fix: add a search/retrieval tool, then the LLM can synthesize over real results."
+              }
+            ],
+            pitfalls: [
+              "Burning hours rewriting the prompt for a task that's structurally undelegatable.",
+              "Assuming a bigger / smarter model fixes mis-delegation. Sometimes it lifts the floor a bit, but the architectural problem remains.",
+              "Conflating 'the model could in principle do this' with 'I should ask it to.' Capability ≠ delegatability."
+            ],
+            notesRef: "00-academy-basics/notes/02-ai-fluency.md",
+            simplified: {
+              oneLiner: "Mis-delegation is asking the LLM to do something it's structurally bad at. The fix is architectural — a tool, decomposition, or a different system — not a better prompt.",
+              analogy: "Asking an LLM to do exact arithmetic is like asking a writer to be your accountant. They can talk about numbers, but they're not the right hire for the books. Get them a calculator (a tool) or hire an accountant (a different system).",
+              paragraphs: [
+                "Some tasks just don't fit an LLM well — exact math, fresh data, large deterministic transforms, citation-grade facts. No prompt rewrites these into success.",
+                "The signal is prompt-iteration plateau: you've tried five prompts and the error rate is unchanged. That's the cue to step back and change the architecture, not the wording."
+              ],
+              keyPoints: [
+                "If better prompts aren't helping, the task may be wrong for the model.",
+                "Add a tool, break the task up, or use code instead.",
+                "'Try harder on the prompt' is the wrong default for these failures."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team has tried five prompt revisions over a week trying to get an LLM to compute exact aggregate statistics over a 200,000-row dataset. Accuracy is unchanged. What's the strongest next step?",
+                options: {
+                  A: "Switch to a more capable model and try the same prompts.",
+                  B: "Recognize this as mis-delegation; have the LLM emit code/SQL and run the aggregation deterministically, returning results back.",
+                  C: "Add temperature=0 and ask for chain-of-thought to make reasoning more careful.",
+                  D: "Increase max_tokens so the model has more room to reason through each row."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Bigger model occasionally lifts the floor but doesn't fix a structural mismatch.",
+                  B: "Right. Aggregations over hundreds of thousands of rows belong in deterministic code. Use the LLM to choose the operation and read the result; run the math in SQL or a script.",
+                  C: "Temperature/CoT tweaks are description-level. The plateau says description isn't the lever.",
+                  D: "max_tokens controls output length. Doesn't fix the structural mismatch."
+                },
+                principle: "Five-prompt plateau on an objective task = mis-delegation. The fix is architectural (add a tool / decompose to code), not prompt-side.",
+                bSkills: ["B2.2"]
+              },
+              {
+                n: 2,
+                question: "Which task is *most clearly* mis-delegation if attempted with a vanilla LLM (no tools)?",
+                options: {
+                  A: "Summarising a long meeting transcript into 5 action items.",
+                  B: "Generating three creative headline options for an article.",
+                  C: "Returning today's stock price for a ticker as of 10 minutes ago.",
+                  D: "Reformatting a paragraph from prose to bullet points."
+                },
+                correct: "C",
+                explanations: {
+                  A: "Summarisation is a strong-fit LLM task.",
+                  B: "Creative generation is a strong-fit LLM task.",
+                  C: "Right. Real-time market data is outside the model's training cutoff and isn't recoverable by better prompting. Without a price-feed tool, the request is structurally undelegatable.",
+                  D: "Reformatting is a textbook strong-fit LLM task."
+                },
+                principle: "Real-time data, exact arithmetic, and grounded factual recall outside training are mis-delegation without tools.",
+                bSkills: ["B2.2"]
+              },
+              {
+                n: 3,
+                question: "'The LLM extracts entities, writes them into our customer DB, then sends the customer an email.' Which step is most likely *mis-delegated* if the LLM is doing it directly?",
+                options: {
+                  A: "Extracting entities from free-text input.",
+                  B: "Writing rows to the customer database directly from the LLM's response with no validation layer.",
+                  C: "Drafting the personalised email body.",
+                  D: "Choosing the email's subject line based on extracted entities."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Extraction from free text is a strong-fit LLM task.",
+                  B: "Right. Direct, unvalidated DB writes from LLM output is the high-stakes irreversible class — bad delegation. The LLM should propose; a deterministic validator should write.",
+                  C: "Drafting copy is a strong-fit LLM task.",
+                  D: "Subject-line choice is a soft creative task — fine for the LLM."
+                },
+                principle: "Don't delegate irreversible high-stakes operations directly to the LLM. Insert a deterministic validator between LLM proposals and side-effects.",
+                bSkills: ["B2.2"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b2-3", code: "B2.3", title: "Write a structured description", bloom: "A",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "A 'description' in the 4D framework is the prompt itself. A *structured* description names four things explicitly: role (who the model is acting as), task (what to do), constraints (what to honour or avoid), and format (the exact output shape). Skipping any of the four shifts work onto the model's guessing — sometimes it guesses right, often it doesn't, and the inconsistency is what's expensive in production.",
+              "Role gives the model a frame for tone, depth, and audience. 'You are a senior compiler engineer' produces different defaults than 'You are explaining to a high-school student.' Task names the verb and the object: 'Summarise this transcript into 5 bullet action items, attributed to speaker.' Constraints encode what would otherwise be implicit: 'Do not invent action items; if a section has none, write \"none.\"' Format is the contract with whatever consumes the output: prose, JSON shape, table columns, length cap.",
+              "Examples are an underrated component of structured description. One worked example does more than three constraint sentences. Show the model the input → output transformation once and it pattern-matches. This is the entire point of few-shot prompting — examples are description, not decoration.",
+              "The diagnostic question for any prompt: if a new junior teammate read this prompt with no context, would they know exactly what to produce? If no, the description is incomplete. The model isn't psychic; under-specification is silently filled in with priors that may or may not match what you wanted."
+            ],
+            keyPoints: [
+              "Structured description = role + task + constraints + format. All four, named explicitly.",
+              "One worked example beats three sentences of constraints.",
+              "Diagnostic: a junior with the prompt and no context should know exactly what to produce.",
+              "Under-specification is silently filled by the model's priors — not a feature."
+            ],
+            examples: [
+              {
+                title: "Unstructured: 'Summarise the transcript.'",
+                body: "Role: unset (default conversational). Task: 'summarise.' Constraints: none. Format: open. Output: highly variable across runs."
+              },
+              {
+                title: "Structured rewrite",
+                body: "Role: 'You are a meeting note-taker for an engineering team.'\nTask: 'Summarise the transcript into action items.'\nConstraints: 'Each action item must be attributed to a speaker. Do not invent action items; sections without any explicit commitment should be omitted.'\nFormat: 'Markdown bullet list, one bullet per item, format: `- [Speaker]: action`.' Then one worked example."
+              }
+            ],
+            pitfalls: [
+              "Naming role and task but skipping format — the consumer of the output gets inconsistent shape.",
+              "Stuffing constraints in but never giving an example. Examples > more constraints.",
+              "Writing the constraint as 'be helpful' or 'be careful' — not actionable. Constraints must be checkable."
+            ],
+            notesRef: "00-academy-basics/notes/02-ai-fluency.md",
+            simplified: {
+              oneLiner: "A good prompt names four things: who you want the model to be, what to do, what rules to follow, and exactly what shape the output should take. Add a worked example.",
+              analogy: "Briefing the model is like briefing a contractor. 'Build me a house' is bad. 'Build me a 3-bed bungalow with a flat roof, here's a sketch' gets you what you wanted on the first try.",
+              paragraphs: [
+                "Unstructured prompts get unstructured results. Name the role, the task, the constraints, and the format. Then show one worked example.",
+                "If a junior teammate with no context wouldn't know what to deliver from your prompt alone, the prompt is incomplete."
+              ],
+              keyPoints: [
+                "Role + Task + Constraints + Format — all four.",
+                "One worked example > three constraint sentences.",
+                "If it's vague to a human, it's vague to the model."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team's prompt reads: 'Pull the action items out of this meeting transcript.' Output shape varies wildly across runs. What is the *first* missing element?",
+                options: {
+                  A: "A higher temperature setting to add diversity.",
+                  B: "Explicit format specification (e.g., 'markdown bullet list, format: `- [Speaker]: action`') ideally with one worked example.",
+                  C: "A larger context window so the transcript fits comfortably.",
+                  D: "Delegation to a smaller model so the output is more deterministic."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Higher temperature increases variance — opposite of what's wanted.",
+                  B: "Right. The output shape isn't specified, so the model varies. Naming the format and showing one worked example is the canonical fix.",
+                  C: "Window size doesn't address output-shape variance.",
+                  D: "Switching models doesn't add format specification to the prompt."
+                },
+                principle: "Format is one of the four explicit description components. Without it, the model fills the gap inconsistently.",
+                bSkills: ["B2.3"]
+              },
+              {
+                n: 2,
+                question: "Which constraint is *most useful* for an LLM that summarises customer support tickets?",
+                options: {
+                  A: "'Be helpful and accurate.'",
+                  B: "'Use your best judgment.'",
+                  C: "'Do not invent root causes; if the ticket doesn't state one, write `not stated` for that field.'",
+                  D: "'Try to be concise.'"
+                },
+                correct: "C",
+                explanations: {
+                  A: "Not actionable. The model already aims to be helpful and accurate.",
+                  B: "Anti-constraint — increases variance.",
+                  C: "Right. Names a specific failure mode (invented root cause), names the contract for missing data (`not stated`). Checkable, falsifiable, action-changing.",
+                  D: "'Concise' is unmeasured. 'Under 100 words' would be a real constraint."
+                },
+                principle: "Constraints in a structured description must be *checkable*. 'Don't do X; if Y, do Z' is real; 'be careful' is decoration.",
+                bSkills: ["B2.3"]
+              },
+              {
+                n: 3,
+                question: "A prompt names role and task but provides no constraints or worked example. The model produces broadly correct but uneven output. Which intervention has the highest leverage?",
+                options: {
+                  A: "Adding two paragraphs of additional explanation about the task.",
+                  B: "Adding one worked input → output example matching the desired shape.",
+                  C: "Lowering temperature to 0.",
+                  D: "Switching the role from `assistant` to `expert`."
+                },
+                correct: "B",
+                explanations: {
+                  A: "More prose helps marginally. Examples help much more.",
+                  B: "Right. One worked example is the highest-leverage description addition — the model pattern-matches the input → output transformation directly.",
+                  C: "Temperature reduces variance but not the underlying ambiguity.",
+                  D: "Cosmetic role change, no information gain."
+                },
+                principle: "Examples are description. One worked example often beats several sentences of constraint text.",
+                bSkills: ["B2.3"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b2-4", code: "B2.4", title: "Run description ↔ discernment loop", bloom: "A",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Description and Discernment work as a loop, not as separate steps. You write a prompt (Description), evaluate the output (Discernment), find a gap, and the gap *almost always* points back at a missing piece of the prompt — not at a need to retry, raise temperature, or escalate to a bigger model. One iteration of this loop is more valuable than three retries with the same prompt.",
+              "The mechanic: when output disappoints, ask 'what did I leave the model to guess about?' Format inconsistency → format wasn't specified. Wrong tone → role wasn't specified. Missed an edge case → constraint for the edge case wasn't named. Hallucinated a fact → either no grounding source was provided (Description) or the model wasn't told to flag uncertainty (Description). The prompt is the lever; running the loop disciplines you to use it.",
+              "The wrong reflex when output disappoints: retry with the same prompt, hoping for a luckier sample. Retrying without changing the description is sampling variance, not learning. Even when retry produces a better answer, you've encoded nothing — the next run regresses. The loop produces durable improvements.",
+              "What ends the loop: when the gap you observe in Discernment can no longer be closed by a Description change. That's the signal you've crossed into Delegation territory (the task itself was wrong) or Diligence territory (the deployment process needs a checkpoint). The loop is also a triage mechanism — it tells you when prompt iteration has stopped paying."
+            ],
+            keyPoints: [
+              "Description and Discernment are a loop, not a sequence.",
+              "Disappointing output → ask 'what did I leave to guess?' → re-describe.",
+              "Retrying without re-describing is sampling, not iteration.",
+              "When re-description stops helping, you've hit Delegation or Diligence."
+            ],
+            examples: [
+              {
+                title: "Output: occasionally invents action items the transcript didn't contain.",
+                body: "Discernment found the gap. The Description re-write: add an explicit constraint, 'Do not invent action items; if no commitment was made, omit the section.' Re-run; verify; either the gap closes (loop succeeded) or it doesn't (Delegation question — maybe the input is too noisy)."
+              },
+              {
+                title: "Output: tone is too casual for an executive summary.",
+                body: "Description gap: role unspecified. Re-write: add 'You are writing for a CFO; precise, concise, no hedging.' Loop ends quickly."
+              }
+            ],
+            pitfalls: [
+              "Retrying with the same prompt and counting the better sample as 'fixed.' Sampling variance ≠ improvement.",
+              "Skipping the gap-naming step. 'Output isn't great, let me rewrite the whole prompt' is rarely as useful as 'output is missing X, let me add the X-spec.'",
+              "Not knowing when to stop. After 3 loops with no movement, name as Delegation or Diligence and change tactic."
+            ],
+            notesRef: "00-academy-basics/notes/02-ai-fluency.md",
+            simplified: {
+              oneLiner: "When the output disappoints, ask 'what did the prompt leave the model to guess?' and add it to the prompt. That's the loop.",
+              analogy: "It's like editing a recipe. The cake came out dry — instead of baking the same recipe again hoping for better, change the recipe. Each disappointment teaches you what to add to the recipe; the next bake is better.",
+              paragraphs: [
+                "If the output isn't right, retrying with the same prompt is just hoping you get a luckier roll. Iterating means changing the prompt — adding the missing constraint, the missing format, the missing example.",
+                "When you've changed the prompt three times and the output isn't improving, the problem probably isn't the prompt. It's either the wrong task for the model or a deployment issue."
+              ],
+              keyPoints: [
+                "Iterate the prompt, not the temperature.",
+                "Each iteration adds the thing the previous prompt left implicit.",
+                "Diminishing returns = stop iterating, change tactic."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A user gets a disappointing answer and clicks 'regenerate' four times, picking the best of the four. What is the structural critique?",
+                options: {
+                  A: "Regenerating costs token budget; cheaper to use one good shot.",
+                  B: "It's sampling variance, not iteration — no learning is encoded for the next run, and the underlying prompt gap is never named.",
+                  C: "Regenerate uses a different model under the hood, so it's not a like-for-like comparison.",
+                  D: "Regenerate disables temperature controls."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Cost is true but not the structural critique.",
+                  B: "Right. Same prompt → different sample. Picking the best one doesn't change anything for next time. Running the Description ↔ Discernment loop adds the missing spec to the prompt so the next run is durably better.",
+                  C: "Same model.",
+                  D: "Fabricated."
+                },
+                principle: "Retry without re-describing = sampling. Iteration means changing the prompt to encode what was missing.",
+                bSkills: ["B2.4"]
+              },
+              {
+                n: 2,
+                question: "A team has rewritten their prompt three times. Quality is essentially unchanged. What does the loop's behavior tell them?",
+                options: {
+                  A: "Run the loop two more times before drawing conclusions.",
+                  B: "The failure has likely shifted out of Description territory — into Delegation or Diligence. Re-describing isn't the right lever.",
+                  C: "Switch to a smaller model and try again.",
+                  D: "Disable temperature and re-run the loop."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Three iterations with no movement is already the signal.",
+                  B: "Right. The loop also tells you when to *stop* prompt-iterating. A plateau is the cue to re-classify the failure and change tactic.",
+                  C: "Smaller model usually worsens outcomes; doesn't address the structural diagnosis.",
+                  D: "Temperature isn't the bottleneck once you've plateaued."
+                },
+                principle: "The loop is also a triage mechanism. Plateau across iterations = leave Description, name a different D.",
+                bSkills: ["B2.4", "B2.1"]
+              },
+              {
+                n: 3,
+                question: "Output is occasionally formatted wrong. Which is the most direct application of the loop?",
+                options: {
+                  A: "Lower temperature and accept the same prompt.",
+                  B: "Add an explicit format spec (and ideally one worked example) to the prompt and re-run.",
+                  C: "Wrap the response in retry logic with regex validation.",
+                  D: "Move the task to a more powerful model."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Lowering temperature reduces variance but doesn't add format specification.",
+                  B: "Right. Discernment named the gap (format inconsistency); the loop says re-describe with explicit format. Most direct fix.",
+                  C: "Retry/validation is a workaround for not iterating the description.",
+                  D: "Bigger model can mask the issue but doesn't fix the underspecified prompt."
+                },
+                principle: "Loop closure: gap observed in output → corresponding spec added to prompt.",
+                bSkills: ["B2.4"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b2-5", code: "B2.5", title: "Name the diligence concern", bloom: "E",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Diligence is the deployment-side D — what oversight, review, risk, and accountability practices wrap around the LLM in production. The other three Ds operate per interaction; Diligence operates at the system/policy layer. The exam frames diligence as 'responsible deployment' — and the questions reward the candidate who can name the *specific* concern rather than waving at 'be careful.'",
+              "The named diligence concerns worth memorising: (1) appropriate human oversight — high-stakes outputs need a human checkpoint before action; (2) bias awareness — outputs may reflect or amplify training-distribution biases, especially in personnel, lending, healthcare, legal contexts; (3) misuse risk — capability that helps a legitimate user can also help a bad actor; design for the malicious case; (4) ownership of outcome — the team deploying the system owns its consequences, not the model vendor; (5) transparency to users — they should know when they're talking to / being affected by an AI.",
+              "Naming the diligence concern in a scenario means matching the deployment shape to the relevant concern. A medical-advice chatbot: oversight, transparency. An auto-loan decision system: bias, oversight, ownership. A free-text customer support agent: misuse risk (prompt-injection), oversight on escalations. The concern is rarely 'all of them' — the question typically privileges one based on the scenario shape.",
+              "Diligence failures don't usually look like product bugs. They look like news stories — a discriminatory denial, a hallucinated diagnosis, a jailbroken assistant. By the time you see the failure, the diligence intervention should already have been in the design. The exam tests whether you'd have specified it in advance."
+            ],
+            keyPoints: [
+              "Diligence = deployment-side concerns: oversight, bias, misuse, ownership, transparency.",
+              "Concern is matched to deployment shape, not blanketed.",
+              "Diligence interventions live in design, not in the prompt.",
+              "Failure mode is news-story shaped, not bug-shaped — design for it upfront."
+            ],
+            examples: [
+              {
+                title: "Personnel screening assistant",
+                body: "Primary diligence concerns: bias (training-distribution biases on names, demographics) + appropriate human oversight (no automated reject without human review) + transparency (candidate told an AI screening tool was used)."
+              },
+              {
+                title: "Public-facing customer support agent",
+                body: "Primary concerns: misuse risk (prompt injection, jailbreak), appropriate oversight on escalations (handoff path to a human), and transparency (user knows they're talking to an AI)."
+              }
+            ],
+            pitfalls: [
+              "Saying 'be careful' or 'add review' without naming *which* concern is binding.",
+              "Treating diligence as a prompt-engineering fix. Diligence interventions are design, policy, and process.",
+              "Skipping diligence on 'low-stakes' deployments that quietly become high-stakes (a research assistant whose summaries get pasted into legal filings)."
+            ],
+            notesRef: "00-academy-basics/notes/02-ai-fluency.md",
+            simplified: {
+              oneLiner: "Diligence is the responsible-deployment layer: oversight, bias, misuse, ownership, transparency. Match the concern to the shape of the deployment.",
+              analogy: "Diligence is to LLM apps what safety engineering is to physical products. You don't bolt it on after the recall — you design for it.",
+              paragraphs: [
+                "Some failures aren't about the prompt or the model. They're about the way the system is deployed — who reviews outputs, what bias guards exist, how misuse is prevented, who owns the outcome.",
+                "Different deployments need different specific concerns named. A loan-decision tool: bias and oversight. A public chatbot: misuse and transparency. Pick the one that matches the scenario."
+              ],
+              keyPoints: [
+                "Diligence = design-time, not prompt-time.",
+                "Named concerns: oversight, bias, misuse, ownership, transparency.",
+                "Failures look like news stories. Design for them in advance."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A bank deploys an LLM-assisted system that pre-screens loan applications before a human officer reviews. Which diligence concern is *most directly* binding?",
+                options: {
+                  A: "Token cost optimisation across the screening pipeline.",
+                  B: "Bias in screening recommendations and appropriate human oversight on the human-officer step (no automated reject without human approval).",
+                  C: "Latency optimisation for end-user experience.",
+                  D: "Logging and observability for engineering debugging."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Cost is operational; not the diligence concern.",
+                  B: "Right. Loan decisions in protected categories carry high bias risk; the deployment shape requires real oversight, not rubber-stamping. The named concerns: bias + oversight.",
+                  C: "Latency is operational.",
+                  D: "Logging is engineering hygiene, not the binding diligence concern."
+                },
+                principle: "In high-stakes regulated decisions (lending, hiring, healthcare), name bias + oversight. Generic 'be careful' is the wrong answer.",
+                bSkills: ["B2.5"]
+              },
+              {
+                n: 2,
+                question: "A public-facing customer-support chatbot connects to internal systems via tools (refund, account lookup, password reset). What is the *primary* diligence concern?",
+                options: {
+                  A: "Response latency for chatbot users.",
+                  B: "Misuse risk — adversarial inputs (prompt injection, jailbreak) attempting to abuse refunds or access accounts; also transparency that users are talking to an AI.",
+                  C: "Token cost on the backend model.",
+                  D: "Choice of fonts and tone in the chat UI."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Operational, not diligence.",
+                  B: "Right. Tools that effect changes are exactly the surface adversarial inputs target. Misuse risk dominates.",
+                  C: "Cost-side.",
+                  D: "UX, not diligence."
+                },
+                principle: "When the LLM holds tools that effect change, misuse risk dominates the diligence picture. Design for the adversarial user.",
+                bSkills: ["B2.5"]
+              },
+              {
+                n: 3,
+                question: "Which statement about diligence is *most* aligned with the 4D framework?",
+                options: {
+                  A: "Diligence concerns can be addressed entirely inside the system prompt.",
+                  B: "Diligence is a design-time concern (oversight, bias, misuse, ownership, transparency); the specific concern depends on the deployment shape.",
+                  C: "Diligence applies only to medical and legal applications.",
+                  D: "Diligence is the model vendor's responsibility, not the deploying team's."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Diligence is design/process — not a prompt feature.",
+                  B: "Right. Design-time and shape-specific. The exam rewards naming the specific concern that matches the scenario.",
+                  C: "Applies broadly; not domain-restricted.",
+                  D: "The deploying team owns the outcome."
+                },
+                principle: "Diligence = design-time, deployment-shape-specific, owned by the deploying team.",
+                bSkills: ["B2.5"]
+              }
+            ]
+          }
+        }
       ],
-      sectionTest: null
+      sectionTest: {
+        title: "Section 2 test — AI Fluency: the 4Ds",
+        passPct: 0.7,
+        questions: [
+          {
+            n: 1,
+            question: "A team's LLM-driven invoice-processor sometimes returns wrong totals. They've tried four prompt rewrites, added worked examples, and lowered temperature. Error rate is unchanged. Which D best classifies the failure, and what is the next move?",
+            options: {
+              A: "Description — keep iterating; the right wording hasn't been found.",
+              B: "Delegation — exact arithmetic at scale is structurally a bad fit; have the LLM emit code and run the math deterministically.",
+              C: "Discernment — the team needs to spot-check more carefully.",
+              D: "Diligence — the system needs a human-in-the-loop reviewer."
+            },
+            correct: "B",
+            explanations: {
+              A: "Four iterations with no movement is the diagnostic signature that prompt iteration has plateaued.",
+              B: "Right. The Description ↔ Discernment loop's plateau is the cue to re-classify as Delegation. Exact totals belong in code; the LLM proposes, the code computes.",
+              C: "Verification catches errors but doesn't make the system reliable.",
+              D: "Oversight is downstream; the structural fix is to remove the mis-delegated step."
+            },
+            principle: "Plateau across description iterations = re-classify the failure. Exact arithmetic is the canonical Delegation case.",
+            bSkills: ["B2.1", "B2.2", "B2.4"]
+          },
+          {
+            n: 2,
+            question: "A prompt produces broadly correct output but with inconsistent format that breaks downstream parsers. Which is the *single* highest-leverage description change?",
+            options: {
+              A: "Add 'be consistent' to the prompt.",
+              B: "Specify the exact format and include one worked example of input → output.",
+              C: "Lower temperature to 0 and accept the existing prompt.",
+              D: "Switch to a larger model."
+            },
+            correct: "B",
+            explanations: {
+              A: "Not actionable.",
+              B: "Right. Format unspecified = model fills with priors that vary. Naming the exact format and showing one worked example is the canonical Description fix.",
+              C: "Temperature reduces variance but not the underlying ambiguity.",
+              D: "Bigger model masks the issue without fixing it."
+            },
+            principle: "Format is one of the four explicit description components. One worked example beats several constraint sentences.",
+            bSkills: ["B2.3"]
+          },
+          {
+            n: 3,
+            question: "An assistant returns a confident citation that turns out to be fabricated. The team published it without checking. Which D is the *operational* miss most directly named by, and what's the structural fix?",
+            options: {
+              A: "Description — re-prompt asking the model to flag uncertainty.",
+              B: "Delegation — without a retrieval tool, citation tasks were structurally underspecified; this is also true, but the question asks for the operational miss.",
+              C: "Discernment — output was trusted without verification; insert a verification step before publication.",
+              D: "Diligence — train the team better."
+            },
+            correct: "C",
+            explanations: {
+              A: "Self-flagging by the model is unreliable and not the operational miss.",
+              B: "True upstream, but the question asks for the operational miss.",
+              C: "Right. The output landed in a brief without verification. Discernment is the verification step that should have happened.",
+              D: "Training is process, but the operational moment of failure was verification."
+            },
+            principle: "Multiple Ds may apply; pick the one closest to the operational moment.",
+            bSkills: ["B2.1", "B2.5"]
+          },
+          {
+            n: 4,
+            question: "A bank uses an LLM to pre-screen loan applications. Which diligence framing is *most* exam-aligned?",
+            options: {
+              A: "Add `temperature=0` and `top_p=1` for deterministic output.",
+              B: "Name bias risk in screening recommendations + require real (not rubber-stamped) human oversight on the deciding step + transparency to applicants that AI is part of the process.",
+              C: "Use a smaller model to reduce per-decision cost.",
+              D: "Run all decisions through a second-pass model for self-consistency."
+            },
+            correct: "B",
+            explanations: {
+              A: "Operational; not the diligence concern.",
+              B: "Right. The deployment shape (high-stakes regulated decisions) names bias + oversight + transparency as the binding concerns. The exam rewards naming the specific concerns.",
+              C: "Cost-side.",
+              D: "Reliability tactic, not the diligence framing."
+            },
+            principle: "Diligence answers name the specific concerns matched to the deployment shape, not generic care.",
+            bSkills: ["B2.5"]
+          }
+        ]
+      }
     },
     {
       id: "s3-claude-api",
