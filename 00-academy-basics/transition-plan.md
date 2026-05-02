@@ -34,7 +34,58 @@ The four phases below are designed to defeat all three.
 
 ---
 
-## Phase A — Course intake (Weeks 1–2)
+## Two paths — pick by profile, not preference
+
+There are two defensible plans. The right one depends on your prior
+knowledge calibration, not your taste.
+
+### Path A — Linear (best for: net-new to LLM engineering)
+
+Phases A → B → C → D, executed in order. Use when basics diagnostic
+score < 8/15. Detailed below.
+
+### Path B — Mastery-learning / gap-driven (RECOMMENDED for this learner)
+
+Use when:
+
+- you already build with LLMs in production, **or**
+- basics diagnostic score ≥ 8/15, **or**
+- the failure pattern is *judgment* (rationale gaps, distractor lures —
+  see `06-failure-analysis/error-log.md`) rather than vocabulary.
+
+The structure:
+
+1. **Diagnose first.** Take `basics-diagnostic.md` cold. Score, then
+   for each B-skill set the *measured rating* per the quiz mapping.
+2. **Skip what you've measured ≥ 3 on.** Don't take those courses.
+   Read only the per-course note for retention.
+3. **Drill the gap, interleaved with architect from day one.** Daily
+   split: 30% remediation on lowest-rated B-skills; 70% architect-shape
+   challenges from `01/`–`05/`, B-tagged so misses pull you back into
+   targeted basics drill. *Transfer-appropriate processing* — practising
+   at the test level, not below it.
+4. **Spaced retrieval keeps remediated skills sticky.** Each newly
+   ≥3-rated B-skill enters `09-progress-tracker/spaced-review.md` at
+   +1d / +3d / +7d / +14d / +30d. Failure resets to +1d.
+5. **Mock cycle (Phase D) unchanged.** The pass-gates are the same.
+
+Time budget: ~4–5 weeks at 60–90 min/day (vs. 6 weeks for Path A).
+
+Why it dominates Path A *for this profile*:
+
+| Mechanism | Path A | Path B |
+|---|---|---|
+| Working-memory load (intrinsic) | High — 9 courses front-loaded | Low — only studied gaps |
+| Time on target task | Late (Phase C) | Daily, from week 1 |
+| ZPD fit | Below ZPD on courses you already know | Forces ZPD-fit drilling on every session |
+| Wasted hours | ~5–8 (already-known content) | ~0 |
+| Risk | Boredom-induced disengagement | Frustration if gaps are larger than estimated — mitigated by spaced-review |
+
+### Path A details below — read only if Path A applies to you
+
+---
+
+## Phase A — Course intake (Weeks 1–2) *— Path A only*
 
 **Goal:** lift every B-skill to a self-rated **2 (Familiar)** with
 evidence — i.e., you can apply it with the notes open.

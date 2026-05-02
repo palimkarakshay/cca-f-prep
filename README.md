@@ -44,13 +44,16 @@ When a session needs context, start here:
 
 ## Status
 
+**Active path: Path B — mastery-learning / gap-driven** (recommended for
+this learner profile; rationale in [`00-academy-basics/transition-plan.md`](00-academy-basics/transition-plan.md)
+§ "Two paths").
+
 - [x] Diagnostic-01 (architect-level) taken — scored 3/10 cold (2026-05-01)
-- [ ] **Phase A — Basics intake** — 9 Anthropic Academy courses + per-course recall + skills-matrix seeding
-- [ ] Basics diagnostic (15 Q) — first attempt, calibration seed
-- [ ] **Phase B — Bridge** — worked-example fading on architect-shape MCQs, all B-skills measured ≥ 3
-- [ ] Basics diagnostic re-take ≥ 12 / 15 (pass-gate to Phase C)
-- [ ] **Phase C — Architect drilling** (Domains 1–5; daily loop; B-tagged challenges)
-- [ ] **Phase D — Mock cycle** — Mock 1 + Mock 2, target ≥ 78%, calibration gap ≤ 0.5
+- [ ] Basics diagnostic (15 Q) — cold attempt, seeds B-skill ratings
+- [ ] Skip courses where measured ≥ 3; remediate only the gaps
+- [ ] Daily drill: 30% basics gap remediation + 70% architect-shape (B-tagged) — interleaved
+- [ ] Basics diagnostic re-take ≥ 12 / 15 (sanity check, not a gate)
+- [ ] Mock 1 + Mock 2 (Phase D), target ≥ 78%, calibration gap ≤ 0.5
 
 ## Real-world example bank
 
