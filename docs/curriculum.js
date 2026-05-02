@@ -4431,12 +4431,525 @@ const CURRICULUM = {
       sourceCourse: "Anthropic Academy — Introduction to Subagents",
       blurb: "Subagent triggers (parallelism, context isolation), the cost model, and what the parent does and does not see.",
       concepts: [
-        { id: "b8-1", code: "B8.1", title: "Two valid spawn triggers",   bloom: "R",  lesson: null, quiz: null },
-        { id: "b8-2", code: "B8.2", title: "Critique underbriefed prompt", bloom: "E",  lesson: null, quiz: null },
-        { id: "b8-3", code: "B8.3", title: "Cost of unnecessary splits",  bloom: "An", lesson: null, quiz: null },
-        { id: "b8-4", code: "B8.4", title: "What parent does NOT see",    bloom: "U",  lesson: null, quiz: null }
+        {
+          id: "b8-1", code: "B8.1", title: "Two valid spawn triggers", bloom: "R",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "There are exactly *two* valid reasons to spawn a subagent: **parallelism** (work that can run independently and concurrently) and **isolation** (work whose intermediate context would otherwise pollute the parent). The exam tests this directly and frequently uses 'cost', 'window size', 'tool count threshold', and 'feels cleaner' as plausible-sounding distractors. None are valid triggers.",
+              "**Parallelism**: 'fan out 12 independent KB searches' or 'review 6 PRs at the same time'. Each unit of work doesn't depend on the others; running them sequentially in a single agent loop is N× slower with no benefit. Coordinator-subagent shape: parent dispatches, each subagent does one unit, parent integrates.",
+              "**Isolation**: 'run 30 turns of exploratory debugging without bloating the parent's planning thread'. The subagent's intermediate scratch — failed hypotheses, large tool outputs, dead-end diffs — stays inside its context. The parent only sees the final summary. The parent's context stays focused on the high-level plan.",
+              "The non-triggers worth memorising as distractors. Subagents are **not cheaper** (each is its own model invocation chain). Subagents do **not have a bigger context window** (they have a *fresh* one of the same size). There is **no tool-count threshold** that mandates subagents. 'Feels cleaner' is not a structural reason — splitting trivially-sequential work just burns tokens. The exam will offer all four; the right answer is parallelism or isolation."
+            ],
+            keyPoints: [
+              "Two and only two triggers: parallelism, isolation.",
+              "Parallelism: independent work, fan-out reduces wall-clock latency.",
+              "Isolation: intermediate context kept out of parent.",
+              "Non-triggers: cost, window size, tool count, 'cleaner' — common distractors.",
+              "Coordinator-subagent shape: parent dispatches + integrates; subagents do the heavy work."
+            ],
+            examples: [
+              {
+                title: "Parallelism: 12 KB searches",
+                body: "Each search is independent. 12 sequential searches in one agent = 12× the time + parent context grows with each search trail. 12 subagents in parallel = wall-clock reduced to ~one search; parent context only carries the integrated summaries."
+              },
+              {
+                title: "Isolation: exploratory debugging",
+                body: "30 turns of trying things, most of which fail. Inline: parent context fills with dead-ends and the plan thread is buried. Subagent: dead-ends stay isolated; parent only sees 'I narrowed it to module X, here's the patch'."
+              }
+            ],
+            pitfalls: [
+              "Reaching for subagents for cost reasons. They cost more.",
+              "Reaching for subagents because 'I have a lot of tools'. There's no threshold.",
+              "Reaching for subagents to 'organise' sequential work. Sequential work is for the parent loop.",
+              "Confusing 'fresh window' (true) with 'bigger window' (false)."
+            ],
+            notesRef: "00-academy-basics/notes/08-subagents.md",
+            simplified: {
+              oneLiner: "Spawn a subagent only for parallel work or to keep messy intermediate context out of the parent. Cost, window size, and tool count are NOT reasons.",
+              analogy: "Like delegating to a teammate at work: do it when you can run two efforts at once or when you don't want their messy whiteboard in your office. Not 'because it feels organised.'",
+              paragraphs: [
+                "Two valid reasons. Anything else is over-engineering and burns tokens for no benefit.",
+                "The exam baits you with cost, window size, and tool count as distractors. None are real triggers."
+              ],
+              keyPoints: [
+                "Triggers: parallelism, isolation.",
+                "Not triggers: cost, window size, tool count.",
+                "Each subagent is a fresh full model run."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "Which is the *correct* statement about valid subagent-spawn triggers?",
+                options: {
+                  A: "Subagents should be spawned when the parent's tool count exceeds 10.",
+                  B: "There are two valid triggers: parallelism (independent work) and isolation (keeping intermediate context out of the parent).",
+                  C: "Subagents should be spawned to take advantage of their longer context window.",
+                  D: "Subagents should be spawned to reduce per-call cost (subagents run on cheaper models)."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Fabricated threshold.",
+                  B: "Right. The two and only two valid triggers. Memorise as fact for the exam.",
+                  C: "Subagents have a *fresh* window of the same size, not a bigger one.",
+                  D: "Subagents inherit the parent model; cost is not a justification."
+                },
+                principle: "Two valid triggers: parallelism, isolation. All others are common distractors.",
+                bSkills: ["B8.1"]
+              },
+              {
+                n: 2,
+                question: "A team spawns subagents for 'cleanliness' on a sequential task: extract → transform → load. Each step depends on the previous. What's the structural critique?",
+                options: {
+                  A: "Each subagent should pass state via shared memory.",
+                  B: "Sequential work has neither parallelism nor isolation triggers — over-spawning burns tokens (each subagent is a full model invocation chain) without structural benefit. Use a single inline loop.",
+                  C: "The subagents should run in parallel anyway and reconcile at the end.",
+                  D: "The middle subagent (transform) should be replaced with a tool."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Doesn't address why they're spawned at all.",
+                  B: "Right. Strictly sequential work doesn't fit either trigger. Spawning costs tokens for no benefit.",
+                  C: "Forcing parallelism on dependent steps doesn't work.",
+                  D: "May be a separate optimisation but doesn't address the over-spawning."
+                },
+                principle: "Without parallelism or isolation, don't spawn. Sequential work is for the parent loop.",
+                bSkills: ["B8.1", "B8.3"]
+              },
+              {
+                n: 3,
+                question: "Which assertion about subagent context is *true*?",
+                options: {
+                  A: "Subagents have a strictly larger context window than the parent.",
+                  B: "Subagents share the parent's conversation history by default.",
+                  C: "Each subagent starts with a fresh context window of the *same* size as the parent's.",
+                  D: "Subagents can access the parent's tool-call trail in real time."
+                },
+                correct: "C",
+                explanations: {
+                  A: "False — fresh, not bigger.",
+                  B: "False — subagents start fresh; brief them explicitly.",
+                  C: "Right. Fresh, same-size window. The exam-tested fact.",
+                  D: "False — context isolation is unidirectional; the subagent doesn't see the parent's trail."
+                },
+                principle: "Subagents have fresh, same-size windows. Context isolation is unidirectional.",
+                bSkills: ["B8.1", "B8.4"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b8-2", code: "B8.2", title: "Critique underbriefed subagent prompt", bloom: "E",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Subagents start with no memory of the parent conversation. The brief you send is *all* the context they have. The single most common subagent failure is **underbriefing** — sending a vague prompt like 'based on the analysis above, write the code' or 'continue from where we left off' and expecting the subagent to fill in the implicit context. It can't; there is no 'above' or 'we' for it.",
+              "A well-formed subagent brief names: (1) the **goal** in one sentence, (2) the **relevant context** the subagent needs (file paths, existing decisions, constraints), (3) **explicit constraints** (what to avoid, what's out of scope), and (4) the **expected output shape** (return a summary, return a diff, return a JSON record). Each of these has to be in the brief because the subagent has no other source.",
+              "The smell list: phrases like 'based on the above', 'as discussed', 'continue from where we left off', 'follow our usual style', 'apply the standard pattern' — every one of these references implicit context the subagent doesn't have. Critiquing a subagent prompt means scanning for these phrases and forcing each one to be made explicit.",
+              "The fix: write the brief as if the subagent is a smart colleague who just walked into the room. They haven't seen the conversation; they don't know the goal; they need the context, the goal, the constraints, and the output shape spelled out. If the brief is shorter than what you'd write as a Slack message to a teammate, it's underbriefed."
+            ],
+            keyPoints: [
+              "Subagents have no parent-conversation memory. Brief is all they have.",
+              "Brief = goal + relevant context + constraints + expected output shape.",
+              "Smell phrases: 'based on the above', 'as discussed', 'continue from where we left off'.",
+              "Fix: write as if briefing a smart colleague who just walked in."
+            ],
+            examples: [
+              {
+                title: "Bad: underbriefed",
+                body: "'Based on the analysis above, write the implementation.' Subagent has no analysis to read; it'll guess plausibly and return plausible nonsense."
+              },
+              {
+                title: "Good: self-contained",
+                body: "'Implement function `parseInvoiceLine(line: str) -> Invoice` per the spec at docs/invoice_format.md. Constraints: no external dependencies, raise ValueError on malformed lines. Return: the function definition only, no surrounding boilerplate. Existing test cases in tests/test_invoice.py — your implementation should pass them.'"
+              }
+            ],
+            pitfalls: [
+              "Treating the parent context as 'the subagent will see this'. It won't.",
+              "Using pronouns and references that depend on parent-conversation context.",
+              "Not naming the expected output shape. Subagent guesses; parent receives wrong shape.",
+              "Skipping constraints because they 'feel obvious'. Without the parent context, nothing is obvious."
+            ],
+            notesRef: "00-academy-basics/notes/08-subagents.md",
+            simplified: {
+              oneLiner: "Subagents have no memory of the parent conversation. Write the brief as if explaining to a teammate who just walked in: goal, context, constraints, expected output.",
+              analogy: "It's like emailing a contractor. 'Finish the kitchen as discussed' doesn't work if they weren't in the discussion. 'Install the granite counter from order #4421, white grout, by Friday, leave the sink for the plumber' works.",
+              paragraphs: [
+                "The biggest subagent bug is assuming it has the parent's context. It doesn't.",
+                "Spell out the goal, the relevant context, the constraints, and the expected output. Every brief needs all four."
+              ],
+              keyPoints: [
+                "No parent-conversation memory.",
+                "Brief = goal + context + constraints + output shape.",
+                "Smell: 'based on the above', 'as discussed'."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A parent agent dispatches a subagent with the prompt: 'Based on the discussion above, implement the fix.' What's the most likely outcome and why?",
+                options: {
+                  A: "Subagent will request the parent's conversation history before proceeding.",
+                  B: "Subagent will produce plausible-sounding but unrelated work because it has no access to the parent's conversation; the brief left all the relevant context implicit.",
+                  C: "Subagent will return an error indicating insufficient context.",
+                  D: "Subagent will inherit the parent's context automatically."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Subagents don't request parent context; they work with whatever brief they're given.",
+                  B: "Right. Subagents have no parent-conversation memory. 'Based on the discussion above' references context the subagent literally cannot see.",
+                  C: "Subagents don't error on vague briefs; they generate something.",
+                  D: "Context isolation is unidirectional — no inheritance."
+                },
+                principle: "Subagents start fresh. Briefs must be self-contained.",
+                bSkills: ["B8.2", "B8.4"]
+              },
+              {
+                n: 2,
+                question: "Which phrase in a subagent prompt is the *strongest* smell that the brief is underbriefed?",
+                options: {
+                  A: "'Return the result as JSON {status, message}.'",
+                  B: "'Constraints: no external dependencies; raise ValueError on malformed input.'",
+                  C: "'Continue from where we left off, applying our usual patterns.'",
+                  D: "'Goal: implement parseInvoiceLine per docs/invoice_format.md.'"
+                },
+                correct: "C",
+                explanations: {
+                  A: "Names the output shape — good.",
+                  B: "Names constraints — good.",
+                  C: "Right. References both implicit conversation history ('where we left off') and implicit team norms ('our usual patterns'). Subagent can't see either.",
+                  D: "Goal + reference to a concrete spec — good."
+                },
+                principle: "Phrases like 'continue from where we left off' or 'our usual patterns' are smells. Force them to be explicit.",
+                bSkills: ["B8.2"]
+              },
+              {
+                n: 3,
+                question: "Which is *not* one of the four required components of a subagent brief?",
+                options: {
+                  A: "The goal in one sentence.",
+                  B: "The relevant context the subagent needs (paths, decisions, constraints).",
+                  C: "An estimate of the parent's remaining token budget.",
+                  D: "The expected output shape (summary, diff, JSON record)."
+                },
+                correct: "C",
+                explanations: {
+                  A: "Required.",
+                  B: "Required.",
+                  C: "Right. Token-budget estimates are not part of a subagent brief; they're parent-side operational concerns.",
+                  D: "Required."
+                },
+                principle: "Brief = goal + context + constraints + expected output shape. The four components.",
+                bSkills: ["B8.2"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b8-3", code: "B8.3", title: "Cost of unnecessary subagent splits", bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Each subagent is its own model invocation chain — its own setup tokens (system prompt, tool definitions if any), its own back-and-forth, its own final summary. Spawning subagents for work that doesn't need parallelism or isolation costs N× the tokens of running it inline, with no offsetting benefit. The exam frames this as 'three subagents that could be one sequential call burn 3× tokens.'",
+              "The cost surfaces in three places. (1) **Setup overhead per subagent**: the system prompt, tool definitions, and brief are sent for each spawn. (2) **Round-trip overhead**: each subagent has its own tool-use loop replays. (3) **Integration overhead in the parent**: the parent has to read N summaries and integrate them, which itself takes context and tokens. For trivially-sequential work, all three are pure waste.",
+              "The decision rule from the cost angle: if the work is sequential and cheap to inline, inline it. The token math almost always favours the parent doing it directly. Subagents earn their token cost when *latency* matters (parallelism) or when *parent-context preservation* matters (isolation). Without one of those wins, the cost is unjustified.",
+              "Detection signature: a parent that dispatches subagents for tiny, sequential, dependent steps (extract → transform → load) where each subagent's input depends on the previous one's output. The parent ends up serialising the subagents anyway (waiting for each to finish before briefing the next), getting the worst of both worlds: subagent overhead with no parallelism win."
+            ],
+            keyPoints: [
+              "Cost = N× tokens (setup, round-trip, integration) for N unnecessary subagents.",
+              "No latency win and no isolation win = pure waste.",
+              "Sequential dependent work should stay inline.",
+              "Detection: parent serialises subagents (waits between briefs) — worst of both worlds."
+            ],
+            examples: [
+              {
+                title: "Wasteful split",
+                body: "Parent dispatches subagent A to read a file, then subagent B to transform it, then subagent C to write the result. Each waits for the previous. Net: ~3× the tokens of doing all three inline; same wall-clock; same context discipline (each subagent's scratch is small anyway)."
+              },
+              {
+                title: "Justified split",
+                body: "Parent dispatches 6 subagents to review 6 independent PRs in parallel. Wall-clock drops 6×. Each subagent's intermediate review trail stays isolated. Parent integrates 6 brief summaries. Cost = 6× setup + 6× round-trip is real, but it's paid for the latency + isolation wins."
+              }
+            ],
+            pitfalls: [
+              "Spawning for 'organisational tidiness'. Tidiness in code, not in token spend.",
+              "Forgetting setup overhead. Each subagent re-pays system prompt and tool-definition costs.",
+              "Spawning subagents that depend on each other's outputs. You're serialising them; pay subagent cost for inline behaviour."
+            ],
+            notesRef: "00-academy-basics/notes/08-subagents.md",
+            simplified: {
+              oneLiner: "Subagents that don't run in parallel and don't need isolation are pure cost — they pay setup, round-trip, and integration overhead with no benefit.",
+              analogy: "Like hiring three different contractors to do three sequential parts of a small job. You pay each one's setup time and travel — and they still wait for each other. One contractor doing all three would be cheaper and the same speed.",
+              paragraphs: [
+                "Each subagent is a fresh model run with full setup costs. Spawning unnecessarily multiplies tokens.",
+                "If the work is sequential and dependent, inline it. Spawn only when parallelism or isolation pays for the overhead."
+              ],
+              keyPoints: [
+                "Each subagent = full setup + round-trip + integration cost.",
+                "Sequential dependent work → inline.",
+                "No parallelism + no isolation = pure waste."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A parent agent dispatches three subagents to perform extract → transform → load on a single small dataset. Each subagent waits for the previous one's output before being briefed. What's the cost analysis?",
+                options: {
+                  A: "Cheaper than inline because each subagent is smaller.",
+                  B: "Roughly 3× the tokens of inline (setup + round-trip + integration overhead per subagent), with no parallelism or isolation win — pure waste.",
+                  C: "Same cost as inline; subagents are free.",
+                  D: "Cheaper because each subagent uses a smaller model automatically."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Subagents pay setup overhead each; they're not smaller.",
+                  B: "Right. Three subagents = 3× setup, 3× round-trip, plus the parent's integration cost. Sequential dependent work fits neither trigger; the cost is pure waste.",
+                  C: "Subagents cost real tokens.",
+                  D: "Subagents inherit the parent model unless explicitly configured."
+                },
+                principle: "Each subagent is a full model invocation chain. Sequential dependent work without a trigger pays N× cost for no benefit.",
+                bSkills: ["B8.3"]
+              },
+              {
+                n: 2,
+                question: "Which is *not* a cost paid per subagent invocation?",
+                options: {
+                  A: "Setup tokens (system prompt, tool definitions, brief).",
+                  B: "Round-trip tokens for the subagent's own tool-use loop.",
+                  C: "A separate API key per subagent.",
+                  D: "Integration tokens in the parent (reading and incorporating the summary)."
+                },
+                correct: "C",
+                explanations: {
+                  A: "Real cost.",
+                  B: "Real cost.",
+                  C: "Right. There's no per-subagent API-key requirement; subagents share the parent's authentication. Distractor.",
+                  D: "Real cost."
+                },
+                principle: "Per-subagent costs: setup, round-trip, integration. Authentication is shared.",
+                bSkills: ["B8.3"]
+              },
+              {
+                n: 3,
+                question: "Detection signature for *unjustified* subagent splits: which is most diagnostic?",
+                options: {
+                  A: "The parent waits for each subagent to finish before briefing the next (serialised dispatch).",
+                  B: "Each subagent has its own system prompt.",
+                  C: "Subagents return summaries instead of tool-call trails.",
+                  D: "Subagents have a fresh context window."
+                },
+                correct: "A",
+                explanations: {
+                  A: "Right. Serialised dispatch means parallelism is not being used — the only remaining trigger would be isolation, and trivially-sequential work usually doesn't need isolation either. Pay the cost; get nothing.",
+                  B: "Normal subagent property.",
+                  C: "Normal subagent property (context isolation).",
+                  D: "Normal subagent property (fresh same-size window)."
+                },
+                principle: "Serialised subagent dispatch = no parallelism win. If isolation isn't needed either, the splits are unjustified.",
+                bSkills: ["B8.3", "B8.1"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b8-4", code: "B8.4", title: "What parent does NOT see from subagent", bloom: "U",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Context isolation between parent and subagent is **unidirectional**: the parent passes a brief in, the subagent returns a summary. The parent does *not* see the subagent's intermediate work — the tool-call trail, the partial outputs, the dead-end reasoning, the raw read-file contents the subagent looked at, the failed attempts. All of that lives in the subagent's context only.",
+              "What the parent *does* see: whatever the subagent's final summary contains. If the summary mentions 'I tried X, then Y, then settled on Z,' the parent knows that. If the summary just says 'Done; here's the final patch,' the parent has no insight into how the subagent got there. The summary is the entire surface area between the two contexts.",
+              "Implication for design: anything the parent might need to act on must be in the summary. If the parent needs to know which files were touched, the summary must list them. If the parent needs the subagent's reasoning trace, the summary must include it. The default ('subagent did its work') gives the parent only the final answer — that's usually fine, but it's a property to design around.",
+              "Implication for debugging: when something goes wrong inside the subagent, the parent can't see why. Errors that show up at integration time may be caused by something deep in the subagent's loop the parent has no visibility into. Mitigation: subagents should return detailed summaries when failures happen (or always, if the work is risky) so the parent has enough to act on."
+            ],
+            keyPoints: [
+              "Context isolation is unidirectional. Parent → brief in. Subagent → summary out.",
+              "Parent does NOT see: tool-call trail, intermediate outputs, dead-ends, raw reads, failed attempts.",
+              "Parent sees only what the summary contains.",
+              "Design implication: summary must contain everything the parent needs to act on.",
+              "Debugging implication: subagent failures need detailed summaries for parent visibility."
+            ],
+            examples: [
+              {
+                title: "Default summary",
+                body: "Subagent: 'Implemented parseInvoiceLine; tests pass. Returning the function.' Parent sees: the function and a one-liner. Parent doesn't see the 5 attempts before that or which test cases were tricky."
+              },
+              {
+                title: "Designed summary for visibility",
+                body: "Subagent's brief asked it to 'return: the function + a list of test cases that are tricky + any assumptions you made.' Subagent's summary includes all three. Parent has visibility because the summary was *designed* for it."
+              }
+            ],
+            pitfalls: [
+              "Assuming the parent will see the subagent's tool calls or intermediate outputs. It won't.",
+              "Designing parent integration logic that depends on the subagent's working notes (which the parent never receives).",
+              "Not specifying summary shape in the brief. Subagent decides what to surface; parent gets whatever it picked."
+            ],
+            notesRef: "00-academy-basics/notes/08-subagents.md",
+            simplified: {
+              oneLiner: "The parent only sees the subagent's final summary. The tool calls, intermediate outputs, and dead-ends stay in the subagent's context.",
+              analogy: "It's like a consultant report. You get the recommendations and a brief explanation. You don't get every email, draft, or whiteboard photo from inside their team.",
+              paragraphs: [
+                "Subagent isolation is one-way. Parent in, summary out.",
+                "Anything the parent needs has to be in the summary. Design the summary shape in the brief."
+              ],
+              keyPoints: [
+                "Parent sees only the summary.",
+                "Summary shape is part of the brief.",
+                "Debugging subagent internals requires detailed summaries."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A subagent finished a debugging task. The parent agent wants to know which 5 hypotheses the subagent ruled out before reaching the final answer. What does the parent see by default?",
+                options: {
+                  A: "The full tool-call trail of the subagent's investigation.",
+                  B: "Whatever the subagent chose to include in its summary; if it didn't mention the ruled-out hypotheses, the parent can't see them.",
+                  C: "A structured log of all subagent turns automatically generated by the harness.",
+                  D: "The intermediate outputs of every tool the subagent ran."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Parent doesn't see the trail.",
+                  B: "Right. Parent sees only the summary. If the parent needs the ruled-out hypotheses, the brief must request them as part of the summary shape.",
+                  C: "No automatic structured log surfaces to the parent.",
+                  D: "Tool outputs stay in the subagent's context."
+                },
+                principle: "Parent sees only the subagent's summary. Anything else the parent needs must be requested in the brief.",
+                bSkills: ["B8.4"]
+              },
+              {
+                n: 2,
+                question: "Which of the following is *true* about parent ↔ subagent context isolation?",
+                options: {
+                  A: "Bidirectional — parent and subagent share state freely.",
+                  B: "Unidirectional — parent passes a brief in; subagent returns a summary; the parent does not see the subagent's intermediate work.",
+                  C: "Optional — depends on a `share_context: true` flag in the brief.",
+                  D: "None — parent and subagent run in the same context."
+                },
+                correct: "B",
+                explanations: {
+                  A: "False — context isolation is the whole point of a subagent.",
+                  B: "Right. Brief in, summary out. The parent's only visibility into the subagent's run is via the summary.",
+                  C: "Fabricated flag.",
+                  D: "False — they run in different contexts."
+                },
+                principle: "Subagent context isolation is unidirectional. Brief in, summary out.",
+                bSkills: ["B8.4"]
+              },
+              {
+                n: 3,
+                question: "Best practice for designing a subagent brief that lets the parent debug failures: which approach?",
+                options: {
+                  A: "Trust the default summary; failures will surface naturally.",
+                  B: "Specify in the brief the exact shape of the summary the subagent should return — including, for risky work, intermediate notes the parent might need to debug.",
+                  C: "Configure the harness to forward all subagent tool calls to the parent.",
+                  D: "Run subagents inline whenever debugging visibility matters."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Default summaries are minimal; failures surface as 'something went wrong' without detail.",
+                  B: "Right. Specify the summary shape upfront. For risky work, request intermediate notes (assumptions, hypotheses tried, failures encountered) so the parent has enough to debug.",
+                  C: "Not a feature; context isolation is the point of subagents.",
+                  D: "Defeats the purpose; if you need subagent benefits, design summaries for visibility instead."
+                },
+                principle: "Design summary shape in the brief. For risky or debug-prone work, request enough intermediate detail for parent-side debugging.",
+                bSkills: ["B8.4", "B8.2"]
+              }
+            ]
+          }
+        }
       ],
-      sectionTest: null
+      sectionTest: {
+        title: "Section 8 test — Introduction to Subagents",
+        passPct: 0.7,
+        questions: [
+          {
+            n: 1,
+            question: "Which is the *correct* set of subagent-spawn triggers, with non-triggers labelled?",
+            options: {
+              A: "Triggers: cost, parallelism, larger context window. Non-trigger: isolation.",
+              B: "Triggers: parallelism, isolation. Non-triggers: cost, window size, tool count, 'feels cleaner'.",
+              C: "Triggers: parallelism, isolation, tool-count over 10. Non-triggers: cost, window size.",
+              D: "Triggers: isolation only. Non-triggers: parallelism, cost, window size."
+            },
+            correct: "B",
+            explanations: {
+              A: "Inverts the canonical triggers.",
+              B: "Right. The two valid triggers; common distractors named.",
+              C: "No tool-count threshold exists.",
+              D: "Parallelism is also a valid trigger."
+            },
+            principle: "Two triggers: parallelism, isolation. Cost / window / tool-count are common distractors.",
+            bSkills: ["B8.1"]
+          },
+          {
+            n: 2,
+            question: "A subagent prompt: 'Continue from where we left off; apply our usual patterns.' What is the structural critique?",
+            options: {
+              A: "Too short — the subagent prefers longer prompts.",
+              B: "Underbriefed — references implicit conversation history ('where we left off') and implicit team norms ('our usual patterns') that the subagent cannot see. Rewrite to be self-contained: goal, context, constraints, expected output.",
+              C: "The subagent will request the missing context automatically.",
+              D: "The subagent will inherit the parent's conversation."
+            },
+            correct: "B",
+            explanations: {
+              A: "Length is the symptom; structure is the cause.",
+              B: "Right. The two smell phrases ('where we left off', 'usual patterns') reference parent-only context. Subagent has no access. Brief must be self-contained.",
+              C: "Subagents don't request missing context.",
+              D: "Context isolation is unidirectional — no inheritance."
+            },
+            principle: "Subagent briefs must be self-contained: goal, context, constraints, expected output. Pronouns and references to parent state are smells.",
+            bSkills: ["B8.2"]
+          },
+          {
+            n: 3,
+            question: "A team dispatches three subagents to perform sequential dependent work (extract → transform → load), each waiting for the previous. What's the cost critique?",
+            options: {
+              A: "Subagents are free; cost is irrelevant.",
+              B: "~3× the tokens of inline (setup + round-trip + integration overhead) with no parallelism or isolation win — pure waste. Inline the work in the parent.",
+              C: "Each subagent runs on a cheaper model; cost is roughly 1/3.",
+              D: "Cost is identical to inline."
+            },
+            correct: "B",
+            explanations: {
+              A: "Subagents cost real tokens.",
+              B: "Right. Per-subagent setup + round-trip + integration overhead, multiplied by 3, with no offsetting trigger. Sequential dependent work belongs in the parent loop.",
+              C: "Subagents inherit the parent model.",
+              D: "Inline doesn't pay setup-per-subagent overhead."
+            },
+            principle: "Subagents earn their token cost only when parallelism or isolation pays for it. Sequential dependent work is pure waste.",
+            bSkills: ["B8.3"]
+          },
+          {
+            n: 4,
+            question: "A subagent finishes a task. The parent wants the list of files the subagent touched and the assumptions it made. What does it see by default and what's the fix?",
+            options: {
+              A: "Sees the full tool-call trail by default; no fix needed.",
+              B: "Sees only what the subagent's summary contains. Fix: the brief must specify the summary shape, asking explicitly for the file list and assumptions.",
+              C: "Sees the subagent's intermediate context up to a 1KB cap.",
+              D: "Sees nothing; subagent invocations are fire-and-forget."
+            },
+            correct: "B",
+            explanations: {
+              A: "Trail isn't visible to parent.",
+              B: "Right. Context isolation is unidirectional. The parent sees only the summary; specify the summary shape in the brief.",
+              C: "Fabricated 1KB cap.",
+              D: "Parent does receive the summary; not fire-and-forget."
+            },
+            principle: "Parent sees only the summary. Anything else the parent needs must be requested in the brief.",
+            bSkills: ["B8.4", "B8.2"]
+          }
+        ]
+      }
     },
     {
       id: "s9-cowork",
