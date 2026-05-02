@@ -2991,7 +2991,7 @@ const CURRICULUM = {
               "SessionStart for per-turn validation — fires only once at boot; misses every subsequent turn.",
               "Putting an automation that 'must always run' in CLAUDE.md or memory instead of a hook — the model can interpret, prioritize, or skip those. The harness can't skip a hook."
             ],
-            "notesRef": "00-academy-basics/notes/05-claude-code-101.md",
+            "notesRef": "00-academy-basics/notes/03-claude-code-101.md",
             "simplified": {
               "oneLiner": "Pick the hook event by what your trigger fires on: blocking → PreToolUse · per-task → Stop · per-tool-call → PostToolUse · once at boot → SessionStart.",
               "analogy": "Think of the model as a chef and the harness as the kitchen's safety officer. Hooks are the officer's standing rules. 'Stop the chef before they pick up the knife' has to fire before the action — that's PreToolUse. 'After every dish goes out, wipe the counter' fires once per dish leaving — that's Stop, the per-task event. 'After every utensil is used, sanitize it' fires every time a utensil touches food — that's PostToolUse. Pointing the rules at the wrong moment is what makes the kitchen unsafe.",
