@@ -151,7 +151,88 @@ const CURRICULUM = {
         { id: "b1-3", code: "B1.3", title: "Artifact vs inline message",       bloom: "E", lesson: null, quiz: null },
         { id: "b1-4", code: "B1.4", title: "Context cost of N file uploads",   bloom: "A", lesson: null, quiz: null }
       ],
-      sectionTest: null
+      sectionTest: {
+        title: "Section 1 test — Claude 101",
+        passPct: 0.7,
+        questions: [
+          {
+            n: 1,
+            question: "You're advising a team that wants to make 200 internal docs queryable by Claude. They propose attaching all 200 to a single Claude.ai Project. What's the strongest objection?",
+            options: {
+              A: "Projects only support up to 50 files; this hits the limit.",
+              B: "Each chat would load all 200 docs into context, exceeding the window and degrading attention even where it fits.",
+              C: "Projects are per-user; the team can't share one across the team.",
+              D: "The UI doesn't allow bulk uploads; they'd have to add files one at a time."
+            },
+            correct: "B",
+            explanations: {
+              A: "Wrong axis. Even if the file-count limit weren't an issue, the underlying problem (no retrieval, all-in-context) is the real reason.",
+              B: "Right. Projects are in-context file storage. 200 docs = 200 docs of system context every chat. Quality degrades long before the hard window limit; relevance pressure makes retrieval the right tool.",
+              C: "Sharing is a permissions concern, not the architectural objection.",
+              D: "UI ergonomics; not the principled objection."
+            },
+            principle: "Project ≠ corpus. For 'queryable across N docs', reach for retrieval (RAG/MCP), not more uploads.",
+            bSkills: ["B1.1", "B1.4"]
+          },
+          {
+            n: 2,
+            question: "A pro-tier user notices their per-message context limit is much smaller than what the Claude API exposes for the same model. What explains the gap?",
+            options: {
+              A: "The API runs a different (larger) version of the model.",
+              B: "Product-tier limits are subscription-side caps, separate from API-level model capacity.",
+              C: "The user must have hit a daily message quota that triggered a downgrade.",
+              D: "Claude.ai compresses prompts before sending them to the model, reducing usable context."
+            },
+            correct: "B",
+            explanations: {
+              A: "Same model, different surface. The API and Claude.ai expose the same underlying model with different envelopes.",
+              B: "Right. Per-product limits (context length, daily caps, model selection) are subscription-tier features. The API exposes the model's actual capacity; Claude.ai sits behind a product-side envelope.",
+              C: "Quotas affect message count, not per-message context length.",
+              D: "Fabricated. The product surface doesn't compress prompts behind your back."
+            },
+            principle: "Product-tier limits ≠ API-level model capacity. When users see 'small' context on Claude.ai, they're hitting the subscription envelope, not the model's ceiling.",
+            bSkills: ["B1.2"]
+          },
+          {
+            n: 3,
+            question: "A user asks Claude to draft a 4 000-word policy doc. Why is producing it as an Artifact preferable to inlining the text in the chat reply?",
+            options: {
+              A: "Artifacts cost less per token than inline text.",
+              B: "Artifacts isolate the long output from conversational context, so iteration doesn't bloat the chat history, and the Artifact can be re-rendered/edited directly.",
+              C: "Inline text is hard-capped at 1 000 words; Artifacts have no such limit.",
+              D: "Artifacts get extra fact-checking from a secondary model."
+            },
+            correct: "B",
+            explanations: {
+              A: "Token cost is identical. The benefit is structural, not economic.",
+              B: "Right. The point of the Artifact construct is *separation*: the long deliverable lives outside the chat thread and can be iterated without polluting context or replaying the entire doc on every turn.",
+              C: "Fabricated limit. There is no 1 000-word inline cap.",
+              D: "Fabricated. Artifacts aren't reviewed by a separate model."
+            },
+            principle: "Artifacts exist to keep long deliverables out of conversational context — for iteration, re-rendering, and direct editing without replay overhead.",
+            bSkills: ["B1.3"]
+          },
+          {
+            n: 4,
+            question: "A team attaches 12 PDFs (~30 KB each) to a Claude.ai Project. What is the most accurate description of the per-message context cost?",
+            options: {
+              A: "0 KB — Project files use a separate budget that doesn't count against the message context.",
+              B: "~360 KB of context is consumed by Project files on every chat, leaving the rest of the window for the conversation and answer.",
+              C: "Cost is paid only on the first message; subsequent messages reuse a cached representation at no context cost.",
+              D: "Cost depends on the subscription tier; pro users pay no context cost for Project files."
+            },
+            correct: "B",
+            explanations: {
+              A: "There is no separate budget. One window, shared.",
+              B: "Right. Project files load into the same context window as the rest of the prompt. 12 × 30 KB ≈ 360 KB consumed every chat. That's the budget the conversation and answer share with the corpus.",
+              C: "There is no first-turn-only caching of Project files at this layer; they're re-included every turn.",
+              D: "Subscription doesn't change the per-message context math."
+            },
+            principle: "Project files cost context every chat. N × file_size = system context burned per turn — plan capacity accordingly.",
+            bSkills: ["B1.4"]
+          }
+        ]
+      }
     },
     {
       id: "s2-ai-fluency",

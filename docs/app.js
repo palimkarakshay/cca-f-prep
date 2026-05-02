@@ -62,12 +62,94 @@
     return s ? (s.concepts.find(c => c.id === conceptId) || null) : null;
   }
 
-  // ---------------- Mastery + recommendation (placeholders for commit 1) ----------------
-  // Mastery scale (0–4) drives the badge in the dashboard. Adaptive engine
-  // is fleshed out in commit 3; for the scaffold we expose only the
-  // primitives needed for navigation.
+  // ---------------- Mastery ----------------
   function masteryLabel(m) {
     return ["Not started", "Lesson read", "Below 60%", "Passing", "Strong"][m] || "Not started";
+  }
+
+  function isSectionPassed(sectionId) {
+    const s = ensureSection(sectionId);
+    const last = s.testAttempts[s.testAttempts.length - 1];
+    if (!last) return false;
+    const sec = getSection(sectionId);
+    const passPct = (sec && sec.sectionTest && sec.sectionTest.passPct) || 0.7;
+    return (last.score / last.total) >= passPct;
+  }
+
+  function unlockNextSection(sectionId) {
+    const idx = CURRICULUM.sections.findIndex(s => s.id === sectionId);
+    const next = CURRICULUM.sections[idx + 1];
+    if (next) ensureSection(next.id).unlocked = true;
+  }
+
+  // ---------------- Adaptive recommendation ----------------
+  // Priorities:
+  //   1. Drill: any unlocked-section concept currently at mastery=2 (failed quiz).
+  //   2. Section-test: an unlocked section where every authored concept passes
+  //      AND the section-test exists AND it hasn't been passed.
+  //   3. Continue: earliest unlocked-incomplete section's first authored,
+  //      not-yet-passed concept.
+  //   4. Done.
+  function recommend() {
+    for (const section of CURRICULUM.sections) {
+      if (!ensureSection(section.id).unlocked) continue;
+      for (const c of section.concepts) {
+        const cp = ensureConcept(c.id);
+        if (cp.mastery === 2 && c.quiz) {
+          return {
+            kind: "drill",
+            title: "Drill " + c.code + " — " + c.title,
+            why: "Last quiz scored below 60%. Re-read the lesson, then re-take the quiz.",
+            actionLabel: "Re-read lesson",
+            action: () => navigate("lesson", { sectionId: section.id, conceptId: c.id })
+          };
+        }
+      }
+    }
+    for (const section of CURRICULUM.sections) {
+      const sp = ensureSection(section.id);
+      if (!sp.unlocked || sp.complete) continue;
+      if (!section.sectionTest) continue;
+      const authored = section.concepts.filter(c => c.quiz);
+      if (!authored.length) continue;
+      const allPassed = authored.every(c => ensureConcept(c.id).mastery >= 3);
+      const allConceptsHaveQuizzes = section.concepts.every(c => c.quiz);
+      if (allPassed && allConceptsHaveQuizzes && !isSectionPassed(section.id)) {
+        return {
+          kind: "sectionTest",
+          title: "Section-test ready: " + section.title,
+          why: "All concept quizzes in this section pass. Take the section-test (≥" +
+               Math.round(((section.sectionTest.passPct || 0.7) * 100)) + "% to unlock the next section).",
+          actionLabel: "Take section-test",
+          action: () => startSectionTest(section)
+        };
+      }
+    }
+    for (const section of CURRICULUM.sections) {
+      const sp = ensureSection(section.id);
+      if (!sp.unlocked || sp.complete) continue;
+      for (const c of section.concepts) {
+        const cp = ensureConcept(c.id);
+        const hasContent = (c.lesson && c.lesson.status === "ready") || (c.quiz && c.quiz.questions && c.quiz.questions.length);
+        if (!hasContent) continue;
+        if (cp.mastery >= 3) continue;
+        const wantQuiz = cp.lessonRead && c.quiz;
+        return {
+          kind: "concept",
+          title: c.code + " · " + c.title,
+          why: wantQuiz ? "Lesson read. Take the quiz to lock in mastery." : ("Continue " + section.title + "."),
+          actionLabel: wantQuiz ? "Take quiz" : "Read lesson",
+          action: () => navigate(wantQuiz ? "quiz" : "lesson", { sectionId: section.id, conceptId: c.id })
+        };
+      }
+    }
+    return {
+      kind: "done",
+      title: "All authored content complete.",
+      why: "More content lands as sections are authored. You're up to date.",
+      actionLabel: null,
+      action: null
+    };
   }
 
   // ---------------- Element helper ----------------
@@ -144,15 +226,15 @@
     topnav.appendChild(el("span", null, CURRICULUM.sections.length + " sections · "
       + CURRICULUM.sections.reduce((n, s) => n + s.concepts.length, 0) + " concepts"));
 
-    // Recommendation banner placeholder — wired up in commit 3
+    const r = recommend();
     const reco = el("div", { class: "reco" },
-      el("div", { class: "reco-label" }, "Scaffold preview"),
-      el("div", { class: "reco-title" }, "Walk the structure first."),
-      el("div", { class: "reco-why" },
-        "This is the navigation skeleton. Lessons, quizzes, the adaptive recommendation engine, "
-        + "and progress saving land in subsequent commits. Click into a section to see how concepts list. "
-        + "Click a concept to preview the lesson/quiz shell.")
+      el("div", { class: "reco-label" }, "Recommended next"),
+      el("div", { class: "reco-title" }, r.title),
+      el("div", { class: "reco-why" }, r.why)
     );
+    if (r.action) {
+      reco.appendChild(el("button", { class: "primary", onclick: r.action }, r.actionLabel));
+    }
     root.appendChild(reco);
 
     const list = el("div", { class: "section-list" });
@@ -239,14 +321,36 @@
     panel.appendChild(list);
 
     const sp = ensureSection(section.id);
-    const allConceptsDone = section.concepts.every(c => ensureConcept(c.id).mastery >= 3);
-    panel.appendChild(el("div", {
-      class: "section-test-card" + (allConceptsDone ? " unlocked" : "")
-    },
-      allConceptsDone
-        ? "Section-test unlocked — coming in commit 3."
-        : "Pass all concept quizzes to unlock the section-test."
-    ));
+    const authoredConcepts = section.concepts.filter(c => c.quiz);
+    const allConceptsHaveQuizzes = section.concepts.every(c => c.quiz);
+    const allAuthoredPassed = authoredConcepts.length > 0 && authoredConcepts.every(c => ensureConcept(c.id).mastery >= 3);
+    const fullyUnlocked = allConceptsHaveQuizzes && allAuthoredPassed;
+    const hasSectionTest = !!section.sectionTest;
+
+    let sectionTestText;
+    let sectionTestAction = null;
+    if (!hasSectionTest) {
+      sectionTestText = "Section-test — not yet authored.";
+    } else if (fullyUnlocked) {
+      const passed = isSectionPassed(section.id);
+      sectionTestText = passed ? "Section-test passed — section complete." : "Section-test unlocked.";
+      sectionTestAction = () => startSectionTest(section);
+    } else if (allAuthoredPassed && !allConceptsHaveQuizzes) {
+      sectionTestText = "Section-test waits on unauthored concepts (" + section.concepts.filter(c => !c.quiz).map(c => c.code).join(", ") + ").";
+    } else {
+      sectionTestText = "Pass all concept quizzes to unlock the section-test.";
+    }
+
+    const sectionTestCard = el("div", {
+      class: "section-test-card" + ((fullyUnlocked || isSectionPassed(section.id)) ? " unlocked" : "")
+    }, sectionTestText);
+    if (sectionTestAction) {
+      sectionTestCard.appendChild(el("div", { style: "margin-top:10px;" },
+        el("button", { class: "primary", onclick: sectionTestAction },
+          isSectionPassed(section.id) ? "Re-take section-test" : "Take section-test →")
+      ));
+    }
+    panel.appendChild(sectionTestCard);
 
     root.appendChild(panel);
   }
@@ -639,8 +743,248 @@
     root.appendChild(review);
   }
 
-  function renderSectionTest()       { renderQuiz(); }
-  function renderSectionTestResult() { renderQuiz(); }
+  // ---------------- Section-test runner ----------------
+  function startSectionTest(section) {
+    const sp = ensureSection(section.id);
+    if (!sp.currentTestAttempt) {
+      sp.currentTestAttempt = {
+        idx: 0,
+        answers: section.sectionTest.questions.map(() => ({ pick: null, notes: "" }))
+      };
+      saveProgress();
+    }
+    navigate("sectionTest", { sectionId: section.id });
+  }
+
+  function renderSectionTest() {
+    const section = getSection(P.location.sectionId);
+    if (!section || !section.sectionTest) return navigate("dashboard");
+    const sp = ensureSection(section.id);
+    if (!sp.currentTestAttempt) return startSectionTest(section);
+
+    const Q = section.sectionTest.questions;
+    const a = sp.currentTestAttempt;
+    const i = a.idx;
+    const q = Q[i];
+    const total = Q.length;
+
+    brandSub.textContent = section.title + " · Section-test";
+    topnav.appendChild(el("span", null, "Q " + (i + 1) + " of " + total));
+    topnav.appendChild(el("button", { class: "linkish", onclick: () => {
+      if (confirm("Exit the section-test? Your progress is saved; you can resume from the section page.")) {
+        navigate("section", { sectionId: section.id });
+      }
+    } }, "Exit"));
+
+    root.appendChild(breadcrumbs([
+      { label: "Dashboard", onclick: () => navigate("dashboard") },
+      { label: section.title, onclick: () => navigate("section", { sectionId: section.id }) },
+      { label: "Section-test · Q" + (i + 1) + "/" + total }
+    ]));
+
+    const pct = (i / total) * 100;
+    root.appendChild(el("div", { class: "progress-shell" },
+      el("div", { class: "progress-fill", style: "width:" + pct + "%" })
+    ));
+
+    const optionsWrap = el("div", { class: "options" });
+    Object.keys(q.options).forEach(letter => {
+      const text = q.options[letter];
+      const sel = a.answers[i].pick === letter;
+      optionsWrap.appendChild(
+        el("div", {
+          class: "opt" + (sel ? " sel" : ""),
+          role: "button",
+          tabindex: "0",
+          onclick: () => { a.answers[i].pick = letter; saveProgress(); render(); },
+          onkeydown: (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              a.answers[i].pick = letter; saveProgress(); render();
+            }
+          }
+        },
+          el("div", { class: "opt-letter" }, letter),
+          el("div", { class: "opt-text" }, text)
+        )
+      );
+    });
+
+    const reasonTa = el("textarea", {
+      class: "reason",
+      placeholder: "Optional reasoning."
+    });
+    reasonTa.value = a.answers[i].notes || "";
+    reasonTa.addEventListener("input", (ev) => {
+      a.answers[i].notes = ev.target.value;
+      saveProgress();
+    });
+
+    root.appendChild(el("div", { class: "panel" },
+      el("div", { class: "qhead" },
+        el("span", { class: "qno" }, "Q" + q.n),
+        el("span", { class: "badge dom" }, "Section " + section.n),
+        q.bSkills && q.bSkills.length
+          ? el("span", { class: "badge" }, "Tags: " + q.bSkills.join(", "))
+          : null
+      ),
+      el("h1", { class: "qtitle" }, "Q" + q.n),
+      el("div", { class: "qbody" }, q.question),
+      optionsWrap,
+      el("div", { class: "reason-wrap" },
+        el("div", { class: "reason-label" }, "Your reasoning (optional)"),
+        reasonTa
+      )
+    ));
+
+    const isLast = i === total - 1;
+    const allPicked = a.answers.every(x => x.pick);
+
+    root.appendChild(el("div", { class: "controls" },
+      el("button", {
+        onclick: () => { a.idx = Math.max(0, i - 1); saveProgress(); render(); },
+        disabled: i === 0 ? "disabled" : false
+      }, "← Prev"),
+      el("div", { class: "nav-spacer" }),
+      !isLast
+        ? el("button", { class: "primary", onclick: () => { a.idx = Math.min(total - 1, i + 1); saveProgress(); render(); } }, "Next →")
+        : el("button", {
+            class: "primary",
+            onclick: () => {
+              if (!allPicked) {
+                const skipped = a.answers.map((x, idx) => x.pick ? null : idx + 1).filter(Boolean);
+                if (!confirm("You haven't picked an answer for Q" + skipped.join(", Q") + ". Submit anyway?")) return;
+              }
+              submitSectionTest(section);
+            }
+          }, "Submit section-test")
+    ));
+  }
+
+  function submitSectionTest(section) {
+    const sp = ensureSection(section.id);
+    const Q = section.sectionTest.questions;
+    const a = sp.currentTestAttempt;
+    const score = a.answers.reduce((acc, ans, i) => acc + (ans.pick === Q[i].correct ? 1 : 0), 0);
+    sp.testAttempts.push({
+      score: score,
+      total: Q.length,
+      dateISO: new Date().toISOString(),
+      answers: a.answers.map(x => ({ pick: x.pick, notes: x.notes }))
+    });
+    sp.currentTestAttempt = null;
+    const passPct = section.sectionTest.passPct || 0.7;
+    if ((score / Q.length) >= passPct) {
+      sp.complete = true;
+      unlockNextSection(section.id);
+    }
+    saveProgress();
+    navigate("sectionTestResult", { sectionId: section.id });
+  }
+
+  function renderSectionTestResult() {
+    const section = getSection(P.location.sectionId);
+    if (!section || !section.sectionTest) return navigate("dashboard");
+    const sp = ensureSection(section.id);
+    const last = sp.testAttempts[sp.testAttempts.length - 1];
+    if (!last) return navigate("section", { sectionId: section.id });
+
+    const Q = section.sectionTest.questions;
+    const passPct = section.sectionTest.passPct || 0.7;
+    const passed = (last.score / last.total) >= passPct;
+
+    brandSub.textContent = section.title + " · Section-test result";
+    topnav.appendChild(el("button", { class: "linkish", onclick: () => navigate("section", { sectionId: section.id }) }, "← Section"));
+
+    root.appendChild(breadcrumbs([
+      { label: "Dashboard", onclick: () => navigate("dashboard") },
+      { label: section.title, onclick: () => navigate("section", { sectionId: section.id }) },
+      { label: "Section-test result" }
+    ]));
+
+    const verdict = passed
+      ? "Section complete. " + (CURRICULUM.sections[CURRICULUM.sections.findIndex(s => s.id === section.id) + 1]
+          ? "Next section unlocked."
+          : "All sections cleared.")
+      : "Below " + Math.round(passPct * 100) + "% gate. Re-take, or drill the lowest-scoring concepts first.";
+
+    root.appendChild(el("div", { class: "scorecard" },
+      el("div", null,
+        el("div", { class: "score-num" }, last.score + " / " + last.total),
+        el("div", { class: "score-meta" }, Math.round((last.score / last.total) * 100) + "% · attempt " + sp.testAttempts.length)
+      ),
+      el("div", { class: "score-band" },
+        el("div", { class: "verdict-line " + (passed ? "pass" : "fail") },
+          passed ? "Section passed" : "Below pass-gate"),
+        el("div", null, verdict)
+      )
+    ));
+
+    root.appendChild(el("div", { class: "controls", style: "margin-top:0;margin-bottom:18px;" },
+      el("button", { onclick: () => navigate("section", { sectionId: section.id }) }, "← Back to section"),
+      el("div", { class: "nav-spacer" }),
+      el("button", { class: "primary", onclick: () => startSectionTest(section) }, "Re-take section-test")
+    ));
+
+    const review = el("div", { class: "review" });
+    Q.forEach((q, i) => {
+      const ans = last.answers[i];
+      const picked = ans.pick;
+      const status = !picked ? "skipped" : (picked === q.correct ? "correct" : "wrong");
+      const verdictTextR = !picked ? "Skipped" : (picked === q.correct ? "Correct" : "Incorrect");
+
+      const expList = el("ul");
+      Object.keys(q.options).forEach(letter => {
+        const isRight = letter === q.correct;
+        const why = q.explanations[letter] || "";
+        const li = el("li", { class: isRight ? "right" : "" });
+        if (isRight) {
+          li.appendChild(el("strong", null, letter + " — Correct."));
+          li.appendChild(document.createTextNode(" " + why));
+        } else {
+          li.appendChild(el("strong", null, letter + "."));
+          li.appendChild(document.createTextNode(" " + why));
+        }
+        expList.appendChild(li);
+      });
+
+      review.appendChild(el("div", { class: "rcard " + status },
+        el("div", { class: "qhead" },
+          el("span", { class: "qno" }, "Q" + q.n),
+          el("span", { class: "badge dom" }, "Section " + section.n),
+          q.bSkills ? el("span", { class: "badge" }, "Tags: " + q.bSkills.join(", ")) : null,
+          el("span", { class: "verdict " + status }, verdictTextR)
+        ),
+        el("h3", null, "Q" + q.n),
+        el("div", { class: "qtext-mini" }, q.question),
+        el("div", { class: "answer-row" },
+          el("div", null,
+            el("span", { class: "lbl" }, "Your pick:"),
+            el("code", null, picked || "—")
+          ),
+          el("div", null,
+            el("span", { class: "lbl" }, "Correct:"),
+            el("code", null, q.correct)
+          )
+        ),
+        ans.notes && ans.notes.trim()
+          ? el("div", { class: "user-notes" },
+              el("span", { class: "lbl" }, "Your reasoning"),
+              ans.notes.trim()
+            )
+          : null,
+        el("div", { class: "explain" },
+          el("h4", null, "Per-option breakdown"),
+          expList
+        ),
+        el("div", { class: "principle" },
+          el("span", { class: "lbl" }, "Principle:"),
+          q.principle
+        )
+      ));
+    });
+    root.appendChild(review);
+  }
 
   // ---------------- Boot ----------------
   const VALID_VIEWS = ["dashboard", "section", "concept", "lesson", "quiz", "quizResult", "sectionTest", "sectionTestResult"];
