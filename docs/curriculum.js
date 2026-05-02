@@ -425,7 +425,123 @@ const CURRICULUM = {
       sourceCourse: "Anthropic Academy — Claude Code 101",
       blurb: "Claude Code anatomy: hooks, slash commands, permissions, the CLAUDE.md / settings.json split.",
       concepts: [
-        { id: "b5-1", code: "B5.1", title: "Place hook on correct event",         bloom: "A",  lesson: null, quiz: null },
+        {
+          id: "b5-1", code: "B5.1", title: "Place hook on correct event", bloom: "A",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Hooks in Claude Code are deterministic harness-side actions wired to lifecycle events. The model does not run a hook; the harness does, regardless of what the model decides. That distinction is the entire reason hooks exist: when you need a guarantee — a guardrail, an automated post-task action, a trust gate — the model is the wrong layer to put it on. The hook event you choose decides whether the action fires before, after, or instead of the thing you care about. Picking the wrong event is the single most common hook bug.",
+              "The events worth memorising at this tier (and their granularity): SessionStart fires once when a session begins; UserPromptSubmit fires when the user sends a turn; PreToolUse fires before each individual tool call and is the only event that can return a blocking decision to refuse the call; PostToolUse fires after each tool call with its result; Notification fires for transient harness messages; Stop fires once when the assistant finishes a task / turn; SubagentStop fires when a delegated subagent finishes; PreCompact / PostCompact fire around context compaction. Granularity is everything: PreToolUse is per-tool-call; Stop is per-task.",
+              "The decision rule maps directly from the trigger phrasing. 'Refuse / block / require approval before X tool runs' → PreToolUse (the only event with a block primitive). 'Every time you finish a task, do X' → Stop (per-task granularity matches 'task'). 'Every time a tool call completes, do X' → PostToolUse (per-call granularity matches 'each call'). 'When the session boots, prepare X' → SessionStart. 'Every time the user sends a message, validate X' → UserPromptSubmit.",
+              "Two anti-patterns produce most real-world miswires. First: putting a guardrail on PostToolUse instead of PreToolUse. PostToolUse can warn, but the dangerous command has already executed — you've turned an enforcement into a forensic alert. Second: putting a per-task automation on PostToolUse instead of Stop. PostToolUse fires per-tool-call, so 'run lint after the task' becomes 'run lint after every Edit, every Read, every Bash' — a flood, not a checkpoint. Match event granularity to the trigger granularity, not just the verb."
+            ],
+            keyPoints: [
+              "Hooks run in the harness. The model can't refuse, forget, or interpret them.",
+              "PreToolUse is the only blocking event. Guardrails live there, period.",
+              "PostToolUse = per individual tool call. Stop = per task / turn. Pick by granularity.",
+              "Trigger phrasing maps to event: 'before tool' → PreToolUse · 'after task' → Stop · 'after each call' → PostToolUse · 'on boot' → SessionStart.",
+              "If the placement could fire at the wrong granularity, you've picked the wrong event."
+            ],
+            examples: [
+              {
+                title: "Refuse `rm -rf` and `--no-verify`",
+                body: "Trigger: 'block any shell command containing rm -rf or --no-verify, regardless of permission mode.' Required primitive: blocking decision before execution. Event: PreToolUse. Hook inspects the candidate command; if it matches either pattern, it returns a deny decision and the call never runs. PostToolUse can't do this — the command has already run."
+              },
+              {
+                title: "Run `npm run lint` after every task",
+                body: "Trigger: 'every time you finish a task, run npm run lint.' 'Task' granularity = per-turn = Stop. PostToolUse would fire after each individual Edit, Read, and Bash call — running lint dozens of times per task. Stop fires once when the assistant signals it's done with the user's request. Match granularity to the user's words."
+              },
+              {
+                title: "Inject project-state context at session boot",
+                body: "Trigger: 'when a session starts, dump current git branch + uncommitted file count into the conversation as context.' One-shot, at session begin. Event: SessionStart. Not UserPromptSubmit (that runs every turn — wasteful repetition). Not Stop (too late)."
+              }
+            ],
+            pitfalls: [
+              "PostToolUse for guardrails — fires after the dangerous command. No block primitive at that event.",
+              "PostToolUse for per-task automation — wrong granularity; lint floods on every tool call.",
+              "Stop for guardrails — fires only at task end, way too late to prevent harm.",
+              "SessionStart for per-turn validation — fires only once at boot; misses every subsequent turn.",
+              "Putting an automation that 'must always run' in CLAUDE.md or memory instead of a hook — the model can interpret, prioritize, or skip those. The harness can't skip a hook."
+            ],
+            notesRef: "00-academy-basics/notes/05-claude-code-101.md",
+            simplified: {
+              oneLiner: "Pick the hook event by what your trigger fires on: blocking → PreToolUse · per-task → Stop · per-tool-call → PostToolUse · once at boot → SessionStart.",
+              analogy: "Think of the model as a chef and the harness as the kitchen's safety officer. Hooks are the officer's standing rules. 'Stop the chef before they pick up the knife' has to fire before the action — that's PreToolUse. 'After every dish goes out, wipe the counter' fires once per dish leaving — that's Stop, the per-task event. 'After every utensil is used, sanitize it' fires every time a utensil touches food — that's PostToolUse. Pointing the rules at the wrong moment is what makes the kitchen unsafe.",
+              paragraphs: [
+                "Hooks are little scripts the harness runs at fixed moments — independent of whatever the model decides. That's their whole superpower: they always fire when you said they would.",
+                "The trick is matching the moment. 'Block this before it happens' has to be PreToolUse (the only one that can refuse). 'Once per task' is Stop. 'After every single tool call' is PostToolUse. 'On session boot' is SessionStart.",
+                "If you put a guardrail on PostToolUse, it fires after the damage is done. If you put a per-task action on PostToolUse, it floods because tool calls outnumber tasks. Match the event to the granularity of the thing you want."
+              ],
+              keyPoints: [
+                "Hooks always fire — that's why we use them.",
+                "Block before something runs → PreToolUse.",
+                "After each task → Stop. After every tool call → PostToolUse.",
+                "Wrong event = wrong moment. Read the trigger carefully."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team wants Claude Code to refuse any shell invocation containing `--force-push` to main, regardless of which user is running it. Which hook event implements this reliably?",
+                options: {
+                  A: "Stop — analyse the transcript at session end and warn if a force-push happened.",
+                  B: "PreToolUse — inspect the candidate command and return a blocking decision before it runs.",
+                  C: "PostToolUse — inspect the result of the command and warn if a force-push went through.",
+                  D: "SessionStart — reject the session if force-push appears anywhere in the user's recent shell history."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Stop fires once at task end — far too late to prevent the destructive action.",
+                  B: "Right. PreToolUse is the only event that can return a blocking decision before the tool call executes. This is the canonical home for command guardrails.",
+                  C: "PostToolUse fires after the command. The damage is done; it can only forensically alert.",
+                  D: "SessionStart has no per-call context and runs once at boot. Wrong granularity entirely."
+                },
+                principle: "Pre-execution policy → PreToolUse. The blocking-decision capability is what makes it the right primitive for guardrails.",
+                bSkills: ["B5.1"]
+              },
+              {
+                n: 2,
+                question: "The user writes: \"Every time you finish a task, run `pytest -q` and post the result.\" Which event placement is correct?",
+                options: {
+                  A: "PostToolUse — runs after each tool call, which captures task completion.",
+                  B: "Stop — fires once when the assistant signals task completion (per-turn granularity).",
+                  C: "Notification — picks up the harness's task-completed signal.",
+                  D: "SessionStart — schedule a recurring pytest job once per session."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Wrong granularity. PostToolUse fires per individual tool call — pytest would run after every Edit, Read, and Bash. The user said 'every task,' not 'every tool call.'",
+                  B: "Right. Stop fires once per task / turn. That matches the user's 'every time you finish a task' trigger directly.",
+                  C: "Notification is for transient harness messages, not the canonical per-task hook.",
+                  D: "SessionStart fires once at boot. Wrong granularity — it would run pytest once and never again."
+                },
+                principle: "Match event granularity to trigger granularity. 'Per task' = Stop. 'Per tool call' = PostToolUse. Verbs alone don't decide — granularity does.",
+                bSkills: ["B5.1"]
+              },
+              {
+                n: 3,
+                question: "An ops engineer wants to inject the current git branch and the count of uncommitted files into Claude's context at the start of every session, so the model knows the working state without being asked. Which event is the right home?",
+                options: {
+                  A: "UserPromptSubmit — runs every turn, so the state is always fresh.",
+                  B: "SessionStart — fires once when the session begins; the harness can prepend the git info as initial context.",
+                  C: "PreToolUse — runs before any tool call, so it's the earliest moment available.",
+                  D: "PreCompact — runs around context compaction, which is when the model needs the orienting context most."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Works, but runs every turn — wasteful repetition. The trigger is 'at start of session,' not 'every turn.'",
+                  B: "Right. SessionStart is the canonical 'prepare initial context' event. Fires once, attaches the git info, the rest of the session has it.",
+                  C: "PreToolUse fires per individual tool call — wrong granularity for a one-shot setup.",
+                  D: "PreCompact fires only around compaction events, not at session boot. Wrong moment."
+                },
+                principle: "Read the trigger's granularity literally. 'At start of session' = SessionStart, not 'whenever it might also be useful.'",
+                bSkills: ["B5.1"]
+              }
+            ]
+          }
+        },
         { id: "b5-2", code: "B5.2", title: "Predict permission cascade",          bloom: "An", lesson: null, quiz: null },
         { id: "b5-3", code: "B5.3", title: "Route rule (CLAUDE.md/skill/hook)",   bloom: "E",  lesson: null, quiz: null },
         { id: "b5-4", code: "B5.4", title: "Author slash command",                bloom: "A",  lesson: null, quiz: null }
