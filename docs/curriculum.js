@@ -4958,11 +4958,414 @@ const CURRICULUM = {
       sourceCourse: "Anthropic Academy — Introduction to Claude Cowork",
       blurb: "Long-running agentic work, plugins vs skills, checkpoint cadence, the set-and-forget anti-pattern.",
       concepts: [
-        { id: "b9-1", code: "B9.1", title: "Plugin vs skill",         bloom: "U",  lesson: null, quiz: null },
-        { id: "b9-2", code: "B9.2", title: "Add checkpoint cadence",  bloom: "E",  lesson: null, quiz: null },
-        { id: "b9-3", code: "B9.3", title: "Detect set-and-forget",   bloom: "An", lesson: null, quiz: null }
+        {
+          id: "b9-1", code: "B9.1", title: "Plugin vs skill (Cowork)", bloom: "U",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Cowork is the persistent, multi-step task workspace — a managed agent that keeps state across hours or days, runs file work, and exposes plugins and skills. Two extension surfaces: **plugins** add *capabilities* (file system, web access, integrations); **skills** add *instructions* (markdown bundles steering how the agent works). The distinction is the same as elsewhere in the Anthropic ecosystem — instructions vs. capabilities — but it matters specifically inside Cowork because both are first-class menu surfaces.",
+              "Plugins are *what the agent can do*. Installing a filesystem plugin means the agent can now read and write files; installing a web plugin means it can now fetch URLs. Plugins introduce tools (sometimes resources or prompts via MCP shape) and side-effecting capabilities. Without the plugin, the capability simply isn't there.",
+              "Skills are *how the agent should work* on a given task. A `weekly-report` skill steers the agent's approach to producing weekly reports; it doesn't add any capability the agent didn't have. Skills load on user invocation; their body is instructions the agent follows during that task.",
+              "The miswire: putting capabilities in a skill (it's just instructions; the underlying tool doesn't exist) or putting instructions-only behaviour in a plugin (the agent gets no new capability and the menu is cluttered with what should be a Skill). The decision rule: 'does this add a new ability the agent didn't have, or does it steer how the agent uses existing abilities?' Ability → plugin. Steering → skill."
+            ],
+            keyPoints: [
+              "Plugin = capability (what the agent can do).",
+              "Skill = instructions (how the agent works on a task).",
+              "Without the plugin, the capability isn't present.",
+              "Skills steer existing capabilities; they don't add new ones."
+            ],
+            examples: [
+              {
+                title: "Plugin: filesystem access",
+                body: "Installs read/write file tools. The agent can now interact with the local file system. Capability is now present."
+              },
+              {
+                title: "Skill: weekly-report",
+                body: "Markdown body that says 'Group by component, list breaking changes first, etc.' Doesn't add any tool; uses whatever the agent already has (filesystem plugin, web plugin) to do the work."
+              }
+            ],
+            pitfalls: [
+              "Trying to ship a 'plugin' that's just instructions. It's a Skill.",
+              "Trying to encode a capability in a Skill. The instructions can't conjure a tool that doesn't exist; install the plugin.",
+              "Treating plugins and skills as substitutes. They're complementary — most useful tasks need both."
+            ],
+            notesRef: "00-academy-basics/notes/09-cowork.md",
+            simplified: {
+              oneLiner: "Plugins add capabilities (what the agent CAN do). Skills add instructions (HOW the agent should work). Both attach to a Cowork task.",
+              analogy: "Plugins are tools in a workshop (saw, drill). Skills are blueprints (how to build a chair with the tools you have). You need both to build something.",
+              paragraphs: [
+                "Cowork has two extension types. Plugins give the agent new abilities; skills tell it how to apply abilities to a task.",
+                "If you need a new capability, install a plugin. If you need to steer behaviour, write a skill."
+              ],
+              keyPoints: [
+                "Plugin = capability.",
+                "Skill = instructions.",
+                "Often you need both."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team wants to add 'send Slack notifications' as an extension to their Cowork task. They write a markdown skill called `slack-notifier` with instructions to 'use the Slack tool to post messages.' But there's no Slack tool installed. What's the structural error?",
+                options: {
+                  A: "The skill needs a higher priority field.",
+                  B: "Capability is missing — Slack messaging requires a Slack *plugin* (which provides the tool). A skill can only steer existing capabilities; it can't introduce new ones.",
+                  C: "Skills need to be in a specific directory.",
+                  D: "Slack notifications are not supported by Cowork."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Fabricated priority field; doesn't address the layer error.",
+                  B: "Right. Plugins introduce capabilities; skills steer existing ones. A skill instructing 'use the Slack tool' fails when the Slack tool doesn't exist — because no plugin provides it.",
+                  C: "Location isn't the structural issue.",
+                  D: "Cowork can integrate Slack via a plugin."
+                },
+                principle: "Plugins introduce capabilities; skills steer them. Instructions can't conjure tools that don't exist.",
+                bSkills: ["B9.1"]
+              },
+              {
+                n: 2,
+                question: "Which is the *correct* description of plugins vs. skills in Cowork?",
+                options: {
+                  A: "They're aliases for the same thing.",
+                  B: "Plugin = capability (introduces tools / abilities); skill = instructions (steers how existing capabilities are used).",
+                  C: "Plugin = instructions; skill = capability (inverse of B).",
+                  D: "Plugins are deprecated in favour of skills."
+                },
+                correct: "B",
+                explanations: {
+                  A: "They're complementary, not synonymous.",
+                  B: "Right. Plugins add abilities; skills add steering. Most tasks use both.",
+                  C: "Inverted.",
+                  D: "Both are first-class extensions in Cowork."
+                },
+                principle: "Plugin = capability. Skill = instructions. Both attach to a task; both are first-class.",
+                bSkills: ["B9.1"]
+              },
+              {
+                n: 3,
+                question: "A team has a recurring task: 'Pull last week's metrics from our internal dashboard, then summarise them as bullets.' They've installed a metrics-API plugin (with a `fetch_metrics` tool) and now want to standardise the summary format across the team. What's the right shape?",
+                options: {
+                  A: "Write a `metrics-summary` skill that uses `fetch_metrics` and produces a standard bullet format.",
+                  B: "Write a second plugin to enforce the bullet format.",
+                  C: "Add the bullet-format rules to the metrics plugin's source code.",
+                  D: "Replace the plugin with a skill that includes the metrics tool inline."
+                },
+                correct: "A",
+                explanations: {
+                  A: "Right. The plugin provides the capability (fetch_metrics); the Skill steers how that capability is used and how the output is shaped. Canonical division of labour.",
+                  B: "Format steering doesn't need a plugin.",
+                  C: "Couples team-specific style with the (possibly third-party) plugin source.",
+                  D: "Skills can't include tools; that's a plugin."
+                },
+                principle: "Plugin for the capability; skill for the steering. Don't bundle steering into plugins.",
+                bSkills: ["B9.1"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b9-2", code: "B9.2", title: "Add appropriate human-checkpoint cadence", bloom: "E",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Cowork tasks are long-running by design — multi-hour, multi-day, sometimes multi-week. The longer the run, the higher the cost of drift: the agent silently moves away from intent, accumulates wrong assumptions, and produces something useful-looking but off-target. **Human-checkpoint cadence** is the antidote: scheduled moments where the human reviews state, corrects course, and re-confirms intent. Without checkpoints, you have a runaway risk regardless of how good the model is.",
+              "The cadence is task-shape-specific, not one-size-fits-all. Short, well-scoped tasks (a few hours) may need only one mid-task check. Multi-day exploratory tasks need daily check-ins. Multi-week strategic work needs both daily progress reviews and weekly intent re-alignment. The decision is informed by *how fast intent can change* and *how expensive it is to discover drift late*.",
+              "What goes in a checkpoint: the agent surfaces (1) what it's done since the last checkpoint, (2) what it's about to do, (3) any open questions or assumptions it had to make, (4) any state that's surprising or costly to undo. The human reviews, corrects, re-confirms. The agent adjusts; the run continues. Good checkpoint design surfaces *intermediate artefacts* — partial output, written plans, code in progress — so review is concrete, not abstract.",
+              "The antipattern named in B9.3 ('set and forget') is the absence of cadence. Adding cadence is the structural fix; it's not 'micromanagement' — it's the discipline that keeps long-running agents aligned with the intent they were given hours or days ago."
+            ],
+            keyPoints: [
+              "Long-running tasks accumulate drift without checkpoints.",
+              "Cadence is task-shape-specific: hours → mid-task; days → daily; weeks → daily + weekly.",
+              "Checkpoint surfaces what's done, what's next, open assumptions, costly state.",
+              "Good checkpoints surface intermediate artefacts for concrete review.",
+              "Cadence is the structural antidote to drift, not 'micromanagement'."
+            ],
+            examples: [
+              {
+                title: "Multi-day research task",
+                body: "Daily checkpoint at start of day: 'Yesterday I gathered X. Today I plan Y. Open question: should source Z be excluded?' Human approves, redirects, or pauses. Run continues."
+              },
+              {
+                title: "Multi-week strategic task",
+                body: "Daily progress checkpoint (concrete artefacts) + weekly intent re-alignment ('does this still match what we set out to do, given what we've learned?'). Two cadences, two purposes."
+              }
+            ],
+            pitfalls: [
+              "Setting one checkpoint at the end of a multi-day task. Drift is already cooked in.",
+              "Making checkpoints abstract ('all good, continuing'). Without artefacts, the human can't see drift either.",
+              "Treating 'no checkpoint' as a feature ('the agent is autonomous'). Cowork is explicitly *not* autonomous — it's collaborative."
+            ],
+            notesRef: "00-academy-basics/notes/09-cowork.md",
+            simplified: {
+              oneLiner: "Long Cowork tasks need scheduled human check-ins to catch drift. Cadence depends on length: hours → mid-task; days → daily; weeks → daily + weekly.",
+              analogy: "Like supervising a contractor on a long job. You don't show up only at the end — you walk the site daily. The check-ins catch problems while they're cheap to fix.",
+              paragraphs: [
+                "Without checkpoints, long-running agents drift silently. The fix is scheduled human review with concrete artefacts to inspect.",
+                "Pick the cadence by how long and how strategic the task is."
+              ],
+              keyPoints: [
+                "Cadence prevents drift.",
+                "Hours → mid-task; days → daily; weeks → daily + weekly.",
+                "Checkpoints need concrete artefacts."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team configures a Cowork task to run autonomously for 5 days with one final review at the end. What's the structural critique?",
+                options: {
+                  A: "5-day tasks aren't supported.",
+                  B: "Drift accumulates over 5 days; one end-of-task review can't catch it. Add a daily checkpoint cadence so the human can correct course while drift is small.",
+                  C: "Tasks should be split into 5 separate 1-day tasks.",
+                  D: "The agent should self-monitor and self-correct without human intervention."
+                },
+                correct: "B",
+                explanations: {
+                  A: "5-day tasks are supported.",
+                  B: "Right. Cowork is collaborative-by-design; long tasks without checkpoint cadence drift silently. Daily cadence is the fix for multi-day work.",
+                  C: "Splitting may help structurally but doesn't substitute for cadence.",
+                  D: "Self-monitoring is unreliable; cadence is the structural mitigation."
+                },
+                principle: "Cadence depends on length. Multi-day tasks need daily checkpoints; one final review is too late.",
+                bSkills: ["B9.2"]
+              },
+              {
+                n: 2,
+                question: "Which checkpoint shape is *most* effective for catching drift?",
+                options: {
+                  A: "A 'continuing as planned' message every hour.",
+                  B: "A concrete artefact (partial output, written plan, code-in-progress) plus a list of assumptions and open questions, surfaced at the cadence.",
+                  C: "A sentiment score summarising agent confidence.",
+                  D: "A token-usage report at end-of-day."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Abstract; doesn't let the human see drift concretely.",
+                  B: "Right. Concrete artefacts + assumptions + open questions give the human enough to inspect and correct. Drift hides in unstated assumptions.",
+                  C: "Confidence scores are unreliable.",
+                  D: "Cost report doesn't speak to alignment with intent."
+                },
+                principle: "Good checkpoints surface concrete artefacts and stated assumptions — what the agent is doing, what it assumed, what's still open.",
+                bSkills: ["B9.2"]
+              },
+              {
+                n: 3,
+                question: "For a multi-week strategic task, which cadence pair is most appropriate?",
+                options: {
+                  A: "End-of-task only.",
+                  B: "Daily progress checkpoints (concrete artefacts) plus weekly intent re-alignment (does this still match the goal given what we've learned?).",
+                  C: "Hourly status updates.",
+                  D: "One mid-week and one end-of-task."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Catches no drift along the way.",
+                  B: "Right. Two cadences serve two purposes: daily for tactical drift, weekly for strategic-intent drift. Multi-week tasks need both.",
+                  C: "Too high frequency for strategic work; review fatigue.",
+                  D: "Two checkpoints in multi-week work is sparse."
+                },
+                principle: "Match cadence to drift speed. Tactical drift = daily; strategic-intent drift = weekly. Multi-week work usually needs both.",
+                bSkills: ["B9.2"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b9-3", code: "B9.3", title: "Detect set-and-forget antipattern", bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "**Set-and-forget** is the antipattern of dispatching a long-running Cowork task and not checking on it until the end. It's tempting because Cowork's persistence makes it possible — the task just keeps running. It's the wrong default because long-running agents drift; the longer the run, the larger the drift; without intermediate review, you discover the drift only when it's expensive to undo.",
+              "Detection signature: (1) the task spans multiple days with zero mid-task interaction; (2) no intermediate artefacts are produced (or none are reviewed); (3) the only feedback loop is end-of-task; (4) the operator describes the task as 'autonomous' or 'set and forget' (Cowork is explicitly *not* autonomous; the design is collaborative). Any of these is the same antipattern.",
+              "The structural fix is human-checkpoint cadence (B9.2). Adding cadence transforms set-and-forget into 'set and steer' — the intended Cowork shape. The agent does the heavy lifting; the human's lever is intermediate review and course correction. Both are first-class roles.",
+              "Adjacent failure: producing no intermediate artefact during a long-running task even if the cadence is set. The cadence is the *opportunity* for review; without artefacts to look at, the review is empty. Fix the artefact-emission shape (write the partial output to a known path, log the in-progress plan, snapshot the code state) so the cadence has something concrete to inspect."
+            ],
+            keyPoints: [
+              "Set-and-forget = dispatch + ignore until end. Antipattern by design.",
+              "Detection: multi-day, zero mid-task interaction, no intermediate artefacts, 'autonomous' framing.",
+              "Fix: add human-checkpoint cadence (B9.2). Transform to 'set and steer'.",
+              "Adjacent failure: cadence without artefacts to review = empty cadence."
+            ],
+            examples: [
+              {
+                title: "Set-and-forget shape",
+                body: "Operator says: 'Just run this 4-day research task and ping me when done.' No intermediate artefacts; no checkpoints; no opportunity to correct drift. Day 4 reveals the agent went off-track on day 1 and built on the wrong foundation."
+              },
+              {
+                title: "Set-and-steer shape",
+                body: "Same task, with daily checkpoints surfacing the day's findings, the next day's plan, and any open questions. Day 1 drift is caught on day 2 morning; correction is cheap; the rest of the task stays aligned."
+              }
+            ],
+            pitfalls: [
+              "Treating Cowork's persistence as 'autonomy'. It's not; it's a managed long-running surface that *expects* steering.",
+              "Setting cadences but providing nothing concrete to review. Empty cadence = false confidence.",
+              "Disabling cadence after a few smooth runs. Drift compounds; missing cadence is hard to put back."
+            ],
+            notesRef: "00-academy-basics/notes/09-cowork.md",
+            simplified: {
+              oneLiner: "Set-and-forget is dispatching a long-running Cowork task and not checking on it. It's an antipattern — the right shape is set-and-steer with checkpoints.",
+              analogy: "It's like giving a contractor a 6-month project and never visiting the site. Even with good intentions, drift compounds. Visit weekly; correct early.",
+              paragraphs: [
+                "Cowork's persistence makes it tempting to walk away. Don't. Long-running agents drift; you only see the drift if you check.",
+                "Add cadence; produce artefacts; review. Set and steer."
+              ],
+              keyPoints: [
+                "Set-and-forget = antipattern.",
+                "Set-and-steer = intended shape.",
+                "Cadence + artefacts = the fix."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team boasts that their Cowork task ran autonomously for a week with no human interaction. What's the structural critique?",
+                options: {
+                  A: "Cowork doesn't support week-long tasks.",
+                  B: "Set-and-forget antipattern. Cowork is collaborative-by-design; long-running agents drift silently without checkpoint cadence. The right shape is set-and-steer with daily checkpoints.",
+                  C: "The agent should self-monitor.",
+                  D: "Tasks should always be under 1 hour."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Week-long tasks are supported.",
+                  B: "Right. 'Autonomous' framing for Cowork is the antipattern. Drift over a week without review is almost guaranteed.",
+                  C: "Self-monitoring is unreliable.",
+                  D: "No fixed time cap; the issue is cadence, not duration."
+                },
+                principle: "Cowork is set-and-steer, not set-and-forget. Long runs need checkpoint cadence.",
+                bSkills: ["B9.3", "B9.2"]
+              },
+              {
+                n: 2,
+                question: "Which combination is the *strongest* signal of a set-and-forget antipattern?",
+                options: {
+                  A: "Multi-day task + zero mid-task interaction + no intermediate artefacts emitted.",
+                  B: "Single-hour task + one final review.",
+                  C: "Multi-day task + daily checkpoints with concrete artefacts.",
+                  D: "Multi-week task + daily and weekly checkpoints."
+                },
+                correct: "A",
+                explanations: {
+                  A: "Right. Multi-day duration + no interaction + no artefacts = the canonical antipattern.",
+                  B: "Short task; one final review is plausibly OK.",
+                  C: "Set-and-steer (correct shape).",
+                  D: "Set-and-steer with appropriate cadence pair (correct shape)."
+                },
+                principle: "Antipattern signal: long duration + no interaction + no artefacts to review.",
+                bSkills: ["B9.3"]
+              },
+              {
+                n: 3,
+                question: "A team adds daily checkpoints to a long Cowork task but each checkpoint shows 'continuing as planned' with no artefacts. What's the diagnosis?",
+                options: {
+                  A: "The cadence is correct; the team should trust the agent.",
+                  B: "Empty cadence — checkpoints exist but provide no concrete artefacts to inspect, so drift is invisible. Fix: emit intermediate artefacts (partial output, plans, code snapshots) the human can review.",
+                  C: "Daily cadence is too frequent; reduce to weekly.",
+                  D: "The agent should use a different model."
+                },
+                correct: "B",
+                explanations: {
+                  A: "False confidence; abstract checkpoints can't catch drift.",
+                  B: "Right. Cadence is the *opportunity* for review; without artefacts, there's nothing to review. The structural fix is artefact emission shape.",
+                  C: "Frequency isn't the issue.",
+                  D: "Model isn't the issue."
+                },
+                principle: "Cadence + artefacts. Cadence alone (without concrete artefacts) is empty review.",
+                bSkills: ["B9.3", "B9.2"]
+              }
+            ]
+          }
+        }
       ],
-      sectionTest: null
+      sectionTest: {
+        title: "Section 9 test — Introduction to Claude Cowork",
+        passPct: 0.7,
+        questions: [
+          {
+            n: 1,
+            question: "A team writes a Cowork skill instructing the agent to 'use the GitHub tool to create issues' but no GitHub plugin is installed. What's the structural critique?",
+            options: {
+              A: "Cowork doesn't support GitHub integration.",
+              B: "Plugin vs skill miswire — the GitHub *plugin* introduces the tool (capability); the skill can only steer existing capabilities. Without the plugin, the skill's instructions reference a tool that doesn't exist.",
+              C: "The skill needs to be in a different folder.",
+              D: "Skills are deprecated in Cowork."
+            },
+            correct: "B",
+            explanations: {
+              A: "Cowork supports GitHub via plugin.",
+              B: "Right. Plugin = capability; skill = instructions. Skills can't conjure tools the plugins haven't provided.",
+              C: "Location isn't the issue.",
+              D: "Skills are first-class extensions."
+            },
+            principle: "Plugin = capability; skill = instructions. Skills can only steer capabilities that exist.",
+            bSkills: ["B9.1"]
+          },
+          {
+            n: 2,
+            question: "A team configures a 5-day Cowork task with one end-of-task review. What's the cadence critique?",
+            options: {
+              A: "End-of-task review is sufficient for any task length.",
+              B: "5-day task needs at least daily cadence — drift accumulates and is expensive to discover at end. Add daily checkpoints with concrete artefacts so the human can correct course while drift is cheap to fix.",
+              C: "5-day tasks should be split into 5 separate single-day tasks.",
+              D: "The agent should self-monitor and self-correct."
+            },
+            correct: "B",
+            explanations: {
+              A: "Drift compounds; one final review is too late.",
+              B: "Right. Multi-day cadence = daily. Cowork is set-and-steer; cadence is the structural antidote to drift.",
+              C: "Splitting may help but isn't a substitute for cadence.",
+              D: "Self-monitoring is unreliable."
+            },
+            principle: "Match cadence to task length. Multi-day → daily checkpoints with artefacts.",
+            bSkills: ["B9.2"]
+          },
+          {
+            n: 3,
+            question: "Which combination is the canonical *set-and-forget* antipattern?",
+            options: {
+              A: "Single-hour task with one mid-task and one end-of-task review.",
+              B: "Multi-day task with no mid-task interaction and no intermediate artefacts emitted; operator describes it as 'autonomous'.",
+              C: "Multi-week task with daily and weekly checkpoints.",
+              D: "Single-hour task with no checkpoints."
+            },
+            correct: "B",
+            explanations: {
+              A: "Reasonable cadence for a short task.",
+              B: "Right. The full antipattern signature: long duration + zero interaction + no artefacts + 'autonomous' framing. Cowork is collaborative; this isn't.",
+              C: "Correct cadence shape for multi-week strategic work.",
+              D: "Short and probably fine."
+            },
+            principle: "Set-and-forget is multi-day duration + no interaction + no artefacts. Fix: cadence + artefacts.",
+            bSkills: ["B9.3"]
+          },
+          {
+            n: 4,
+            question: "Daily checkpoints have been added to a long Cowork task, but each checkpoint reports only 'continuing as planned' with no concrete artefacts. What's the diagnosis and fix?",
+            options: {
+              A: "Cadence is too frequent; reduce to weekly.",
+              B: "Empty cadence — review opportunity exists but there's nothing concrete to inspect. Fix: emit intermediate artefacts (partial output, plans, code snapshots) at each checkpoint so the human can see drift, not just hear about it.",
+              C: "The agent's confidence score is too high.",
+              D: "The team should trust the agent and remove the cadence."
+            },
+            correct: "B",
+            explanations: {
+              A: "Frequency isn't the issue.",
+              B: "Right. Cadence + artefacts is the design. Cadence without artefacts is false confidence.",
+              C: "Confidence isn't the diagnostic.",
+              D: "Removing cadence is the antipattern."
+            },
+            principle: "Checkpoints need concrete artefacts. Cadence alone is empty review.",
+            bSkills: ["B9.2", "B9.3"]
+          }
+        ]
+      }
     }
   ],
 
