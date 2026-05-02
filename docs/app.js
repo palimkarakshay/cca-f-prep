@@ -287,46 +287,363 @@
         el("div", { style: "margin-top:6px;" },
           "When ready it will include: 3–5 paragraphs of explanation, key takeaways, a worked example, and the canonical pitfalls.")
       ));
-    } else {
-      // Real lesson rendering arrives in commit 2.
-      panel.appendChild(el("div", { class: "lesson-stub" }, "Lesson rendering arrives in commit 2."));
     }
 
     panel.appendChild(el("div", { class: "controls" },
       el("button", { onclick: () => navigate("section", { sectionId: section.id }) }, "← Back to section"),
       el("div", { class: "nav-spacer" }),
+      hasLesson
+        ? el("button", { onclick: () => navigate("lesson", { sectionId: section.id, conceptId: concept.id }) }, "Read lesson →")
+        : null,
       el("button", {
         class: "primary",
         disabled: hasQuiz ? false : "disabled",
-        onclick: () => hasQuiz && navigate("quiz", { sectionId: section.id, conceptId: concept.id })
+        onclick: () => hasQuiz && startQuiz(section, concept)
+      }, hasQuiz ? (cp.currentAttempt ? "Resume quiz →" : "Take quiz →") : "Quiz — coming")
+    ));
+
+    root.appendChild(panel);
+  }
+
+  // ---------------- Lesson view ----------------
+  function renderLesson() {
+    const section = getSection(P.location.sectionId);
+    const concept = getConcept(P.location.sectionId, P.location.conceptId);
+    if (!section || !concept || !concept.lesson || concept.lesson.status !== "ready") {
+      return navigate("concept", { sectionId: P.location.sectionId, conceptId: P.location.conceptId });
+    }
+    const cp = ensureConcept(concept.id);
+    const L = concept.lesson;
+
+    brandSub.textContent = section.title + " · " + concept.code + " · Lesson";
+    topnav.appendChild(el("button", { class: "linkish", onclick: () => navigate("concept", { sectionId: section.id, conceptId: concept.id }) }, "← Concept"));
+
+    root.appendChild(breadcrumbs([
+      { label: "Dashboard", onclick: () => navigate("dashboard") },
+      { label: section.title, onclick: () => navigate("section", { sectionId: section.id }) },
+      { label: concept.code, onclick: () => navigate("concept", { sectionId: section.id, conceptId: concept.id }) },
+      { label: "Lesson" }
+    ]));
+
+    const panel = el("div", { class: "panel lesson" },
+      el("div", { class: "lesson-meta" },
+        el("span", { class: "badge dom" }, concept.code),
+        el("span", { class: "badge" }, "Bloom: " + concept.bloom),
+        el("span", { class: "badge" }, section.sourceCourse)
+      ),
+      el("h2", null, concept.title)
+    );
+
+    L.paragraphs.forEach(p => panel.appendChild(el("p", null, p)));
+
+    if (L.keyPoints && L.keyPoints.length) {
+      panel.appendChild(el("h3", null, "Key takeaways"));
+      const ul = el("ul");
+      L.keyPoints.forEach(k => ul.appendChild(el("li", null, k)));
+      panel.appendChild(ul);
+    }
+
+    if (L.examples && L.examples.length) {
+      panel.appendChild(el("h3", null, "Worked example"));
+      L.examples.forEach(ex => panel.appendChild(
+        el("div", { class: "example" },
+          el("div", { class: "ex-title" }, ex.title),
+          el("div", null, ex.body)
+        )
+      ));
+    }
+
+    if (L.pitfalls && L.pitfalls.length) {
+      panel.appendChild(el("h3", null, "Pitfalls"));
+      const div = el("div", { class: "pitfalls" });
+      const ul = el("ul");
+      L.pitfalls.forEach(pf => ul.appendChild(el("li", null, pf)));
+      div.appendChild(ul);
+      panel.appendChild(div);
+    }
+
+    if (L.notesRef) {
+      panel.appendChild(el("div", { class: "notes-ref" },
+        "Source notes: ", el("code", null, L.notesRef)
+      ));
+    }
+
+    cp.lessonRead = true;
+    if (cp.mastery < 1) cp.mastery = 1;
+    saveProgress();
+
+    const hasQuiz = concept.quiz && concept.quiz.questions && concept.quiz.questions.length > 0;
+    panel.appendChild(el("div", { class: "controls" },
+      el("button", { onclick: () => navigate("concept", { sectionId: section.id, conceptId: concept.id }) }, "← Back"),
+      el("div", { class: "nav-spacer" }),
+      el("button", {
+        class: "primary",
+        disabled: hasQuiz ? false : "disabled",
+        onclick: () => hasQuiz && startQuiz(section, concept)
       }, hasQuiz ? "Take quiz →" : "Quiz — coming")
     ));
 
     root.appendChild(panel);
   }
 
-  // ---------------- Lesson / Quiz / Result placeholders (filled in commits 2-3) ----------------
-  function renderLesson() {
-    // Commit 2 fills this in. For now, fall back to concept detail.
-    P.location.view = "concept";
-    saveProgress();
-    return renderConceptDetail();
+  // ---------------- Quiz runner ----------------
+  function startQuiz(section, concept) {
+    const cp = ensureConcept(concept.id);
+    if (!cp.currentAttempt) {
+      cp.currentAttempt = {
+        idx: 0,
+        answers: concept.quiz.questions.map(() => ({ pick: null, notes: "" }))
+      };
+      saveProgress();
+    }
+    navigate("quiz", { sectionId: section.id, conceptId: concept.id });
   }
+
   function renderQuiz() {
-    root.appendChild(el("div", { class: "panel" },
-      el("h2", null, "Quiz runner"),
-      el("p", { class: "blurb" }, "Wired up in commit 2 alongside the first authored concept (B1.1)."),
-      el("button", { class: "primary", onclick: () => navigate("dashboard") }, "← Back to dashboard")
+    const section = getSection(P.location.sectionId);
+    const concept = getConcept(P.location.sectionId, P.location.conceptId);
+    if (!section || !concept || !concept.quiz) return navigate("dashboard");
+    const cp = ensureConcept(concept.id);
+    if (!cp.currentAttempt) return startQuiz(section, concept);
+
+    const Q = concept.quiz.questions;
+    const a = cp.currentAttempt;
+    const i = a.idx;
+    const q = Q[i];
+    const total = Q.length;
+
+    brandSub.textContent = section.title + " · " + concept.code + " · Quiz";
+    topnav.appendChild(el("span", null, "Q " + (i + 1) + " of " + total));
+    topnav.appendChild(el("button", { class: "linkish", onclick: () => {
+      if (confirm("Exit quiz? Your progress is saved; you can resume from the concept page.")) {
+        navigate("concept", { sectionId: section.id, conceptId: concept.id });
+      }
+    } }, "Exit"));
+
+    root.appendChild(breadcrumbs([
+      { label: "Dashboard", onclick: () => navigate("dashboard") },
+      { label: section.title, onclick: () => navigate("section", { sectionId: section.id }) },
+      { label: concept.code, onclick: () => navigate("concept", { sectionId: section.id, conceptId: concept.id }) },
+      { label: "Quiz · Q" + (i + 1) + "/" + total }
+    ]));
+
+    const pct = (i / total) * 100;
+    root.appendChild(el("div", { class: "progress-shell" },
+      el("div", { class: "progress-fill", style: "width:" + pct + "%" })
+    ));
+
+    const optionsWrap = el("div", { class: "options" });
+    Object.keys(q.options).forEach(letter => {
+      const text = q.options[letter];
+      const sel = a.answers[i].pick === letter;
+      optionsWrap.appendChild(
+        el("div", {
+          class: "opt" + (sel ? " sel" : ""),
+          role: "button",
+          tabindex: "0",
+          onclick: () => { a.answers[i].pick = letter; saveProgress(); render(); },
+          onkeydown: (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              a.answers[i].pick = letter; saveProgress(); render();
+            }
+          }
+        },
+          el("div", { class: "opt-letter" }, letter),
+          el("div", { class: "opt-text" }, text)
+        )
+      );
+    });
+
+    const reasonTa = el("textarea", {
+      class: "reason",
+      placeholder: "Optional — write your reasoning. Why this answer? What ruled out the others? Surfaces in the result review next to the canonical explanation."
+    });
+    reasonTa.value = a.answers[i].notes || "";
+    reasonTa.addEventListener("input", (ev) => {
+      a.answers[i].notes = ev.target.value;
+      saveProgress();
+    });
+
+    const card = el("div", { class: "panel" },
+      el("div", { class: "qhead" },
+        el("span", { class: "qno" }, "Q" + q.n),
+        el("span", { class: "badge dom" }, concept.code),
+        q.bSkills && q.bSkills.length > 1
+          ? el("span", { class: "badge" }, "Also tags: " + q.bSkills.filter(b => b !== concept.code).join(", "))
+          : null
+      ),
+      el("h1", { class: "qtitle" }, "Q" + q.n),
+      el("div", { class: "qbody" }, q.question),
+      optionsWrap,
+      el("div", { class: "reason-wrap" },
+        el("div", { class: "reason-label" }, "Your reasoning (optional)"),
+        reasonTa
+      )
+    );
+    root.appendChild(card);
+
+    const isLast = i === total - 1;
+    const allPicked = a.answers.every(x => x.pick);
+
+    root.appendChild(el("div", { class: "controls" },
+      el("button", {
+        onclick: () => { a.idx = Math.max(0, i - 1); saveProgress(); render(); },
+        disabled: i === 0 ? "disabled" : false
+      }, "← Prev"),
+      el("div", { class: "nav-spacer" }),
+      !isLast
+        ? el("button", {
+            class: "primary",
+            onclick: () => { a.idx = Math.min(total - 1, i + 1); saveProgress(); render(); }
+          }, "Next →")
+        : el("button", {
+            class: "primary",
+            onclick: () => {
+              if (!allPicked) {
+                const skipped = a.answers.map((x, idx) => x.pick ? null : idx + 1).filter(Boolean);
+                if (!confirm("You haven't picked an answer for Q" + skipped.join(", Q") + ". Submit anyway?")) return;
+              }
+              submitQuiz(section, concept);
+            }
+          }, "Submit quiz")
     ));
   }
-  function renderQuizResult()        { renderQuiz(); }
+
+  function submitQuiz(section, concept) {
+    const cp = ensureConcept(concept.id);
+    const Q = concept.quiz.questions;
+    const a = cp.currentAttempt;
+    const score = a.answers.reduce((acc, ans, i) => acc + (ans.pick === Q[i].correct ? 1 : 0), 0);
+    cp.quizAttempts.push({
+      score: score,
+      total: Q.length,
+      dateISO: new Date().toISOString(),
+      answers: a.answers.map(x => ({ pick: x.pick, notes: x.notes }))
+    });
+    cp.currentAttempt = null;
+    // Mastery: <60 → 2; ≥60 → 3; ≥90 → 4
+    const pct = score / Q.length;
+    if (pct >= 0.9) cp.mastery = 4;
+    else if (pct >= 0.6) cp.mastery = 3;
+    else cp.mastery = 2;
+    saveProgress();
+    navigate("quizResult", { sectionId: section.id, conceptId: concept.id });
+  }
+
+  function renderQuizResult() {
+    const section = getSection(P.location.sectionId);
+    const concept = getConcept(P.location.sectionId, P.location.conceptId);
+    if (!section || !concept || !concept.quiz) return navigate("dashboard");
+    const cp = ensureConcept(concept.id);
+    const last = cp.quizAttempts[cp.quizAttempts.length - 1];
+    if (!last) return navigate("concept", { sectionId: section.id, conceptId: concept.id });
+
+    const Q = concept.quiz.questions;
+    const passed = (last.score / last.total) >= 0.6;
+
+    brandSub.textContent = section.title + " · " + concept.code + " · Result";
+    topnav.appendChild(el("button", { class: "linkish", onclick: () => navigate("section", { sectionId: section.id }) }, "← Section"));
+
+    root.appendChild(breadcrumbs([
+      { label: "Dashboard", onclick: () => navigate("dashboard") },
+      { label: section.title, onclick: () => navigate("section", { sectionId: section.id }) },
+      { label: concept.code, onclick: () => navigate("concept", { sectionId: section.id, conceptId: concept.id }) },
+      { label: "Result" }
+    ]));
+
+    const verdictText = passed
+      ? (cp.mastery === 4 ? "Strong — concept marked complete (≥90%)." : "Pass — concept marked complete (≥60%).")
+      : "Below 60% — re-read the lesson and re-take the quiz.";
+
+    root.appendChild(el("div", { class: "scorecard" },
+      el("div", null,
+        el("div", { class: "score-num" }, last.score + " / " + last.total),
+        el("div", { class: "score-meta" }, Math.round((last.score / last.total) * 100) + "% · attempt " + cp.quizAttempts.length)
+      ),
+      el("div", { class: "score-band" },
+        el("div", { class: "verdict-line " + (passed ? "pass" : "fail") },
+          passed ? "Concept passed" : "Below pass-gate"),
+        el("div", null, verdictText)
+      )
+    ));
+
+    root.appendChild(el("div", { class: "controls", style: "margin-top:0;margin-bottom:18px;" },
+      el("button", { onclick: () => navigate("section", { sectionId: section.id }) }, "← Back to section"),
+      el("div", { class: "nav-spacer" }),
+      passed
+        ? null
+        : el("button", { onclick: () => navigate("lesson", { sectionId: section.id, conceptId: concept.id }) }, "Re-read lesson"),
+      el("button", {
+        class: "primary",
+        onclick: () => startQuiz(section, concept)
+      }, "Re-take quiz")
+    ));
+
+    const review = el("div", { class: "review" });
+    Q.forEach((q, i) => {
+      const ans = last.answers[i];
+      const picked = ans.pick;
+      const status = !picked ? "skipped" : (picked === q.correct ? "correct" : "wrong");
+      const verdictTextR = !picked ? "Skipped" : (picked === q.correct ? "Correct" : "Incorrect");
+
+      const expList = el("ul");
+      Object.keys(q.options).forEach(letter => {
+        const isRight = letter === q.correct;
+        const why = q.explanations[letter] || "";
+        const li = el("li", { class: isRight ? "right" : "" });
+        if (isRight) {
+          li.appendChild(el("strong", null, letter + " — Correct."));
+          li.appendChild(document.createTextNode(" " + why));
+        } else {
+          li.appendChild(el("strong", null, letter + "."));
+          li.appendChild(document.createTextNode(" " + why));
+        }
+        expList.appendChild(li);
+      });
+
+      review.appendChild(el("div", { class: "rcard " + status },
+        el("div", { class: "qhead" },
+          el("span", { class: "qno" }, "Q" + q.n),
+          el("span", { class: "badge dom" }, concept.code),
+          el("span", { class: "verdict " + status }, verdictTextR)
+        ),
+        el("h3", null, "Q" + q.n),
+        el("div", { class: "qtext-mini" }, q.question),
+        el("div", { class: "answer-row" },
+          el("div", null,
+            el("span", { class: "lbl" }, "Your pick:"),
+            el("code", null, picked || "—")
+          ),
+          el("div", null,
+            el("span", { class: "lbl" }, "Correct:"),
+            el("code", null, q.correct)
+          )
+        ),
+        ans.notes && ans.notes.trim()
+          ? el("div", { class: "user-notes" },
+              el("span", { class: "lbl" }, "Your reasoning"),
+              ans.notes.trim()
+            )
+          : null,
+        el("div", { class: "explain" },
+          el("h4", null, "Per-option breakdown"),
+          expList
+        ),
+        el("div", { class: "principle" },
+          el("span", { class: "lbl" }, "Principle:"),
+          q.principle
+        )
+      ));
+    });
+    root.appendChild(review);
+  }
+
   function renderSectionTest()       { renderQuiz(); }
   function renderSectionTestResult() { renderQuiz(); }
 
   // ---------------- Boot ----------------
-  // If the saved location points at a view that doesn't exist yet, fall back.
-  if (P.location.view !== "dashboard" && P.location.view !== "section" && P.location.view !== "concept") {
-    P.location.view = "dashboard";
-  }
+  const VALID_VIEWS = ["dashboard", "section", "concept", "lesson", "quiz", "quizResult", "sectionTest", "sectionTestResult"];
+  if (VALID_VIEWS.indexOf(P.location.view) === -1) P.location.view = "dashboard";
   render();
 })();

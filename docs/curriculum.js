@@ -57,7 +57,96 @@ const CURRICULUM = {
       sourceCourse: "Anthropic Academy — Claude 101",
       blurb: "Mental model of Claude.ai products. Projects, artifacts, file attachments, model picker. The non-API surface.",
       concepts: [
-        { id: "b1-1", code: "B1.1", title: "Project vs RAG corpus",            bloom: "U", lesson: null, quiz: null },
+        {
+          id: "b1-1", code: "B1.1", title: "Project vs RAG corpus", bloom: "U",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "A Claude.ai *Project* gives one chat (or many) a persistent system prompt plus a small attached file corpus. Files attached to a Project are loaded into the model's context for every chat in that Project — every file, every time, as raw text.",
+              "Critically: there is no semantic search, no embeddings index, no retrieval step. The Project does not pick the most relevant file for your question. It puts them all in front of the model and lets attention sort it out.",
+              "A *RAG* system is the opposite: an embeddings index sits between the user question and the documents. Only the top-k most relevant chunks ride into context. The corpus can be vastly larger than the model's context window because retrieval filters before the model ever sees the data.",
+              "This single distinction explains why answer quality degrades as you add files to a Claude.ai Project. The model isn't confused — it's correctly attending to a noisier prompt. Adding more files makes the prompt noisier, not smarter."
+            ],
+            keyPoints: [
+              "Project = in-context file storage. Every file loads every chat.",
+              "No embeddings index. No retriever. No vector store.",
+              "Quality degrades with file count because attention competes against more text.",
+              "RAG = retrieval before context. Corpus can be unbounded; context cost is constant."
+            ],
+            examples: [
+              {
+                title: "Why uploading 40 PDFs to a Project hurts",
+                body: "All 40 PDFs land in the system context for every chat. The model has to find the relevant one inside a wall of text — and worse, irrelevant content starts to compete for attention with the actual answer. The fix isn't 'better prompting'; it's switching to retrieval (RAG, MCP server, etc.)."
+              }
+            ],
+            pitfalls: [
+              "Treating a Project like a corpus: 'I'll just upload all our docs and Claude can answer across them.' Works at 3 files. Breaks at 30.",
+              "Assuming Claude.ai exposes an 'index' or 'vector store' you can query. It does not. There is nothing to re-index, no quota to hit."
+            ],
+            notesRef: "00-academy-basics/notes/01-claude-101.md"
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team uploads 40 PDFs to a Claude.ai Project so the assistant can answer across the corpus. As more PDFs are added, answer quality degrades — irrelevant content keeps surfacing. What is happening?",
+                options: {
+                  A: "The model's context window is too small to hold the embeddings index.",
+                  B: "Project files are loaded into context, not retrieved by similarity — so all of them compete for attention.",
+                  C: "Claude.ai's project retriever needs an explicit re-index call after each upload.",
+                  D: "The Project's vector store has hit its quota and is silently dropping older files."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Wrong axis. There is no embeddings index in a Claude.ai Project — the misconception this option encodes is the question's whole trap.",
+                  B: "Right. Project files are in-context file storage, not RAG. Every chat loads attached files as raw text up to the context limit; when relevance pressure goes up, retrieval-by-similarity is what fixes it, not 'more files'.",
+                  C: "Fabricated mechanism. There is no retriever to re-index.",
+                  D: "Fabricated mechanism. There is no vector store, hence no quota."
+                },
+                principle: "A Claude.ai Project is in-context file storage, not retrieval. If you need a corpus that scales, you need RAG — not more uploads.",
+                bSkills: ["B1.1"]
+              },
+              {
+                n: 2,
+                question: "A user opens a Claude.ai Project with 8 files attached and notices their per-message context budget feels very small. Why?",
+                options: {
+                  A: "Project files compete for retrieval slots with the user message; the system reserves room for the top-k.",
+                  B: "All Project files are loaded into context for every chat, taking from the same context budget as the user turn.",
+                  C: "Projects use a separate 'file context' budget; the user-message budget should not be affected.",
+                  D: "The model needs context space to embed each file before answering."
+                },
+                correct: "B",
+                explanations: {
+                  A: "There are no retrieval slots and no top-k. Projects don't retrieve.",
+                  B: "Right. Project files load into the same context window as the user turn. 8 files of 30 KB each = ~24 KB of system context burned every chat, leaving less room for the conversation.",
+                  C: "There is no separate budget. One window, shared.",
+                  D: "Embedding doesn't happen at chat time, and even if it did it wouldn't consume context."
+                },
+                principle: "Project files cost context like any other text in the prompt. Attaching more files = smaller per-message budget for the actual conversation.",
+                bSkills: ["B1.1", "B1.4"]
+              },
+              {
+                n: 3,
+                question: "Which best describes when to use a Claude.ai Project versus when to build a RAG system?",
+                options: {
+                  A: "Project: small corpus that all needs to be considered every chat. RAG: corpus too big to fit in context, or only the relevant slice should be retrieved.",
+                  B: "Always Project; RAG is a legacy pattern for older Claude versions.",
+                  C: "RAG for short documents, Project for long ones.",
+                  D: "They are interchangeable; the choice is purely a cost optimization."
+                },
+                correct: "A",
+                explanations: {
+                  A: "Right. Project = small, durable, every-chat context. RAG = scale-out via retrieval. The deciding axis is whether all the content needs to be present every chat.",
+                  B: "RAG is the standard pattern for any non-trivial corpus. Newer Claude versions don't change that.",
+                  C: "Document length isn't the deciding factor. Corpus size and the every-chat-vs-on-demand question are.",
+                  D: "They have different operational shapes. Treating them as interchangeable will produce one of the failure modes from the lesson."
+                },
+                principle: "Choose by access pattern, not by file size. Every-chat → Project. On-demand / scale-out → RAG.",
+                bSkills: ["B1.1"]
+              }
+            ]
+          }
+        },
         { id: "b1-2", code: "B1.2", title: "Product-tier vs API-level limit",  bloom: "A", lesson: null, quiz: null },
         { id: "b1-3", code: "B1.3", title: "Artifact vs inline message",       bloom: "E", lesson: null, quiz: null },
         { id: "b1-4", code: "B1.4", title: "Context cost of N file uploads",   bloom: "A", lesson: null, quiz: null }
