@@ -283,6 +283,109 @@ button.ghost { background: transparent; }
 }
 .lesson-stub strong { color: var(--warn); }
 
+/* ---------- Simplify toggle + simplified view ---------- */
+.lesson-meta-spacer { flex: 1; }
+button.simplify-toggle {
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  letter-spacing: .2px;
+}
+button.simplify-toggle.on {
+  background: var(--accent);
+  color: #1a0f0a;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+.simplified-banner {
+  font-size: 12px;
+  color: var(--muted);
+  background: #1a1814;
+  border: 1px dashed rgba(217,194,101,.35);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 4px 0 14px;
+}
+.simplified-banner .lbl {
+  color: var(--warn);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  font-size: 11px;
+  margin-right: 6px;
+}
+.simplified-oneliner {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--fg);
+  background: #1d1a18;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 12px 14px;
+  margin: 4px 0 8px;
+}
+
+/* ---------- Ask Claude panel ---------- */
+.ask-claude {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--border);
+}
+.ask-claude h3 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: var(--accent-2);
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+.ask-claude-help {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 0 10px;
+}
+textarea.ask-claude-input {
+  width: 100%;
+  min-height: 64px;
+  resize: vertical;
+  background: var(--panel-2);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font: inherit;
+  line-height: 1.5;
+}
+textarea.ask-claude-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.ask-claude-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  align-items: center;
+}
+.ask-claude-controls .ask-claude-open { margin-left: auto; }
+.ask-claude-status {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--good);
+  min-height: 1.2em;
+}
+pre.ask-claude-preview {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--code);
+  white-space: pre-wrap;
+  max-height: 320px;
+  overflow: auto;
+}
+
 /* ---------- Quiz (concept + section-test share) ---------- */
 .progress-shell {
   height: 6px; background: var(--panel-2);

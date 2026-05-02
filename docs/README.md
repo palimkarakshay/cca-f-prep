@@ -71,9 +71,32 @@ const CURRICULUM = {
   keyPoints:  ["…"],                     // bulleted takeaways
   examples:   [{ title: "…", body: "…" }], // optional worked example(s)
   pitfalls:   ["…"],                     // common mistakes / failure modes
-  notesRef:   "00-academy-basics/notes/01-claude-101.md"
+  notesRef:   "00-academy-basics/notes/01-claude-101.md",
+  simplified: {                          // optional — drives the Simplify toggle
+    oneLiner:   "…",                     // one-sentence TLDR
+    analogy:    "…",                     // plain-language analogy
+    paragraphs: ["…"],                   // 1–3 simpler paragraphs
+    keyPoints:  ["…"]                    // optional simpler bullets
+  }
 }
 ```
+
+### Simplify feature
+
+Each lesson view exposes two ways to get a simpler explanation:
+
+1. **Simplify toggle** — flips the lesson into a plain-language view
+   built from `lesson.simplified` (one-liner TLDR + analogy + simpler
+   paragraphs + simpler key points). Toggle off to return to the
+   canonical lesson. If `simplified` isn't authored, the button focuses
+   the Ask Claude input below instead.
+2. **Ask Claude panel** — a textarea + "Open in Claude →" button. The
+   app builds a self-contained prompt (lesson body + your question),
+   copies it to the clipboard, and opens `claude.ai/new` in a new tab.
+   No API key needed; works on a static GitHub Pages host.
+
+Authoring a `simplified` block is optional but recommended — it gives
+the toggle something to flip to without leaving the app.
 
 ### Quiz / section-test shape
 

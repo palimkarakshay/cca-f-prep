@@ -410,16 +410,27 @@
   }
 
   // ---------------- Lesson view ----------------
+  // View-local state (not persisted): simplify mode resets when the
+  // active lesson changes so each new lesson opens in canonical view.
+  let lessonMode = "full"; // "full" | "simplified"
+  let lessonModeFor = null; // conceptId the current lessonMode applies to
+
   function renderLesson() {
     const section = getSection(P.location.sectionId);
     const concept = getConcept(P.location.sectionId, P.location.conceptId);
     if (!section || !concept || !concept.lesson || concept.lesson.status !== "ready") {
       return navigate("concept", { sectionId: P.location.sectionId, conceptId: P.location.conceptId });
     }
+    if (lessonModeFor !== concept.id) {
+      lessonMode = "full";
+      lessonModeFor = concept.id;
+    }
     const cp = ensureConcept(concept.id);
     const L = concept.lesson;
+    const S = L.simplified || null;
+    const isSimplified = lessonMode === "simplified" && !!S;
 
-    brandSub.textContent = section.title + " · " + concept.code + " · Lesson";
+    brandSub.textContent = section.title + " · " + concept.code + " · Lesson" + (isSimplified ? " · Simplified" : "");
     topnav.appendChild(el("button", { class: "linkish", onclick: () => navigate("concept", { sectionId: section.id, conceptId: concept.id }) }, "← Concept"));
 
     root.appendChild(breadcrumbs([
@@ -429,41 +440,81 @@
       { label: "Lesson" }
     ]));
 
+    const simplifyBtn = el("button", {
+      class: "simplify-toggle" + (isSimplified ? " on" : ""),
+      title: S ? "Toggle a simpler explanation" : "No pre-authored simpler version — use Ask Claude below",
+      onclick: () => {
+        if (!S) {
+          const ta = document.getElementById("askClaudeInput");
+          if (ta) { ta.focus(); ta.scrollIntoView({ behavior: "smooth", block: "center" }); }
+          return;
+        }
+        lessonMode = isSimplified ? "full" : "simplified";
+        render();
+      }
+    }, isSimplified ? "Show full lesson" : (S ? "Simplify" : "Ask for simpler"));
+
     const panel = el("div", { class: "panel lesson" },
       el("div", { class: "lesson-meta" },
         el("span", { class: "badge dom" }, concept.code),
         el("span", { class: "badge" }, "Bloom: " + concept.bloom),
-        el("span", { class: "badge" }, section.sourceCourse)
+        el("span", { class: "badge" }, section.sourceCourse),
+        el("div", { class: "lesson-meta-spacer" }),
+        simplifyBtn
       ),
       el("h2", null, concept.title)
     );
 
-    L.paragraphs.forEach(p => panel.appendChild(el("p", null, p)));
-
-    if (L.keyPoints && L.keyPoints.length) {
-      panel.appendChild(el("h3", null, "Key takeaways"));
-      const ul = el("ul");
-      L.keyPoints.forEach(k => ul.appendChild(el("li", null, k)));
-      panel.appendChild(ul);
-    }
-
-    if (L.examples && L.examples.length) {
-      panel.appendChild(el("h3", null, "Worked example"));
-      L.examples.forEach(ex => panel.appendChild(
-        el("div", { class: "example" },
-          el("div", { class: "ex-title" }, ex.title),
-          el("div", null, ex.body)
-        )
+    if (isSimplified) {
+      panel.appendChild(el("div", { class: "simplified-banner" },
+        el("span", { class: "lbl" }, "Simplified view"),
+        " — plain language. Toggle off for the canonical lesson."
       ));
-    }
+      if (S.oneLiner) {
+        panel.appendChild(el("div", { class: "simplified-oneliner" }, S.oneLiner));
+      }
+      if (S.analogy) {
+        panel.appendChild(el("h3", null, "Analogy"));
+        panel.appendChild(el("p", null, S.analogy));
+      }
+      if (S.paragraphs && S.paragraphs.length) {
+        panel.appendChild(el("h3", null, "In plain terms"));
+        S.paragraphs.forEach(p => panel.appendChild(el("p", null, p)));
+      }
+      if (S.keyPoints && S.keyPoints.length) {
+        panel.appendChild(el("h3", null, "Key takeaways"));
+        const ul = el("ul");
+        S.keyPoints.forEach(k => ul.appendChild(el("li", null, k)));
+        panel.appendChild(ul);
+      }
+    } else {
+      L.paragraphs.forEach(p => panel.appendChild(el("p", null, p)));
 
-    if (L.pitfalls && L.pitfalls.length) {
-      panel.appendChild(el("h3", null, "Pitfalls"));
-      const div = el("div", { class: "pitfalls" });
-      const ul = el("ul");
-      L.pitfalls.forEach(pf => ul.appendChild(el("li", null, pf)));
-      div.appendChild(ul);
-      panel.appendChild(div);
+      if (L.keyPoints && L.keyPoints.length) {
+        panel.appendChild(el("h3", null, "Key takeaways"));
+        const ul = el("ul");
+        L.keyPoints.forEach(k => ul.appendChild(el("li", null, k)));
+        panel.appendChild(ul);
+      }
+
+      if (L.examples && L.examples.length) {
+        panel.appendChild(el("h3", null, "Worked example"));
+        L.examples.forEach(ex => panel.appendChild(
+          el("div", { class: "example" },
+            el("div", { class: "ex-title" }, ex.title),
+            el("div", null, ex.body)
+          )
+        ));
+      }
+
+      if (L.pitfalls && L.pitfalls.length) {
+        panel.appendChild(el("h3", null, "Pitfalls"));
+        const div = el("div", { class: "pitfalls" });
+        const ul = el("ul");
+        L.pitfalls.forEach(pf => ul.appendChild(el("li", null, pf)));
+        div.appendChild(ul);
+        panel.appendChild(div);
+      }
     }
 
     if (L.notesRef) {
@@ -475,6 +526,8 @@
     cp.lessonRead = true;
     if (cp.mastery < 1) cp.mastery = 1;
     saveProgress();
+
+    panel.appendChild(renderAskClaudePanel(section, concept, L));
 
     const hasQuiz = concept.quiz && concept.quiz.questions && concept.quiz.questions.length > 0;
     panel.appendChild(el("div", { class: "controls" },
@@ -488,6 +541,112 @@
     ));
 
     root.appendChild(panel);
+  }
+
+  // ---------------- Ask Claude panel ----------------
+  // No backend, no API key: build a prompt that contains the lesson + the
+  // user's question, copy it to the clipboard, then open claude.ai/new.
+  function buildSimplifyPrompt(concept, L, userQuestion) {
+    const lessonText = [
+      "Title: " + concept.title + " (" + concept.code + ")",
+      "",
+      L.paragraphs.join("\n\n")
+    ];
+    if (L.keyPoints && L.keyPoints.length) {
+      lessonText.push("", "Key takeaways:", L.keyPoints.map(k => "- " + k).join("\n"));
+    }
+    if (L.pitfalls && L.pitfalls.length) {
+      lessonText.push("", "Pitfalls:", L.pitfalls.map(p => "- " + p).join("\n"));
+    }
+    const q = (userQuestion || "").trim() || "Explain this concept in simpler terms with a concrete analogy.";
+    return [
+      "I'm studying for the Anthropic CCA-F exam. Here's a lesson I'd like a simpler take on.",
+      "",
+      "--- LESSON ---",
+      lessonText.join("\n"),
+      "--- END LESSON ---",
+      "",
+      "My request: " + q
+    ].join("\n");
+  }
+
+  function renderAskClaudePanel(section, concept, L) {
+    const wrap = el("div", { class: "ask-claude" });
+    wrap.appendChild(el("h3", null, "Ask Claude for a simpler take"));
+    wrap.appendChild(el("p", { class: "ask-claude-help" },
+      "Type a question (or leave blank for a default simpler explanation). " +
+      "We'll copy a prompt with this lesson's content to your clipboard and open Claude in a new tab."
+    ));
+
+    const ta = el("textarea", {
+      id: "askClaudeInput",
+      class: "ask-claude-input",
+      placeholder: "e.g. Explain like I'm new to LLMs. Use an analogy. Skip the jargon."
+    });
+
+    const status = el("div", { class: "ask-claude-status", role: "status", "aria-live": "polite" });
+
+    const openBtn = el("button", {
+      class: "primary ask-claude-open",
+      onclick: async () => {
+        const prompt = buildSimplifyPrompt(concept, L, ta.value);
+        let copied = false;
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(prompt);
+            copied = true;
+          }
+        } catch (e) { copied = false; }
+        if (!copied) {
+          // Fallback: select-and-copy on a hidden textarea.
+          try {
+            const tmp = document.createElement("textarea");
+            tmp.value = prompt;
+            tmp.style.position = "fixed";
+            tmp.style.left = "-9999px";
+            document.body.appendChild(tmp);
+            tmp.select();
+            copied = document.execCommand && document.execCommand("copy");
+            document.body.removeChild(tmp);
+          } catch (e) { copied = false; }
+        }
+        status.textContent = copied
+          ? "Prompt copied. Paste it into the new Claude tab."
+          : "Could not auto-copy — the prompt is shown below; copy it manually.";
+        if (!copied) {
+          ta.value = prompt;
+          ta.focus();
+          ta.select();
+        }
+        window.open("https://claude.ai/new", "_blank", "noopener");
+      }
+    }, "Open in Claude →");
+
+    const previewBtn = el("button", {
+      class: "ghost",
+      onclick: () => {
+        const prompt = buildSimplifyPrompt(concept, L, ta.value);
+        const pre = document.getElementById("askClaudePreview");
+        if (pre) {
+          if (pre.dataset.shown === "1") {
+            pre.style.display = "none";
+            pre.dataset.shown = "0";
+            previewBtn.textContent = "Preview prompt";
+          } else {
+            pre.textContent = prompt;
+            pre.style.display = "block";
+            pre.dataset.shown = "1";
+            previewBtn.textContent = "Hide prompt";
+          }
+        }
+      }
+    }, "Preview prompt");
+
+    wrap.appendChild(ta);
+    wrap.appendChild(el("div", { class: "ask-claude-controls" }, previewBtn, openBtn));
+    wrap.appendChild(status);
+    wrap.appendChild(el("pre", { id: "askClaudePreview", class: "ask-claude-preview", style: "display:none" }));
+    return wrap;
   }
 
   // ---------------- Quiz runner ----------------

@@ -22,8 +22,16 @@
        keyPoints: ["..."],                    // bulleted takeaways
        examples: [{ title, body }],           // optional worked examples
        pitfalls: ["..."],                     // common mistakes / failure modes
-       notesRef: "00-academy-basics/notes/..." // pointer back to the source notes
+       notesRef: "00-academy-basics/notes/..", // pointer back to the source notes
+       simplified: {                          // optional — drives the "Simplify" toggle
+         oneLiner: "...",                     // one-sentence TLDR
+         analogy: "...",                      // plain-language analogy paragraph
+         paragraphs: ["..."],                 // 1-3 simpler paragraphs
+         keyPoints: ["..."]                   // optional simpler bullets
+       }
      }
+   When `simplified` is absent the toggle still appears and falls through
+   to the "Ask Claude" panel so the user can ask for a custom simpler take.
 
    Quiz / sectionTest shape (when authored):
      {
@@ -83,7 +91,20 @@ const CURRICULUM = {
               "Treating a Project like a corpus: 'I'll just upload all our docs and Claude can answer across them.' Works at 3 files. Breaks at 30.",
               "Assuming Claude.ai exposes an 'index' or 'vector store' you can query. It does not. There is nothing to re-index, no quota to hit."
             ],
-            notesRef: "00-academy-basics/notes/01-claude-101.md"
+            notesRef: "00-academy-basics/notes/01-claude-101.md",
+            simplified: {
+              oneLiner: "A Claude.ai Project pastes every attached file into every chat — it doesn't search them. RAG searches first, then pastes only the relevant bit.",
+              analogy: "Think of a Project as a desk: every file you've stuck on it is in front of you when you sit down, all the time. RAG is a librarian: you ask a question, and only the relevant pages get handed to you. Stack 40 things on the desk and you can't find anything; ask the librarian for the same 40 and you get one tidy answer.",
+              paragraphs: [
+                "When you attach files to a Claude.ai Project, Claude reads all of them at the start of every chat. There is no smart search step. Add more files and Claude has more text to wade through — answers get noisier, not better.",
+                "RAG (Retrieval-Augmented Generation) does the opposite. A separate index sits in front of the documents and only the pieces that match your question get passed to Claude. The corpus can be huge because Claude only ever sees the slice that matters."
+              ],
+              keyPoints: [
+                "Project = full files, every chat. No search.",
+                "RAG = search first, then send only the matching pieces.",
+                "More files in a Project = worse answers, not better."
+              ]
+            }
           },
           quiz: {
             questions: [
