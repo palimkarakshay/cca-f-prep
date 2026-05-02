@@ -12,6 +12,14 @@
            ],
            sectionTest
          }
+       ],
+       mockExams: [                              // optional
+         {
+           id, title, blurb, sourceFile,
+           timeMinutes, passPct,
+           scoreBands: [ { min, max, verdict, message } ],
+           questions                             // same shape as sectionTest.questions
+         }
        ]
      }
 
@@ -371,6 +379,241 @@ const CURRICULUM = {
         { id: "b9-3", code: "B9.3", title: "Detect set-and-forget",   bloom: "An", lesson: null, quiz: null }
       ],
       sectionTest: null
+    }
+  ],
+
+  mockExams: [
+    {
+      id: "diagnostic-01",
+      title: "Diagnostic 01 — Mixed Domain",
+      blurb: "10 questions, ~20 min. Cold calibration across all five exam domains. Take it without notes — the score band tells you which domain to train first.",
+      sourceFile: "07-mock-exams/diagnostic-01.md",
+      timeMinutes: 20,
+      passPct: 0.7,
+      scoreBands: [
+        {
+          min: 9, max: 10,
+          verdict: "Strong baseline",
+          message: "Train misses' sub-areas only. One full mock per week to keep edges sharp."
+        },
+        {
+          min: 7, max: 8,
+          verdict: "Solid",
+          message: "Train the misses' domains in full (notes + 5–10 challenges + a per-domain MCQ set). Skim the rest."
+        },
+        {
+          min: 5, max: 6,
+          verdict: "Sequence by exam weight",
+          message: "Order by weight: D1 Agentic Arch (27%) → D4 Prompt Eng (20%) → D2 Claude Code (20%) → D3 Tool/MCP (18%) → D5 Context (15%)."
+        },
+        {
+          min: 0, max: 4,
+          verdict: "Slow down",
+          message: "Notes first, then 1 worked example per sub-area before any MCQs. Re-take after one cycle."
+        }
+      ],
+      questions: [
+        {
+          n: 1,
+          question: "A team is building a research assistant that must (a) search across 12 internal knowledge bases, (b) cross-check facts across the results, and (c) write a final report. The current implementation runs as a single agentic loop calling tools sequentially. Median latency is 90 seconds and the assistant occasionally drops sources mid-report when the context grows long.\n\nWhat is the strongest reason to refactor to a coordinator-subagent pattern?",
+          options: {
+            A: "Subagents will reduce per-turn token cost because they run on cheaper models.",
+            B: "Independent searches can run in parallel, and each subagent's intermediate context is isolated from the coordinator's.",
+            C: "Subagents have access to a longer context window than the coordinator.",
+            D: "The coordinator-subagent pattern is required when more than 10 tools are registered."
+          },
+          correct: "B",
+          explanations: {
+            A: "Wrong axis. Subagents inherit the parent model unless explicitly configured otherwise; cost is not the canonical justification.",
+            B: "Right. The two real wins of coordinator-subagent are parallel execution of independent work and context isolation — the subagent's intermediate scratch never lands in the coordinator's window.",
+            C: "False. Subagents don't get a bigger window; they get a fresh one.",
+            D: "Fabricated. There is no '10 tools' threshold."
+          },
+          principle: "Reach for coordinator-subagent when (a) work is independently parallelizable or (b) intermediate context would otherwise pollute the parent. Not for cost, not for window size.",
+          domain: "1. Agentic Architecture",
+          subArea: "Coordinator-subagent vs. linear loop"
+        },
+        {
+          n: 2,
+          question: "A developer wants Claude Code to refuse to run any shell command containing `rm -rf` or `--no-verify`, regardless of the user's permission mode.\n\nWhich hook event should this rule live in?",
+          options: {
+            A: "SessionStart — block at session boot before any tool call happens.",
+            B: "PreToolUse — inspect and reject the tool call before it executes.",
+            C: "PostToolUse — inspect the result and warn if a dangerous command ran.",
+            D: "Stop — analyze the full transcript at the end of the session."
+          },
+          correct: "B",
+          explanations: {
+            A: "SessionStart runs once at boot with no per-tool-call context. Can't inspect commands.",
+            B: "Right. PreToolUse is the only event that fires before a tool call and can return a blocking decision. This is the canonical home for command guardrails.",
+            C: "PostToolUse runs after the command. Too late to prevent harm.",
+            D: "Stop runs once at session end. Same problem as C, only worse."
+          },
+          principle: "Pre-execution policy → PreToolUse. The blocking-decision capability is what makes it the right primitive for guardrails.",
+          domain: "1. Agentic Architecture",
+          subArea: "Hook event placement"
+        },
+        {
+          n: 3,
+          question: "An agent is implementing a complex feature. It has been going for 47 turns, looping between editing the same file, running tests, and re-editing. The tests still fail.\n\nWhich mitigation is most aligned with agentic-architecture best practices?",
+          options: {
+            A: "Increase max_tokens so the agent has more room to think.",
+            B: "Add a soft watermark at ~80% of max-turns: finish current unit, commit, exit cleanly, resume next run.",
+            C: "Switch the agent to a more powerful model mid-run when retries exceed 5.",
+            D: "Disable the test-running tool until the agent commits to a written plan."
+          },
+          correct: "B",
+          explanations: {
+            A: "Confuses turn budget with token budget. max_tokens controls per-message generation, not loop count.",
+            B: "Right. Self-pacing watermarks (~80% commit + exit cleanly, ~95% hard exit) are the canonical defense against runaway loops. Partial progress is preserved; the next run resumes.",
+            C: "Escalating model mid-run is not a recognized pattern; adds complexity, doesn't solve loop dynamics.",
+            D: "Removes the feedback the agent needs to validate work."
+          },
+          principle: "Bounded loops with self-pacing watermarks. Exiting at 80% is a success, not a failure — partial work is recoverable.",
+          domain: "1. Agentic Architecture",
+          subArea: "Bounded loops / session budget"
+        },
+        {
+          n: 4,
+          question: "A repo's CLAUDE.md has grown to 12,000 tokens over six months. Sessions feel slower to start, and the operator notices Claude sometimes parrots instructions back rather than acting on them.\n\nWhat is the most appropriate action?",
+          options: {
+            A: "Switch the model to a smaller one to reduce per-token cost.",
+            B: "Move historical sections into docs/reference/ and @-include only the parts that are still actively binding.",
+            C: "Delete the file and re-derive context from each new session's user prompt.",
+            D: "Compress the file with an LLM-based summarizer and overwrite it in place."
+          },
+          correct: "B",
+          explanations: {
+            A: "Wrong axis. The bottleneck is context shape, not per-token cost.",
+            B: "Right. CLAUDE.md is loaded into context every session — treat it like RAM, not a database. Move historical decisions to disk (reference/, docs/) and @-include or link only what is still binding.",
+            C: "Destroys durable behavior anchors that won't be reconstructed from a user prompt.",
+            D: "LLM-summarizing loses fidelity, and the file will balloon again."
+          },
+          principle: "Lean charter, archive history. The same content can serve the agent equally well from reference/ if it's referenced rather than inlined.",
+          domain: "2. Claude Code",
+          subArea: "CLAUDE.md hygiene"
+        },
+        {
+          n: 5,
+          question: "The user says: \"From now on, every time you finish a task, run `npm run lint` and post the output in the chat.\"\n\nWhich mechanism implements this reliably?",
+          options: {
+            A: "Add a sentence to CLAUDE.md describing the desired behavior.",
+            B: "Save it as a memory / preference for future sessions.",
+            C: "Configure a Stop hook in settings.json that runs `npm run lint` and prints the result.",
+            D: "Create a slash command that runs lint, and tell the user to invoke it after each task."
+          },
+          correct: "C",
+          explanations: {
+            A: "CLAUDE.md instructions are advisory. The model can interpret, prioritize, or even forget. Not an enforcement mechanism.",
+            B: "Same problem as A. Memories/preferences are read by the model, not executed by the harness.",
+            C: "Right. Hooks run in the harness layer, deterministically, regardless of what the model decides. 'Every time you finish a task' = per-turn = Stop hook (PostToolUse would fire per individual tool call).",
+            D: "Slash commands require the user to invoke them. 'Every time' is the user not having to remember."
+          },
+          principle: "Automated behaviors ('every time X', 'from now on when X') need hooks in settings.json. The harness executes hooks; it does not execute CLAUDE.md or memory. Match event granularity to the trigger: per-task = Stop, per-tool-call = PostToolUse.",
+          domain: "2. Claude Code",
+          subArea: "Hooks vs. memory for automation"
+        },
+        {
+          n: 6,
+          question: "A team is building an MCP server that exposes a 50ms-latency internal database. The server will be used by a single developer's Claude Code instance, running on the same machine.\n\nWhich transport should they use?",
+          options: {
+            A: "HTTP + Server-Sent Events, because it is the future-proof default.",
+            B: "stdio, because the server runs on the same machine and its lifecycle is bound to the Claude Code process.",
+            C: "WebSockets, for full-duplex streaming.",
+            D: "gRPC, for strongly-typed schemas."
+          },
+          correct: "B",
+          explanations: {
+            A: "HTTP+SSE (now called Streamable HTTP in the current spec) is for remote or multi-user MCP servers. Single dev, same machine? Overkill.",
+            B: "Right. stdio is the canonical local-machine transport. Claude Code spawns the server as a subprocess; lifecycle is bound to the Claude process; no port management; no auth surface.",
+            C: "WebSockets is not a current MCP transport.",
+            D: "gRPC is not a current MCP transport."
+          },
+          principle: "Match transport to deployment shape. Local single-user → stdio. Remote / multi-user → Streamable HTTP (older docs: HTTP+SSE).",
+          domain: "3. Tool Design / MCP",
+          subArea: "MCP transport choice"
+        },
+        {
+          n: 7,
+          question: "Two tools are registered: `search_documents` and `find_files`. Both currently have one-line descriptions: \"Search the system for documents\" and \"Find files.\" The model keeps picking the wrong one.\n\nWhich fix has the highest leverage?",
+          options: {
+            A: "Rename the tools to search_documents_v2 and find_files_v2.",
+            B: "Rewrite both descriptions to specify what each tool searches (e.g., 'search indexed PDFs by content' vs. 'list filenames in working directory by glob'), the input shape, and the kind of question each is right for.",
+            C: "Add a system-prompt rule: 'When in doubt, prefer search_documents.'",
+            D: "Merge both tools into one `search` tool with a `mode` parameter."
+          },
+          correct: "B",
+          explanations: {
+            A: "Renaming is cosmetic. Doesn't tell the model what each tool does.",
+            B: "Right. Tool descriptions are the model's selection signal. Specify (1) what it operates on, (2) input shape, (3) ideal-use scenarios, (4) what it does not handle. Differentiation > naming > nudging.",
+            C: "System-prompt nudges paper over the design problem and bias the model without informing it.",
+            D: "Merging into one tool with a `mode` param adds API surface complexity to dodge a description-quality issue."
+          },
+          principle: "When the model picks the wrong tool, the tool's description is the first thing to fix. Renames, system nudges, and tool merges are second-order.",
+          domain: "3. Tool Design / MCP",
+          subArea: "Tool description quality"
+        },
+        {
+          n: 8,
+          question: "An agent must return a list of {name, email, score} records to be inserted into a database. About 1 in 30 responses has a trailing comma or unescaped quote that breaks JSON.parse.\n\nWhat is the most reliable fix?",
+          options: {
+            A: "Add 'Return valid JSON, no trailing commas' to the system prompt.",
+            B: "Use the API's structured-output / tool-use mode with a JSON schema for the records.",
+            C: "Wrap the response in <json> XML tags and parse the inner content.",
+            D: "Increase temperature so the model takes more care."
+          },
+          correct: "B",
+          explanations: {
+            A: "Soft constraint in the prompt. The model will still violate it ~3% of the time, exactly the rate the question describes.",
+            B: "Right. Structured-output / tool-use mode with a schema uses constrained decoding — the model literally cannot emit tokens that violate the schema for those fields. This is a platform-level guarantee.",
+            C: "XML tags don't constrain the JSON inside. The same trailing-comma bug recurs.",
+            D: "Higher temperature increases variance, not reliability."
+          },
+          principle: "For machine-consumed output, prefer platform-level constraints over prompt-level requests. The model cannot violate a constraint that isn't sampled.",
+          domain: "4. Prompt Engineering",
+          subArea: "Structured output reliability"
+        },
+        {
+          n: 9,
+          question: "A classification prompt has 5 few-shot examples. The role definition is in the system prompt, the examples sit inline as text inside the user message before the actual input, and the input itself follows. Classification accuracy varies wildly between runs.\n\nWhich restructure is most likely to improve consistency?",
+          options: {
+            A: "Move all examples into the system prompt as a long bulleted list.",
+            B: "Use alternating user / assistant turns for the few-shot examples, then send the actual input as the final user message.",
+            C: "Increase temperature to add diversity, then average over multiple runs.",
+            D: "Compress the examples with bullet points to fit more into context."
+          },
+          correct: "B",
+          explanations: {
+            A: "Works, but inline-text examples in a system prompt match the training distribution less well than conversational turns.",
+            B: "Right. Claude is trained on conversation patterns. Putting few-shots as user / assistant alternating turns lets the model pattern-match form and content. Consistency improves because the input→output shape is exemplified, not just described.",
+            C: "Temperature averaging is a workaround for poor structure, not a fix.",
+            D: "Compressing examples often removes the discriminating signal that makes them few-shots in the first place."
+          },
+          principle: "Few-shots work best in their natural form — conversation turns, not bulleted text. Match training distribution where possible.",
+          domain: "4. Prompt Engineering",
+          subArea: "Few-shot placement"
+        },
+        {
+          n: 10,
+          question: "A team calls Claude with a 30,000-token system prompt (instructions + reference docs) and 200-token user messages. They make ~500 calls per day and want to reduce cost.\n\nWhich strategy delivers the biggest win?",
+          options: {
+            A: "Truncate the system prompt to 10,000 tokens.",
+            B: "Add cache_control to the static reference-docs portion of the system prompt.",
+            C: "Switch from Sonnet to Haiku.",
+            D: "Batch 10 user messages per call."
+          },
+          correct: "B",
+          explanations: {
+            A: "Truncation loses information; you'd ship a worse system prompt to save dollars.",
+            B: "Right. Static prefix + 500 calls/day is the exact shape prompt caching is built for. Cache reads are ~10% of the price of cache writes. With a 30k-token reused prefix, this is the largest available lever.",
+            C: "Haiku trades quality for cost; doesn't address the underlying inefficiency (sending the same 30k tokens 500 times).",
+            D: "Batching helps amortize per-call overhead but doesn't help when the system prompt is the cost driver."
+          },
+          principle: "When a large stable prefix is reused across calls, prompt caching with cache_control is the highest-leverage cost lever. Place the cache breakpoint at the boundary between stable and dynamic content.",
+          domain: "5. Context & Reliability",
+          subArea: "Prompt caching strategy"
+        }
+      ]
     }
   ]
 };

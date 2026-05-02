@@ -58,6 +58,21 @@ const CURRICULUM = {
       sectionTest: { … } | null
     },
     …
+  ],
+  mockExams: [                                 // optional — top-level
+    {
+      id: "diagnostic-01",
+      title: "Diagnostic 01 — Mixed Domain",
+      blurb: "…",
+      sourceFile: "07-mock-exams/diagnostic-01.md",
+      timeMinutes: 20,
+      passPct: 0.7,
+      scoreBands: [
+        { min: 9, max: 10, verdict: "Strong baseline", message: "…" },
+        …
+      ],
+      questions: [ /* same shape as sectionTest.questions */ ]
+    }
   ]
 };
 ```
@@ -116,6 +131,45 @@ the toggle something to flip to without leaving the app.
   ]
 }
 ```
+
+### Mock-exam shape
+
+Mock exams are the same MCQ shape as section-tests, but live at the
+top level of `CURRICULUM.mockExams` (independent of section progress)
+and carry a score-band rubric so the result page can give the user a
+direct "what to train next" verdict.
+
+```js
+{
+  id: "diagnostic-01",
+  title: "Diagnostic 01 — Mixed Domain",
+  blurb: "Cold calibration across all five exam domains.",
+  sourceFile: "07-mock-exams/diagnostic-01.md",
+  timeMinutes: 20,
+  passPct: 0.7,
+  scoreBands: [
+    { min: 9, max: 10, verdict: "Strong baseline",        message: "…" },
+    { min: 7, max: 8,  verdict: "Solid",                  message: "…" },
+    { min: 5, max: 6,  verdict: "Sequence by exam weight",message: "…" },
+    { min: 0, max: 4,  verdict: "Slow down",              message: "…" }
+  ],
+  questions: [
+    {
+      n: 1, question: "…",
+      options: { A: "…", B: "…", C: "…", D: "…" },
+      correct: "B",
+      explanations: { A: "…", B: "…", C: "…", D: "…" },
+      principle: "…",
+      domain: "1. Agentic Architecture",   // optional — surfaced as a badge
+      subArea: "Coordinator-subagent vs. linear loop"
+    }
+  ]
+}
+```
+
+Mock-exam attempts persist independently from section progress (under
+`P.mock[id]` in `localStorage`). Resume / re-take / review-last-attempt
+are wired up on the dashboard's **Mock exams** panel.
 
 ## Adding content
 
