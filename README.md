@@ -7,6 +7,7 @@ Foundations (CCA-F) exam.
 
 | Folder | Purpose | Exam weight |
 |---|---|---|
+| `00-academy-basics/` | foundation track from the 9 [Anthropic Academy](https://anthropic.skilljar.com/) courses — per-course notes, atomic B-skill checklist, basics diagnostic, transition plan | foundation |
 | `01-agentic-architecture/` | agentic loops, coordinator-subagent, hook lifecycle, bounded loops & session budget | 27% |
 | `02-claude-code/` | CLAUDE.md hygiene, settings.json, slash commands, hooks vs. memory vs. CLAUDE.md | 20% |
 | `03-tool-design-mcp/` | tool descriptions, MCP transports (stdio / HTTP+SSE), schema design | 18% |
@@ -14,7 +15,8 @@ Foundations (CCA-F) exam.
 | `05-context-reliability/` | context windows, prompt caching, batching, retries | 15% |
 | `06-failure-analysis/` | running error log + F-code cognitive failure-mode taxonomy | — |
 | `07-mock-exams/` | full-length practice exams (diagnostic-01 + parallel `solutions/`) | — |
-| `08-cheat-sheets/` | When-to decision trees + training methodology | — |
+| `08-cheat-sheets/` | When-to decision trees + training methodology (with phase model + interleaving) | — |
+| `09-progress-tracker/` | skills matrix (B-skills + architect sub-areas with calibration gap), weekly history snapshots, spaced-review queue | — |
 | `docs/` | single-file MCQ runner, served via GitHub Pages (`/docs` source) | — |
 
 ## How to use
@@ -34,20 +36,21 @@ Weekly: full mock exam (60 questions, 120 min) + 4-phase audit
 When a session needs context, start here:
 
 1. [`CLAUDE.md`](CLAUDE.md) — repo charter, exam structure, authoring conventions.
-2. [`08-cheat-sheets/decision-trees.md`](08-cheat-sheets/decision-trees.md) — When-to trees + running defaults.
-3. [`08-cheat-sheets/training-methodology.md`](08-cheat-sheets/training-methodology.md) — daily loop, mock phases, drills.
-4. [`06-failure-analysis/error-log.md`](06-failure-analysis/error-log.md) — open misses + F-code patterns.
+2. [`00-academy-basics/transition-plan.md`](00-academy-basics/transition-plan.md) — Phase A→D pathway from basics to architect.
+3. [`08-cheat-sheets/training-methodology.md`](08-cheat-sheets/training-methodology.md) — daily loop, mock phases, drills, interleaving rule.
+4. [`08-cheat-sheets/decision-trees.md`](08-cheat-sheets/decision-trees.md) — When-to trees + running defaults.
+5. [`09-progress-tracker/skills-matrix.md`](09-progress-tracker/skills-matrix.md) — current ratings + calibration gap.
+6. [`06-failure-analysis/error-log.md`](06-failure-analysis/error-log.md) — open misses + F-code patterns.
 
 ## Status
 
-- [x] Diagnostic-01 taken — scored 3/10 on cold attempt (2026-05-01)
-- [ ] Domain 1 (Agentic Architecture, 27%) — notes, then `[no-ai]` challenge, then MCQ set
-- [ ] Domain 2 (Claude Code, 20%) — same loop
-- [ ] Domain 3 (Tool Design / MCP, 18%) — same loop
-- [ ] Domain 4 (Prompt Engineering, 20%) — same loop
-- [ ] Domain 5 (Context Reliability, 15%) — same loop
-- [ ] Mock exam 1 (60-question, full-length)
-- [ ] Mock exam 2 (60-question, full-length)
+- [x] Diagnostic-01 (architect-level) taken — scored 3/10 cold (2026-05-01)
+- [ ] **Phase A — Basics intake** — 9 Anthropic Academy courses + per-course recall + skills-matrix seeding
+- [ ] Basics diagnostic (15 Q) — first attempt, calibration seed
+- [ ] **Phase B — Bridge** — worked-example fading on architect-shape MCQs, all B-skills measured ≥ 3
+- [ ] Basics diagnostic re-take ≥ 12 / 15 (pass-gate to Phase C)
+- [ ] **Phase C — Architect drilling** (Domains 1–5; daily loop; B-tagged challenges)
+- [ ] **Phase D — Mock cycle** — Mock 1 + Mock 2, target ≥ 78%, calibration gap ≤ 0.5
 
 ## Real-world example bank
 
