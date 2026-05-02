@@ -3258,13 +3258,639 @@ const CURRICULUM = {
       sourceCourse: "Anthropic Academy — Claude Code in Action",
       blurb: "Lifecycle events end-to-end, hook trust levels, subagents vs inline, CI surface, watermarks.",
       concepts: [
-        { id: "b6-1", code: "B6.1", title: "Order all hook events",            bloom: "R",  lesson: null, quiz: null },
-        { id: "b6-2", code: "B6.2", title: "Hook vs CLAUDE.md by trust level", bloom: "E",  lesson: null, quiz: null },
-        { id: "b6-3", code: "B6.3", title: "Predict no-watermark loop failure", bloom: "An", lesson: null, quiz: null },
-        { id: "b6-4", code: "B6.4", title: "Subagent vs inline",               bloom: "E",  lesson: null, quiz: null },
-        { id: "b6-5", code: "B6.5", title: "CI surface blast radius",          bloom: "An", lesson: null, quiz: null }
+        {
+          id: "b6-1", code: "B6.1", title: "Order all hook lifecycle events", bloom: "R",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Hook event ordering is a Domain 2 fact-recall question that gets missed because the events feel obvious until you have to put them in order under pressure. The per-turn order: **SessionStart** (once, at session boot) → **UserPromptSubmit** (each user turn) → **PreToolUse** (before each tool call, blocking-capable) → [tool runs] → **PostToolUse** (after each tool call) → ... → **Stop** (once, at task / turn end) → **SessionEnd** (once, at session close).",
+              "Other events to know: **Notification** (transient harness messages — UI surface, useful for informing the user but not a workflow primitive); **SubagentStop** (fires when a delegated subagent finishes — distinct from the parent's Stop); **PreCompact** / **PostCompact** (fire around context compaction, when the harness summarises older turns to free room).",
+              "Granularity is the easy-to-miss part of ordering. PreToolUse and PostToolUse fire **per individual tool call** — if a turn includes 5 tool calls, you get 5 PreToolUse + 5 PostToolUse events in that turn alone. Stop fires **per task / turn** (once). UserPromptSubmit fires once per user turn (before any tool calls). SessionStart and SessionEnd fire once per session.",
+              "The fact-recall trap: confusing 'after each tool call' (PostToolUse) with 'after the task' (Stop). They feel similar in plain English; they're very different in the harness. Lint after every tool call (PostToolUse) floods; lint after the task (Stop) checkpoints. Memorise the granularity, not just the name."
+            ],
+            keyPoints: [
+              "Per-turn order: SessionStart → UserPromptSubmit → PreToolUse → [tool] → PostToolUse → ... → Stop → SessionEnd.",
+              "PreToolUse / PostToolUse: per individual tool call.",
+              "UserPromptSubmit: per user turn (before tool calls).",
+              "Stop: per task / turn (once).",
+              "Other events: Notification, SubagentStop, PreCompact, PostCompact."
+            ],
+            examples: [
+              {
+                title: "Single-turn event sequence",
+                body: "User asks a question that requires 3 tool calls.\nEvents fire: SessionStart (only on first turn) → UserPromptSubmit → PreToolUse(call 1) → tool runs → PostToolUse(call 1) → PreToolUse(call 2) → tool runs → PostToolUse(call 2) → PreToolUse(call 3) → tool runs → PostToolUse(call 3) → Stop. SessionEnd fires only when the session itself closes."
+              },
+              {
+                title: "Subagent-spawning turn",
+                body: "Same as above but one of the tool calls spawns a subagent. The subagent runs its own loop (with its own SessionStart/Stop/SessionEnd in its context); when it finishes, SubagentStop fires in the parent."
+              }
+            ],
+            pitfalls: [
+              "Saying 'PostToolUse fires after the task.' It fires after each tool call — different granularity.",
+              "Putting per-task automation on PostToolUse. Lint runs N times per task instead of once.",
+              "Forgetting Notification, SubagentStop, PreCompact, PostCompact exist. The exam can name them in distractors."
+            ],
+            notesRef: "00-academy-basics/notes/06-claude-code-in-action.md",
+            simplified: {
+              oneLiner: "Per turn: SessionStart → UserPromptSubmit → PreToolUse → tool → PostToolUse → ... → Stop → SessionEnd. PreToolUse / PostToolUse fire per *tool call*; Stop fires per *task*.",
+              analogy: "Think of a meal: opening (SessionStart) → request order (UserPromptSubmit) → before each dish (PreToolUse) → the dish (tool) → after each dish (PostToolUse) → end of meal (Stop) → close the restaurant (SessionEnd). 'After each dish' ≠ 'after the meal.'",
+              paragraphs: [
+                "Memorise the order and the granularity. The trap is treating per-call events as per-task.",
+                "Other events (Notification, SubagentStop, PreCompact/PostCompact) sit alongside the main flow."
+              ],
+              keyPoints: [
+                "Pre/PostToolUse = per call.",
+                "Stop = per task.",
+                "Session{Start,End} = once per session."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "Within a single user turn that triggers two tool calls, in what order do the relevant hook events fire?",
+                options: {
+                  A: "UserPromptSubmit → PreToolUse → PostToolUse → Stop. (Pre/Post fire once per turn.)",
+                  B: "UserPromptSubmit → PreToolUse(1) → tool → PostToolUse(1) → PreToolUse(2) → tool → PostToolUse(2) → Stop.",
+                  C: "Stop → UserPromptSubmit → PreToolUse → PostToolUse.",
+                  D: "PreToolUse → UserPromptSubmit → tool → PostToolUse → Stop."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Pre/PostToolUse fire per individual tool call, not per turn.",
+                  B: "Right. The harness fires Pre/PostToolUse once per call. Two tool calls in a turn = two Pre + two Post.",
+                  C: "Stop fires at task end, not before UserPromptSubmit.",
+                  D: "UserPromptSubmit fires before tool calls, not interleaved."
+                },
+                principle: "Within a turn: UserPromptSubmit → (PreToolUse + tool + PostToolUse) per tool call → Stop. Granularity is per-call, not per-turn.",
+                bSkills: ["B6.1"]
+              },
+              {
+                n: 2,
+                question: "Which event fires *once per session*, not per turn?",
+                options: {
+                  A: "PreToolUse.",
+                  B: "Stop.",
+                  C: "SessionStart.",
+                  D: "UserPromptSubmit."
+                },
+                correct: "C",
+                explanations: {
+                  A: "Per individual tool call.",
+                  B: "Per task/turn.",
+                  C: "Right. SessionStart (and SessionEnd) fire once per session boundary.",
+                  D: "Per user turn."
+                },
+                principle: "SessionStart / SessionEnd = once per session. Stop = once per task. Pre/PostToolUse = once per tool call.",
+                bSkills: ["B6.1"]
+              },
+              {
+                n: 3,
+                question: "A delegated subagent finishes its work. Which event fires in the *parent* session?",
+                options: {
+                  A: "Stop — same as a normal task end.",
+                  B: "SubagentStop — distinct from the parent's own Stop event.",
+                  C: "PostToolUse — the subagent invocation is treated as a single tool call.",
+                  D: "SessionEnd — the parent session always ends when a subagent finishes."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Stop is the parent's own task end, not the subagent's.",
+                  B: "Right. SubagentStop is the dedicated event for subagent completion in the parent's lifecycle.",
+                  C: "Subagent invocations are not surfaced as PostToolUse in the parent.",
+                  D: "Parent session continues after a subagent finishes."
+                },
+                principle: "SubagentStop fires in the parent when a delegated subagent completes. Distinct from the parent's own Stop.",
+                bSkills: ["B6.1"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b6-2", code: "B6.2", title: "Hook vs CLAUDE.md by trust level", bloom: "E",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "The choice between hook and CLAUDE.md (or memory, or system prompt) maps cleanly to a single axis: **trust requirement**. CLAUDE.md is *advisory* — the model reads it and interprets it. Hooks are *enforced* — the harness executes them regardless of the model's decision. If the rule must apply even when the model would rather skip it, the answer is hook. If 'usually applies' is fine, CLAUDE.md is lighter and equally appropriate.",
+              "The decision: ask 'what happens if the model decides to ignore this?' If the answer is 'a security incident', 'production data loss', 'compliance breach' — anything you cannot accept the model overriding — that's a hook. If the answer is 'the suggestion is slightly less aligned with our style' — that's CLAUDE.md.",
+              "Hooks have additional structural advantages even when both could work. They run synchronously and deterministically; they have access to event context (the candidate command for PreToolUse, the tool result for PostToolUse, etc.); they can return blocking decisions (PreToolUse can refuse a tool call). CLAUDE.md is read by the model, interpreted, possibly compressed alongside other context, and competes with everything else for attention.",
+              "The over-engineering trap is real in the other direction: putting *every* nudge in a hook is heavy machinery for what should be a CLAUDE.md sentence. Style preferences, naming conventions, 'we like comments to be terse' — these are advice, not enforcement. Putting them in hooks adds complexity without trust requirement. Match the mechanism to the trust level."
+            ],
+            keyPoints: [
+              "Single decision axis: trust requirement.",
+              "Cannot accept model override → hook.",
+              "Advice / nudge / preference → CLAUDE.md.",
+              "Hooks have synchronous determinism + event context + block primitive.",
+              "Don't over-engineer: not every CLAUDE.md rule needs to be a hook."
+            ],
+            examples: [
+              {
+                title: "Hook (high trust): refuse `rm -rf`",
+                body: "If the model decides to run rm -rf, you have a destroyed filesystem. Trust requirement = absolute. Implementation: PreToolUse hook that pattern-matches the candidate command and returns a deny."
+              },
+              {
+                title: "CLAUDE.md (low trust): 'use 4-space indentation'",
+                body: "If the model uses 2 spaces in one file, the consequence is a style inconsistency, not a security event. Advisory is fine. Implementation: one line in CLAUDE.md."
+              },
+              {
+                title: "Hook (medium trust): require lint pass before committing",
+                body: "If the model commits without linting, CI fails — annoying but recoverable. Trust requirement is non-zero (lint catches bugs). Implementation: PreToolUse on the git-commit shell call, or Stop hook that fails loudly."
+              }
+            ],
+            pitfalls: [
+              "Putting security guardrails in CLAUDE.md ('please don't run rm -rf'). Advisory ≠ enforcement; the model can rationalise around it.",
+              "Putting style nudges in hooks. Heavy machinery; adds friction; obscures the actual policies.",
+              "Conflating 'I want this to always happen' with 'I want this enforced.' Always-happen advice is CLAUDE.md; enforced is hook."
+            ],
+            notesRef: "00-academy-basics/notes/06-claude-code-in-action.md",
+            simplified: {
+              oneLiner: "Use a hook when you can't tolerate the model ignoring the rule. Use CLAUDE.md when 'usually applies' is good enough.",
+              analogy: "It's like the difference between an office handbook (CLAUDE.md — read, expected to follow) and a locked door (hook — physically enforced).",
+              paragraphs: [
+                "If the consequence of being ignored is severe (security, production, compliance), use a hook. The harness enforces.",
+                "If it's a style or preference, CLAUDE.md is enough. Don't bring out hooks for everything."
+              ],
+              keyPoints: [
+                "Severe consequence if ignored → hook.",
+                "Style / preference → CLAUDE.md.",
+                "Decision axis = trust requirement."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team adds the rule 'never push to main without code review' to CLAUDE.md as a single sentence. Six months later, an investigation finds the model occasionally pushes to main when running long autonomous tasks. What is the *structural* fix?",
+                options: {
+                  A: "Reword the CLAUDE.md sentence in stronger language.",
+                  B: "Move the rule to a PreToolUse hook that pattern-matches `git push.*main` and refuses; CLAUDE.md is advisory and the model can rationalise around it.",
+                  C: "Switch to a more capable model.",
+                  D: "Delete the CLAUDE.md rule and rely on GitHub branch protection alone."
+                },
+                correct: "B",
+                explanations: {
+                  A: "The model can still ignore stronger wording; rewording doesn't change the layer.",
+                  B: "Right. Trust requirement is high (production main branch). CLAUDE.md is advisory; only hooks enforce. A PreToolUse hook makes the rule unbypassable from the model side.",
+                  C: "Doesn't address the trust-layer mismatch.",
+                  D: "GitHub protection is good defense-in-depth but doesn't substitute for the harness-side rule when the model has push access."
+                },
+                principle: "When the consequence of model override is severe, use a hook. CLAUDE.md is advisory; hooks are enforced.",
+                bSkills: ["B6.2", "B5.1"]
+              },
+              {
+                n: 2,
+                question: "A team writes a PreToolUse hook for *every* coding-style preference (indent width, brace style, naming conventions). What's the structural critique?",
+                options: {
+                  A: "PreToolUse hooks can't read tool input.",
+                  B: "Over-engineered for the trust requirement. Style preferences are advisory; CLAUDE.md is the right layer. Hooks add friction and complexity for nudges that don't need enforcement.",
+                  C: "Style hooks slow down each tool call to the point of timing out.",
+                  D: "Style hooks bypass the model and produce non-LLM-aware fixes."
+                },
+                correct: "B",
+                explanations: {
+                  A: "PreToolUse hooks can read tool input; that's not the issue.",
+                  B: "Right. Trust requirement is low for style. CLAUDE.md is the right layer; reserve hooks for cases where override is unacceptable.",
+                  C: "Performance is a secondary concern; the structural issue is layer mismatch.",
+                  D: "Plausible misuse, but not the canonical critique."
+                },
+                principle: "Hooks are for trust-required enforcement. Style preferences belong in CLAUDE.md to keep the hook layer focused on real guardrails.",
+                bSkills: ["B6.2"]
+              },
+              {
+                n: 3,
+                question: "Which is the *clearest* example of a rule that *must* be a hook (not CLAUDE.md)?",
+                options: {
+                  A: "'Prefer functional style over imperative when both work.'",
+                  B: "'Always include a docstring on public functions.'",
+                  C: "'Refuse to execute any shell command containing `--no-verify`, regardless of permission mode.'",
+                  D: "'Use UK English spelling in user-facing strings.'"
+                },
+                correct: "C",
+                explanations: {
+                  A: "Style preference; CLAUDE.md.",
+                  B: "Style preference; CLAUDE.md.",
+                  C: "Right. Bypassing a verify gate has real consequences. The model cannot be allowed to override it; only a PreToolUse hook can guarantee enforcement.",
+                  D: "Style preference; CLAUDE.md."
+                },
+                principle: "Trust requirement = decisive. Cannot accept override → hook.",
+                bSkills: ["B6.2"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b6-3", code: "B6.3", title: "Predict no-watermark loop failure", bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "An agent loop without **session-budget watermarks** is the canonical 'runaway agent' failure: the agent keeps trying things, retrying, and editing until it runs out of context window. By the time it stops, it has produced a clipped final answer, lost early-conversation context, or summarised away the actual progress. The fix is a self-pacing discipline: at ~80% of context fill, *commit in-flight work and exit cleanly*; at ~95%, *hard exit*. Exiting cleanly *is* success.",
+              "The failure mode signature: long-running tasks (47 turns, 100 turns) where the agent edits the same file, runs tests, re-edits, re-tests, and either dies mid-stream or returns a vague 'I made some progress; continue from here' summary. The clipped output is the visible symptom; the structural cause is no budget watermark, so retries consumed the window.",
+              "Watermarks belong at the loop layer, not the prompt layer. The model's job is to do work; the harness or surrounding orchestration code's job is to monitor token usage and call the watermark. Two thresholds: 80% = soft (finish current unit, commit, exit); 95% = hard (immediate exit, even if mid-unit). The next session resumes from the committed state.",
+              "Why two thresholds: 80% is the point where the *graceful* exit is still possible — there's enough budget to write a useful summary, commit changes, and leave the workspace in a state the next session can pick up from. 95% is the safety net for cases where the 80% logic missed (e.g., a single tool call ate 15% of context unexpectedly). Hard exit at 95% prevents the unrecoverable state where the agent runs out of room mid-summary."
+            ],
+            keyPoints: [
+              "No watermark = runaway loop = clipped output / lost context.",
+              "Two watermarks: 80% (soft, commit + exit cleanly), 95% (hard exit).",
+              "Watermarks live at the loop / harness layer, not in prompts.",
+              "'Exit cleanly' is success — partial work committed and recoverable."
+            ],
+            examples: [
+              {
+                title: "Symptom",
+                body: "Agent has been going for 47 turns, looping between editing a file and running tests. Tests still fail. The final output is 'I'm continuing to work on this — please re-run for further progress.' Diagnosis: window filled, summary clipped, no watermark caught it."
+              },
+              {
+                title: "Watermarked design",
+                body: "At each loop iteration, check token usage. If ≥80%: commit current changes, write a 'state-of-play' file, return a summary, exit. If ≥95%: hard exit immediately. Next session: read state-of-play, resume."
+              }
+            ],
+            pitfalls: [
+              "Treating 'increase max_tokens' as the fix. max_tokens is per-message generation length, not loop budget.",
+              "Putting the watermark logic in the prompt ('please stop at 80%'). The model doesn't reliably track its own context usage; the harness must.",
+              "Treating a clean 80% exit as a *failure*. It's success — partial progress is preserved and recoverable.",
+              "Setting only one threshold. 80% alone misses unexpected context spikes; 95% alone misses the graceful-exit window."
+            ],
+            notesRef: "00-academy-basics/notes/06-claude-code-in-action.md",
+            simplified: {
+              oneLiner: "Long-running agents need budget watermarks: at 80% commit and exit cleanly, at 95% hard exit. No watermark = clipped final output and lost progress.",
+              analogy: "It's like running a marathon with no concept of pacing. You sprint, then collapse mid-track — instead of slowing down at mile 20 (80%) to finish the last 6 properly.",
+              paragraphs: [
+                "Without a watermark, the agent will keep working until it runs out of context. The final output ends up clipped or summarised away.",
+                "The fix lives in the loop / harness, not the prompt. Two watermarks: graceful at 80%, hard at 95%."
+              ],
+              keyPoints: [
+                "80% = commit + exit cleanly.",
+                "95% = hard exit.",
+                "Clean exit = success (not failure)."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "An agent has been going for 47 turns, looping between editing the same file, running tests, and re-editing. The tests still fail. Which mitigation is most aligned with agentic-architecture best practice?",
+                options: {
+                  A: "Increase max_tokens so the agent has more room to think.",
+                  B: "Add a soft watermark at ~80% of context fill: finish current unit, commit, exit cleanly, resume next run. Add a hard watermark at ~95% as a safety net.",
+                  C: "Switch the agent to a more powerful model mid-run when retries exceed 5.",
+                  D: "Disable the test-running tool until the agent commits to a written plan."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Confuses turn budget with token budget. max_tokens controls per-message generation, not loop count.",
+                  B: "Right. Self-pacing watermarks (~80% commit + exit cleanly, ~95% hard exit) are the canonical defense against runaway loops. Partial progress is preserved; the next run resumes.",
+                  C: "Escalating model mid-run is not a recognised pattern; adds complexity, doesn't solve loop dynamics.",
+                  D: "Removes the feedback the agent needs to validate work."
+                },
+                principle: "Bounded loops with self-pacing watermarks. Exiting at 80% is a success, not a failure.",
+                bSkills: ["B6.3"]
+              },
+              {
+                n: 2,
+                question: "Why are *two* watermarks (80% soft + 95% hard) preferred over a single threshold?",
+                options: {
+                  A: "Two thresholds give the model time to consider whether to exit.",
+                  B: "80% leaves enough headroom for a graceful exit (commit, summary, state-of-play). 95% catches cases where unexpected context spikes blew past the 80% logic.",
+                  C: "The spec requires exactly two watermarks at 80% and 95%.",
+                  D: "Two thresholds let the user pick which one to honour."
+                },
+                correct: "B",
+                explanations: {
+                  A: "The model isn't deciding; the harness is.",
+                  B: "Right. 80% is the graceful-exit window — enough budget to commit and summarise. 95% is the safety net for cases where a single tool call ate more context than expected.",
+                  C: "Not a spec; a pattern.",
+                  D: "Honouring is automatic, not user-chosen."
+                },
+                principle: "Two watermarks separate *graceful exit* (80%) from *safety net* (95%). Each handles a different failure case.",
+                bSkills: ["B6.3"]
+              },
+              {
+                n: 3,
+                question: "Where in the system architecture should the budget watermark live?",
+                options: {
+                  A: "In the prompt: 'Please stop at 80% of your context window.'",
+                  B: "At the harness / loop layer that monitors token usage and triggers commit/exit; the model itself doesn't reliably track its own context usage.",
+                  C: "In CLAUDE.md as a hard rule.",
+                  D: "In a PostToolUse hook that runs every tool call."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Models don't reliably self-monitor context usage. Prompt-side watermarks are unreliable.",
+                  B: "Right. Watermark is operational state monitored by the harness; the harness initiates the clean exit. The model executes the commit-and-exit but doesn't decide when.",
+                  C: "Advisory; not enforcement.",
+                  D: "PostToolUse runs per call; can be one of several places to *check* the threshold but the watermark itself is a loop-layer concern."
+                },
+                principle: "Watermarks are operational, monitored at the loop layer. Prompt-side self-monitoring is unreliable.",
+                bSkills: ["B6.3"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b6-4", code: "B6.4", title: "Subagent vs inline", bloom: "E",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "The decision to spawn a subagent versus continuing inline has exactly two valid triggers: (1) **parallelism** — the work decomposes into independent units the parent can fan out concurrently, and (2) **isolation** — the work's intermediate scratch (long traces, large outputs, exploratory dead-ends) would pollute the parent's context if it landed there. Anything else (cost, model size, 'feels cleaner') is not a structural reason to spawn.",
+              "Parallelism case: 'search 12 internal knowledge bases independently' or 'review 4 PRs concurrently'. Each unit is independent of the others; the parent fans out, each subagent does its work in its own context, the parent integrates the summaries. Sequential single-agent execution would be N× slower.",
+              "Isolation case: 'run 30 turns of exploratory debugging without polluting the parent's plan-then-execute thread'. The subagent's scratch (failed hypotheses, intermediate diffs, tool output) stays in its context; only the final summary lands in the parent's view. The parent stays focused on the high-level plan.",
+              "The non-reasons: 'subagents are cheaper' (they're not — each is its own model invocation chain), 'subagents have a longer context window' (no, they have a *fresh* one of the same size), 'subagent is required when more than N tools are registered' (no threshold rule). The exam tests these as distractors. Cost discipline matters in the other direction: each subagent is a token-heavy invocation; over-spawning trivially-sequential work burns budget for no benefit."
+            ],
+            keyPoints: [
+              "Two and only two triggers: parallelism, isolation.",
+              "Parallelism: independent work the parent can fan out.",
+              "Isolation: intermediate context that shouldn't pollute the parent.",
+              "Cost, window-size, tool-count are NOT triggers (and are common distractors).",
+              "Over-spawning sequential work burns tokens without benefit."
+            ],
+            examples: [
+              {
+                title: "Subagent (parallelism + isolation)",
+                body: "'Search 12 KBs and cross-check facts.' Each KB search is independent (parallelism). Each subagent's tool-call trail and intermediate output stays in its own context (isolation). Parent integrates summaries. Latency drops, parent context stays clean."
+              },
+              {
+                title: "Inline (no trigger)",
+                body: "'Add a one-line comment to a function.' Single short task, no parallelism, no isolation need. Subagent here is over-engineering — the spawn cost outweighs any benefit."
+              }
+            ],
+            pitfalls: [
+              "Spawning for 'cleanliness'. If neither parallelism nor isolation applies, inline is correct.",
+              "Believing subagents have a bigger window. They have a fresh window of the same size.",
+              "Falling for 'N-tool threshold' framing. There isn't one.",
+              "Underbriefing subagents (covered in B8.2). Subagents have no memory of the parent conversation."
+            ],
+            notesRef: "00-academy-basics/notes/06-claude-code-in-action.md",
+            simplified: {
+              oneLiner: "Spawn a subagent only when work is genuinely parallel or its intermediate context would pollute the parent. Otherwise, inline.",
+              analogy: "Like delegating to a teammate: do it when you can run two efforts in parallel or when you don't want their messy scratch on your desk. Don't delegate just to feel organised.",
+              paragraphs: [
+                "Two valid reasons: parallel work or context isolation. Anything else is over-engineering.",
+                "Each subagent is a fresh model invocation — costs tokens. Don't spawn for tidiness."
+              ],
+              keyPoints: [
+                "Triggers: parallelism, isolation.",
+                "Not triggers: cost, window size, tool count.",
+                "Sequential work → inline."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team is building a research assistant that must (a) search across 12 internal knowledge bases, (b) cross-check facts across the results, and (c) write a final report. The current single-loop implementation has 90s median latency and occasionally drops sources. What is the strongest reason to refactor to a coordinator-subagent pattern?",
+                options: {
+                  A: "Subagents will reduce per-turn token cost because they run on cheaper models.",
+                  B: "Independent searches can run in parallel, and each subagent's intermediate context is isolated from the coordinator's.",
+                  C: "Subagents have access to a longer context window than the coordinator.",
+                  D: "The coordinator-subagent pattern is required when more than 10 tools are registered."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Wrong axis. Subagents inherit the parent model unless explicitly configured otherwise; cost is not the canonical justification.",
+                  B: "Right. The two real wins of coordinator-subagent are parallel execution of independent work and context isolation.",
+                  C: "False. Subagents don't get a bigger window; they get a fresh one.",
+                  D: "Fabricated. There is no '10 tools' threshold."
+                },
+                principle: "Reach for coordinator-subagent when (a) work is independently parallelizable or (b) intermediate context would otherwise pollute the parent. Not for cost, not for window size.",
+                bSkills: ["B6.4"]
+              },
+              {
+                n: 2,
+                question: "Which task is the *worst* fit for a subagent?",
+                options: {
+                  A: "Parallel review of 6 independent PRs.",
+                  B: "30 turns of exploratory debugging on a tricky bug.",
+                  C: "Adding a single missing comment to one function.",
+                  D: "Searching 8 KBs and integrating the results."
+                },
+                correct: "C",
+                explanations: {
+                  A: "Parallelism trigger.",
+                  B: "Isolation trigger (don't pollute parent with the dead-ends).",
+                  C: "Right. Single short sequential task with no parallelism or isolation need. Inline is correct; spawning is over-engineering.",
+                  D: "Parallelism + isolation combined."
+                },
+                principle: "If neither parallelism nor isolation applies, do not spawn. Each subagent costs a model invocation chain.",
+                bSkills: ["B6.4"]
+              },
+              {
+                n: 3,
+                question: "Which statement about subagents is *false*?",
+                options: {
+                  A: "Subagents start with a fresh, empty context (no parent conversation memory).",
+                  B: "Subagents have access to a strictly larger context window than their parent.",
+                  C: "The parent receives the subagent's final summary, not its full tool-call trail.",
+                  D: "Each subagent invocation is its own model invocation chain (costs tokens)."
+                },
+                correct: "B",
+                explanations: {
+                  A: "True — subagents must be self-contained-briefed.",
+                  B: "Right (false statement). Subagents have a fresh window of the *same size* as the parent's. The window-size distractor is common on the exam.",
+                  C: "True — context isolation is unidirectional.",
+                  D: "True — cost discipline matters."
+                },
+                principle: "Subagents have a fresh window, not a bigger one. Memorise this distractor.",
+                bSkills: ["B6.4"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b6-5", code: "B6.5", title: "CI surface blast radius", bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Running Claude Code as a GitHub Actions step (or in any CI surface) does not create a new permission boundary — the agent runs with the *same* permissions as a developer with the same access list. Repository secrets are accessible. The deployable artefacts are reachable. The package registry tokens, cloud credentials, and database URLs that live in CI are all in scope. The blast radius of a misbehaving agent in CI is the same as the blast radius of a developer with the equivalent token.",
+              "The implication: the same hooks that protect the local developer surface (PreToolUse refusing rm -rf, PreToolUse refusing --no-verify) need to be in place — or stronger — in the CI surface. The CI surface often *also* needs additional guards: 'don't push to protected branches', 'don't tag releases', 'don't publish packages without approval', 'don't run migration scripts'. Each of these is a candidate for a PreToolUse hook with a deny-decision.",
+              "The mistake to avoid: assuming CI is 'safer' because it's automated and unattended. The opposite is true — without a developer to glance at the screen and stop a bad action, the ceiling for damage is higher, not lower. The agent's permission set times the agent's autonomy = blast radius. CI usually has higher autonomy; the permission set must compensate.",
+              "Two operational notes. Repo-level secrets are exposed via env vars to the running step; an agent with shell access can read them. Reasoning about blast radius in CI means reasoning about every secret in the environment. The mitigation isn't 'hide secrets from Claude' (impossible if the workflow itself uses them); it's 'reduce the secret set the workflow exposes' and 'gate side-effecting operations behind explicit approvals'."
+            ],
+            keyPoints: [
+              "CI = same permissions as a dev with the equivalent token. No new boundary.",
+              "Repo secrets, registry tokens, cloud creds — all in scope for the agent.",
+              "Hooks that protect local surface should also be present (or stronger) in CI.",
+              "CI's higher autonomy raises the ceiling on damage, not lowers it.",
+              "Mitigation: scope secrets tightly + gate side-effecting operations."
+            ],
+            examples: [
+              {
+                title: "Wrong assumption: 'CI is safer'",
+                body: "Team relies on developer review to stop bad agent actions locally. They run the same agent in CI without additional guards. A misbehaving prompt asks the agent to 'clean up old branches' and the CI step has push permissions to all branches. Damage is real and unattended."
+              },
+              {
+                title: "Right shape: scoped CI permissions + hooks",
+                body: "CI step runs with a token scoped to read-only on protected branches, read-write on docs/. PreToolUse hooks deny `git push.*main`, `npm publish`, and any shell containing `--no-verify`. Side-effecting operations require an explicit approval step in the workflow."
+              }
+            ],
+            pitfalls: [
+              "Treating CI as a sandbox just because it's not the dev's machine. It's not.",
+              "Forgetting that env-var secrets are accessible to a shell-capable agent.",
+              "Reusing high-privilege tokens in CI 'because it's easier.' The principle is least-privilege, especially when the operator is automated."
+            ],
+            notesRef: "00-academy-basics/notes/06-claude-code-in-action.md",
+            simplified: {
+              oneLiner: "Claude Code in CI runs with the same permissions as a developer with the same token. CI's higher autonomy means damage potential is higher, not lower.",
+              analogy: "Think of CI as a developer working unsupervised. They have all the keys; nobody's watching the screen. Either keep the key set small or put locks on the dangerous doors (hooks).",
+              paragraphs: [
+                "CI surface is the same blast radius as a dev with the same access. No magic boundary.",
+                "Hooks that protect the local surface should be there (or stronger) in CI. Tokens should be scoped down."
+              ],
+              keyPoints: [
+                "CI permissions = developer permissions.",
+                "Higher autonomy = higher damage ceiling.",
+                "Mitigate via hooks + scoped tokens + approval gates."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team runs Claude Code as a GitHub Actions step on every push, with the same PreToolUse hooks they use locally. What additional risk should they account for in CI that doesn't apply locally?",
+                options: {
+                  A: "GitHub Actions run on smaller machines that may OOM the agent.",
+                  B: "The CI step runs unattended (no developer to interrupt) AND has access to repo secrets, registry tokens, and protected-branch permissions — autonomy × privilege = blast radius is higher.",
+                  C: "GitHub blocks Claude Code from running in Actions by default.",
+                  D: "CI runs on a different model that ignores hooks."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Operational concern; not the structural risk.",
+                  B: "Right. CI's autonomy combined with its access to secrets and protected resources raises the ceiling on damage. Local dev has the dev as a brake; CI has none.",
+                  C: "Not true; Actions can run Claude Code.",
+                  D: "Same model, same hook semantics."
+                },
+                principle: "CI surface = same permissions as a dev with the same token, plus higher autonomy. Damage ceiling is higher, not lower.",
+                bSkills: ["B6.5"]
+              },
+              {
+                n: 2,
+                question: "Which mitigation is *most* effective at reducing blast radius for a Claude Code GitHub Actions integration?",
+                options: {
+                  A: "Run the workflow on every push instead of only on PRs (more frequent runs catch more bugs).",
+                  B: "Scope the workflow's GitHub token to least-privilege (read-only on protected branches), and add PreToolUse hooks denying `git push.*protected`, `npm publish`, and similar side-effecting operations.",
+                  C: "Increase the workflow's timeout so it can't be interrupted mid-task.",
+                  D: "Use the same admin token for CI as developers use locally."
+                },
+                correct: "B",
+                explanations: {
+                  A: "More runs = more chances for bad outcomes; not a mitigation.",
+                  B: "Right. Two complementary controls: token scoping (reduce what's reachable) + PreToolUse hooks (refuse dangerous operations on the operations that are reachable). Layered.",
+                  C: "Increasing timeouts widens the damage window.",
+                  D: "Anti-pattern; admin tokens in CI are the worst case."
+                },
+                principle: "Mitigation = scope tokens down + add PreToolUse hooks for side-effecting operations. Defense in depth.",
+                bSkills: ["B6.5", "B5.1"]
+              },
+              {
+                n: 3,
+                question: "True or false: 'Repository secrets injected as env vars are inaccessible to Claude Code running as a GitHub Actions step.'",
+                options: {
+                  A: "True — secrets are encrypted and only the GitHub runner can read them.",
+                  B: "True — Claude Code is sandboxed away from process env vars in CI.",
+                  C: "False — env-var secrets are accessible to any shell-capable process in the step, including Claude Code.",
+                  D: "Depends on the secret's classification level."
+                },
+                correct: "C",
+                explanations: {
+                  A: "Once injected into the step's env, they're plain env vars to the process.",
+                  B: "Fabricated sandbox.",
+                  C: "Right. Env-var secrets are accessible to any shell-capable process. Mitigation is to inject only the secrets the step actually needs and to gate side-effecting operations.",
+                  D: "Fabricated tier."
+                },
+                principle: "Env-var secrets are visible to a shell-capable agent in the same step. Inject only what's needed.",
+                bSkills: ["B6.5"]
+              }
+            ]
+          }
+        }
       ],
-      sectionTest: null
+      sectionTest: {
+        title: "Section 6 test — Claude Code in Action",
+        passPct: 0.7,
+        questions: [
+          {
+            n: 1,
+            question: "Order the following hook events in the order they fire within a single user turn that triggers two tool calls.",
+            options: {
+              A: "Stop → UserPromptSubmit → PreToolUse → PostToolUse.",
+              B: "UserPromptSubmit → PreToolUse(1) → PostToolUse(1) → PreToolUse(2) → PostToolUse(2) → Stop.",
+              C: "UserPromptSubmit → PreToolUse → PostToolUse → Stop. (Pre/Post fire once per turn.)",
+              D: "PreToolUse → UserPromptSubmit → tool → PostToolUse → Stop."
+            },
+            correct: "B",
+            explanations: {
+              A: "Stop is at the end of the turn, not the start.",
+              B: "Right. Pre/PostToolUse fire per individual tool call. Stop fires once per task.",
+              C: "Pre/Post fire per call, not per turn.",
+              D: "UserPromptSubmit fires before tool calls, not interleaved."
+            },
+            principle: "Per-call (Pre/PostToolUse) vs per-task (Stop) granularity is the most-tested ordering distinction.",
+            bSkills: ["B6.1"]
+          },
+          {
+            n: 2,
+            question: "A team's CLAUDE.md says 'never push to main without approval.' On a long autonomous run, the model occasionally pushes anyway. Which structural change has the highest leverage?",
+            options: {
+              A: "Reword the CLAUDE.md sentence in stronger language.",
+              B: "Move the rule to a PreToolUse hook that pattern-matches `git push.*main` and refuses; CLAUDE.md is advisory, hooks are enforced.",
+              C: "Switch to a more capable model.",
+              D: "Disable CLAUDE.md and rely on GitHub branch protection alone."
+            },
+            correct: "B",
+            explanations: {
+              A: "Stronger wording doesn't change the trust layer.",
+              B: "Right. High trust requirement (production main) demands enforcement, not advice. PreToolUse + deny is the canonical fix.",
+              C: "Doesn't address the trust-layer mismatch.",
+              D: "Branch protection is good defence-in-depth but doesn't substitute for the harness-side rule."
+            },
+            principle: "Trust requirement decides hook vs CLAUDE.md. Cannot accept override → hook.",
+            bSkills: ["B6.2"]
+          },
+          {
+            n: 3,
+            question: "An agent has been going for 47 turns with no progress on a stuck test. Which mitigation is most aligned with agentic best practice?",
+            options: {
+              A: "Increase max_tokens.",
+              B: "Add session-budget watermarks: ~80% commit + exit cleanly, ~95% hard exit. Partial progress is preserved; the next run resumes.",
+              C: "Switch to a more powerful model mid-run.",
+              D: "Disable the test tool until the agent commits to a written plan."
+            },
+            correct: "B",
+            explanations: {
+              A: "Confuses turn budget with token budget.",
+              B: "Right. Self-pacing watermarks are the canonical defence against runaway loops.",
+              C: "Mid-run model escalation isn't a recognised pattern.",
+              D: "Removes the feedback the agent needs to validate work."
+            },
+            principle: "Bounded loops with self-pacing watermarks. Exiting at 80% is success.",
+            bSkills: ["B6.3"]
+          },
+          {
+            n: 4,
+            question: "A team plans to run Claude Code as a GitHub Actions step on every PR with the same hooks they use locally. What is the most important *additional* mitigation specific to the CI surface?",
+            options: {
+              A: "Add `temperature=0` to the model config.",
+              B: "Scope the workflow's GitHub token to least-privilege AND add PreToolUse hooks denying side-effecting operations like `git push.*protected` and `npm publish` — CI's autonomy raises the damage ceiling.",
+              C: "Use the same admin token developers use locally so CI behaves consistently.",
+              D: "Run the workflow on every push (not just PRs) so issues are caught faster."
+            },
+            correct: "B",
+            explanations: {
+              A: "Temperature doesn't address blast radius.",
+              B: "Right. Scope the token (reduce what's reachable) + hook the side-effecting operations (refuse dangerous ones). Defence in depth.",
+              C: "Anti-pattern. Admin tokens in CI are the worst case.",
+              D: "More runs ≠ more safety; widens the damage window."
+            },
+            principle: "CI mitigation = scope tokens + PreToolUse hooks for side-effecting operations.",
+            bSkills: ["B6.5"]
+          }
+        ]
+      }
     },
     {
       id: "s7-skills",
