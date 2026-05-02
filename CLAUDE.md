@@ -87,7 +87,47 @@ for the Anthropic Claude Certified Architect – Foundations (CCA-F) exam.
 - Reference real-world examples from `palimkarakshay/lumivara-site` where
   the abstract concept has a concrete production analog (CLAUDE.md +
   AGENTS.md, dual-lane architecture, session-budget watermarks at 80%/95%,
-  AI routing tables, Vercel-mirror discipline).
+  AI routing tables, Vercel-mirror discipline). Order: principle first,
+  lumivara-site link second. Don't fabricate links.
 - When I'm shifting goals mid-session, name it and ask whether to defer
   the new thread to a parking-lot note or pursue it. Keep me anchored on
   the main goal: pass the CCA-F exam.
+- Watch for accidental answer leaks in question files: example answer
+  strings, sample submissions, and option ordering must NOT mirror the
+  real key. (See diagnostic-01 spoiler regression, 2026-05-02.)
+
+## External review (codex)
+
+Every PR is reviewed by OpenAI gpt-5.5 (with Gemini → GitHub Models →
+OpenRouter fallback) via `.github/workflows/codex-review.yml`. The
+review is posted as a PR comment and labels the PR `codex-reviewed` /
+`codex-blockers` / `review-deferred` accordingly. Use it as the merge
+gate — don't merge `codex-blockers` without addressing findings.
+
+- **Trigger:** opens, reopens, synchronizes, or `ready_for_review` on
+  any PR. Manual rerun via `workflow_dispatch` with `pr=<n>`.
+- **Provider ladder:** `scripts/codex-review-fallback.py` — same
+  five-leg ladder used in `palimkarakshay/lumivara-site`. Defers (no
+  silent skip) only when every leg is unavailable.
+- **Recheck cron:** `.github/workflows/codex-review-recheck.yml` retries
+  any open `review-deferred` PR every 2h.
+- **Secrets to set in repo settings → Actions:** `OPENAI_API_KEY`,
+  `OPENAI_API_KEY_BACKUP`, `GEMINI_API_KEY`, `OPENROUTER_API_KEY` (all
+  optional; GitHub Models leg uses the auto-provisioned `GITHUB_TOKEN`).
+- **Retroactive review of pre-workflow commits:** open a PR from a
+  branch that contains the historical changes — codex will review the
+  PR's full diff.
+
+## Coherency review log
+
+- 2026-05-02 — Audit of committed history. Two findings:
+  - **Spoiler in `07-mock-exams/diagnostic-01.md`** (still
+    `full-mock-exams/` at audit time; renamed to `07-mock-exams/` in
+    PR #2 in parallel) — the example answer-format string
+    `1B 2B 3B 4B 5C 6B 7B 8B 9B 10B` was an exact match for the answer
+    key. Replaced with a neutral `1X 2X … 10X` placeholder (commit
+    `c38f580`). Spoiler-leak watchpoint added to "How to help me" so
+    future MCQ generation doesn't reintroduce it.
+  - **No external review pipeline existed** — added codex workflow
+    parity with `palimkarakshay/lumivara-site` (commits `f28350d`,
+    `10a9e33`, plus this CLAUDE.md update).
