@@ -1972,14 +1972,739 @@ const CURRICULUM = {
       sourceCourse: "Anthropic Academy — Introduction to MCP",
       blurb: "Model Context Protocol primitives (tool / resource / prompt), transports (stdio / HTTP+SSE), and what auth boundary they imply.",
       concepts: [
-        { id: "b4-1", code: "B4.1", title: "Classify tool / resource / prompt",      bloom: "An", lesson: null, quiz: null },
-        { id: "b4-2", code: "B4.2", title: "stdio vs HTTP+SSE",                      bloom: "E",  lesson: null, quiz: null },
-        { id: "b4-3", code: "B4.3", title: "Reject non-MCP transports",              bloom: "R",  lesson: null, quiz: null },
-        { id: "b4-4", code: "B4.4", title: "Diagnose wrong-tool-pick to description", bloom: "An", lesson: null, quiz: null },
-        { id: "b4-5", code: "B4.5", title: "Server-per-capability vs monolith",      bloom: "E",  lesson: null, quiz: null },
-        { id: "b4-6", code: "B4.6", title: "Auth at transport, not in tool input",   bloom: "A",  lesson: null, quiz: null }
+        {
+          id: "b4-1", code: "B4.1", title: "Classify tool / resource / prompt", bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "MCP defines three core primitives — **tools**, **resources**, and **prompts** — and the exam tests whether you can match a real-world capability to the right one. The trap is that all three look like 'things a server exposes to the client' until you focus on *who invokes them and what their semantics are*. The invocation model is the defining axis.",
+              "**Tools** are model-invoked, executable, side-effecting (or computing) operations. The model sees their schema and chooses to call them mid-conversation. Examples: 'send_email', 'run_query', 'create_ticket'. If the model could plausibly say 'now I want to do X to satisfy this request,' it's a tool.",
+              "**Resources** are data references — read-only content the model can be pointed at. They're typically *application/user-invoked* (the host app or user picks which resource to attach), not model-invoked. They're addressed by URI and are the right primitive when the model needs to *consume* a piece of data without executing anything. Examples: a file's contents, a database row, an OpenAPI doc.",
+              "**Prompts** are reusable, *user-invoked* templates — pre-authored prompt structures with parameters that the user (or app) selects from a menu. They're the right primitive when there's a recurring task you want to make one-click reusable. Examples: 'summarise_meeting', 'write_release_notes'. The user picks the prompt and fills in the slots; the model then executes the templated request.",
+              "The classification rule is mechanical: *who decides this gets used?* Model decides → tool. App/user attaches data → resource. User picks a template → prompt. Misclassification produces real bugs: exposing a static doc as a tool clutters the model's tool list and triggers spurious calls; exposing a workflow as a resource buries it in attachments where users won't find it; exposing data as a prompt requires the user to select something they shouldn't have to think about."
+            ],
+            keyPoints: [
+              "Three primitives, defined by *invoker*: tools (model), resources (app/user), prompts (user).",
+              "Tools = executable / side-effecting. Resources = read-only data references. Prompts = reusable templates.",
+              "Misclassification has real costs: tool clutter, hidden workflows, user confusion.",
+              "Sampling and roots are emerging additions but not the focus of D3 questions."
+            ],
+            examples: [
+              {
+                title: "'Expose a database query helper'",
+                body: "If the model should decide when to query (mid-conversation, given the user's question): tool. If the user picks a query template from a menu and fills in parameters: prompt. If the model needs to read a specific table's schema as data context: resource."
+              },
+              {
+                title: "'Expose a 50-page policy document'",
+                body: "Resource. The model consumes its content; the model doesn't 'execute' the doc. Wrong choice: defining a `read_policy_doc` tool — every time the model wants the doc it has to invoke a tool, where attaching the resource once would be enough."
+              }
+            ],
+            pitfalls: [
+              "Defaulting to 'everything is a tool' because tools feel familiar from function-calling. Resources and prompts exist precisely because not everything model-callable belongs in the tool list.",
+              "Exposing a workflow ('summarise this meeting in 5 bullets') as a resource. Users need to *pick* it; resources don't have a picker UX in most clients.",
+              "Exposing static reference data as a tool. Forces the model to make a tool call for content that should already be in context."
+            ],
+            notesRef: "00-academy-basics/notes/05-mcp-intro.md",
+            simplified: {
+              oneLiner: "Tools are what the model decides to use, resources are data the app/user attaches, prompts are templates the user picks from a menu.",
+              analogy: "Imagine a kitchen. Tools are the appliances (the chef decides when to use them). Resources are the ingredients in the pantry (the kitchen owner decides what's stocked). Prompts are the recipes pinned to the wall (the customer picks which one).",
+              paragraphs: [
+                "MCP has three things a server can expose. Which one to use depends on who decides to use it.",
+                "Model decides → tool. Owner attaches data → resource. User picks a template → prompt. Get the role right and the integration is clean; get it wrong and things show up in the wrong place."
+              ],
+              keyPoints: [
+                "Tool = model-invoked operation.",
+                "Resource = data reference.",
+                "Prompt = reusable template."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team wants to expose a 'company policy handbook' (a 60-page PDF) to Claude through an MCP server. Which primitive is the right fit?",
+                options: {
+                  A: "Tool — define `read_handbook` so the model can fetch it on demand.",
+                  B: "Resource — expose the handbook as a URI-addressed data reference the user can attach when relevant.",
+                  C: "Prompt — make it a `consult_handbook` template the user picks from the menu.",
+                  D: "It doesn't matter; all three are functionally equivalent."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Forces the model to call a tool every time it wants to consult the doc. Wrong primitive — there's no operation, just data.",
+                  B: "Right. Resources are read-only data references the user/app attaches. The handbook is data, not an action.",
+                  C: "Prompts are templates with slots, not data containers. Users would have to pick something for which there's no choice to make.",
+                  D: "Misclassification produces real UX and tool-call bugs."
+                },
+                principle: "Static data the model needs to *consume* belongs in a resource. Tools are for operations; prompts are for templates.",
+                bSkills: ["B4.1"]
+              },
+              {
+                n: 2,
+                question: "Which capability is *most clearly* a tool (not a resource or prompt)?",
+                options: {
+                  A: "A README.md file the model should consult before answering questions.",
+                  B: "A `summarise_pull_request` template the user invokes from a menu, filling in a PR number slot.",
+                  C: "A `create_jira_ticket` operation the model decides to call mid-conversation when the user reports a bug.",
+                  D: "A list of company branding colors as a JSON document."
+                },
+                correct: "C",
+                explanations: {
+                  A: "Read-only content = resource.",
+                  B: "User-invoked template = prompt.",
+                  C: "Right. Model-invoked, side-effecting operation = tool.",
+                  D: "Read-only data = resource."
+                },
+                principle: "Model decides + executes / side-effects = tool. The invocation model is the defining axis.",
+                bSkills: ["B4.1"]
+              },
+              {
+                n: 3,
+                question: "An engineering team has a recurring multi-step request: 'Generate weekly release notes from the last 7 days of merged PRs.' Users want one-click access. Which primitive is the right shape?",
+                options: {
+                  A: "Tool — `generate_release_notes` the model calls when it senses the user wants notes.",
+                  B: "Resource — exposed as a URI of the last 7 days of PRs.",
+                  C: "Prompt — a `weekly_release_notes` template the user picks from the menu, with optional `start_date` and `repo` slots.",
+                  D: "Three separate resources, one per day, that the user attaches manually."
+                },
+                correct: "C",
+                explanations: {
+                  A: "The model can't reliably guess when the user wants weekly notes; user-invoked is the right shape.",
+                  B: "PRs are data; the recurring *workflow* (write release notes from them) is what's being templated.",
+                  C: "Right. Reusable, user-invoked templated workflow with slots = prompt. One-click discoverability is the prompt menu.",
+                  D: "Manual attachment doesn't templatise the workflow."
+                },
+                principle: "Reusable, user-invoked templates with parameters = prompt. Make recurring workflows one-click, not tool-call-guessable.",
+                bSkills: ["B4.1"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b4-2", code: "B4.2", title: "stdio vs Streamable HTTP", bloom: "E",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "MCP defines two official transports: **stdio** and **Streamable HTTP** (the current spec name; older docs and question banks call this 'HTTP+SSE'). They're not interchangeable — each fits a different deployment shape, and the wrong choice creates real operational problems.",
+              "**stdio** is the local-machine transport. The MCP client (e.g. Claude Code) spawns the server as a child process and communicates via stdin/stdout. There's no port, no auth surface, no network attack surface; the server's lifecycle is bound to the client's. This is the right transport for local single-user tools — filesystem helpers, git operations, local databases — where 'the server runs alongside the client' is the natural shape.",
+              "**Streamable HTTP** is the remote / multi-user transport. The server runs on a host (could be remote, could be containerised, could be shared by multiple clients), exposes an HTTP endpoint, and uses streaming (Server-Sent Events) for the response channel. This is the right transport when the server is shared, lives on a different machine, or needs to outlive the client process. Auth is at the transport layer (OAuth-style flows, headers, mTLS — depends on the deployment).",
+              "Decision rule: 'Does the server run on the same machine as the client and only serve that one client?' Yes → stdio. No → Streamable HTTP. The trap is reaching for HTTP because it 'feels more modern' for simple local cases (port management, auth surface, lifecycle complexity for nothing) or reaching for stdio for shared services (you can't share a child process across users)."
+            ],
+            keyPoints: [
+              "Two official transports. Closed list. Anything else is wrong.",
+              "stdio = local single-user. Server is a child process; lifecycle bound to client.",
+              "Streamable HTTP = remote / multi-user. HTTP endpoint, streaming response, auth at transport.",
+              "Older name for Streamable HTTP: 'HTTP+SSE' — same thing, may appear in older question banks."
+            ],
+            examples: [
+              {
+                title: "Local filesystem MCP server for a single dev",
+                body: "stdio. Server runs as a subprocess of Claude Code; no port, no auth, lifecycle bound to the IDE session. Reaching for HTTP here adds operational overhead for zero benefit."
+              },
+              {
+                title: "Internal team-shared 'company knowledge' MCP server",
+                body: "Streamable HTTP. Multiple clients (multiple devs, possibly CI), runs on a host, needs auth (token or OAuth), needs to outlive any single client. stdio can't share a process across users."
+              }
+            ],
+            pitfalls: [
+              "Picking HTTP for a single-dev local tool because it 'feels more modern.' You've added port management and auth surface for nothing.",
+              "Picking stdio for a multi-user service. You can't share a child process across users; each client would spawn its own.",
+              "Thinking there's a third option (WebSockets, gRPC, named pipes). The list is closed."
+            ],
+            notesRef: "00-academy-basics/notes/05-mcp-intro.md",
+            simplified: {
+              oneLiner: "stdio is for tools running on the same machine as one user. Streamable HTTP is for servers serving multiple users or running remotely.",
+              analogy: "stdio is like a personal assistant in the same room as you (no doorbell, no shared schedule). Streamable HTTP is like a receptionist serving the whole office (door, schedule, badge to enter).",
+              paragraphs: [
+                "Two transports, picked by deployment shape. Local + single user → stdio. Shared / remote → Streamable HTTP.",
+                "stdio's win is no auth, no port, no lifecycle complexity. Streamable HTTP's win is sharing and remote access. Pick by the actual shape of the deployment."
+              ],
+              keyPoints: [
+                "Local single-user → stdio.",
+                "Remote / shared → Streamable HTTP.",
+                "No third option exists."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team builds an MCP server that exposes a 50ms-latency internal database. The server will be used by a single developer's Claude Code instance, running on the same machine. Which transport should they use?",
+                options: {
+                  A: "HTTP + Server-Sent Events, because it is the future-proof default.",
+                  B: "stdio, because the server runs on the same machine and its lifecycle is bound to the Claude Code process.",
+                  C: "WebSockets, for full-duplex streaming.",
+                  D: "gRPC, for strongly-typed schemas."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Streamable HTTP is for remote or multi-user MCP servers. Single dev, same machine? Overkill.",
+                  B: "Right. stdio is the canonical local-machine transport. Claude Code spawns the server as a subprocess; lifecycle is bound to the Claude process; no port management; no auth surface.",
+                  C: "WebSockets is not a current MCP transport.",
+                  D: "gRPC is not a current MCP transport."
+                },
+                principle: "Match transport to deployment shape. Local single-user → stdio. Remote / multi-user → Streamable HTTP.",
+                bSkills: ["B4.2"]
+              },
+              {
+                n: 2,
+                question: "An engineering team wants an MCP server that exposes 'company knowledge' (internal docs, policies, runbooks) to multiple developers across the org from a shared host. Which transport fits?",
+                options: {
+                  A: "stdio — each developer's Claude Code spawns its own subprocess of the server.",
+                  B: "Streamable HTTP — multi-user, remote, auth at transport, lives independently of any single client.",
+                  C: "Both — stdio for local dev, HTTP for production; the spec allows per-environment transport choice.",
+                  D: "Neither — use a non-MCP transport (gRPC) for shared services."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Each dev would spawn a fresh local copy. Doesn't share state, can't centralise updates, and can't enforce auth at transport.",
+                  B: "Right. Multi-user / remote / shared = Streamable HTTP. Auth lives at the transport layer; the server outlives any client.",
+                  C: "Single MCP server picks one transport. The exam-aligned answer is the right one for the deployment shape.",
+                  D: "gRPC isn't an MCP transport. The list is closed."
+                },
+                principle: "Multi-user / remote / shared = Streamable HTTP. stdio cannot share a process across users.",
+                bSkills: ["B4.2"]
+              },
+              {
+                n: 3,
+                question: "Which is the *strongest* operational reason to prefer stdio for a local-only MCP server?",
+                options: {
+                  A: "stdio supports more tools per server than HTTP does.",
+                  B: "stdio has no auth surface, no port management, and the server's lifecycle is bound to the client — fewer moving parts for a local single-user case.",
+                  C: "stdio servers can use Python; HTTP servers can only use Node.",
+                  D: "stdio responses are cached automatically."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Tool count is identical across transports; this is a fabricated distinction.",
+                  B: "Right. The win for stdio in local-only deployments is operational simplicity: no port, no auth, no lifecycle question. All of those become real costs the moment you pick HTTP.",
+                  C: "Both transports support any language with an SDK.",
+                  D: "Fabricated mechanism."
+                },
+                principle: "stdio's win is operational: no auth, no port, no lifecycle complexity. HTTP earns those costs only when the deployment shape requires them.",
+                bSkills: ["B4.2"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b4-3", code: "B4.3", title: "Reject non-MCP transports", bloom: "R",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "The MCP spec lists exactly two transports: **stdio** and **Streamable HTTP**. Anything else — WebSockets, gRPC, named pipes, raw TCP, message queues — is *not* an MCP transport. The exam tests this directly and frequently uses 'WebSockets for streaming' or 'gRPC for typed schemas' as plausible-sounding distractors. They're wrong on sight.",
+              "Why the closed list matters: MCP's value is interoperability — any compliant client talks to any compliant server. A 'WebSocket MCP server' isn't compliant; clients can't speak it. The transports are deliberately small to keep the surface tractable. Streamable HTTP already supports streaming responses (it's literally Server-Sent Events under the hood), so 'I want streaming' is not a reason to reach for WebSockets.",
+              "The recognition skill: when a question lists four transport options and three are real protocols (WebSockets, gRPC, message queue) plus one MCP transport, the MCP transport is the only correct answer. Distractors lean on the candidate's familiarity with non-MCP protocols from other contexts. The shortcut: cross out anything that isn't stdio or Streamable HTTP (sometimes phrased as HTTP+SSE in older question banks).",
+              "Two transitional notes. The spec evolves; new transports may be added in future versions, but as of the current spec the two-transport rule holds. And 'Streamable HTTP' replaced the older name 'HTTP+SSE' — same protocol shape, both names may appear, both refer to the same transport."
+            ],
+            keyPoints: [
+              "MCP transports: stdio, Streamable HTTP. Closed list.",
+              "WebSockets, gRPC, named pipes, raw TCP, message queues are *not* MCP.",
+              "Streamable HTTP already streams (via SSE) — 'streaming' is not a reason to reach outside the spec.",
+              "Older name for Streamable HTTP: HTTP+SSE."
+            ],
+            examples: [
+              {
+                title: "MCQ shape: 'Which is a valid MCP transport?'",
+                body: "Options often include WebSockets (familiar from real-time apps), gRPC (familiar from microservices), and one MCP transport. Cross out the non-MCP options regardless of how plausible they sound."
+              },
+              {
+                title: "'We want streaming responses' framing",
+                body: "Streamable HTTP supports streaming. Don't reach for WebSockets. The exam wants you to recognize the closed list, not relitigate it."
+              }
+            ],
+            pitfalls: [
+              "Picking WebSockets for 'real-time' framing. Streamable HTTP handles streaming.",
+              "Picking gRPC for 'typed schemas' framing. MCP itself defines typed schemas at a higher layer.",
+              "Assuming the spec must support some popular transport because it would be useful. The list is what it is."
+            ],
+            notesRef: "00-academy-basics/notes/05-mcp-intro.md",
+            simplified: {
+              oneLiner: "MCP only has two transports: stdio and Streamable HTTP. WebSockets and gRPC are common in other systems but not MCP.",
+              analogy: "It's like asking 'which countries are in this trade agreement?' There's a list. Other countries might be reasonable trading partners but they're not in the agreement.",
+              paragraphs: [
+                "Two transports, closed list. Distractor questions name plausible-sounding alternatives — they're wrong by definition.",
+                "Streamable HTTP (older name: HTTP+SSE) already streams; 'I want streaming' is not a reason to leave the spec."
+              ],
+              keyPoints: [
+                "stdio + Streamable HTTP. Nothing else.",
+                "Cross out non-MCP options on sight.",
+                "Old name HTTP+SSE = same as Streamable HTTP."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "Which of the following is *not* a valid MCP transport?",
+                options: {
+                  A: "stdio.",
+                  B: "Streamable HTTP (sometimes called HTTP+SSE).",
+                  C: "WebSockets.",
+                  D: "(All three are valid.)"
+                },
+                correct: "C",
+                explanations: {
+                  A: "Valid — local single-user transport.",
+                  B: "Valid — current name for the remote/multi-user transport.",
+                  C: "Right. WebSockets is not an MCP transport. The closed list is stdio + Streamable HTTP.",
+                  D: "False — WebSockets isn't on the list."
+                },
+                principle: "MCP transports are a closed list (stdio, Streamable HTTP). WebSockets, gRPC, and other protocols, however plausible, are not MCP.",
+                bSkills: ["B4.3"]
+              },
+              {
+                n: 2,
+                question: "A team wants 'streaming responses' from their MCP server and proposes WebSockets. What is the correct response?",
+                options: {
+                  A: "Approve — WebSockets is the obvious choice for streaming.",
+                  B: "Reject and pick gRPC for typed streaming.",
+                  C: "Reject — Streamable HTTP already supports streaming (via Server-Sent Events) and is the spec-defined remote transport. WebSockets is not an MCP transport.",
+                  D: "Approve, but only on internal networks."
+                },
+                correct: "C",
+                explanations: {
+                  A: "Off-spec. WebSockets isn't MCP.",
+                  B: "gRPC isn't MCP either; same problem.",
+                  C: "Right. Streamable HTTP already streams. 'I want streaming' is not a reason to leave the spec.",
+                  D: "Network scope doesn't change the spec."
+                },
+                principle: "Streamable HTTP supports streaming. Reaching for WebSockets is the canonical 'wrong transport' bait.",
+                bSkills: ["B4.3", "B4.2"]
+              },
+              {
+                n: 3,
+                question: "Which two transports together form the *complete* current MCP transport list?",
+                options: {
+                  A: "stdio and gRPC.",
+                  B: "WebSockets and HTTP+SSE.",
+                  C: "stdio and Streamable HTTP (older name: HTTP+SSE).",
+                  D: "TCP and HTTP/2."
+                },
+                correct: "C",
+                explanations: {
+                  A: "gRPC isn't on the list.",
+                  B: "WebSockets isn't on the list.",
+                  C: "Right. stdio + Streamable HTTP is the complete current list.",
+                  D: "Neither is an MCP transport."
+                },
+                principle: "Memorise the closed list: stdio + Streamable HTTP. Older docs may use 'HTTP+SSE' for the latter.",
+                bSkills: ["B4.3"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b4-4", code: "B4.4", title: "Diagnose wrong-tool-pick to description", bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "When the model calls the wrong tool, the *first* fix to consider is the tool description, not the tool list, the model, or the system prompt. The model picks tools by reading their schemas and descriptions; vague or overlapping descriptions are the most common cause of wrong-tool-pick. This is consistent enough that 'model picks wrong tool' should map mentally to 'check the descriptions' as the default first hypothesis.",
+              "A good tool description names four things: (1) what the tool *does* (the operation), (2) what it *operates on* (the input/data class), (3) what scenario it's the right pick for ('use this when…'), and (4) what it does *not* handle (the boundary that distinguishes it from neighbouring tools). Most bad descriptions miss (3) and (4); the model has to infer the differentiation, which it does by guessing.",
+              "Concrete example: two tools, `search_documents` and `find_files`. With descriptions 'Search the system for documents' and 'Find files,' they read like synonyms — the model picks based on noise. Rewriting to 'search_documents: search indexed PDFs and Word docs by content' and 'find_files: list filenames in the working directory by glob pattern' makes the choice mechanical for the model.",
+              "The diagnostic order: (1) check tool descriptions for clarity and differentiation; (2) check schema parameters for ambiguity; (3) only after both are clean, consider whether the *set* of tools is wrong (too many overlapping, too few covering distinct use cases). Renaming tools, adding system-prompt nudges ('prefer X when…'), or merging tools are all weaker fixes that paper over a description-quality problem."
+            ],
+            keyPoints: [
+              "Wrong-tool-pick → check the description first.",
+              "Good description = operation + operand + when-to-use + when-NOT-to-use.",
+              "Differentiation between neighbouring tools is the most-missed component.",
+              "Rename / system-prompt nudges / tool merges are second-order fixes."
+            ],
+            examples: [
+              {
+                title: "Bad pair",
+                body: "search_documents: 'Search the system for documents.'\nfind_files: 'Find files.'\nReads as synonyms; model picks based on noise."
+              },
+              {
+                title: "Good pair",
+                body: "search_documents: 'Search indexed PDFs and Word docs by *content* (full-text search). Use when the user asks about what's *in* a document. Does not list filenames or directory contents.'\nfind_files: 'List filenames in the working directory by glob pattern. Use when the user asks where a file *is*. Does not search inside files.'\nDifferentiation is explicit; selection becomes mechanical."
+              }
+            ],
+            pitfalls: [
+              "Renaming tools as the fix. The model reads descriptions, not names.",
+              "Adding 'prefer search_documents when in doubt' to the system prompt. Bias without information; doesn't fix the structural ambiguity.",
+              "Merging two ambiguous tools into one with a `mode` param. Pushes the disambiguation onto a parameter; the description-quality problem just moves.",
+              "Skipping the 'does NOT handle' clause. The boundary is what differentiates."
+            ],
+            notesRef: "00-academy-basics/notes/05-mcp-intro.md",
+            simplified: {
+              oneLiner: "If the model keeps picking the wrong tool, fix the descriptions before anything else. Say what each tool does, what it operates on, when to use it, and what it doesn't handle.",
+              analogy: "It's like having two job titles in an org: 'Frontend Engineer' and 'UI Engineer'. If their job descriptions are vague, requests get routed badly. Tighten the descriptions and the routing fixes itself.",
+              paragraphs: [
+                "Tools are picked by description. Bad descriptions cause wrong picks more than anything else.",
+                "Name the operation, the input class, the when-to-use case, and the not-handled boundary. Differentiation is what makes selection mechanical."
+              ],
+              keyPoints: [
+                "First fix: descriptions.",
+                "Include 'does NOT handle' boundaries.",
+                "Renaming and prompt nudges are weaker fixes."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "Two tools are registered: `search_documents` ('Search the system for documents') and `find_files` ('Find files'). The model keeps picking the wrong one. Which fix has the highest leverage?",
+                options: {
+                  A: "Rename the tools to search_documents_v2 and find_files_v2.",
+                  B: "Rewrite both descriptions to specify what each searches (e.g., 'search indexed PDFs by content' vs. 'list filenames in working directory by glob'), input shape, and when each is right.",
+                  C: "Add a system-prompt rule: 'When in doubt, prefer search_documents.'",
+                  D: "Merge both tools into one `search` tool with a `mode` parameter."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Renaming is cosmetic. Doesn't tell the model what each tool does.",
+                  B: "Right. Tool descriptions are the model's selection signal. Specify operation, operand, when-to-use, and not-handled. Differentiation > naming > nudging.",
+                  C: "System-prompt nudges paper over the design problem and bias the model without informing it.",
+                  D: "Merging adds API complexity to dodge a description-quality issue."
+                },
+                principle: "When the model picks the wrong tool, the tool's description is the first thing to fix. Renames, nudges, and merges are second-order.",
+                bSkills: ["B4.4"]
+              },
+              {
+                n: 2,
+                question: "Which component is *most* often missing from a tool description that causes wrong-tool-pick failures?",
+                options: {
+                  A: "The tool's name in CamelCase.",
+                  B: "The 'does NOT handle' boundary that distinguishes it from neighbouring tools.",
+                  C: "The version number of the underlying API.",
+                  D: "The author's name and contact info."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Casing is cosmetic.",
+                  B: "Right. Tools live in a list; the model has to differentiate them. The 'does NOT handle' clause is what makes the boundary explicit and most often missing.",
+                  C: "Versioning is metadata; not the selection signal.",
+                  D: "Author info is irrelevant to selection."
+                },
+                principle: "Differentiation between neighbouring tools is the most-missed description component. Name the boundary explicitly.",
+                bSkills: ["B4.4"]
+              },
+              {
+                n: 3,
+                question: "Which is the *least effective* fix for 'model picks the wrong tool'?",
+                options: {
+                  A: "Rewriting the tool descriptions to differentiate them clearly.",
+                  B: "Adding a 'when to use this' clause to each description.",
+                  C: "Renaming the tools to longer, more descriptive names while leaving the descriptions vague.",
+                  D: "Removing a redundant tool that overlaps with another."
+                },
+                correct: "C",
+                explanations: {
+                  A: "Most effective fix.",
+                  B: "Effective — adds the when-to-use clause that's often missing.",
+                  C: "Right. Renaming alone leaves the model with the same selection signal (the description). Names aren't the lever.",
+                  D: "Removing redundant tools is a legitimate (less common) fix when descriptions can't differentiate."
+                },
+                principle: "Tool selection is driven by description, not name. Name changes alone don't fix the underlying issue.",
+                bSkills: ["B4.4"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b4-5", code: "B4.5", title: "Server-per-capability vs monolith", bloom: "E",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "MCP server design strongly favours **server-per-capability** over **monolithic 'company server' designs**. A capability is a coherent integration target — git, filesystem, Jira, Postgres. One MCP server per capability means tight focus on the schemas and descriptions of *that* integration, independent versioning, smaller blast radius for failures, and the ability to compose servers in the client (Claude Code, etc.) without inheriting unrelated dependencies.",
+              "The monolith antipattern: a single 'company-wide MCP server' that bundles git + Jira + Postgres + S3 + every other internal integration into one process. Symptoms: tool list bloats (the model sees 50+ tools at once and selection accuracy drops), deploys become risky (any change touches the shared surface), permissions get coarse-grained (you either auth into the whole monolith or none of it), and one buggy integration takes the whole server down.",
+              "The right defaults: scope each server to one integration; let the client compose. Most MCP clients (including Claude Code) connect to multiple servers concurrently — there's no operational benefit to bundling. The two reference servers worth studying as exemplars: the Filesystem server and the Git server in `modelcontextprotocol/servers` — small, focused, single-capability.",
+              "When a monolith *is* tempting (shared auth, shared rate-limits, shared logging), the better answer is usually a thin wrapper or sidecar that handles the cross-cutting concern outside the server, keeping the per-capability servers small. The exam frames this exactly: 'should we build one company server or many smaller servers?' — the right answer is many small ones."
+            ],
+            keyPoints: [
+              "Server-per-capability is the default. Monolith is the antipattern.",
+              "Tool list bloat reduces model selection accuracy at ~10+ tools.",
+              "Independent versioning, smaller blast radius, finer-grained auth.",
+              "Clients compose multiple servers concurrently — there's no need to bundle."
+            ],
+            examples: [
+              {
+                title: "Right: separate servers per integration",
+                body: "git-mcp · jira-mcp · postgres-mcp · s3-mcp. Each ~10 well-described tools. Each independently auth'd, deployed, versioned. Claude Code connects to all four; the model sees a focused tool list per capability."
+              },
+              {
+                title: "Wrong: 'acme-internal-mcp' monolith",
+                body: "One server, 60 tools across 8 integrations. Tool descriptions inevitably overlap (search_jira_tickets vs search_zendesk_tickets vs search_internal_docs). Selection accuracy degrades. Auth is all-or-nothing. Deploy is high-risk."
+              }
+            ],
+            pitfalls: [
+              "Reaching for a monolith because 'one server is easier to deploy.' True for now; expensive forever.",
+              "Underestimating tool-list bloat. The model is reading every description on every call; 50 tools is a lot of context.",
+              "Bundling because 'shared auth.' Sidecar / proxy patterns handle shared concerns without forcing the bundle."
+            ],
+            notesRef: "00-academy-basics/notes/05-mcp-intro.md",
+            simplified: {
+              oneLiner: "Build one MCP server per integration (git, Jira, Postgres). Don't bundle them into one giant company server.",
+              analogy: "Like microservices vs. a monolith: small, focused services compose better than one giant service. Same principle here.",
+              paragraphs: [
+                "Each MCP server should cover one capability. The client connects to many.",
+                "Bundling looks easier on day one but makes everything harder afterward — selection accuracy, auth, deploys, blast radius all suffer."
+              ],
+              keyPoints: [
+                "Server-per-capability is the default.",
+                "Clients can compose many servers easily.",
+                "Monoliths bloat the tool list and bundle blast radius."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "An ops team is planning their MCP architecture. They need to expose git, Jira, Postgres, and S3 capabilities to Claude Code. Which design is *most* aligned with MCP best practice?",
+                options: {
+                  A: "One monolithic 'acme-internal-mcp' server bundling all four integrations.",
+                  B: "Four separate servers (git-mcp, jira-mcp, postgres-mcp, s3-mcp) the client connects to concurrently.",
+                  C: "One server per environment (dev, staging, prod), each bundling all four integrations.",
+                  D: "A custom non-MCP gateway in front of all four backends."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Monolith antipattern — tool-list bloat, coarse auth, large blast radius.",
+                  B: "Right. Server-per-capability is the canonical MCP design. Each server is focused, independently versioned, and the client composes them.",
+                  C: "Environment-bundled monolith multiplies the antipattern by environment count.",
+                  D: "Off-spec — non-MCP gateways defeat interoperability."
+                },
+                principle: "Server-per-capability is the default. Clients compose multiple servers concurrently.",
+                bSkills: ["B4.5"]
+              },
+              {
+                n: 2,
+                question: "A team's monolithic MCP server now exposes 55 tools. They report the model often picks wrong tools and selection accuracy has degraded over time. What's the *structural* fix?",
+                options: {
+                  A: "Lower temperature on the model.",
+                  B: "Split the monolith into several capability-focused servers; each server's tool list is small enough for the model to differentiate cleanly.",
+                  C: "Add a system-prompt list of 'preferred tools' to bias selection.",
+                  D: "Switch to a more capable model."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Doesn't address the structural cause.",
+                  B: "Right. Tool-list bloat reduces selection accuracy. Splitting into per-capability servers gives each small focused tool list and resolves the cause.",
+                  C: "Bias without information; weaker than splitting.",
+                  D: "Bigger model can mask the issue but doesn't fix the structural cause."
+                },
+                principle: "Tool-list bloat is the predictable symptom of monolith MCP design. The structural fix is splitting into per-capability servers.",
+                bSkills: ["B4.5", "B4.4"]
+              },
+              {
+                n: 3,
+                question: "Which is the strongest justification for splitting an MCP server when a single integration grows large?",
+                options: {
+                  A: "It will run faster on multi-core hosts.",
+                  B: "Independent versioning, smaller blast radius for failures, finer-grained auth, and (above ~10 tools) better model selection accuracy.",
+                  C: "MCP requires a tool-count cap of 12 per server.",
+                  D: "Splitting reduces the per-token cost of tool descriptions."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Performance argument is real but secondary.",
+                  B: "Right. The structural wins are versioning, blast radius, auth granularity, and selection accuracy. All of these compound as the server grows.",
+                  C: "Fabricated cap.",
+                  D: "Per-token cost is unaffected by splitting at that layer."
+                },
+                principle: "Server-per-capability wins on versioning, blast radius, auth, and selection accuracy. Bundling trades these away for a one-time deploy convenience.",
+                bSkills: ["B4.5"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b4-6", code: "B4.6", title: "Auth at transport, not in tool input", bloom: "A",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Authentication and identity in MCP belong at the **transport layer**, not in tool input schemas. For Streamable HTTP, that means OAuth-style flows, bearer tokens, mTLS, or transport headers handled by the MCP client/server framework. For stdio, the parent process owns identity (the user who started the client). Putting credentials into tool inputs (an `api_key` parameter on every tool, a `user_token` field) is structurally wrong — it leaks credentials into the model's context, makes tool descriptions encode secrets, and breaks the abstraction MCP is built on.",
+              "Why this matters: the model sees tool inputs. Anything you put in a tool's input schema is something the model is reading, reasoning about, and potentially generating. Credentials in that surface become part of the prompt; they may end up in logs, traces, model-side caches, or — in the worst case — emitted back to the user. Even if the integration would 'work,' the security shape is wrong.",
+              "The correct pattern: the client authenticates to the server at connection time (Streamable HTTP) or by virtue of being the parent process (stdio). The server uses the established identity to scope all subsequent calls. Tool inputs carry only the *operation parameters* (what to do), never the *identity* (who is doing it).",
+              "Detection signature: tool schemas contain fields named `api_key`, `auth_token`, `user_id`, `session_token`, `bearer`. Each is a smell — sometimes legitimate (passing through a downstream system's parameter), but usually a sign that auth has leaked into the wrong layer. Refactor to handle identity at the transport handshake instead."
+            ],
+            keyPoints: [
+              "Auth lives at the transport layer (Streamable HTTP: OAuth/headers; stdio: parent process).",
+              "Tool inputs carry operation parameters only, never identity/credentials.",
+              "Credentials in tool inputs leak into the model's context — log/trace/cache risk.",
+              "Schema fields named api_key / auth_token / bearer in tool inputs are smells."
+            ],
+            examples: [
+              {
+                title: "Wrong: auth in tool input",
+                body: "tool: send_email(api_key, to, subject, body)\nThe model reads api_key on every call; it lands in conversation history, logs, traces."
+              },
+              {
+                title: "Right: auth at transport",
+                body: "Client establishes auth at HTTP connection (OAuth flow). Server scopes to the authenticated user.\ntool: send_email(to, subject, body)\nNo credential surface in the tool schema; the model never sees the key."
+              }
+            ],
+            pitfalls: [
+              "Treating tool inputs as a convenient place to pass per-call auth. Convenient ≠ correct.",
+              "Multi-tenant servers that use a `tenant_id` tool input as if it were auth. Use real identity at the transport.",
+              "Forgetting that the model literally reads tool input descriptions and values during selection — secrets there become prompt content."
+            ],
+            notesRef: "00-academy-basics/notes/05-mcp-intro.md",
+            simplified: {
+              oneLiner: "Auth happens when the client connects to the server, not in the parameters of each tool call. Don't put api_key fields in tool schemas.",
+              analogy: "It's like showing your badge at the office door (transport auth) versus carrying it into every meeting and reading it aloud (auth in tool input). One leaks; one doesn't.",
+              paragraphs: [
+                "MCP auth belongs at the transport handshake. Tool inputs should only carry what to do, not who's doing it.",
+                "Credentials in tool inputs end up in the model's context and — by extension — in logs, traces, and possibly user-facing replies."
+              ],
+              keyPoints: [
+                "Auth at transport. Always.",
+                "Tool inputs = operation params only.",
+                "api_key in a tool schema = smell."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "An MCP server's `send_email` tool has the input schema `{api_key, to, subject, body}`. What is the structural critique?",
+                options: {
+                  A: "The schema is fine; tool-level auth gives finer-grained control than transport-level.",
+                  B: "Credentials belong at the transport layer (OAuth, headers, parent-process identity). Putting api_key in the tool input leaks it into the model's context, conversation history, logs, and traces.",
+                  C: "The tool would work but should rename `api_key` to `bearer_token` for consistency.",
+                  D: "The tool should accept credentials but encrypt them client-side first."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Tool-level auth is the wrong layer. The model sees tool inputs.",
+                  B: "Right. The model reads tool inputs. Auth in the schema means credentials become prompt content — log risk, trace risk, replay risk. Auth belongs at transport.",
+                  C: "Renaming doesn't fix the layer error.",
+                  D: "Client-side encryption doesn't change the fact the model sees the field."
+                },
+                principle: "Auth lives at the transport layer, not in tool inputs. Credentials in tool schemas leak into model context.",
+                bSkills: ["B4.6"]
+              },
+              {
+                n: 2,
+                question: "For an MCP server using *stdio*, how is identity / auth typically established?",
+                options: {
+                  A: "Each tool input must carry a `user_id` field.",
+                  B: "The parent process (the MCP client) owns identity; the server runs in that user's process context, no separate auth surface needed.",
+                  C: "The server prompts for credentials on first tool call.",
+                  D: "stdio doesn't support authentication; it's local-only and trustless."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Identity in tool input is the antipattern.",
+                  B: "Right. stdio servers run as a child of the client; the client's user owns the process. Identity is implicit and inherited from the parent. No separate auth surface — that's part of why stdio is operationally simple.",
+                  C: "There's no in-band auth prompt for stdio.",
+                  D: "Identity is established (via parent process); 'no auth' would be wrong characterisation."
+                },
+                principle: "stdio: parent process owns identity. Streamable HTTP: transport-layer auth (OAuth, headers, mTLS). Tool inputs never.",
+                bSkills: ["B4.6"]
+              },
+              {
+                n: 3,
+                question: "Which schema field in a tool input is *most* likely a smell that auth has leaked into the wrong layer?",
+                options: {
+                  A: "`to_email` (string).",
+                  B: "`subject` (string).",
+                  C: "`bearer_token` (string, required).",
+                  D: "`body` (string)."
+                },
+                correct: "C",
+                explanations: {
+                  A: "Operation parameter — fine.",
+                  B: "Operation parameter — fine.",
+                  C: "Right. A bearer_token in the tool input means the model reads, reasons about, and generates with the credential. Should be at transport instead.",
+                  D: "Operation parameter — fine."
+                },
+                principle: "Schema fields shaped like credentials (api_key, auth_token, bearer, session_token) in tool inputs are smells — refactor to transport auth.",
+                bSkills: ["B4.6"]
+              }
+            ]
+          }
+        }
       ],
-      sectionTest: null
+      sectionTest: {
+        title: "Section 4 test — Introduction to MCP",
+        passPct: 0.7,
+        questions: [
+          {
+            n: 1,
+            question: "A team is exposing four kinds of capability via an MCP server: (a) a 60-page company handbook PDF the model should consult, (b) a `send_invoice` operation the model decides to invoke when finalising orders, (c) a `weekly_status_report` workflow with a date range slot users pick from a menu, (d) a static reference table of state-tax rates. Which mapping to MCP primitives is *most* correct?",
+            options: {
+              A: "All four as tools.",
+              B: "(a) resource, (b) tool, (c) prompt, (d) resource.",
+              C: "(a) prompt, (b) tool, (c) resource, (d) tool.",
+              D: "All four as resources, with the model deciding what to do."
+            },
+            correct: "B",
+            explanations: {
+              A: "Tool-everything bloats the tool list and miscategorises data and templates.",
+              B: "Right. Static data the model consumes = resource. Model-invoked operation = tool. User-picked templated workflow = prompt. Static reference table = resource.",
+              C: "PDFs aren't templated workflows; tax-rate tables aren't operations.",
+              D: "Resource-everything misses operations and templates."
+            },
+            principle: "Three primitives, defined by invoker. Misclassifying produces tool-list bloat, hidden workflows, and broken UX.",
+            bSkills: ["B4.1"]
+          },
+          {
+            n: 2,
+            question: "A team needs an MCP server that exposes internal-docs search to the entire engineering org from a shared host with auth. Pick the transport, and explain *why* not its alternatives.",
+            options: {
+              A: "stdio — each developer's Claude Code spawns a fresh subprocess.",
+              B: "Streamable HTTP — multi-user, remote, transport-layer auth, server lifecycle independent of any single client. WebSockets / gRPC are not MCP transports.",
+              C: "WebSockets — real-time streaming for shared services.",
+              D: "Custom gRPC gateway — strongly typed; clients can connect to any RPC system."
+            },
+            correct: "B",
+            explanations: {
+              A: "stdio cannot share a process across multiple clients/users.",
+              B: "Right. Multi-user / shared / remote = Streamable HTTP. The closed transport list excludes WebSockets and gRPC.",
+              C: "WebSockets isn't an MCP transport.",
+              D: "Off-spec; defeats interoperability."
+            },
+            principle: "Match transport to deployment shape; the list is closed (stdio + Streamable HTTP).",
+            bSkills: ["B4.2", "B4.3"]
+          },
+          {
+            n: 3,
+            question: "An organisation's monolithic MCP server now exposes 55 tools. The model picks wrong tools frequently and any deploy carries org-wide risk. What's the *structural* refactor most aligned with MCP best practice?",
+            options: {
+              A: "Lower temperature; the wrong-pick rate will improve.",
+              B: "Add a system-prompt list of 'preferred tools' to bias the model.",
+              C: "Split the monolith into per-capability servers; each server's small focused tool list improves selection accuracy and the blast radius shrinks.",
+              D: "Switch to a more capable model and accept the tool-list bloat."
+            },
+            correct: "C",
+            explanations: {
+              A: "Doesn't address the structural cause.",
+              B: "Bias without information; weaker than splitting.",
+              C: "Right. Tool-list bloat + monolithic blast radius are predictable monolith antipatterns. Server-per-capability is the canonical MCP design.",
+              D: "Bigger model masks the issue without fixing the structural cause."
+            },
+            principle: "Server-per-capability is the default. Monolith antipattern manifests as wrong-tool-pick (selection bloat) and large blast radius (deploy risk).",
+            bSkills: ["B4.5", "B4.4"]
+          },
+          {
+            n: 4,
+            question: "An MCP `send_payment` tool's input schema includes `{api_key, recipient, amount, memo}`. What is the *correct* refactor?",
+            options: {
+              A: "Rename `api_key` to `auth_token` for clarity.",
+              B: "Move authentication to the transport layer (OAuth or headers for HTTP; parent process for stdio); the tool input should carry operation parameters only.",
+              C: "Encrypt `api_key` client-side before sending.",
+              D: "Mark `api_key` as `secret: true` in the schema annotation."
+            },
+            correct: "B",
+            explanations: {
+              A: "Renaming doesn't change the layer error.",
+              B: "Right. Auth belongs at the transport layer. Credentials in tool inputs leak into model context and beyond.",
+              C: "Client-side encryption doesn't change the fact the model sees the field.",
+              D: "A `secret: true` annotation is fabricated and wouldn't fix the layer error anyway."
+            },
+            principle: "Auth at transport, not in tool input. Tool schemas carry operation parameters only.",
+            bSkills: ["B4.6"]
+          }
+        ]
+      }
     },
     {
       id: "s5-claude-code-101",
