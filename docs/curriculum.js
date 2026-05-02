@@ -178,7 +178,115 @@ const CURRICULUM = {
         },
         { id: "b1-2", code: "B1.2", title: "Product-tier vs API-level limit",  bloom: "A", lesson: null, quiz: null },
         { id: "b1-3", code: "B1.3", title: "Artifact vs inline message",       bloom: "E", lesson: null, quiz: null },
-        { id: "b1-4", code: "B1.4", title: "Context cost of N file uploads",   bloom: "A", lesson: null, quiz: null }
+        {
+          id: "b1-4", code: "B1.4", title: "Context cost of N file uploads", bloom: "A",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "B1.1 established the qualitative claim: a Claude.ai Project is in-context file storage, not retrieval. B1.4 makes that quantitative. Every file you attach to a Project is concatenated into the system context on *every* chat, every turn — there is no caching, no on-demand load, no top-k. The per-message cost of N files is roughly N × file_size in tokens, paid every turn for the life of the Project.",
+              "Two things follow from that. First: the budget the conversation and the model's answer get is what's left of the context window after the files are loaded. With a 200 KB context budget and 150 KB of attached files, the user message and the answer share the remaining 50 KB. The 'context window feels small' complaint on a heavily-loaded Project is a direct consequence of this math, not a subscription tier issue.",
+              "Second: even when N × file_size still fits, attention quality degrades non-linearly. The model has to find the relevant tokens inside an ever-growing wall of content. Distractor passages compete for attention with the actual question. The breaking point arrives long before the hard window limit — usually as 'answers get vaguer / cite the wrong file' rather than as a visible error.",
+              "The decision rule is mechanical. If the access pattern is *every chat needs all of it*, a Project is the right shape and you must size N × file_size to leave conversational headroom. If the access pattern is *only the relevant slice should land in context*, you've outgrown a Project and you need retrieval (RAG / MCP server / search tool). Adding more files to a Project that's already too big does not help. It is the failure mode."
+            ],
+            keyPoints: [
+              "Per-message cost ≈ N × file_size, paid every turn. No caching at this layer.",
+              "Conversation budget = window − attached files. Heavy Projects shrink the budget visibly.",
+              "Quality degrades from attention competition before the hard window limit fires.",
+              "Threshold question: must every chat see all of it? If no, switch to retrieval — don't add files."
+            ],
+            examples: [
+              {
+                title: "Sizing a Project before attaching",
+                body: "Window: ~200,000 tokens. Files: 12 PDFs, ~10,000 tokens each = 120,000 tokens of system context every chat. Conversation + answer share ~80,000 tokens — usually fine. Now add the 13th file at 100,000 tokens (a long policy doc): you've blown past the window and the Project will start dropping content silently. The fix is not 'shorten the conversation' — it's pulling that 13th file out of the Project and behind retrieval."
+              },
+              {
+                title: "Diagnosing 'context feels tight'",
+                body: "User reports: 'Claude is forgetting earlier turns sooner than usual.' Project has 8 files attached. Total: ~140,000 tokens of files in a 200,000-token window. The conversation budget is ~60,000 tokens — earlier turns are being squeezed out by the file load, not by anything wrong with the conversation. The fix is structural: drop files that don't need to be in every chat."
+              }
+            ],
+            pitfalls: [
+              "Believing 'Claude.ai caches Project files between turns.' It does not at this layer; cost is paid every turn.",
+              "Assuming a separate 'file context budget' exists. There is one window, shared by files + conversation + answer.",
+              "Treating 'add another file' as the default response when answer quality drops. The opposite is usually correct: pull files out and switch the access pattern."
+            ],
+            notesRef: "00-academy-basics/notes/01-claude-101.md",
+            simplified: {
+              oneLiner: "N attached files cost roughly N × file_size of context every chat — there is no caching, no retrieval, no separate budget.",
+              analogy: "Imagine printing every attached file at the start of every conversation and stapling it to the front of your question. The pile grows; your speaking room shrinks; eventually the staple bursts. Adding more paper doesn't help — moving the rarely-needed pages off the desk does.",
+              paragraphs: [
+                "Every file you attach to a Claude.ai Project gets pasted into the prompt at the start of every chat. There is no clever caching — the same files are re-sent each turn.",
+                "That means the room left for your question and Claude's answer is the context window minus all those files. Pile on too many and the conversation gets cramped, and answers start missing things even before you hit the hard limit.",
+                "The fix is rarely 'add more files.' It's usually 'remove files that don't need to be in every chat,' or 'switch to a setup that searches before sending.'"
+              ],
+              keyPoints: [
+                "Files load fresh every chat — no cache, no shortcut.",
+                "Window ≠ unlimited. Files eat the same budget as the conversation.",
+                "If quality drops, take files out — don't pile more in."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team attaches 10 internal docs (~20 KB each) to a Claude.ai Project. After the first week, users complain Claude 'forgets' earlier turns much sooner than expected. What is the most likely structural cause?",
+                options: {
+                  A: "The Project is silently summarizing earlier turns to make room.",
+                  B: "The 10 docs are loaded into context every chat, shrinking the budget the conversation and answer share.",
+                  C: "Claude.ai's tier-based cache eviction is dropping older turns under load.",
+                  D: "The model is operating below its context limit but above its 'attention budget,' a separate cap."
+                },
+                correct: "B",
+                explanations: {
+                  A: "There is no automatic summarization at this layer.",
+                  B: "Right. ~200 KB of files in the system context every turn leaves the conversation a much smaller working budget. Earlier turns drop because the window is genuinely tighter, not because anything is being summarized.",
+                  C: "Fabricated mechanism. There is no tier-based cache eviction of conversation turns.",
+                  D: "Fabricated. There is no separate 'attention budget' cap."
+                },
+                principle: "Per-message context budget = window − attached files. The 'forgetting' symptom is the math made visible.",
+                bSkills: ["B1.4"]
+              },
+              {
+                n: 2,
+                question: "A user reports answer quality is poor and asks whether they should attach 5 more reference PDFs to their already-loaded Project. What is the strongest response?",
+                options: {
+                  A: "Yes — more reference material gives Claude more grounding to answer correctly.",
+                  B: "Yes, but only if the new PDFs are smaller than the existing ones, to stay under the file-count limit.",
+                  C: "No — adding files raises the per-turn context cost and increases attention competition. The fix is usually to remove files or move to retrieval, not add more.",
+                  D: "No — Project files are write-once; the originals would have to be re-uploaded together."
+                },
+                correct: "C",
+                explanations: {
+                  A: "This is the canonical failure mode the lesson names. More files = more context cost + more attention competition, not better grounding.",
+                  B: "File-count is not the binding constraint here; aggregate token cost and attention quality are.",
+                  C: "Right. The corrective intervention when answer quality drops on a heavy Project is to reduce the file load or switch the access pattern (retrieval), not to add more.",
+                  D: "Fabricated. Project files can be added and removed freely."
+                },
+                principle: "When a Project is already saturated, more files is the wrong direction. Either trim the corpus to what every chat truly needs, or move to retrieval.",
+                bSkills: ["B1.4"]
+              },
+              {
+                n: 3,
+                question: "Which statement about per-message context cost on a Claude.ai Project is correct?",
+                options: {
+                  A: "Files are paid for once on first attach; subsequent chats reuse a cached representation at zero context cost.",
+                  B: "Cost ≈ N × file_size every turn, regardless of whether the user's question relates to the files.",
+                  C: "Cost is computed lazily — only the files relevant to the current question are loaded.",
+                  D: "Cost is bounded by the subscription tier's daily token quota, not the per-message window."
+                },
+                correct: "B",
+                explanations: {
+                  A: "No first-turn caching at this layer. Files re-load every chat.",
+                  B: "Right. Claude.ai Projects do not retrieve. All attached files load into the system context every turn, whether or not the question touches them. Cost is mechanical: N × file_size, every chat.",
+                  C: "There is no relevance filter on Project files. That's the point of the Project / RAG distinction in B1.1.",
+                  D: "Daily quotas govern message count, not per-message context cost."
+                },
+                principle: "Project context cost is mechanical and paid every turn. Plan capacity from N × file_size; expect no relevance filtering.",
+                bSkills: ["B1.4"]
+              }
+            ]
+          }
+        }
       ],
       sectionTest: {
         title: "Section 1 test — Claude 101",
