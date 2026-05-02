@@ -588,37 +588,53 @@
 
     const openBtn = el("button", {
       class: "primary ask-claude-open",
-      onclick: async () => {
+      onclick: () => {
         const prompt = buildSimplifyPrompt(concept, L, ta.value);
+
+        // Open the new tab synchronously while the click's user-activation
+        // is still live — awaiting clipboard.writeText() first can drop
+        // activation in Safari/Firefox and trigger their popup blocker.
+        window.open("https://claude.ai/new", "_blank", "noopener");
+
+        // Try the synchronous execCommand path first so we never have to
+        // await before any other side-effect that needs activation.
         let copied = false;
         try {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(prompt);
-            copied = true;
-          }
+          const tmp = document.createElement("textarea");
+          tmp.value = prompt;
+          tmp.style.position = "fixed";
+          tmp.style.left = "-9999px";
+          document.body.appendChild(tmp);
+          tmp.select();
+          copied = !!(document.execCommand && document.execCommand("copy"));
+          document.body.removeChild(tmp);
         } catch (e) { copied = false; }
-        if (!copied) {
-          // Fallback: select-and-copy on a hidden textarea.
-          try {
-            const tmp = document.createElement("textarea");
-            tmp.value = prompt;
-            tmp.style.position = "fixed";
-            tmp.style.left = "-9999px";
-            document.body.appendChild(tmp);
-            tmp.select();
-            copied = document.execCommand && document.execCommand("copy");
-            document.body.removeChild(tmp);
-          } catch (e) { copied = false; }
+
+        const finish = (ok) => {
+          status.textContent = ok
+            ? "Prompt copied. Paste it into the new Claude tab."
+            : "Could not auto-copy — the prompt is shown below; copy it manually.";
+          if (!ok) {
+            ta.value = prompt;
+            ta.focus();
+            ta.select();
+          }
+        };
+
+        if (copied) {
+          finish(true);
+          return;
         }
-        status.textContent = copied
-          ? "Prompt copied. Paste it into the new Claude tab."
-          : "Could not auto-copy — the prompt is shown below; copy it manually.";
-        if (!copied) {
-          ta.value = prompt;
-          ta.focus();
-          ta.select();
+
+        // Async clipboard API as a secondary attempt. Safe to await here
+        // because the new tab and synchronous copy attempt are already done.
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(prompt)
+            .then(() => finish(true))
+            .catch(() => finish(false));
+        } else {
+          finish(false);
         }
-        window.open("https://claude.ai/new", "_blank", "noopener");
       }
     }, "Open in Claude →");
 
