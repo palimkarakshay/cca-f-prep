@@ -2830,11 +2830,426 @@ const CURRICULUM = {
             ]
           }
         },
-        { id: "b5-2", code: "B5.2", title: "Predict permission cascade",          bloom: "An", lesson: null, quiz: null },
-        { id: "b5-3", code: "B5.3", title: "Route rule (CLAUDE.md/skill/hook)",   bloom: "E",  lesson: null, quiz: null },
-        { id: "b5-4", code: "B5.4", title: "Author slash command",                bloom: "A",  lesson: null, quiz: null }
+        {
+          id: "b5-2", code: "B5.2", title: "Predict permission cascade", bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Claude Code's permission system is *cascading* — settings come from multiple layers, and the layers stack with a defined precedence order. Understanding the order is the difference between 'I added Allow * and it doesn't take effect' (because a higher layer Denies) and 'why did this command get blocked, I never set that' (because of an Enterprise-managed rule).",
+              "Precedence order, highest → lowest: **Enterprise-managed settings** (set by org IT, often via MDM) → **CLI flags** for the current invocation → **`.claude/settings.local.json`** (per-project, gitignored, your local override) → **`.claude/settings.json`** (per-project, checked in, shared with the team) → **`~/.claude/settings.json`** (per-user, your default across all projects). Higher layers can lock fields lower layers cannot override.",
+              "The trap to internalise: *local project settings override shared project settings*. Your `.claude/settings.local.json` (gitignored) wins over `.claude/settings.json` (committed) in your project. This is the inverse of what people often guess under exam pressure ('the team setting feels more authoritative'). The local-overrides-shared semantics is intentional — it lets individuals customise without forcing the team config to change.",
+              "How a single rule resolves: walk top-down. If Enterprise sets `permissions.deny: rm -rf` then nothing below can override it. If no Enterprise rule applies, look at CLI flags. Then settings.local.json. Then settings.json. Then user. The first explicit decision wins; absence of a rule means 'pass through.' For *deny* outcomes specifically: a deny anywhere in the chain is sticky if higher layers don't explicitly re-allow."
+            ],
+            keyPoints: [
+              "Precedence: Enterprise > CLI > project local > project shared > user.",
+              "Higher layers can lock fields lower layers cannot override.",
+              "Local project (`.local.json`) wins over shared project (`.json`). Inverse of common guess.",
+              "First explicit decision in the cascade wins; absence = pass-through.",
+              "Enterprise deny is sticky and intentional — IT's veto."
+            ],
+            examples: [
+              {
+                title: "Enterprise deny + user allow",
+                body: "Enterprise: `permissions.deny: ['Bash(rm -rf:*)']`. User settings: `permissions.allow: ['Bash(*)']`. Result: rm -rf is denied. Enterprise wins."
+              },
+              {
+                title: "Local override of shared",
+                body: "Project shared (`.claude/settings.json`): `permissions.deny: ['Bash(npm publish:*)']`. Local (`.claude/settings.local.json`): `permissions.allow: ['Bash(npm publish:*)']`. Result on this machine: allowed. The local file overrides the shared one for this user."
+              }
+            ],
+            pitfalls: [
+              "Inverting local vs shared. Under exam pressure, people often guess 'shared/team wins' — wrong. Local wins.",
+              "Forgetting that CLI flags sit *between* Enterprise and per-project. They're scoped to the current invocation.",
+              "Thinking absence of a rule means 'deny.' Absence means 'pass through to the next layer'; default is allow unless something denies.",
+              "Treating Enterprise rules as suggestions. They're locks; nothing below can override."
+            ],
+            notesRef: "00-academy-basics/notes/03-claude-code-101.md",
+            simplified: {
+              oneLiner: "Settings cascade in order: Enterprise > CLI > project-local (.local.json) > project-shared (.json) > user. Higher always wins. Local-project beats shared-project.",
+              analogy: "Think of it like a chain of approvers. The boss (Enterprise) overrides everyone. CLI flags are 'just for this meeting.' Your personal note on the project (local) overrides the team note (shared). Your default user prefs are last.",
+              paragraphs: [
+                "Five layers, fixed order. Higher layers win. Enterprise is the absolute ceiling.",
+                "The one to memorise carefully: project-LOCAL overrides project-SHARED. People often guess the other way under pressure."
+              ],
+              keyPoints: [
+                "Order: Enterprise > CLI > local > shared > user.",
+                "Local-project beats shared-project.",
+                "Enterprise denies are unbreakable from below."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "Project's `.claude/settings.json` (committed, shared) sets `permissions.deny: ['Bash(npm publish:*)']`. The same project's `.claude/settings.local.json` (gitignored, your local) sets `permissions.allow: ['Bash(npm publish:*)']`. What is the resulting permission for `npm publish` on your machine?",
+                options: {
+                  A: "Denied — committed/shared settings override local settings.",
+                  B: "Allowed — local project settings override shared project settings.",
+                  C: "Ask — conflict triggers a prompt.",
+                  D: "Undefined — Claude Code refuses to start with conflicting permission rules."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Inverts the cascade. Shared does not override local.",
+                  B: "Right. The cascade order is Enterprise > CLI > project-local > project-shared > user. Local project wins over shared project. This is the most-commonly-inverted gotcha.",
+                  C: "No prompt; the cascade resolves deterministically.",
+                  D: "Claude Code resolves cascades without erroring."
+                },
+                principle: "Project-LOCAL overrides project-SHARED. The order is intentional so individuals can customise without changing the team config.",
+                bSkills: ["B5.2"]
+              },
+              {
+                n: 2,
+                question: "Enterprise-managed settings set `permissions.deny: ['Bash(rm -rf:*)']`. The user adds `permissions.allow: ['Bash(*)']` to their `~/.claude/settings.json`. What happens when the model tries to run `rm -rf /tmp/foo`?",
+                options: {
+                  A: "Allowed — user-level allow rules override Enterprise rules.",
+                  B: "Denied — Enterprise sits at the top of the cascade and locks the field; nothing lower can override.",
+                  C: "Allowed — `Bash(*)` is more specific than `Bash(rm -rf:*)`.",
+                  D: "Ask — conflict prompts the user."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Inverts the cascade.",
+                  B: "Right. Enterprise > CLI > project-local > project-shared > user. Enterprise denies are sticky — that's the entire point of Enterprise managed settings.",
+                  C: "`Bash(*)` is broader, not more specific. Specificity isn't the resolution rule; layer precedence is.",
+                  D: "No prompt; the cascade is deterministic."
+                },
+                principle: "Enterprise sits at the top of the cascade. An Enterprise deny locks the field; lower layers cannot override.",
+                bSkills: ["B5.2"]
+              },
+              {
+                n: 3,
+                question: "Which is the *correct* precedence order (highest → lowest) for Claude Code permission settings?",
+                options: {
+                  A: "User > project-shared > project-local > CLI flags > Enterprise.",
+                  B: "Enterprise > CLI flags > project-local > project-shared > user.",
+                  C: "Project-shared > project-local > user > CLI flags > Enterprise.",
+                  D: "Project-shared > Enterprise > project-local > user > CLI flags."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Inverts everything.",
+                  B: "Right. The canonical cascade order. Enterprise is highest; user is lowest. Local-project is above shared-project (the most common gotcha).",
+                  C: "Wrong order across the board.",
+                  D: "Enterprise is first, not third."
+                },
+                principle: "Memorise the cascade: Enterprise > CLI > project-local > project-shared > user.",
+                bSkills: ["B5.2"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b5-3", code: "B5.3", title: "Route rule (CLAUDE.md / reference / skill / slash / hook)", bloom: "E",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Claude Code offers many places to put rules and behaviour: CLAUDE.md, files in `reference/`, Skills, slash commands, and hooks. Picking the right one is one of the most-tested judgement skills in Domain 2 because each mechanism has a *different invocation model and trust level*. Putting a rule in the wrong place produces a predictable failure: the rule silently doesn't apply, or it applies too aggressively, or it can be ignored when it shouldn't be.",
+              "The decision axes are: (1) **how often does the rule need to apply?** Always (every turn) → CLAUDE.md. On demand (when the user invokes) → slash command or skill. On a specific event (before tool, after task, on session start) → hook. (2) **how much do you trust the model to follow it?** Soft (advice; OK if the model interprets) → CLAUDE.md or memory. Hard (must execute regardless of model decision) → hook (only the harness can guarantee). (3) **does it carry instructions or capabilities?** Instructions only → skill or CLAUDE.md. Capability → tool / MCP server.",
+              "The mechanisms in one line each: **CLAUDE.md** = always-on project memory, advisory, model interprets. **`reference/`** = on-demand context the model can `@`-include when relevant; not loaded by default. **Skill** = user-invoked named instruction-bundle, packaged for distribution and discoverability. **Slash command** = user-invoked one-shot prompt expansion (per-project or personal). **Hook** = harness-executed lifecycle action, deterministic, model can't override.",
+              "Common miswires: putting an automation rule ('every time you finish a task, run lint') in CLAUDE.md instead of a Stop hook (model can interpret/forget; the rule isn't enforced). Putting a guardrail ('never run rm -rf') as a CLAUDE.md instruction (model can be argued out of it; it must be a PreToolUse hook). Putting an always-on style guide in a Skill (skills don't auto-load; it should be CLAUDE.md). Putting a one-off team workflow as a hook (heavy machinery for what should be a slash command)."
+            ],
+            keyPoints: [
+              "Decision axes: invocation frequency, trust requirement, instructions vs capability.",
+              "CLAUDE.md = always-on advice. reference/ = on-demand context. Skill = user-invoked instructions. Slash = user-invoked one-shot. Hook = harness-enforced.",
+              "Hard rules and automation → hook. Always-on advice → CLAUDE.md. On-demand workflow → slash or skill.",
+              "Instructions are not the same as capabilities. Capabilities go in tools / MCP."
+            ],
+            examples: [
+              {
+                title: "'Always reject any rm -rf shell command'",
+                body: "Hard rule, must execute regardless of model decision = hook (PreToolUse). CLAUDE.md is wrong because the model can be argued out of it. Skill is wrong because skills are user-invoked, not always-on."
+              },
+              {
+                title: "'After every finished task, run npm run lint and report'",
+                body: "Automation, per-task granularity = hook (Stop). CLAUDE.md is wrong (advisory). Slash command is wrong (requires user to invoke each time). The user's words 'after every task' = harness, not model."
+              },
+              {
+                title: "'Project style guide for all code suggestions'",
+                body: "Always-on advice the model interprets = CLAUDE.md. Skill is wrong (skills don't auto-load). Hook is wrong (not enforced behaviour, just guidance)."
+              },
+              {
+                title: "'Weekly release-notes workflow team can invoke'",
+                body: "User-invoked, multi-step, parameterised = slash command (or Skill if you want discoverability + assets). Hook is wrong (no event trigger). CLAUDE.md is wrong (not always-on)."
+              }
+            ],
+            pitfalls: [
+              "Putting hard rules in CLAUDE.md. The model interprets; it can't be relied on for enforcement.",
+              "Putting always-on rules in a Skill. Skills don't auto-load; the rule won't apply silently.",
+              "Putting per-task automation in CLAUDE.md or memory. Both are advisory; only the harness can guarantee execution.",
+              "Reaching for a hook for an on-demand workflow. Hooks fire on events; on-demand work is what slash commands and skills are for."
+            ],
+            notesRef: "00-academy-basics/notes/03-claude-code-101.md",
+            simplified: {
+              oneLiner: "Pick by invocation model and trust: always-on advice → CLAUDE.md; on-demand by user → slash or skill; deterministic enforcement → hook; on-demand reference → reference/.",
+              analogy: "It's like deciding where to put a rule at work. Standing rule? Office handbook (CLAUDE.md). Reusable workflow? Templated form (slash). Specialist procedure? Trained skill on the menu (skill). Mandatory pre-flight check? A locked door with a badge reader (hook).",
+              paragraphs: [
+                "Each mechanism has a different invocation pattern. Match the rule's required pattern to the right one.",
+                "If the rule MUST apply regardless of model decision, only a hook gives that guarantee. If it should apply every turn as guidance, CLAUDE.md. If the user picks when to apply it, slash command or skill."
+              ],
+              keyPoints: [
+                "Always-on advice: CLAUDE.md.",
+                "User-invoked: slash command or skill.",
+                "Deterministic enforcement: hook.",
+                "On-demand reference content: reference/."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "The user says: 'From now on, every time you finish a task, run `npm run lint` and post the output in the chat.' Which mechanism implements this reliably?",
+                options: {
+                  A: "Add a sentence to CLAUDE.md describing the desired behavior.",
+                  B: "Save it as a memory / preference for future sessions.",
+                  C: "Configure a Stop hook in settings.json that runs `npm run lint` and prints the result.",
+                  D: "Create a slash command that runs lint, and tell the user to invoke it after each task."
+                },
+                correct: "C",
+                explanations: {
+                  A: "CLAUDE.md instructions are advisory. The model can interpret, prioritize, or even forget.",
+                  B: "Same problem as A. Memories/preferences are read by the model, not executed by the harness.",
+                  C: "Right. Hooks run in the harness layer, deterministically. 'Every time you finish a task' = per-turn = Stop hook (PostToolUse would fire per-tool-call).",
+                  D: "Slash commands require user invocation; 'every time' = harness."
+                },
+                principle: "Automated behaviors ('every time X', 'from now on when X') need hooks in settings.json. Match event granularity: per-task = Stop, per-tool-call = PostToolUse.",
+                bSkills: ["B5.3", "B5.1"]
+              },
+              {
+                n: 2,
+                question: "A team wants a always-on project style guide that nudges Claude toward their preferred patterns on every code suggestion. Which mechanism is the *right* fit?",
+                options: {
+                  A: "A Stop hook that re-formats outputs after each task.",
+                  B: "CLAUDE.md, since it's loaded into project context every session as advisory guidance the model interprets.",
+                  C: "A Skill called `style-guide` that the user runs at the start of every session.",
+                  D: "A slash command `/style` the user types before each prompt."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Hook for style-nudging is over-engineered; a hook can't 'nudge', only enforce or transform.",
+                  B: "Right. Always-on advisory guidance is exactly CLAUDE.md's role. Loaded every session; the model reads and interprets.",
+                  C: "Skills are user-invoked, not auto-loaded. The rule would silently not apply if the user forgot.",
+                  D: "Same problem — relies on user remembering to invoke."
+                },
+                principle: "Always-on advice = CLAUDE.md. Skills and slash commands are user-invoked; hooks are enforcement.",
+                bSkills: ["B5.3"]
+              },
+              {
+                n: 3,
+                question: "A team wants a one-line on-demand command: 'rebuild the dev container and re-run the failing tests.' Which mechanism is *most* appropriate?",
+                options: {
+                  A: "A PreToolUse hook that intercepts every command.",
+                  B: "Add a paragraph to CLAUDE.md describing how to do it.",
+                  C: "A slash command (e.g., `/rebuild-and-test`) that expands into the full prompt sequence; checked into the project.",
+                  D: "A Skill the user invokes from the menu."
+                },
+                correct: "C",
+                explanations: {
+                  A: "Hook is heavy machinery for what's just a reusable prompt.",
+                  B: "Forces the user to remember the steps every time.",
+                  C: "Right. Reusable on-demand prompt expansion = slash command. Project-scoped (checked in) = team can use it.",
+                  D: "Skills are valid for this too, but slash commands are the lighter / canonical fit for one-shot prompt expansion."
+                },
+                principle: "On-demand reusable prompts = slash command. Skill is the right fit when you also need packaged assets and menu discoverability.",
+                bSkills: ["B5.3", "B5.4"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b5-4", code: "B5.4", title: "Author slash command", bloom: "A",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Slash commands are reusable prompt expansions. A user types `/command` and the harness substitutes the command file's body as the user message — sometimes templated with arguments, often pre-filled with project context. They're the lightest-weight mechanism for codifying a recurring on-demand workflow.",
+              "File location decides scope. **Project-shared**: `.claude/commands/<name>.md` — checked into the repo, shared across the team, the team's standard workflows. **Personal**: `~/.claude/commands/<name>.md` — your personal commands across all projects. Same file format; different visibility.",
+              "Anatomy: optional YAML frontmatter (`description:`, `argument-hint:`, `allowed-tools:`) and a markdown body that becomes the prompt. The frontmatter description is what shows up in the slash-command menu — vague descriptions hurt discoverability the same way vague tool descriptions cause wrong-tool-pick (B4.4). `argument-hint:` documents what the user passes; the body can reference `$ARGUMENTS` (or named args).",
+              "When to reach for a slash command vs a Skill: slash commands are *prompt-only*. They expand into a user message, period. If you need bundled supporting files, asset references, scripts, or menu UX with rich metadata, that's a Skill (B7.x). The slash command sweet spot is 'one-paragraph repeated workflow that needs to be one keystroke instead of three sentences typed each time.'"
+            ],
+            keyPoints: [
+              "Slash command = reusable prompt expansion, invoked via `/name`.",
+              "Project: `.claude/commands/<name>.md` (checked in). Personal: `~/.claude/commands/<name>.md`.",
+              "Frontmatter: description, argument-hint, allowed-tools. Body = the prompt template.",
+              "Use slash for prompt-only reuse. Use Skill when you need assets / discoverability."
+            ],
+            examples: [
+              {
+                title: "Project slash command",
+                body: "File: `.claude/commands/release-notes.md`\nFrontmatter: `description: Generate release notes from the last 7 days of merged PRs`\nargument-hint: `[start-date]`\nBody: `Generate release notes for $ARGUMENTS through today. Group by component. List breaking changes first. Use the format in docs/RELEASE_NOTES_TEMPLATE.md.`\nUser invokes: `/release-notes 2026-04-25`."
+              },
+              {
+                title: "Personal slash command",
+                body: "File: `~/.claude/commands/explain-error.md`\nFrontmatter: `description: Explain a stack trace pasted in the next message`\nBody: `Explain this stack trace step-by-step. Identify the root cause and suggest fixes.`\nUser pastes a trace and types `/explain-error`."
+              }
+            ],
+            pitfalls: [
+              "Vague description in frontmatter ('helper'). Same problem as a vague tool description — discoverability dies.",
+              "Putting a slash command in `~/.claude/commands/` when the team needs it. Move to `.claude/commands/` so it ships with the repo.",
+              "Reaching for a slash command when you need persistent/automatic behaviour. That's CLAUDE.md or a hook, not slash.",
+              "Reaching for a slash command when you need bundled assets. That's a Skill."
+            ],
+            notesRef: "00-academy-basics/notes/03-claude-code-101.md",
+            simplified: {
+              oneLiner: "A slash command is a saved prompt you invoke with `/name`. Live in `.claude/commands/` (project) or `~/.claude/commands/` (personal). Frontmatter for metadata, body for the prompt.",
+              analogy: "Think of a slash command as a text-expansion shortcut that the AI uses. You type `/release-notes`, the AI sees the full pre-written prompt.",
+              paragraphs: [
+                "Slash commands are reusable prompts. They go in a file, you invoke them with `/name`, the body becomes your message.",
+                "If you need more than just a prompt (assets, menu UX, conditional behaviour), use a Skill instead."
+              ],
+              keyPoints: [
+                "Two locations: project (.claude/commands/) and personal (~/.claude/commands/).",
+                "Frontmatter for description and arg hints; body is the prompt.",
+                "Slash = prompt-only. Skill = prompt + assets."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "Where should a project-shared slash command live so the entire team gets it when they clone the repo?",
+                options: {
+                  A: "`~/.claude/commands/<name>.md` — under the user's home directory.",
+                  B: "`.claude/commands/<name>.md` inside the repo, checked into version control.",
+                  C: "`.vscode/commands/<name>.md` — picked up by the editor extension.",
+                  D: "`docs/commands/<name>.md` — referenced from CLAUDE.md."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Personal commands location; not shipped with the repo.",
+                  B: "Right. `.claude/commands/` inside the project, checked in, ships with clones, available team-wide.",
+                  C: "Fabricated path.",
+                  D: "Not a slash-command location."
+                },
+                principle: "Project slash commands: `.claude/commands/` checked into the repo. Personal: `~/.claude/commands/`.",
+                bSkills: ["B5.4"]
+              },
+              {
+                n: 2,
+                question: "Which slash-command frontmatter field most directly affects whether teammates *find* and use the command?",
+                options: {
+                  A: "`name:`",
+                  B: "`description:`",
+                  C: "`version:`",
+                  D: "`author:`"
+                },
+                correct: "B",
+                explanations: {
+                  A: "Name is taken from the filename; not the discovery signal.",
+                  B: "Right. `description:` is what shows up in the slash-command menu. Vague descriptions = unused commands, same as vague tool descriptions causing wrong-tool-pick (B4.4).",
+                  C: "Versioning is metadata.",
+                  D: "Author is metadata."
+                },
+                principle: "Slash command discoverability lives in the description field. Treat it like a tool description: name what it does, when to use it, what it doesn't handle.",
+                bSkills: ["B5.4", "B4.4"]
+              },
+              {
+                n: 3,
+                question: "When should you choose a Skill over a slash command for a recurring workflow?",
+                options: {
+                  A: "Always — Skills are the modern replacement for slash commands.",
+                  B: "When the workflow needs bundled assets, supporting files, or richer menu discoverability beyond a prompt expansion.",
+                  C: "When the workflow needs to run on a hook event.",
+                  D: "Never — Skills and slash commands are functionally identical."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Skills haven't replaced slash commands; they cover different cases.",
+                  B: "Right. Skills are prompt + supporting files + menu metadata. Slash commands are prompt-only. Reach for Skill when you need more than just the prompt.",
+                  C: "Hooks are for harness-event automation, distinct from both.",
+                  D: "They have different surfaces and different invocation models."
+                },
+                principle: "Slash command = prompt-only on-demand. Skill = bundled instructions + assets + menu UX.",
+                bSkills: ["B5.4", "B7.1"]
+              }
+            ]
+          }
+        }
       ],
-      sectionTest: null
+      sectionTest: {
+        title: "Section 5 test — Claude Code 101",
+        passPct: 0.7,
+        questions: [
+          {
+            n: 1,
+            question: "A user reports: 'I added `permissions.allow: [\"Bash(*)\"]` to my project's `.claude/settings.json` but the harness still asks for permission on every Bash call.' What is most likely happening?",
+            options: {
+              A: "Allow rules without a `priority` field don't take effect.",
+              B: "Their `.claude/settings.local.json` (or an Enterprise setting, or CLI flags) sits higher in the cascade and is overriding the shared `permissions.allow`.",
+              C: "Bash permissions can only be granted via CLAUDE.md, not settings.json.",
+              D: "The `Bash(*)` glob is invalid; only specific commands can be allowed."
+            },
+            correct: "B",
+            explanations: {
+              A: "Fabricated `priority` field.",
+              B: "Right. Cascade: Enterprise > CLI > project-local > project-shared > user. Anything higher overrides their shared allow. Most commonly: a `settings.local.json` denies or asks.",
+              C: "Permissions live in settings.json; CLAUDE.md is advisory.",
+              D: "`Bash(*)` is a valid glob."
+            },
+            principle: "Permission cascade: Enterprise > CLI > project-local > project-shared > user. Higher always wins.",
+            bSkills: ["B5.2"]
+          },
+          {
+            n: 2,
+            question: "The user wants two behaviours: (a) 'never run any shell command containing rm -rf' and (b) 'after every task, run npm run lint and report.' Which mechanism pair is *correct*?",
+            options: {
+              A: "(a) CLAUDE.md instruction; (b) memory.",
+              B: "(a) PreToolUse hook (only event with a block primitive); (b) Stop hook (per-task granularity).",
+              C: "(a) PostToolUse hook; (b) PreToolUse hook.",
+              D: "(a) Slash command; (b) Skill."
+            },
+            correct: "B",
+            explanations: {
+              A: "Both are advisory; neither is enforced.",
+              B: "Right. Hard rule needing block before execution = PreToolUse. Per-task automation = Stop. Granularity matters: PostToolUse fires per-tool-call (lint floods).",
+              C: "PostToolUse can't block; PreToolUse fires on every tool call (lint floods).",
+              D: "Slash and Skill require user invocation; neither is automatic."
+            },
+            principle: "Hard rules and per-event automation belong in hooks. Match event granularity to trigger phrasing.",
+            bSkills: ["B5.1", "B5.3"]
+          },
+          {
+            n: 3,
+            question: "A team wants an *always-on* project style guide that the model considers on every code suggestion. Which mechanism is the right fit?",
+            options: {
+              A: "A Skill the team invokes at session start.",
+              B: "CLAUDE.md — loaded into project context every session as advisory guidance.",
+              C: "A Stop hook that re-formats outputs.",
+              D: "A slash command the user types before each prompt."
+            },
+            correct: "B",
+            explanations: {
+              A: "Skills are user-invoked; the rule wouldn't apply silently if forgotten.",
+              B: "Right. Always-on advisory guidance is exactly CLAUDE.md's role. Loaded every session; the model reads and interprets.",
+              C: "Re-formatting outputs ≠ nudging the model toward patterns at generation time.",
+              D: "Relies on user remembering to invoke."
+            },
+            principle: "Always-on advice = CLAUDE.md. Skills and slash commands are user-invoked; hooks are enforcement.",
+            bSkills: ["B5.3"]
+          },
+          {
+            n: 4,
+            question: "Where should a team's *shared* slash command live so it ships with the repo, and what is the canonical home for a *personal* one?",
+            options: {
+              A: "Both in `~/.claude/commands/`.",
+              B: "Project: `.claude/commands/<name>.md`. Personal: `~/.claude/commands/<name>.md`.",
+              C: "Project: `docs/slash/`. Personal: `~/.config/claude/`.",
+              D: "Both in `.vscode/commands/`."
+            },
+            correct: "B",
+            explanations: {
+              A: "Personal-only doesn't ship with the repo.",
+              B: "Right. `.claude/commands/` (project, checked in) for team-shared; `~/.claude/commands/` for personal.",
+              C: "Fabricated paths.",
+              D: "Not a Claude Code path."
+            },
+            principle: "Project slash commands live in `.claude/commands/` checked in. Personal commands live in `~/.claude/commands/`.",
+            bSkills: ["B5.4"]
+          }
+        ]
+      }
     },
     {
       id: "s6-claude-code-action",
