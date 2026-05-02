@@ -23,9 +23,13 @@ commands).
 4. **Slash commands are reusable prompts**, not features. They expand
    into the user message; they're per-project (`.claude/commands/`) or
    personal (`~/.claude/commands/`).
-5. **Settings cascade.** Enterprise managed > project `settings.json` >
-   project `settings.local.json` > user `~/.claude/settings.json`. Higher
-   tiers can lock fields lower tiers can't override.
+5. **Settings cascade (highest → lowest precedence):**
+   enterprise managed > CLI flags > `.claude/settings.local.json`
+   (local project, gitignored) > `.claude/settings.json` (shared
+   project, checked in) > `~/.claude/settings.json` (user). Higher
+   tiers can lock fields lower tiers can't override. Note: **local
+   project settings override shared project settings** — easy to
+   invert under exam pressure.
 
 ## 2 failure modes
 

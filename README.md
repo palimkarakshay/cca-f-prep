@@ -10,7 +10,7 @@ Foundations (CCA-F) exam.
 | `00-academy-basics/` | foundation track from the 9 [Anthropic Academy](https://anthropic.skilljar.com/) courses — per-course notes, atomic B-skill checklist, basics diagnostic, transition plan | foundation |
 | `01-agentic-architecture/` | agentic loops, coordinator-subagent, hook lifecycle, bounded loops & session budget | 27% |
 | `02-claude-code/` | CLAUDE.md hygiene, settings.json, slash commands, hooks vs. memory vs. CLAUDE.md | 20% |
-| `03-tool-design-mcp/` | tool descriptions, MCP transports (stdio / HTTP+SSE), schema design | 18% |
+| `03-tool-design-mcp/` | tool descriptions, MCP transports (stdio / Streamable HTTP), schema design | 18% |
 | `04-prompt-engineering/` | system vs. user, few-shot as turns, structured output / tool use | 20% |
 | `05-context-reliability/` | context windows, prompt caching, batching, retries | 15% |
 | `06-failure-analysis/` | running error log + F-code cognitive failure-mode taxonomy | — |
@@ -54,6 +54,26 @@ this learner profile; rationale in [`00-academy-basics/transition-plan.md`](00-a
 - [ ] Daily drill: 30% basics gap remediation + 70% architect-shape (B-tagged) — interleaved
 - [ ] Basics diagnostic re-take ≥ 12 / 15 (sanity check, not a gate)
 - [ ] Mock 1 + Mock 2 (Phase D), target ≥ 78%, calibration gap ≤ 0.5
+
+### Content completeness — be honest
+
+The layout table above describes the **target shape**. Today's reality
+(self-audit, 2026-05-02):
+
+| Area | Status |
+|---|---|
+| `00-academy-basics/` notes + skills checklist + diagnostic | **Complete and usable** |
+| `06-failure-analysis/error-log.md` | One worked exemplar; pattern-promotion rule untriggered |
+| `07-mock-exams/diagnostic-01.md` | Single 10-Q diagnostic; no full-length 60-Q mocks yet |
+| `08-cheat-sheets/` | Decision trees, training methodology, external resources — complete |
+| `01-agentic-architecture/` … `05-context-reliability/` | **Empty** (`.gitkeep` only). No `notes.md`, no `mcq-set-N.md`, no challenges, no solutions. To be authored. |
+| `docs/` MCQ runner | Basics layer populated; architect-tier stubbed pending the above |
+
+**Implication:** the daily-loop and Phase C/D gates in `training-methodology.md`
+cannot run until the architect-tier domain folders are populated. The
+foundation track (Phase A→B) *can* run today on the basics content alone.
+Don't read the layout table as a claim that all of this exists; read it
+as a contract for what gets authored next.
 
 ## Real-world example bank
 

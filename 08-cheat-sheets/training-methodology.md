@@ -191,7 +191,7 @@ Go deep:
 - When to call a tool vs. reason in-context
 - Tool schema design (inputs, errors, side effects)
 - Deterministic tool output vs. probabilistic model output
-- MCP transport: `stdio` (local single-user) vs. `HTTP+SSE` (remote/multi-user)
+- MCP transport: `stdio` (local single-user) vs. `Streamable HTTP` (remote/multi-user; "HTTP+SSE" in older docs)
 
 Build:
 - 3–5 realistic tool APIs (HR DB, budget tracker, code search) with full

@@ -12,10 +12,12 @@ This course is where the architect-level patterns first appear.
 ## 5 principles
 
 1. **Hooks are deterministic guardrails.** They run shell commands at
-   named lifecycle events. Order matters:
-   `SessionStart → UserPromptSubmit → PreToolUse → [tool runs] → PostToolUse → Stop / SessionEnd`.
-   `PreToolUse` is the only place you can *block* a tool call before it
-   runs.
+   named lifecycle events. Per-turn order:
+   `SessionStart → UserPromptSubmit → PreToolUse → [tool runs] →
+   PostToolUse → Stop → SessionEnd`. Other events to know:
+   `Notification` (UI surface), `SubagentStop` (subagent end),
+   `PreCompact` / `PostCompact` (context compaction). `PreToolUse` is
+   the only place you can *block* a tool call before it runs.
 2. **Hooks > prompt instructions for hard rules.** "Don't run rm -rf"
    in CLAUDE.md is a soft rule the model can disobey. A `PreToolUse`
    hook that pattern-matches and exits non-zero is enforced. Pick the

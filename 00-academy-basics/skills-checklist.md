@@ -58,7 +58,7 @@ should target **U / A** first, then promote.
 | Code | Skill | Bloom | Maps to |
 |---|---|---|---|
 | **B4.1** | classify a capability as **tool / resource / prompt** | An | D3 |
-| **B4.2** | choose `stdio` vs. `HTTP+SSE` given a deployment scenario | E | D3 |
+| **B4.2** | choose `stdio` vs. `Streamable HTTP` given a deployment scenario | E | D3 |
 | **B4.3** | reject non-MCP transport options (WebSockets, gRPC) on sight | R | D3 |
 | **B4.4** | diagnose "model picks wrong tool" to a tool-description deficit | An | D3 |
 | **B4.5** | choose server-per-capability vs. monolith server, with rationale | E | D3 |

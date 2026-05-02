@@ -12,7 +12,23 @@ for the Anthropic Claude Certified Architect – Foundations (CCA-F) exam.
   3. Tool Design & MCP Integration (18%)
   4. Prompt Engineering & Structured Output (20%)
   5. Context Management & Reliability (15%)
-- Passing scaled score: 720/1000
+- Passing scaled score: 720/1000 (range 100–1000)
+- **Format details (often missed — added 2026-05-02 after audit):**
+  - **Proctored, closed-book, no AI assistance.**
+  - **6 production scenarios exist; 4 are randomly chosen per sitting.**
+    All 60 questions anchor to those 4 scenarios — i.e., ~15 questions
+    per scenario. Implication: practice scenario-anchored question
+    *blocks* (one shared scenario → 10–15 follow-up questions), not
+    isolated single-MCQs. Mock exams here should mirror that shape.
+  - **No penalty for guessing** — answer every question.
+  - $99 sitting fee (waived for first 5,000 Anthropic Partner Network
+    employees). Cert launched 2026-03-12. Score reports ~2 business days,
+    digital badge issued.
+  - "Foundations" is the entry tier; Anthropic has signaled additional
+    tiers (seller, developer, architect-advanced) later in 2026.
+  - The 27/20/18/20/15 weight split is consistent across every
+    third-party source citing the exam guide PDF, but not yet found
+    on a first-party anthropic.com URL — treat as very likely correct.
 
 ## Repo layout
 - `01-agentic-architecture/` … `05-context-reliability/` — one folder per exam domain, 1:1 with the official names above
