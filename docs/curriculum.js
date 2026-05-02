@@ -3899,12 +3899,530 @@ const CURRICULUM = {
       sourceCourse: "Anthropic Academy — Introduction to Agent Skills",
       blurb: "Skills as user-invoked capabilities. Routing between skill / slash / CLAUDE.md / hook by invocation model.",
       concepts: [
-        { id: "b7-1", code: "B7.1", title: "Skill vs slash vs CLAUDE.md vs hook", bloom: "An", lesson: null, quiz: null },
-        { id: "b7-2", code: "B7.2", title: "Critique skill description",          bloom: "E",  lesson: null, quiz: null },
-        { id: "b7-3", code: "B7.3", title: "Place skill (project/user/plugin)",   bloom: "A",  lesson: null, quiz: null },
-        { id: "b7-4", code: "B7.4", title: "Detect kitchen-sink skill",           bloom: "An", lesson: null, quiz: null }
+        {
+          id: "b7-1", code: "B7.1", title: "Skill vs slash vs CLAUDE.md vs hook (by invocation model)", bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "All four mechanisms — Skill, slash command, CLAUDE.md, hook — let you codify behaviour. They look interchangeable until you focus on *how each one is invoked*. Invocation model is the canonical axis: it determines whether a rule fires automatically, on user request, on a harness event, or via interpretation by the model.",
+              "**CLAUDE.md** is *auto-loaded into project context* every session. The model reads it on every turn; it's advisory and persistent. **Slash command** is *user-invoked one-shot* — the user types `/name`, the body expands as a user message, and that's it. **Skill** is *user-invoked named instruction-bundle* — it appears in a discoverable menu, may bundle assets, and is selected and loaded on demand. **Hook** is *harness-executed* on a named lifecycle event — deterministic, model can't override, the only mechanism with the block primitive (PreToolUse).",
+              "The decision rule maps invocation to need. 'Always applies, advisory' → CLAUDE.md. 'User picks and runs' → slash command (prompt-only) or skill (prompt + bundled assets / menu). 'Fires on a harness event regardless of model decision' → hook. The most common confusion is between Skill and CLAUDE.md: Skills don't auto-load (they're user-invoked), so 'always-on' rules in a Skill silently won't apply.",
+              "Cross-cutting axis 2: trust requirement (covered in B6.2). If the rule must execute regardless of model decision, only a hook gives that guarantee — even an auto-loaded CLAUDE.md is interpreted by the model. Cross-cutting axis 3: instructions vs. capabilities. A Skill carries instructions; a tool / MCP server carries capabilities. Confusing the two leads to skills that try to encode runnable logic and tools that try to carry workflow."
+            ],
+            keyPoints: [
+              "Invocation model is the canonical decision axis.",
+              "CLAUDE.md = auto-loaded advisory. Slash = user-invoked prompt-only. Skill = user-invoked instruction-bundle (with assets/menu). Hook = harness-executed on lifecycle event.",
+              "Skills don't auto-load — 'always-on' rule in a Skill silently won't apply.",
+              "Hook is the only mechanism with deterministic enforcement and a block primitive."
+            ],
+            examples: [
+              {
+                title: "'Always-on coding-style guide'",
+                body: "Auto-loaded advisory = CLAUDE.md. Skill silently fails (doesn't auto-load); slash relies on user invocation; hook is over-engineered."
+              },
+              {
+                title: "'Reusable release-notes workflow with templates'",
+                body: "User-invoked + bundled assets (templates) + menu discoverability = Skill. Slash command works for the prompt-only case but loses the assets and menu UX."
+              },
+              {
+                title: "'One-keystroke rebuild-and-test command'",
+                body: "User-invoked + prompt-only = slash command. Skill is heavier than needed; CLAUDE.md is auto-loaded (wrong invocation); hook fires on events."
+              }
+            ],
+            pitfalls: [
+              "Putting 'always-on' rules in a Skill. Skills are user-invoked; the rule won't apply when the user forgets.",
+              "Putting prompt-only on-demand workflows in a Skill 'for tidiness'. Slash command is lighter and equally appropriate.",
+              "Treating CLAUDE.md as a hook substitute. Advisory ≠ enforced.",
+              "Encoding runnable logic in a Skill. Skills are instructions; capabilities belong in tools / MCP servers."
+            ],
+            notesRef: "00-academy-basics/notes/07-agent-skills.md",
+            simplified: {
+              oneLiner: "Pick by invocation: auto-loaded → CLAUDE.md; user-runs-it → slash (prompt-only) or skill (bundle); harness fires it → hook.",
+              analogy: "CLAUDE.md is the standing notice on the office wall; slash is a quick-text shortcut; Skill is a labelled folder you grab from the shelf; hook is a door alarm.",
+              paragraphs: [
+                "All four codify behaviour. The right one depends on how it gets invoked.",
+                "Don't put always-on rules in a Skill (it won't auto-fire). Don't put advisory rules in a hook (overkill). Match invocation to need."
+              ],
+              keyPoints: [
+                "Auto-loaded → CLAUDE.md.",
+                "User-invoked → slash or Skill.",
+                "Harness event → hook."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team wants an *always-on* project rule the model considers on every turn. Which mechanism is the right fit?",
+                options: {
+                  A: "A Skill called `project-rules` users invoke at session start.",
+                  B: "CLAUDE.md, which is auto-loaded into project context every session.",
+                  C: "A slash command users type before each prompt.",
+                  D: "A SubagentStop hook."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Skills are user-invoked, not auto-loaded. Rule silently fails when the user forgets.",
+                  B: "Right. CLAUDE.md is the only of these that auto-loads every session.",
+                  C: "Slash relies on user invocation per turn.",
+                  D: "Hook for the wrong event; not the mechanism for advisory always-on rules."
+                },
+                principle: "Skills don't auto-load. For always-on advisory rules, use CLAUDE.md.",
+                bSkills: ["B7.1", "B5.3"]
+              },
+              {
+                n: 2,
+                question: "Which mechanism is *the only one* that can deterministically refuse a tool call before it executes?",
+                options: {
+                  A: "CLAUDE.md.",
+                  B: "Slash command.",
+                  C: "Skill.",
+                  D: "PreToolUse hook."
+                },
+                correct: "D",
+                explanations: {
+                  A: "Advisory; the model interprets.",
+                  B: "User-invoked prompt expansion; no enforcement layer.",
+                  C: "User-invoked instruction bundle; no enforcement layer.",
+                  D: "Right. PreToolUse is the only event with a block primitive. Hooks run in the harness regardless of model decision."
+                },
+                principle: "Only hooks (specifically PreToolUse) provide deterministic block-before-execute. Other mechanisms are advisory.",
+                bSkills: ["B7.1", "B5.1"]
+              },
+              {
+                n: 3,
+                question: "A user-invoked workflow needs both a prompt template *and* bundled supporting files (templates, sample inputs). Which mechanism is the right shape?",
+                options: {
+                  A: "Slash command — slash commands can attach arbitrary files.",
+                  B: "Skill — Skills bundle instructions plus optional assets and surface in a menu.",
+                  C: "PostCompact hook — hooks can carry arbitrary payloads.",
+                  D: "CLAUDE.md — large bundles can live in CLAUDE.md."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Slash commands are prompt-only.",
+                  B: "Right. Skills are the canonical mechanism for user-invoked work that bundles instructions with supporting files.",
+                  C: "Hooks fire on events; not for user-invoked bundles.",
+                  D: "CLAUDE.md is for advisory rules; bundling assets there bloats project context."
+                },
+                principle: "Slash = prompt-only. Skill = prompt + assets + menu UX. Pick by what the workflow actually needs.",
+                bSkills: ["B7.1"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b7-2", code: "B7.2", title: "Critique skill description for discoverability", bloom: "E",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "A Skill's description in its frontmatter is what makes it discoverable in the menu. A vague description guarantees the skill is unused — same failure shape as a vague tool description causing wrong-tool-pick (B4.4). The pattern is symmetric: the model selects tools by description, the user selects skills by description. Bad descriptions kill both.",
+              "A good Skill description names: (1) what the Skill *does* (the operation or workflow), (2) what scenario it's the *right pick* for (when to reach for it), (3) what input or context it expects (so the user knows what to have ready), and (4) what it does *not* handle (the boundary against neighbouring skills). The boundary is the most-omitted component.",
+              "The smell list: descriptions starting with 'Helper for…', 'Various tasks related to…', 'Tools and utilities for…' — all signal a description that hasn't done the work of being specific. A user scanning a menu of 20 skills won't pick a 'Helper'; they pick the one whose description *matches their current question's words*. Description is selection.",
+              "Critique workflow: read the description, then ask 'when would I pick this *over* the next skill in the menu?' If you can't answer in one sentence, the description is broken. Rewrite to add the differentiation. Optional but useful: read the description side-by-side with neighbouring skills' descriptions; the boundaries should be obvious."
+            ],
+            keyPoints: [
+              "Description is the selection signal — for skills as for tools.",
+              "Good description names operation + when-to-pick + expected input + not-handled.",
+              "Smells: 'Helper for…', 'Various tasks…', 'Tools and utilities…'.",
+              "Critique question: 'when would I pick this over neighbouring skills?'"
+            ],
+            examples: [
+              {
+                title: "Bad: 'Helper for various coding tasks'",
+                body: "No operation, no scenario, no boundary. The user can't tell when to pick it. Result: never picked."
+              },
+              {
+                title: "Good: 'Generate weekly release notes from merged PRs in the last 7 days'",
+                body: "Operation (generate notes), scenario (weekly cadence, last 7 days), expected input (a repo path or default to current). Boundary implied (not for ad-hoc summaries; that's a different skill)."
+              }
+            ],
+            pitfalls: [
+              "Reusing the Skill name in the description with no added information.",
+              "Listing every possible feature instead of the one core scenario. Discoverability dies in long descriptions.",
+              "Skipping the 'when to pick this' framing. Users scan menus by question-fit, not by feature list."
+            ],
+            notesRef: "00-academy-basics/notes/07-agent-skills.md",
+            simplified: {
+              oneLiner: "A Skill's description is what makes it findable. Vague descriptions = unused skills. Name the operation, when to pick it, what input it needs, what it doesn't do.",
+              analogy: "It's like the title on a recipe card. 'Cake recipe' is bad. '20-minute chocolate cake for one' is good — you know exactly when to grab it.",
+              paragraphs: [
+                "Users find skills by reading descriptions. Bad descriptions hide good skills.",
+                "Name the specific scenario. 'When would I reach for this over the others?' should be obvious from one read."
+              ],
+              keyPoints: [
+                "Description = discoverability.",
+                "Name operation + when-to-pick + boundary.",
+                "Smell: 'Helper for various…'."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A Skill's description reads: 'Helper for various coding tasks.' Why is this a bug, and what's the canonical critique?",
+                options: {
+                  A: "The description must be under 50 characters by spec.",
+                  B: "It tells the user nothing about when to pick this skill over neighbouring skills — discoverability dies. Rewrite to name operation, when-to-pick scenario, expected input, and what it does NOT handle.",
+                  C: "Descriptions must include version numbers.",
+                  D: "The description should be in JSON, not prose."
+                },
+                correct: "B",
+                explanations: {
+                  A: "No length spec.",
+                  B: "Right. The canonical Skill-discoverability critique. Vague descriptions are functionally invisible in a menu.",
+                  C: "Versioning is metadata; not the discoverability critique.",
+                  D: "Descriptions are prose."
+                },
+                principle: "Skill description is the selection signal. Vague descriptions kill discoverability. Name operation, scenario, expected input, and not-handled boundary.",
+                bSkills: ["B7.2", "B4.4"]
+              },
+              {
+                n: 2,
+                question: "Which Skill description is *most* effective for menu discoverability?",
+                options: {
+                  A: "'Skill for handling various release-engineering tasks.'",
+                  B: "'release-notes-skill-v2'",
+                  C: "'Generate release notes from PRs merged in the last 7 days. Use weekly. Input: repo path. Does not summarise individual PRs (use `pr-summary` for that).'",
+                  D: "'Engineering helper.'"
+                },
+                correct: "C",
+                explanations: {
+                  A: "Vague — 'various tasks' is the canonical anti-pattern.",
+                  B: "Name, not description. No scenario or boundary.",
+                  C: "Right. Names operation, scenario (weekly), expected input (repo path), and not-handled boundary (ad-hoc PR summaries → different skill). Mechanical to pick or skip from a menu read.",
+                  D: "Vague."
+                },
+                principle: "Description should make 'when to pick this' mechanical. Include the not-handled boundary against neighbouring skills.",
+                bSkills: ["B7.2"]
+              },
+              {
+                n: 3,
+                question: "What is the most effective *test* for a Skill description?",
+                options: {
+                  A: "Run a spell-check.",
+                  B: "Read it side-by-side with neighbouring Skills' descriptions; the boundaries should be obvious to a new user.",
+                  C: "Count the words; under 30 is best.",
+                  D: "Check it loads without error."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Spelling is hygiene; not the discoverability test.",
+                  B: "Right. Skills compete for selection. The discoverability test is comparative: can a user pick the right one from the menu without already knowing the answer?",
+                  C: "Length isn't the criterion; differentiation is.",
+                  D: "Loading without error doesn't measure discoverability."
+                },
+                principle: "Test descriptions comparatively. The boundary against neighbouring skills must be obvious from the menu.",
+                bSkills: ["B7.2"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b7-3", code: "B7.3", title: "Place skill (project / user / plugin)", bloom: "A",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Skills live in three locations, each with different distribution semantics. **Project-shared**: `.claude/skills/<name>/` inside the repo, checked in, ships with clones. The team's standard skills. **Personal**: `~/.claude/skills/<name>/`, your skills across all projects, not shipped to teammates. **Plugin / marketplace**: versioned, distributable bundles installed via the plugin system — independent of any single project.",
+              "Decision rule: 'who needs this skill?' Just me, across all my projects → personal. The team for this project → project-shared. Multiple teams / orgs / external users → plugin/marketplace. The location follows the audience.",
+              "Common miswiring: putting team skills in `~/.claude/skills/` (the team can't see them; new hires don't get them on clone). Or the inverse: putting personal experimental skills in `.claude/skills/` (clutters the project, ships drafts to teammates). The check is whether the skill should be in version control with the project — if yes, project-shared; if no, personal.",
+              "Plugin-distributed skills are the right shape when the skill is non-project-specific and reusable across many users / orgs (e.g. a popular MCP server's companion skill). They get versioned distribution, can be installed and updated independently, and don't tie to a single project's git history. The trade-off: more setup and packaging overhead than just dropping a file in `.claude/skills/`."
+            ],
+            keyPoints: [
+              "Three locations: project (`.claude/skills/`), personal (`~/.claude/skills/`), plugin/marketplace.",
+              "Pick by audience: just-me → personal; my team → project; many teams → plugin.",
+              "Project skills ship via git clone; personal skills don't.",
+              "Plugin skills get versioned independent distribution."
+            ],
+            examples: [
+              {
+                title: "Project: team's release-notes skill",
+                body: "`.claude/skills/release-notes/SKILL.md` (with frontmatter, body, optional bundled templates). Checked into the repo. Every clone gets it; new hires get it for free."
+              },
+              {
+                title: "Personal: my prefer-to-have explain-stack-trace skill",
+                body: "`~/.claude/skills/explain-stack-trace/SKILL.md`. Not project-specific; useful across every codebase I work in. Doesn't belong in any single repo."
+              },
+              {
+                title: "Plugin: companion skill for a popular MCP server",
+                body: "Distributed via a plugin/marketplace; users install it once and updates flow through the plugin system. Not project-specific; not personal-only."
+              }
+            ],
+            pitfalls: [
+              "Putting team-needed skills in `~/.claude/skills/`. New hires miss them.",
+              "Putting personal experimental skills in `.claude/skills/`. Clutters the repo, ships drafts.",
+              "Trying to share a personal skill 'just by sending the file.' Use project-shared or plugin-distributed instead."
+            ],
+            notesRef: "00-academy-basics/notes/07-agent-skills.md",
+            simplified: {
+              oneLiner: "Project skills go in `.claude/skills/` (shared via the repo). Personal skills go in `~/.claude/skills/` (just you). Plugin/marketplace is for skills shared across many orgs.",
+              analogy: "Project skills are tools in the team's toolbox (everyone gets them with the repo). Personal skills are tools in your own bag (you take them everywhere). Plugin skills are tools you sell at a hardware store.",
+              paragraphs: [
+                "Three places, picked by audience.",
+                "If your team needs it, put it in the repo. If only you need it, put it in your home dir. If many teams need it, package it as a plugin."
+              ],
+              keyPoints: [
+                "Project: `.claude/skills/`.",
+                "Personal: `~/.claude/skills/`.",
+                "Plugin: installed via the plugin system."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "Where should a Skill live so that every developer who clones the project repo gets it automatically?",
+                options: {
+                  A: "`~/.claude/skills/<name>/` in each developer's home directory.",
+                  B: "`.claude/skills/<name>/` checked into the project repo.",
+                  C: "Distributed via a plugin marketplace install.",
+                  D: "In CLAUDE.md as a referenced section."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Personal location; doesn't ship with the repo.",
+                  B: "Right. `.claude/skills/` inside the project, checked in, ships with clones.",
+                  C: "Plugin distribution is for cross-project skills, not project-shared ones.",
+                  D: "CLAUDE.md is for advisory rules, not a Skill-distribution mechanism."
+                },
+                principle: "Project-shared skills live in `.claude/skills/` checked into the repo. Audience = the project's contributors.",
+                bSkills: ["B7.3"]
+              },
+              {
+                n: 2,
+                question: "A developer has a personal Skill they use across all their projects (not specific to any one repo). Where should it live?",
+                options: {
+                  A: "In every project's `.claude/skills/`.",
+                  B: "In `~/.claude/skills/<name>/` in their home directory.",
+                  C: "Published as a plugin so they can install it on each machine.",
+                  D: "In CLAUDE.md of the project they happen to be in."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Cluttering every project with personal skills is the inverse antipattern.",
+                  B: "Right. `~/.claude/skills/` is the personal-skills location; available across all projects without polluting any.",
+                  C: "Plugin is heavy machinery for a single-user case.",
+                  D: "Project CLAUDE.md is project-scoped and not for personal skills."
+                },
+                principle: "Personal-across-all-projects skills live in `~/.claude/skills/`. Project repos shouldn't carry your personal kit.",
+                bSkills: ["B7.3"]
+              },
+              {
+                n: 3,
+                question: "When is a *plugin-distributed* Skill the right shape?",
+                options: {
+                  A: "When only one team needs the skill in a single repo.",
+                  B: "When a single user needs the skill across all their projects.",
+                  C: "When many teams or external users need the skill, with versioned independent distribution and updates.",
+                  D: "Never — plugins are deprecated."
+                },
+                correct: "C",
+                explanations: {
+                  A: "Single-team, single-repo is project-shared, not plugin.",
+                  B: "Single-user, multi-project is personal, not plugin.",
+                  C: "Right. Plugin/marketplace is for skills with cross-project, cross-team distribution and independent versioning.",
+                  D: "Not deprecated."
+                },
+                principle: "Plugin skills are for cross-team, cross-org distribution with independent versioning.",
+                bSkills: ["B7.3"]
+              }
+            ]
+          }
+        },
+        {
+          id: "b7-4", code: "B7.4", title: "Detect kitchen-sink skill", bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "A 'kitchen-sink' Skill is one that bundles multiple loosely-related goals into a single Skill — setup + linting + deploy in one Skill, or 'analyze + summarize + recommend' in one Skill. Symptoms: instruction drift (the model partially follows some goals while ignoring others), description-discoverability problems (the description has to mention all the goals, becoming vague), and reuse failures (users can't reach for a sub-piece without inheriting the whole bundle).",
+              "The principle: **one Skill, one purpose**. If the Skill's description has to use 'and' or 'plus' to enumerate three things it does, it's probably two or three Skills. Splitting yields focused descriptions, cleaner instruction adherence, and composable building blocks the user can reach for individually.",
+              "Detection signature: (1) description starts 'Helper for X, Y, and Z' or 'Various tasks related to…'; (2) the Skill's body has multiple disconnected sections targeting different audiences or use cases; (3) users report 'it sort of works for X but I have to nudge it for Y' — the model is getting partial instruction adherence on the multi-purpose body.",
+              "The fix is mechanical split: identify the distinct goals, factor each into its own Skill with its own focused description, and let the user invoke the right one. The kitchen-sink Skill becomes 2–3 Skills. Discoverability improves (each new description names one specific scenario), adherence improves (each invocation has a focused brief), and reuse improves (users can build by composing)."
+            ],
+            keyPoints: [
+              "One Skill, one purpose. 'And' or 'plus' in the description is a smell.",
+              "Symptoms: instruction drift, vague descriptions, partial adherence.",
+              "Detection: description fan-out, unrelated body sections, partial-instruction reports.",
+              "Fix: split into focused Skills."
+            ],
+            examples: [
+              {
+                title: "Kitchen-sink: 'project-helper'",
+                body: "Description: 'Setup, lint, deploy, and explain code in this project.' Body: four unrelated sections. Users report mixed results across the four goals."
+              },
+              {
+                title: "Split: 'project-setup', 'project-lint', 'project-deploy', 'explain-code'",
+                body: "Each focused; each with a description naming one scenario. Users pick the right one; instruction adherence is clean per invocation."
+              }
+            ],
+            pitfalls: [
+              "Bundling 'because they all touch the project'. Bundle by *purpose*, not by *target*.",
+              "Resisting the split because 'it'll be more files'. Files are cheap; cognitive load on the model and user is expensive.",
+              "Ignoring the description-fan-out signal. If it takes 'and' to describe the Skill, you have multiple Skills."
+            ],
+            notesRef: "00-academy-basics/notes/07-agent-skills.md",
+            simplified: {
+              oneLiner: "A kitchen-sink Skill bundles multiple unrelated goals. Symptom: vague description, partial adherence. Fix: split into one-purpose Skills.",
+              analogy: "It's like a Swiss army knife with 30 tools — convenient, but each individual tool is mediocre. Single-purpose tools are sharper and easier to grab.",
+              paragraphs: [
+                "When a Skill tries to do too much, it does each thing badly.",
+                "Split into focused Skills. The user picks the right one; the model gets a focused brief; everything works better."
+              ],
+              keyPoints: [
+                "One Skill, one purpose.",
+                "'And' / 'plus' in description = split signal.",
+                "Files are cheap; bundling cost is high."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A Skill's description reads: 'Set up the project, lint code, deploy to staging, and explain unfamiliar code patterns.' What's the diagnosis?",
+                options: {
+                  A: "The description is well-scoped because it covers the full project lifecycle.",
+                  B: "Kitchen-sink skill — four unrelated purposes bundled together. Split into focused Skills (one per purpose) so each has a clean description and the model gets a focused brief.",
+                  C: "The Skill needs a longer description to fully explain each capability.",
+                  D: "Skills should have at least four purposes for sufficient utility."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Lifecycle coverage is exactly the kitchen-sink trap.",
+                  B: "Right. Multi-purpose Skills suffer from instruction drift, vague descriptions, and reuse failures. Split into focused Skills.",
+                  C: "Longer descriptions don't fix multi-purpose bundling.",
+                  D: "Fabricated guideline."
+                },
+                principle: "One Skill, one purpose. 'And'/'plus' in the description is the canonical kitchen-sink smell.",
+                bSkills: ["B7.4"]
+              },
+              {
+                n: 2,
+                question: "Users report that a Skill 'mostly works for the linting part but doesn't reliably explain code as documented.' What's the structural diagnosis?",
+                options: {
+                  A: "The model needs to be more capable.",
+                  B: "Kitchen-sink Skill — partial instruction adherence is the predictable symptom of multi-purpose bundles. Split into focused Skills.",
+                  C: "The description needs to emphasise the explain-code half more.",
+                  D: "The user needs to invoke the Skill twice."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Doesn't address the structural cause.",
+                  B: "Right. Partial adherence is the canonical symptom of a Skill trying to do too much. The model partially follows; users see inconsistent results across the goals. Splitting fixes the cause.",
+                  C: "Emphasis is a description tweak, not a structural fix.",
+                  D: "Forces the user to compensate for the structural issue."
+                },
+                principle: "Partial-adherence reports across multiple goals = kitchen-sink Skill. Split into focused Skills.",
+                bSkills: ["B7.4"]
+              },
+              {
+                n: 3,
+                question: "Which is the *strongest* signal of a kitchen-sink Skill?",
+                options: {
+                  A: "The Skill name has more than 20 characters.",
+                  B: "The Skill description requires 'and'/'plus' to enumerate multiple unrelated goals.",
+                  C: "The Skill's frontmatter is missing a `version:` field.",
+                  D: "The Skill is invoked more than once per session."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Name length isn't a signal of bundling.",
+                  B: "Right. Description fan-out (multiple goals enumerated with 'and'/'plus') is the canonical kitchen-sink signal. The description couldn't honour the one-purpose principle.",
+                  C: "Versioning is unrelated.",
+                  D: "Invocation frequency doesn't signal bundling."
+                },
+                principle: "If the description needs 'and'/'plus' to list multiple unrelated goals, the Skill should be split.",
+                bSkills: ["B7.4"]
+              }
+            ]
+          }
+        }
       ],
-      sectionTest: null
+      sectionTest: {
+        title: "Section 7 test — Introduction to Agent Skills",
+        passPct: 0.7,
+        questions: [
+          {
+            n: 1,
+            question: "A team adds a single sentence to a new Skill: 'Always use Vue 3 composition API in code suggestions.' Six months later they observe the rule is silently ignored on most sessions. What's the structural cause and fix?",
+            options: {
+              A: "The Skill needs a higher priority field in its frontmatter.",
+              B: "Skills are user-invoked, not auto-loaded — the rule applies only when the Skill is invoked. For an always-on rule, move it to CLAUDE.md (advisory) or a hook (enforced).",
+              C: "Vue 3 isn't supported by the model.",
+              D: "Skills can't carry style preferences."
+            },
+            correct: "B",
+            explanations: {
+              A: "Fabricated priority field; doesn't address the invocation model.",
+              B: "Right. Skills are user-invoked. Always-on rules belong in CLAUDE.md (advisory) or a hook (enforced).",
+              C: "Off-axis.",
+              D: "Skills can carry style preferences when invoked; the issue is the invocation model."
+            },
+            principle: "Skills don't auto-load. For always-on rules, use CLAUDE.md or hook.",
+            bSkills: ["B7.1"]
+          },
+          {
+            n: 2,
+            question: "A Skill description: 'Helper for various coding tasks.' Critique it.",
+            options: {
+              A: "Acceptable — descriptions should be short.",
+              B: "Vague: gives the user no basis to pick this Skill from a menu over neighbouring Skills. Rewrite to name operation, when-to-pick scenario, expected input, and what it does NOT handle.",
+              C: "Should be in JSON not prose.",
+              D: "Should include the author's email."
+            },
+            correct: "B",
+            explanations: {
+              A: "Brevity at the cost of specificity is the smell, not the virtue.",
+              B: "Right. Description = selection signal. Vague descriptions guarantee the Skill is unused.",
+              C: "Descriptions are prose.",
+              D: "Author email is metadata."
+            },
+            principle: "Skill description is the discoverability signal. Name operation, scenario, input, and not-handled boundary.",
+            bSkills: ["B7.2"]
+          },
+          {
+            n: 3,
+            question: "A team's `release-notes-and-deploy-and-explain-code` Skill produces inconsistent results across its three goals. Which is the *correct* structural fix?",
+            options: {
+              A: "Move the Skill to a plugin marketplace.",
+              B: "Split the kitchen-sink Skill into three focused Skills: `release-notes`, `deploy`, `explain-code`. Each gets a focused description and a focused brief.",
+              C: "Move the Skill to CLAUDE.md.",
+              D: "Add more examples to the Skill body."
+            },
+            correct: "B",
+            explanations: {
+              A: "Distribution channel doesn't fix the bundling problem.",
+              B: "Right. Kitchen-sink Skills cause partial adherence, vague descriptions, and reuse failures. Splitting is the canonical fix.",
+              C: "Skills aren't replaced by CLAUDE.md; they have different invocation models.",
+              D: "More examples on a multi-purpose body don't fix the underlying bundling."
+            },
+            principle: "One Skill, one purpose. Split kitchen-sink Skills into focused ones.",
+            bSkills: ["B7.4"]
+          },
+          {
+            n: 4,
+            question: "Where should a Skill live so the entire team gets it on `git clone` of the repo?",
+            options: {
+              A: "`~/.claude/skills/<name>/`.",
+              B: "`.claude/skills/<name>/` checked into the repo.",
+              C: "A plugin marketplace install required for each developer.",
+              D: "CLAUDE.md as a referenced section."
+            },
+            correct: "B",
+            explanations: {
+              A: "Personal location; doesn't ship with the repo.",
+              B: "Right. `.claude/skills/` inside the project, checked in, ships with clones.",
+              C: "Plugin distribution is for cross-project; team-shared is project location.",
+              D: "Not a Skill-distribution mechanism."
+            },
+            principle: "Project-shared Skills live in `.claude/skills/` checked into the repo. Audience = the project's contributors.",
+            bSkills: ["B7.3"]
+          }
+        ]
+      }
     },
     {
       id: "s8-subagents",
