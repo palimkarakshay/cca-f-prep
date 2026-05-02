@@ -193,6 +193,6 @@ Which strategy delivers the **biggest win**?
 
 ## When done
 
-Post your 10 answers (e.g., `1B 2B 3B 4B 5C 6B 7B 8B 9B 10B`) and we'll score
-together. Then I'll open `solutions/diagnostic-01.md` and we'll go question by
-question on the misses to figure out which domain to train first.
+Post your 10 answers in the form `1X 2X … 10X` (one letter per question) and
+we'll score together. Then I'll open `solutions/diagnostic-01.md` and we'll go
+question by question on the misses to figure out which domain to train first.
