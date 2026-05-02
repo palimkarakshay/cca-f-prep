@@ -1,0 +1,82 @@
+name: Codex review recheck (catch missed reviews)
+
+# Adapted from palimkarakshay/lumivara-site. Scheduled safety net for PRs
+# whose codex-review.yml run hit the deferred path (every review leg
+# unavailable). Re-dispatches codex-review.yml for any open PR labelled
+# `review-deferred` so the fallback ladder retries on a refreshed quota.
+#
+# This repo doesn't (yet) seed backlog issues for unreviewed merged PRs
+# the way lumivara does — the use case there (every merge == a Vercel
+# deploy) doesn't apply to a study-content repo. If we add an
+# auto-publish gate later, port the merged-PR backlog leg too.
+#
+# Schedule: every 2h, offset :17 — same cadence as lumivara. The 5-hour
+# rolling provider quotas are longer than 2h, so retries land on a fresh
+# pool.
+
+on:
+  schedule:
+    - cron: '17 */2 * * *'
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Actually dispatch (default true; set false for dry-run)"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+      max_dispatch:
+        description: "Max open `review-deferred` PRs to re-dispatch"
+        required: false
+        default: "5"
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: write       # needed to workflow_dispatch codex-review.yml
+
+concurrency:
+  group: codex-review-recheck-runtime
+  cancel-in-progress: false
+
+jobs:
+  recheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Recheck deferred PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          APPLY: ${{ inputs.apply || 'true' }}
+          MAX_DISPATCH: ${{ inputs.max_dispatch || '5' }}
+        run: |
+          set -euo pipefail
+          mapfile -t PRS < <(
+            gh pr list --repo "$REPO" \
+              --state open --label review-deferred \
+              --limit "$MAX_DISPATCH" \
+              --json number --jq '.[].number'
+          )
+          {
+            echo "## Codex review recheck"
+            echo ""
+            echo "Mode: $([ "$APPLY" = "true" ] && echo APPLY || echo dry-run)"
+            echo "Found ${#PRS[@]} open \`review-deferred\` PR(s)."
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "${#PRS[@]}" -eq 0 ]; then
+            echo "Nothing to recheck."
+            exit 0
+          fi
+          for PR in "${PRS[@]}"; do
+            echo "PR #$PR — re-dispatching codex-review.yml"
+            if [ "$APPLY" = "true" ]; then
+              gh workflow run codex-review.yml --repo "$REPO" \
+                --field pr="$PR" || true
+            fi
+            echo "- PR #$PR re-dispatched" >> "$GITHUB_STEP_SUMMARY"
+          done
