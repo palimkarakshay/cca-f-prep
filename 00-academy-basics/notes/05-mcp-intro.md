@@ -10,14 +10,19 @@ LLM client. Three primitives, two transports — closed list.
 
 ## 5 principles
 
-1. **Three MCP primitives:** **tools** (executable, side-effecting,
-   model-invoked), **resources** (read-only data referenced by URI,
-   usually app/user-invoked), **prompts** (reusable user-invoked
-   templates). Don't confuse them; the exam tests primitive-fit
-   directly.
-2. **Two transports — closed list:**
+1. **MCP primitives — three core, two emerging.** Core (exam-tested):
+   **tools** (executable, side-effecting, model-invoked), **resources**
+   (read-only data referenced by URI, usually app/user-invoked),
+   **prompts** (reusable user-invoked templates). Emerging additions in
+   the spec — **sampling** (server asks the client to run an LLM call)
+   and **roots** (client tells server which paths/URIs are in-scope) —
+   exist but are not the focus of D3 questions. Don't confuse the core
+   three; the exam tests primitive-fit directly.
+2. **Two official transports — closed list:**
    - `stdio` — local single-user, server is a child process.
-   - `HTTP+SSE` (now also "streamable HTTP") — remote / multi-user.
+   - **Streamable HTTP** — remote / multi-user. (Older name in legacy
+     docs / older notes: "HTTP+SSE." The current spec name is
+     Streamable HTTP; expect both terms in older question banks.)
    Anything else (WebSockets, gRPC, named pipes) is wrong on MCP
    questions.
 3. **Tool descriptions are the model's only documentation.** Schema +
@@ -27,9 +32,9 @@ LLM client. Three primitives, two transports — closed list.
    small focused servers (one per integration) composed by the client,
    not one giant "company server."
 5. **Auth and identity live at the transport layer**, not in tool
-   schemas. For `HTTP+SSE`, OAuth-style flows; for `stdio`, the parent
-   process owns identity. Putting credentials into tool inputs is
-   structurally wrong.
+   schemas. For `Streamable HTTP`, OAuth-style flows; for `stdio`, the
+   parent process owns identity. Putting credentials into tool inputs
+   is structurally wrong.
 
 ## 2 failure modes
 

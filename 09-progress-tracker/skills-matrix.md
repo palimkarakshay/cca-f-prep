@@ -47,7 +47,7 @@ challenge, or error-log entry. Gap = self − measured.
 | Code | Skill | Bloom | Self | Date | Evidence | Measured | Gap |
 |---|---|---|---|---|---|---|---|
 | B4.1 | Classify tool / resource / prompt | An | – | – | – | – | – |
-| B4.2 | stdio vs HTTP+SSE | E | – | – | – | – | – |
+| B4.2 | stdio vs Streamable HTTP | E | – | – | – | – | – |
 | B4.3 | Reject non-MCP transports | R | – | – | – | – | – |
 | B4.4 | Diagnose wrong-tool-pick to description | An | – | – | – | – | – |
 | B4.5 | Server-per-capability vs monolith | E | – | – | – | – | – |

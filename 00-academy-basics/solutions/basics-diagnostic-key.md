@@ -109,9 +109,10 @@ references; prompts are user-invoked templates.
 
 ### Q8 — Correct: **B** · B4.2, B4.3 (transport choice)
 
-**Principle.** `stdio` is local-single-user. `HTTP+SSE` is the
-remote/multi-tenant option, with auth at the transport layer. Anything
-else (WebSockets, gRPC) is not an MCP transport.
+**Principle.** `stdio` is local-single-user. `Streamable HTTP`
+(legacy name: `HTTP+SSE`) is the remote/multi-tenant option, with
+auth at the transport layer. Anything else (WebSockets, gRPC) is not
+an MCP transport.
 
 **Traps.**
 - A — F7 (misread): single-user only.

@@ -88,6 +88,8 @@ it so the abstract idea has a concrete shape.
 
 **Principle:** Automated behaviors ("every time X", "from now on when X") need **hooks in `settings.json`**. The harness executes hooks; it does not execute CLAUDE.md or memory.
 
+**Event choice (Stop vs. PostToolUse):** the question says "every time you finish a task," meaning per-turn — that's `Stop`. `PostToolUse` fires per individual tool call (would run lint after *every* file edit, not after the task as a whole). Match event granularity to "task" granularity.
+
 **Mental model:** ask "who runs this — the model, or the harness?" If you need a guarantee, the harness is the only one that can give one.
 
 **Domain:** 2. Claude Code → sub-area "Hooks vs. memory vs. CLAUDE.md."
@@ -98,12 +100,12 @@ it so the abstract idea has a concrete shape.
 
 **Correct: B**
 
-- A — HTTP+SSE is for *remote* or *multi-user* MCP servers. Single dev, same machine? Overkill.
+- A — HTTP+SSE (now called **Streamable HTTP** in the current spec) is for *remote* or *multi-user* MCP servers. Single dev, same machine? Overkill.
 - **B — right.** `stdio` is the canonical local-machine transport. Claude Code spawns the server as a subprocess; lifecycle is bound to the Claude process; no port management; no auth surface.
 - C — WebSockets is not a current MCP transport.
 - D — gRPC is not a current MCP transport.
 
-**Principle:** Match transport to deployment shape. Local single-user → `stdio`. Remote / multi-user → HTTP+SSE.
+**Principle:** Match transport to deployment shape. Local single-user → `stdio`. Remote / multi-user → `Streamable HTTP` (older docs: HTTP+SSE).
 
 **Domain:** 3. Tool Design / MCP → sub-area "MCP transports."
 

@@ -10,7 +10,7 @@ Foundations (CCA-F) exam.
 | `00-academy-basics/` | foundation track from the 9 [Anthropic Academy](https://anthropic.skilljar.com/) courses — per-course notes, atomic B-skill checklist, basics diagnostic, transition plan | foundation |
 | `01-agentic-architecture/` | agentic loops, coordinator-subagent, hook lifecycle, bounded loops & session budget | 27% |
 | `02-claude-code/` | CLAUDE.md hygiene, settings.json, slash commands, hooks vs. memory vs. CLAUDE.md | 20% |
-| `03-tool-design-mcp/` | tool descriptions, MCP transports (stdio / HTTP+SSE), schema design | 18% |
+| `03-tool-design-mcp/` | tool descriptions, MCP transports (stdio / Streamable HTTP), schema design | 18% |
 | `04-prompt-engineering/` | system vs. user, few-shot as turns, structured output / tool use | 20% |
 | `05-context-reliability/` | context windows, prompt caching, batching, retries | 15% |
 | `06-failure-analysis/` | running error log + F-code cognitive failure-mode taxonomy | — |
