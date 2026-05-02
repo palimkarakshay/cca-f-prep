@@ -12,6 +12,14 @@
            ],
            sectionTest
          }
+       ],
+       mockExams: [                              // optional
+         {
+           id, title, blurb, sourceFile,
+           timeMinutes, passPct,
+           scoreBands: [ { min, max, verdict, message } ],
+           questions                             // same shape as sectionTest.questions
+         }
        ]
      }
 
@@ -170,7 +178,115 @@ const CURRICULUM = {
         },
         { id: "b1-2", code: "B1.2", title: "Product-tier vs API-level limit",  bloom: "A", lesson: null, quiz: null },
         { id: "b1-3", code: "B1.3", title: "Artifact vs inline message",       bloom: "E", lesson: null, quiz: null },
-        { id: "b1-4", code: "B1.4", title: "Context cost of N file uploads",   bloom: "A", lesson: null, quiz: null }
+        {
+          id: "b1-4", code: "B1.4", title: "Context cost of N file uploads", bloom: "A",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "B1.1 established the qualitative claim: a Claude.ai Project is in-context file storage, not retrieval. B1.4 makes that quantitative. Every file you attach to a Project is concatenated into the system context on *every* chat, every turn — there is no caching, no on-demand load, no top-k. The per-message cost of N files is roughly N × file_size in tokens, paid every turn for the life of the Project.",
+              "Two things follow from that. First: the budget the conversation and the model's answer get is what's left of the context window after the files are loaded. With a 200 KB context budget and 150 KB of attached files, the user message and the answer share the remaining 50 KB. The 'context window feels small' complaint on a heavily-loaded Project is a direct consequence of this math, not a subscription tier issue.",
+              "Second: even when N × file_size still fits, attention quality degrades non-linearly. The model has to find the relevant tokens inside an ever-growing wall of content. Distractor passages compete for attention with the actual question. The breaking point arrives long before the hard window limit — usually as 'answers get vaguer / cite the wrong file' rather than as a visible error.",
+              "The decision rule is mechanical. If the access pattern is *every chat needs all of it*, a Project is the right shape and you must size N × file_size to leave conversational headroom. If the access pattern is *only the relevant slice should land in context*, you've outgrown a Project and you need retrieval (RAG / MCP server / search tool). Adding more files to a Project that's already too big does not help. It is the failure mode."
+            ],
+            keyPoints: [
+              "Per-message cost ≈ N × file_size, paid every turn. No caching at this layer.",
+              "Conversation budget = window − attached files. Heavy Projects shrink the budget visibly.",
+              "Quality degrades from attention competition before the hard window limit fires.",
+              "Threshold question: must every chat see all of it? If no, switch to retrieval — don't add files."
+            ],
+            examples: [
+              {
+                title: "Sizing a Project before attaching",
+                body: "Window: ~200,000 tokens. Files: 12 PDFs, ~10,000 tokens each = 120,000 tokens of system context every chat. Conversation + answer share ~80,000 tokens — usually fine. Now add the 13th file at 100,000 tokens (a long policy doc): you've blown past the window and the Project will start dropping content silently. The fix is not 'shorten the conversation' — it's pulling that 13th file out of the Project and behind retrieval."
+              },
+              {
+                title: "Diagnosing 'context feels tight'",
+                body: "User reports: 'Claude is forgetting earlier turns sooner than usual.' Project has 8 files attached. Total: ~140,000 tokens of files in a 200,000-token window. The conversation budget is ~60,000 tokens — earlier turns are being squeezed out by the file load, not by anything wrong with the conversation. The fix is structural: drop files that don't need to be in every chat."
+              }
+            ],
+            pitfalls: [
+              "Believing 'Claude.ai caches Project files between turns.' It does not at this layer; cost is paid every turn.",
+              "Assuming a separate 'file context budget' exists. There is one window, shared by files + conversation + answer.",
+              "Treating 'add another file' as the default response when answer quality drops. The opposite is usually correct: pull files out and switch the access pattern."
+            ],
+            notesRef: "00-academy-basics/notes/01-claude-101.md",
+            simplified: {
+              oneLiner: "N attached files cost roughly N × file_size of context every chat — there is no caching, no retrieval, no separate budget.",
+              analogy: "Imagine printing every attached file at the start of every conversation and stapling it to the front of your question. The pile grows; your speaking room shrinks; eventually the staple bursts. Adding more paper doesn't help — moving the rarely-needed pages off the desk does.",
+              paragraphs: [
+                "Every file you attach to a Claude.ai Project gets pasted into the prompt at the start of every chat. There is no clever caching — the same files are re-sent each turn.",
+                "That means the room left for your question and Claude's answer is the context window minus all those files. Pile on too many and the conversation gets cramped, and answers start missing things even before you hit the hard limit.",
+                "The fix is rarely 'add more files.' It's usually 'remove files that don't need to be in every chat,' or 'switch to a setup that searches before sending.'"
+              ],
+              keyPoints: [
+                "Files load fresh every chat — no cache, no shortcut.",
+                "Window ≠ unlimited. Files eat the same budget as the conversation.",
+                "If quality drops, take files out — don't pile more in."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team attaches 10 internal docs (~20 KB each) to a Claude.ai Project. After the first week, users complain Claude 'forgets' earlier turns much sooner than expected. What is the most likely structural cause?",
+                options: {
+                  A: "The Project is silently summarizing earlier turns to make room.",
+                  B: "The 10 docs are loaded into context every chat, shrinking the budget the conversation and answer share.",
+                  C: "Claude.ai's tier-based cache eviction is dropping older turns under load.",
+                  D: "The model is operating below its context limit but above its 'attention budget,' a separate cap."
+                },
+                correct: "B",
+                explanations: {
+                  A: "There is no automatic summarization at this layer.",
+                  B: "Right. ~200 KB of files in the system context every turn leaves the conversation a much smaller working budget. Earlier turns drop because the window is genuinely tighter, not because anything is being summarized.",
+                  C: "Fabricated mechanism. There is no tier-based cache eviction of conversation turns.",
+                  D: "Fabricated. There is no separate 'attention budget' cap."
+                },
+                principle: "Per-message context budget = window − attached files. The 'forgetting' symptom is the math made visible.",
+                bSkills: ["B1.4"]
+              },
+              {
+                n: 2,
+                question: "A user reports answer quality is poor and asks whether they should attach 5 more reference PDFs to their already-loaded Project. What is the strongest response?",
+                options: {
+                  A: "Yes — more reference material gives Claude more grounding to answer correctly.",
+                  B: "Yes, but only if the new PDFs are smaller than the existing ones, to stay under the file-count limit.",
+                  C: "No — adding files raises the per-turn context cost and increases attention competition. The fix is usually to remove files or move to retrieval, not add more.",
+                  D: "No — Project files are write-once; the originals would have to be re-uploaded together."
+                },
+                correct: "C",
+                explanations: {
+                  A: "This is the canonical failure mode the lesson names. More files = more context cost + more attention competition, not better grounding.",
+                  B: "File-count is not the binding constraint here; aggregate token cost and attention quality are.",
+                  C: "Right. The corrective intervention when answer quality drops on a heavy Project is to reduce the file load or switch the access pattern (retrieval), not to add more.",
+                  D: "Fabricated. Project files can be added and removed freely."
+                },
+                principle: "When a Project is already saturated, more files is the wrong direction. Either trim the corpus to what every chat truly needs, or move to retrieval.",
+                bSkills: ["B1.4"]
+              },
+              {
+                n: 3,
+                question: "Which statement about per-message context cost on a Claude.ai Project is correct?",
+                options: {
+                  A: "Files are paid for once on first attach; subsequent chats reuse a cached representation at zero context cost.",
+                  B: "Cost ≈ N × file_size every turn, regardless of whether the user's question relates to the files.",
+                  C: "Cost is computed lazily — only the files relevant to the current question are loaded.",
+                  D: "Cost is bounded by the subscription tier's daily token quota, not the per-message window."
+                },
+                correct: "B",
+                explanations: {
+                  A: "No first-turn caching at this layer. Files re-load every chat.",
+                  B: "Right. Claude.ai Projects do not retrieve. All attached files load into the system context every turn, whether or not the question touches them. Cost is mechanical: N × file_size, every chat.",
+                  C: "There is no relevance filter on Project files. That's the point of the Project / RAG distinction in B1.1.",
+                  D: "Daily quotas govern message count, not per-message context cost."
+                },
+                principle: "Project context cost is mechanical and paid every turn. Plan capacity from N × file_size; expect no relevance filtering.",
+                bSkills: ["B1.4"]
+              }
+            ]
+          }
+        }
       ],
       sectionTest: {
         title: "Section 1 test — Claude 101",
@@ -309,7 +425,123 @@ const CURRICULUM = {
       sourceCourse: "Anthropic Academy — Claude Code 101",
       blurb: "Claude Code anatomy: hooks, slash commands, permissions, the CLAUDE.md / settings.json split.",
       concepts: [
-        { id: "b5-1", code: "B5.1", title: "Place hook on correct event",         bloom: "A",  lesson: null, quiz: null },
+        {
+          id: "b5-1", code: "B5.1", title: "Place hook on correct event", bloom: "A",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Hooks in Claude Code are deterministic harness-side actions wired to lifecycle events. The model does not run a hook; the harness does, regardless of what the model decides. That distinction is the entire reason hooks exist: when you need a guarantee — a guardrail, an automated post-task action, a trust gate — the model is the wrong layer to put it on. The hook event you choose decides whether the action fires before, after, or instead of the thing you care about. Picking the wrong event is the single most common hook bug.",
+              "The events worth memorising at this tier (and their granularity): SessionStart fires once when a session begins; UserPromptSubmit fires when the user sends a turn; PreToolUse fires before each individual tool call and is the only event that can return a blocking decision to refuse the call; PostToolUse fires after each tool call with its result; Notification fires for transient harness messages; Stop fires once when the assistant finishes a task / turn; SubagentStop fires when a delegated subagent finishes; PreCompact / PostCompact fire around context compaction. Granularity is everything: PreToolUse is per-tool-call; Stop is per-task.",
+              "The decision rule maps directly from the trigger phrasing. 'Refuse / block / require approval before X tool runs' → PreToolUse (the only event with a block primitive). 'Every time you finish a task, do X' → Stop (per-task granularity matches 'task'). 'Every time a tool call completes, do X' → PostToolUse (per-call granularity matches 'each call'). 'When the session boots, prepare X' → SessionStart. 'Every time the user sends a message, validate X' → UserPromptSubmit.",
+              "Two anti-patterns produce most real-world miswires. First: putting a guardrail on PostToolUse instead of PreToolUse. PostToolUse can warn, but the dangerous command has already executed — you've turned an enforcement into a forensic alert. Second: putting a per-task automation on PostToolUse instead of Stop. PostToolUse fires per-tool-call, so 'run lint after the task' becomes 'run lint after every Edit, every Read, every Bash' — a flood, not a checkpoint. Match event granularity to the trigger granularity, not just the verb."
+            ],
+            keyPoints: [
+              "Hooks run in the harness. The model can't refuse, forget, or interpret them.",
+              "PreToolUse is the only blocking event. Guardrails live there, period.",
+              "PostToolUse = per individual tool call. Stop = per task / turn. Pick by granularity.",
+              "Trigger phrasing maps to event: 'before tool' → PreToolUse · 'after task' → Stop · 'after each call' → PostToolUse · 'on boot' → SessionStart.",
+              "If the placement could fire at the wrong granularity, you've picked the wrong event."
+            ],
+            examples: [
+              {
+                title: "Refuse `rm -rf` and `--no-verify`",
+                body: "Trigger: 'block any shell command containing rm -rf or --no-verify, regardless of permission mode.' Required primitive: blocking decision before execution. Event: PreToolUse. Hook inspects the candidate command; if it matches either pattern, it returns a deny decision and the call never runs. PostToolUse can't do this — the command has already run."
+              },
+              {
+                title: "Run `npm run lint` after every task",
+                body: "Trigger: 'every time you finish a task, run npm run lint.' 'Task' granularity = per-turn = Stop. PostToolUse would fire after each individual Edit, Read, and Bash call — running lint dozens of times per task. Stop fires once when the assistant signals it's done with the user's request. Match granularity to the user's words."
+              },
+              {
+                title: "Inject project-state context at session boot",
+                body: "Trigger: 'when a session starts, dump current git branch + uncommitted file count into the conversation as context.' One-shot, at session begin. Event: SessionStart. Not UserPromptSubmit (that runs every turn — wasteful repetition). Not Stop (too late)."
+              }
+            ],
+            pitfalls: [
+              "PostToolUse for guardrails — fires after the dangerous command. No block primitive at that event.",
+              "PostToolUse for per-task automation — wrong granularity; lint floods on every tool call.",
+              "Stop for guardrails — fires only at task end, way too late to prevent harm.",
+              "SessionStart for per-turn validation — fires only once at boot; misses every subsequent turn.",
+              "Putting an automation that 'must always run' in CLAUDE.md or memory instead of a hook — the model can interpret, prioritize, or skip those. The harness can't skip a hook."
+            ],
+            notesRef: "00-academy-basics/notes/05-claude-code-101.md",
+            simplified: {
+              oneLiner: "Pick the hook event by what your trigger fires on: blocking → PreToolUse · per-task → Stop · per-tool-call → PostToolUse · once at boot → SessionStart.",
+              analogy: "Think of the model as a chef and the harness as the kitchen's safety officer. Hooks are the officer's standing rules. 'Stop the chef before they pick up the knife' has to fire before the action — that's PreToolUse. 'After every dish goes out, wipe the counter' fires once per dish leaving — that's Stop, the per-task event. 'After every utensil is used, sanitize it' fires every time a utensil touches food — that's PostToolUse. Pointing the rules at the wrong moment is what makes the kitchen unsafe.",
+              paragraphs: [
+                "Hooks are little scripts the harness runs at fixed moments — independent of whatever the model decides. That's their whole superpower: they always fire when you said they would.",
+                "The trick is matching the moment. 'Block this before it happens' has to be PreToolUse (the only one that can refuse). 'Once per task' is Stop. 'After every single tool call' is PostToolUse. 'On session boot' is SessionStart.",
+                "If you put a guardrail on PostToolUse, it fires after the damage is done. If you put a per-task action on PostToolUse, it floods because tool calls outnumber tasks. Match the event to the granularity of the thing you want."
+              ],
+              keyPoints: [
+                "Hooks always fire — that's why we use them.",
+                "Block before something runs → PreToolUse.",
+                "After each task → Stop. After every tool call → PostToolUse.",
+                "Wrong event = wrong moment. Read the trigger carefully."
+              ]
+            }
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question: "A team wants Claude Code to refuse any shell invocation containing `--force-push` to main, regardless of which user is running it. Which hook event implements this reliably?",
+                options: {
+                  A: "Stop — analyse the transcript at session end and warn if a force-push happened.",
+                  B: "PreToolUse — inspect the candidate command and return a blocking decision before it runs.",
+                  C: "PostToolUse — inspect the result of the command and warn if a force-push went through.",
+                  D: "SessionStart — reject the session if force-push appears anywhere in the user's recent shell history."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Stop fires once at task end — far too late to prevent the destructive action.",
+                  B: "Right. PreToolUse is the only event that can return a blocking decision before the tool call executes. This is the canonical home for command guardrails.",
+                  C: "PostToolUse fires after the command. The damage is done; it can only forensically alert.",
+                  D: "SessionStart has no per-call context and runs once at boot. Wrong granularity entirely."
+                },
+                principle: "Pre-execution policy → PreToolUse. The blocking-decision capability is what makes it the right primitive for guardrails.",
+                bSkills: ["B5.1"]
+              },
+              {
+                n: 2,
+                question: "The user writes: \"Every time you finish a task, run `pytest -q` and post the result.\" Which event placement is correct?",
+                options: {
+                  A: "PostToolUse — runs after each tool call, which captures task completion.",
+                  B: "Stop — fires once when the assistant signals task completion (per-turn granularity).",
+                  C: "Notification — picks up the harness's task-completed signal.",
+                  D: "SessionStart — schedule a recurring pytest job once per session."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Wrong granularity. PostToolUse fires per individual tool call — pytest would run after every Edit, Read, and Bash. The user said 'every task,' not 'every tool call.'",
+                  B: "Right. Stop fires once per task / turn. That matches the user's 'every time you finish a task' trigger directly.",
+                  C: "Notification is for transient harness messages, not the canonical per-task hook.",
+                  D: "SessionStart fires once at boot. Wrong granularity — it would run pytest once and never again."
+                },
+                principle: "Match event granularity to trigger granularity. 'Per task' = Stop. 'Per tool call' = PostToolUse. Verbs alone don't decide — granularity does.",
+                bSkills: ["B5.1"]
+              },
+              {
+                n: 3,
+                question: "An ops engineer wants to inject the current git branch and the count of uncommitted files into Claude's context at the start of every session, so the model knows the working state without being asked. Which event is the right home?",
+                options: {
+                  A: "UserPromptSubmit — runs every turn, so the state is always fresh.",
+                  B: "SessionStart — fires once when the session begins; the harness can prepend the git info as initial context.",
+                  C: "PreToolUse — runs before any tool call, so it's the earliest moment available.",
+                  D: "PreCompact — runs around context compaction, which is when the model needs the orienting context most."
+                },
+                correct: "B",
+                explanations: {
+                  A: "Works, but runs every turn — wasteful repetition. The trigger is 'at start of session,' not 'every turn.'",
+                  B: "Right. SessionStart is the canonical 'prepare initial context' event. Fires once, attaches the git info, the rest of the session has it.",
+                  C: "PreToolUse fires per individual tool call — wrong granularity for a one-shot setup.",
+                  D: "PreCompact fires only around compaction events, not at session boot. Wrong moment."
+                },
+                principle: "Read the trigger's granularity literally. 'At start of session' = SessionStart, not 'whenever it might also be useful.'",
+                bSkills: ["B5.1"]
+              }
+            ]
+          }
+        },
         { id: "b5-2", code: "B5.2", title: "Predict permission cascade",          bloom: "An", lesson: null, quiz: null },
         { id: "b5-3", code: "B5.3", title: "Route rule (CLAUDE.md/skill/hook)",   bloom: "E",  lesson: null, quiz: null },
         { id: "b5-4", code: "B5.4", title: "Author slash command",                bloom: "A",  lesson: null, quiz: null }
@@ -371,6 +603,241 @@ const CURRICULUM = {
         { id: "b9-3", code: "B9.3", title: "Detect set-and-forget",   bloom: "An", lesson: null, quiz: null }
       ],
       sectionTest: null
+    }
+  ],
+
+  mockExams: [
+    {
+      id: "diagnostic-01",
+      title: "Diagnostic 01 — Mixed Domain",
+      blurb: "10 questions, ~20 min. Cold calibration across all five exam domains. Take it without notes — the score band tells you which domain to train first.",
+      sourceFile: "07-mock-exams/diagnostic-01.md",
+      timeMinutes: 20,
+      passPct: 0.7,
+      scoreBands: [
+        {
+          min: 9, max: 10,
+          verdict: "Strong baseline",
+          message: "Train misses' sub-areas only. One full mock per week to keep edges sharp."
+        },
+        {
+          min: 7, max: 8,
+          verdict: "Solid",
+          message: "Train the misses' domains in full (notes + 5–10 challenges + a per-domain MCQ set). Skim the rest."
+        },
+        {
+          min: 5, max: 6,
+          verdict: "Sequence by exam weight",
+          message: "Order by weight: D1 Agentic Arch (27%) → D4 Prompt Eng (20%) → D2 Claude Code (20%) → D3 Tool/MCP (18%) → D5 Context (15%)."
+        },
+        {
+          min: 0, max: 4,
+          verdict: "Slow down",
+          message: "Notes first, then 1 worked example per sub-area before any MCQs. Re-take after one cycle."
+        }
+      ],
+      questions: [
+        {
+          n: 1,
+          question: "A team is building a research assistant that must (a) search across 12 internal knowledge bases, (b) cross-check facts across the results, and (c) write a final report. The current implementation runs as a single agentic loop calling tools sequentially. Median latency is 90 seconds and the assistant occasionally drops sources mid-report when the context grows long.\n\nWhat is the strongest reason to refactor to a coordinator-subagent pattern?",
+          options: {
+            A: "Subagents will reduce per-turn token cost because they run on cheaper models.",
+            B: "Independent searches can run in parallel, and each subagent's intermediate context is isolated from the coordinator's.",
+            C: "Subagents have access to a longer context window than the coordinator.",
+            D: "The coordinator-subagent pattern is required when more than 10 tools are registered."
+          },
+          correct: "B",
+          explanations: {
+            A: "Wrong axis. Subagents inherit the parent model unless explicitly configured otherwise; cost is not the canonical justification.",
+            B: "Right. The two real wins of coordinator-subagent are parallel execution of independent work and context isolation — the subagent's intermediate scratch never lands in the coordinator's window.",
+            C: "False. Subagents don't get a bigger window; they get a fresh one.",
+            D: "Fabricated. There is no '10 tools' threshold."
+          },
+          principle: "Reach for coordinator-subagent when (a) work is independently parallelizable or (b) intermediate context would otherwise pollute the parent. Not for cost, not for window size.",
+          domain: "1. Agentic Architecture",
+          subArea: "Coordinator-subagent vs. linear loop"
+        },
+        {
+          n: 2,
+          question: "A developer wants Claude Code to refuse to run any shell command containing `rm -rf` or `--no-verify`, regardless of the user's permission mode.\n\nWhich hook event should this rule live in?",
+          options: {
+            A: "SessionStart — block at session boot before any tool call happens.",
+            B: "PreToolUse — inspect and reject the tool call before it executes.",
+            C: "PostToolUse — inspect the result and warn if a dangerous command ran.",
+            D: "Stop — analyze the full transcript at the end of the session."
+          },
+          correct: "B",
+          explanations: {
+            A: "SessionStart runs once at boot with no per-tool-call context. Can't inspect commands.",
+            B: "Right. PreToolUse is the only event that fires before a tool call and can return a blocking decision. This is the canonical home for command guardrails.",
+            C: "PostToolUse runs after the command. Too late to prevent harm.",
+            D: "Stop runs once at session end. Same problem as C, only worse."
+          },
+          principle: "Pre-execution policy → PreToolUse. The blocking-decision capability is what makes it the right primitive for guardrails.",
+          domain: "1. Agentic Architecture",
+          subArea: "Hook event placement"
+        },
+        {
+          n: 3,
+          question: "An agent is implementing a complex feature. It has been going for 47 turns, looping between editing the same file, running tests, and re-editing. The tests still fail.\n\nWhich mitigation is most aligned with agentic-architecture best practices?",
+          options: {
+            A: "Increase max_tokens so the agent has more room to think.",
+            B: "Add a soft watermark at ~80% of max-turns: finish current unit, commit, exit cleanly, resume next run.",
+            C: "Switch the agent to a more powerful model mid-run when retries exceed 5.",
+            D: "Disable the test-running tool until the agent commits to a written plan."
+          },
+          correct: "B",
+          explanations: {
+            A: "Confuses turn budget with token budget. max_tokens controls per-message generation, not loop count.",
+            B: "Right. Self-pacing watermarks (~80% commit + exit cleanly, ~95% hard exit) are the canonical defense against runaway loops. Partial progress is preserved; the next run resumes.",
+            C: "Escalating model mid-run is not a recognized pattern; adds complexity, doesn't solve loop dynamics.",
+            D: "Removes the feedback the agent needs to validate work."
+          },
+          principle: "Bounded loops with self-pacing watermarks. Exiting at 80% is a success, not a failure — partial work is recoverable.",
+          domain: "1. Agentic Architecture",
+          subArea: "Bounded loops / session budget"
+        },
+        {
+          n: 4,
+          question: "A repo's CLAUDE.md has grown to 12,000 tokens over six months. Sessions feel slower to start, and the operator notices Claude sometimes parrots instructions back rather than acting on them.\n\nWhat is the most appropriate action?",
+          options: {
+            A: "Switch the model to a smaller one to reduce per-token cost.",
+            B: "Move historical sections into docs/reference/ and @-include only the parts that are still actively binding.",
+            C: "Delete the file and re-derive context from each new session's user prompt.",
+            D: "Compress the file with an LLM-based summarizer and overwrite it in place."
+          },
+          correct: "B",
+          explanations: {
+            A: "Wrong axis. The bottleneck is context shape, not per-token cost.",
+            B: "Right. CLAUDE.md is loaded into context every session — treat it like RAM, not a database. Move historical decisions to disk (reference/, docs/) and @-include or link only what is still binding.",
+            C: "Destroys durable behavior anchors that won't be reconstructed from a user prompt.",
+            D: "LLM-summarizing loses fidelity, and the file will balloon again."
+          },
+          principle: "Lean charter, archive history. The same content can serve the agent equally well from reference/ if it's referenced rather than inlined.",
+          domain: "2. Claude Code",
+          subArea: "CLAUDE.md hygiene"
+        },
+        {
+          n: 5,
+          question: "The user says: \"From now on, every time you finish a task, run `npm run lint` and post the output in the chat.\"\n\nWhich mechanism implements this reliably?",
+          options: {
+            A: "Add a sentence to CLAUDE.md describing the desired behavior.",
+            B: "Save it as a memory / preference for future sessions.",
+            C: "Configure a Stop hook in settings.json that runs `npm run lint` and prints the result.",
+            D: "Create a slash command that runs lint, and tell the user to invoke it after each task."
+          },
+          correct: "C",
+          explanations: {
+            A: "CLAUDE.md instructions are advisory. The model can interpret, prioritize, or even forget. Not an enforcement mechanism.",
+            B: "Same problem as A. Memories/preferences are read by the model, not executed by the harness.",
+            C: "Right. Hooks run in the harness layer, deterministically, regardless of what the model decides. 'Every time you finish a task' = per-turn = Stop hook (PostToolUse would fire per individual tool call).",
+            D: "Slash commands require the user to invoke them. 'Every time' is the user not having to remember."
+          },
+          principle: "Automated behaviors ('every time X', 'from now on when X') need hooks in settings.json. The harness executes hooks; it does not execute CLAUDE.md or memory. Match event granularity to the trigger: per-task = Stop, per-tool-call = PostToolUse.",
+          domain: "2. Claude Code",
+          subArea: "Hooks vs. memory for automation"
+        },
+        {
+          n: 6,
+          question: "A team is building an MCP server that exposes a 50ms-latency internal database. The server will be used by a single developer's Claude Code instance, running on the same machine.\n\nWhich transport should they use?",
+          options: {
+            A: "HTTP + Server-Sent Events, because it is the future-proof default.",
+            B: "stdio, because the server runs on the same machine and its lifecycle is bound to the Claude Code process.",
+            C: "WebSockets, for full-duplex streaming.",
+            D: "gRPC, for strongly-typed schemas."
+          },
+          correct: "B",
+          explanations: {
+            A: "HTTP+SSE (now called Streamable HTTP in the current spec) is for remote or multi-user MCP servers. Single dev, same machine? Overkill.",
+            B: "Right. stdio is the canonical local-machine transport. Claude Code spawns the server as a subprocess; lifecycle is bound to the Claude process; no port management; no auth surface.",
+            C: "WebSockets is not a current MCP transport.",
+            D: "gRPC is not a current MCP transport."
+          },
+          principle: "Match transport to deployment shape. Local single-user → stdio. Remote / multi-user → Streamable HTTP (older docs: HTTP+SSE).",
+          domain: "3. Tool Design / MCP",
+          subArea: "MCP transport choice"
+        },
+        {
+          n: 7,
+          question: "Two tools are registered: `search_documents` and `find_files`. Both currently have one-line descriptions: \"Search the system for documents\" and \"Find files.\" The model keeps picking the wrong one.\n\nWhich fix has the highest leverage?",
+          options: {
+            A: "Rename the tools to search_documents_v2 and find_files_v2.",
+            B: "Rewrite both descriptions to specify what each tool searches (e.g., 'search indexed PDFs by content' vs. 'list filenames in working directory by glob'), the input shape, and the kind of question each is right for.",
+            C: "Add a system-prompt rule: 'When in doubt, prefer search_documents.'",
+            D: "Merge both tools into one `search` tool with a `mode` parameter."
+          },
+          correct: "B",
+          explanations: {
+            A: "Renaming is cosmetic. Doesn't tell the model what each tool does.",
+            B: "Right. Tool descriptions are the model's selection signal. Specify (1) what it operates on, (2) input shape, (3) ideal-use scenarios, (4) what it does not handle. Differentiation > naming > nudging.",
+            C: "System-prompt nudges paper over the design problem and bias the model without informing it.",
+            D: "Merging into one tool with a `mode` param adds API surface complexity to dodge a description-quality issue."
+          },
+          principle: "When the model picks the wrong tool, the tool's description is the first thing to fix. Renames, system nudges, and tool merges are second-order.",
+          domain: "3. Tool Design / MCP",
+          subArea: "Tool description quality"
+        },
+        {
+          n: 8,
+          question: "An agent must return a list of {name, email, score} records to be inserted into a database. About 1 in 30 responses has a trailing comma or unescaped quote that breaks JSON.parse.\n\nWhat is the most reliable fix?",
+          options: {
+            A: "Add 'Return valid JSON, no trailing commas' to the system prompt.",
+            B: "Use the API's structured-output / tool-use mode with a JSON schema for the records.",
+            C: "Wrap the response in <json> XML tags and parse the inner content.",
+            D: "Increase temperature so the model takes more care."
+          },
+          correct: "B",
+          explanations: {
+            A: "Soft constraint in the prompt. The model will still violate it ~3% of the time, exactly the rate the question describes.",
+            B: "Right. Structured-output / tool-use mode with a schema uses constrained decoding — the model literally cannot emit tokens that violate the schema for those fields. This is a platform-level guarantee.",
+            C: "XML tags don't constrain the JSON inside. The same trailing-comma bug recurs.",
+            D: "Higher temperature increases variance, not reliability."
+          },
+          principle: "For machine-consumed output, prefer platform-level constraints over prompt-level requests. The model cannot violate a constraint that isn't sampled.",
+          domain: "4. Prompt Engineering",
+          subArea: "Structured output reliability"
+        },
+        {
+          n: 9,
+          question: "A classification prompt has 5 few-shot examples. The role definition is in the system prompt, the examples sit inline as text inside the user message before the actual input, and the input itself follows. Classification accuracy varies wildly between runs.\n\nWhich restructure is most likely to improve consistency?",
+          options: {
+            A: "Move all examples into the system prompt as a long bulleted list.",
+            B: "Use alternating user / assistant turns for the few-shot examples, then send the actual input as the final user message.",
+            C: "Increase temperature to add diversity, then average over multiple runs.",
+            D: "Compress the examples with bullet points to fit more into context."
+          },
+          correct: "B",
+          explanations: {
+            A: "Works, but inline-text examples in a system prompt match the training distribution less well than conversational turns.",
+            B: "Right. Claude is trained on conversation patterns. Putting few-shots as user / assistant alternating turns lets the model pattern-match form and content. Consistency improves because the input→output shape is exemplified, not just described.",
+            C: "Temperature averaging is a workaround for poor structure, not a fix.",
+            D: "Compressing examples often removes the discriminating signal that makes them few-shots in the first place."
+          },
+          principle: "Few-shots work best in their natural form — conversation turns, not bulleted text. Match training distribution where possible.",
+          domain: "4. Prompt Engineering",
+          subArea: "Few-shot placement"
+        },
+        {
+          n: 10,
+          question: "A team calls Claude with a 30,000-token system prompt (instructions + reference docs) and 200-token user messages. They make ~500 calls per day and want to reduce cost.\n\nWhich strategy delivers the biggest win?",
+          options: {
+            A: "Truncate the system prompt to 10,000 tokens.",
+            B: "Add cache_control to the static reference-docs portion of the system prompt.",
+            C: "Switch from Sonnet to Haiku.",
+            D: "Batch 10 user messages per call."
+          },
+          correct: "B",
+          explanations: {
+            A: "Truncation loses information; you'd ship a worse system prompt to save dollars.",
+            B: "Right. Static prefix + 500 calls/day is the exact shape prompt caching is built for. Cache reads are ~10% of the price of cache writes. With a 30k-token reused prefix, this is the largest available lever.",
+            C: "Haiku trades quality for cost; doesn't address the underlying inefficiency (sending the same 30k tokens 500 times).",
+            D: "Batching helps amortize per-call overhead but doesn't help when the system prompt is the cost driver."
+          },
+          principle: "When a large stable prefix is reused across calls, prompt caching with cache_control is the highest-leverage cost lever. Place the cache breakpoint at the boundary between stable and dynamic content.",
+          domain: "5. Context & Reliability",
+          subArea: "Prompt caching strategy"
+        }
+      ]
     }
   ]
 };

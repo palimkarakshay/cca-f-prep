@@ -36,11 +36,15 @@
       section: first
         ? { [first.id]: { unlocked: true, testAttempts: [], complete: false } }
         : {},
-      location: { view: "dashboard", sectionId: null, conceptId: null }
+      mock: {},                       // mockId -> { attempts, currentAttempt? }
+      location: { view: "dashboard", sectionId: null, conceptId: null, mockId: null }
     };
   }
 
   let P = loadProgress();
+  // Forward-compat: lazily add fields older stored progress doesn't have.
+  if (!P.mock) P.mock = {};
+  if (P.location && !("mockId" in P.location)) P.location.mockId = null;
 
   function ensureSection(id) {
     if (!P.section[id]) {
@@ -54,6 +58,12 @@
     }
     return P.concept[id];
   }
+  function ensureMock(id) {
+    if (!P.mock[id]) {
+      P.mock[id] = { attempts: [], currentAttempt: null };
+    }
+    return P.mock[id];
+  }
 
   // ---------------- Curriculum lookup ----------------
   function getSection(id) { return CURRICULUM.sections.find(s => s.id === id) || null; }
@@ -61,6 +71,11 @@
     const s = getSection(sectionId);
     return s ? (s.concepts.find(c => c.id === conceptId) || null) : null;
   }
+  function getMockExam(id) {
+    const list = CURRICULUM.mockExams || [];
+    return list.find(m => m.id === id) || null;
+  }
+  function mockExams() { return CURRICULUM.mockExams || []; }
 
   // ---------------- Mastery ----------------
   function masteryLabel(m) {
@@ -185,7 +200,8 @@
     P.location = {
       view: view,
       sectionId: (opts && opts.sectionId) || null,
-      conceptId: (opts && opts.conceptId) || null
+      conceptId: (opts && opts.conceptId) || null,
+      mockId: (opts && opts.mockId) || null
     };
     saveProgress();
     render();
@@ -203,6 +219,8 @@
     if (v === "quizResult")         return renderQuizResult();
     if (v === "sectionTest")        return renderSectionTest();
     if (v === "sectionTestResult")  return renderSectionTestResult();
+    if (v === "mockExam")           return renderMockExam();
+    if (v === "mockExamResult")     return renderMockExamResult();
     return renderDashboard();
   }
 
@@ -240,6 +258,64 @@
     const list = el("div", { class: "section-list" });
     CURRICULUM.sections.forEach(section => list.appendChild(renderSectionCard(section)));
     root.appendChild(list);
+
+    if (mockExams().length) {
+      root.appendChild(renderMockExamsPanel());
+    }
+  }
+
+  function renderMockExamsPanel() {
+    const wrap = el("div", { class: "mock-panel" });
+    wrap.appendChild(el("div", { class: "mock-panel-head" },
+      el("span", { class: "mock-panel-title" }, "Mock exams"),
+      el("span", { class: "mock-panel-sub" }, "Cold calibration. Score band tells you which domain to train first.")
+    ));
+    const cards = el("div", { class: "mock-card-list" });
+    mockExams().forEach(m => cards.appendChild(renderMockExamCard(m)));
+    wrap.appendChild(cards);
+    return wrap;
+  }
+
+  function renderMockExamCard(mock) {
+    const mp = ensureMock(mock.id);
+    const last = mp.attempts[mp.attempts.length - 1];
+    const inProgress = !!mp.currentAttempt;
+    const total = mock.questions.length;
+
+    let statusText;
+    let statusClass = "";
+    if (inProgress) {
+      const picked = mp.currentAttempt.answers.filter(a => a.pick).length;
+      statusText = "In progress · " + picked + "/" + total + " answered";
+      statusClass = "in-progress";
+    } else if (last) {
+      const pct = Math.round((last.score / last.total) * 100);
+      statusText = "Last attempt: " + last.score + "/" + last.total + " (" + pct + "%) · "
+        + mp.attempts.length + " attempt" + (mp.attempts.length === 1 ? "" : "s");
+      statusClass = (last.score / last.total) >= (mock.passPct || 0.7) ? "pass" : "fail";
+    } else {
+      statusText = "Not yet taken";
+    }
+
+    const card = el("div", { class: "mock-card" },
+      el("div", { class: "mock-card-head" },
+        el("span", { class: "mock-card-title" }, mock.title),
+        el("span", { class: "mock-card-meta" },
+          total + " Q · ~" + mock.timeMinutes + " min")
+      ),
+      el("p", { class: "mock-card-blurb" }, mock.blurb),
+      el("div", { class: "mock-card-status " + statusClass }, statusText),
+      el("div", { class: "mock-card-actions" },
+        el("button", {
+          class: "primary",
+          onclick: () => startMockExam(mock)
+        }, inProgress ? "Resume" : (last ? "Re-take" : "Start mock exam")),
+        last
+          ? el("button", { onclick: () => navigate("mockExamResult", { mockId: mock.id }) }, "Review last attempt")
+          : null
+      )
+    );
+    return card;
   }
 
   function renderSectionCard(section) {
@@ -1161,8 +1237,246 @@
     root.appendChild(review);
   }
 
+  // ---------------- Mock-exam runner ----------------
+  function startMockExam(mock) {
+    const mp = ensureMock(mock.id);
+    if (!mp.currentAttempt) {
+      mp.currentAttempt = {
+        idx: 0,
+        startedISO: new Date().toISOString(),
+        answers: mock.questions.map(() => ({ pick: null, notes: "" }))
+      };
+      saveProgress();
+    }
+    navigate("mockExam", { mockId: mock.id });
+  }
+
+  function scoreBandFor(mock, score) {
+    const bands = mock.scoreBands || [];
+    return bands.find(b => score >= b.min && score <= b.max) || null;
+  }
+
+  function renderMockExam() {
+    const mock = getMockExam(P.location.mockId);
+    if (!mock) return navigate("dashboard");
+    const mp = ensureMock(mock.id);
+    if (!mp.currentAttempt) return startMockExam(mock);
+
+    const Q = mock.questions;
+    const a = mp.currentAttempt;
+    const i = a.idx;
+    const q = Q[i];
+    const total = Q.length;
+
+    brandSub.textContent = mock.title + " · Mock exam";
+    topnav.appendChild(el("span", null, "Q " + (i + 1) + " of " + total));
+    topnav.appendChild(el("button", { class: "linkish", onclick: () => {
+      if (confirm("Exit the mock exam? Your progress is saved; you can resume from the dashboard.")) {
+        navigate("dashboard");
+      }
+    } }, "Exit"));
+
+    root.appendChild(breadcrumbs([
+      { label: "Dashboard", onclick: () => navigate("dashboard") },
+      { label: mock.title },
+      { label: "Q" + (i + 1) + "/" + total }
+    ]));
+
+    const pct = (i / total) * 100;
+    root.appendChild(el("div", { class: "progress-shell" },
+      el("div", { class: "progress-fill", style: "width:" + pct + "%" })
+    ));
+
+    const optionsWrap = el("div", { class: "options" });
+    Object.keys(q.options).forEach(letter => {
+      const text = q.options[letter];
+      const sel = a.answers[i].pick === letter;
+      optionsWrap.appendChild(
+        el("div", {
+          class: "opt" + (sel ? " sel" : ""),
+          role: "button",
+          tabindex: "0",
+          onclick: () => { a.answers[i].pick = letter; saveProgress(); render(); },
+          onkeydown: (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              a.answers[i].pick = letter; saveProgress(); render();
+            }
+          }
+        },
+          el("div", { class: "opt-letter" }, letter),
+          el("div", { class: "opt-text" }, text)
+        )
+      );
+    });
+
+    const reasonTa = el("textarea", {
+      class: "reason",
+      placeholder: "Optional — write your reasoning. Why this answer? What ruled out the others? Surfaces in the result review next to the canonical explanation."
+    });
+    reasonTa.value = a.answers[i].notes || "";
+    reasonTa.addEventListener("input", (ev) => {
+      a.answers[i].notes = ev.target.value;
+      saveProgress();
+    });
+
+    root.appendChild(el("div", { class: "panel" },
+      el("div", { class: "qhead" },
+        el("span", { class: "qno" }, "Q" + q.n),
+        q.domain ? el("span", { class: "badge dom" }, q.domain) : null,
+        q.subArea ? el("span", { class: "badge" }, q.subArea) : null
+      ),
+      el("h1", { class: "qtitle" }, "Q" + q.n),
+      el("div", { class: "qbody" }, q.question),
+      optionsWrap,
+      el("div", { class: "reason-wrap" },
+        el("div", { class: "reason-label" }, "Your reasoning (optional)"),
+        reasonTa
+      )
+    ));
+
+    const isLast = i === total - 1;
+    const allPicked = a.answers.every(x => x.pick);
+
+    root.appendChild(el("div", { class: "controls" },
+      el("button", {
+        onclick: () => { a.idx = Math.max(0, i - 1); saveProgress(); render(); },
+        disabled: i === 0 ? "disabled" : false
+      }, "← Prev"),
+      el("div", { class: "nav-spacer" }),
+      !isLast
+        ? el("button", { class: "primary", onclick: () => { a.idx = Math.min(total - 1, i + 1); saveProgress(); render(); } }, "Next →")
+        : el("button", {
+            class: "primary",
+            onclick: () => {
+              if (!allPicked) {
+                const skipped = a.answers.map((x, idx) => x.pick ? null : idx + 1).filter(Boolean);
+                if (!confirm("You haven't picked an answer for Q" + skipped.join(", Q") + ". Submit anyway?")) return;
+              }
+              submitMockExam(mock);
+            }
+          }, "Submit mock exam")
+    ));
+  }
+
+  function submitMockExam(mock) {
+    const mp = ensureMock(mock.id);
+    const Q = mock.questions;
+    const a = mp.currentAttempt;
+    const score = a.answers.reduce((acc, ans, i) => acc + (ans.pick === Q[i].correct ? 1 : 0), 0);
+    mp.attempts.push({
+      score: score,
+      total: Q.length,
+      startedISO: a.startedISO || null,
+      finishedISO: new Date().toISOString(),
+      answers: a.answers.map(x => ({ pick: x.pick, notes: x.notes }))
+    });
+    mp.currentAttempt = null;
+    saveProgress();
+    navigate("mockExamResult", { mockId: mock.id });
+  }
+
+  function renderMockExamResult() {
+    const mock = getMockExam(P.location.mockId);
+    if (!mock) return navigate("dashboard");
+    const mp = ensureMock(mock.id);
+    const last = mp.attempts[mp.attempts.length - 1];
+    if (!last) return navigate("dashboard");
+
+    const Q = mock.questions;
+    const passPct = mock.passPct || 0.7;
+    const passed = (last.score / last.total) >= passPct;
+    const band = scoreBandFor(mock, last.score);
+
+    brandSub.textContent = mock.title + " · Result";
+    topnav.appendChild(el("button", { class: "linkish", onclick: () => navigate("dashboard") }, "← Dashboard"));
+
+    root.appendChild(breadcrumbs([
+      { label: "Dashboard", onclick: () => navigate("dashboard") },
+      { label: mock.title },
+      { label: "Result" }
+    ]));
+
+    root.appendChild(el("div", { class: "scorecard" },
+      el("div", null,
+        el("div", { class: "score-num" }, last.score + " / " + last.total),
+        el("div", { class: "score-meta" }, Math.round((last.score / last.total) * 100) + "% · attempt " + mp.attempts.length)
+      ),
+      el("div", { class: "score-band" },
+        el("div", { class: "verdict-line " + (passed ? "pass" : "fail") },
+          band ? band.verdict : (passed ? "Above pass-gate" : "Below pass-gate")),
+        el("div", null, band ? band.message : "")
+      )
+    ));
+
+    root.appendChild(el("div", { class: "controls", style: "margin-top:0;margin-bottom:18px;" },
+      el("button", { onclick: () => navigate("dashboard") }, "← Back to dashboard"),
+      el("div", { class: "nav-spacer" }),
+      el("button", { class: "primary", onclick: () => startMockExam(mock) }, "Re-take mock exam")
+    ));
+
+    const review = el("div", { class: "review" });
+    Q.forEach((q, i) => {
+      const ans = last.answers[i];
+      const picked = ans.pick;
+      const status = !picked ? "skipped" : (picked === q.correct ? "correct" : "wrong");
+      const verdictTextR = !picked ? "Skipped" : (picked === q.correct ? "Correct" : "Incorrect");
+
+      const expList = el("ul");
+      Object.keys(q.options).forEach(letter => {
+        const isRight = letter === q.correct;
+        const why = q.explanations[letter] || "";
+        const li = el("li", { class: isRight ? "right" : "" });
+        if (isRight) {
+          li.appendChild(el("strong", null, letter + " — Correct."));
+          li.appendChild(document.createTextNode(" " + why));
+        } else {
+          li.appendChild(el("strong", null, letter + "."));
+          li.appendChild(document.createTextNode(" " + why));
+        }
+        expList.appendChild(li);
+      });
+
+      review.appendChild(el("div", { class: "rcard " + status },
+        el("div", { class: "qhead" },
+          el("span", { class: "qno" }, "Q" + q.n),
+          q.domain ? el("span", { class: "badge dom" }, q.domain) : null,
+          q.subArea ? el("span", { class: "badge" }, q.subArea) : null,
+          el("span", { class: "verdict " + status }, verdictTextR)
+        ),
+        el("h3", null, "Q" + q.n),
+        el("div", { class: "qtext-mini" }, q.question),
+        el("div", { class: "answer-row" },
+          el("div", null,
+            el("span", { class: "lbl" }, "Your pick:"),
+            el("code", null, picked || "—")
+          ),
+          el("div", null,
+            el("span", { class: "lbl" }, "Correct:"),
+            el("code", null, q.correct)
+          )
+        ),
+        ans.notes && ans.notes.trim()
+          ? el("div", { class: "user-notes" },
+              el("span", { class: "lbl" }, "Your reasoning"),
+              ans.notes.trim()
+            )
+          : null,
+        el("div", { class: "explain" },
+          el("h4", null, "Per-option breakdown"),
+          expList
+        ),
+        el("div", { class: "principle" },
+          el("span", { class: "lbl" }, "Principle:"),
+          q.principle
+        )
+      ));
+    });
+    root.appendChild(review);
+  }
+
   // ---------------- Boot ----------------
-  const VALID_VIEWS = ["dashboard", "section", "concept", "lesson", "quiz", "quizResult", "sectionTest", "sectionTestResult"];
+  const VALID_VIEWS = ["dashboard", "section", "concept", "lesson", "quiz", "quizResult", "sectionTest", "sectionTestResult", "mockExam", "mockExamResult"];
   if (VALID_VIEWS.indexOf(P.location.view) === -1) P.location.view = "dashboard";
   render();
 })();
