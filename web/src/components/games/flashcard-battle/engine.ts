@@ -23,6 +23,11 @@ export interface BattleConfig {
   /** When rated Hard, push the card back this many positions so the
    *  user sees it again later in the run. 0 means it doesn't repeat. */
   hardRequeueOffset: number;
+  /** Hard requeues are capped per card so a user who keeps rating
+   *  Hard cannot stretch the queue indefinitely (codex P1 #12). After
+   *  a card has been requeued this many times, further Hard ratings
+   *  drop it from the queue and let the round finish. Default 1. */
+  maxRequeuesPerCard: number;
 }
 
 export const DEFAULT_BATTLE_CONFIG: BattleConfig = {
@@ -31,6 +36,7 @@ export const DEFAULT_BATTLE_CONFIG: BattleConfig = {
   pointsGood: 50,
   pointsEasy: 100,
   hardRequeueOffset: 3,
+  maxRequeuesPerCard: 1,
 };
 
 export type BattlePhase = "idle" | "front" | "back" | "done";
@@ -127,7 +133,19 @@ function applyRating(
   };
 
   let nextQueue = state.queue;
-  if (rating === "hard" && state.config.hardRequeueOffset > 0) {
+  // Count prior Hard ratings on this exact card. A user cycling Hard
+  // forever would otherwise keep growing the queue and the round
+  // would never reach `done` (codex P1 review on PR #12). We cap the
+  // requeues at `maxRequeuesPerCard`; once exceeded the card drops
+  // out of the queue on the next Hard.
+  const priorHardOnThisCard = state.outcomes.filter(
+    (o) => o.cardId === card.id && o.rating === "hard"
+  ).length;
+  const canRequeue =
+    rating === "hard" &&
+    state.config.hardRequeueOffset > 0 &&
+    priorHardOnThisCard < state.config.maxRequeuesPerCard;
+  if (canRequeue) {
     // Re-insert the card N positions ahead of the current pointer.
     // If the offset overshoots the tail, append.
     const insertAt = Math.min(

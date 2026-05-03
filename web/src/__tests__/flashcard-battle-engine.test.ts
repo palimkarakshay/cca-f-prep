@@ -128,6 +128,39 @@ describe("reduce — state machine", () => {
     expect(s.index).toBe(1);
   });
 
+  it("a card can only be requeued maxRequeuesPerCard times — round always terminates (codex P1 #12)", () => {
+    // With max=1 the user can rate the SAME card Hard twice; the
+    // second time it drops from the queue. With offset 1 + max 1
+    // we precisely chase the same card and verify the queue size
+    // stops growing.
+    const config = {
+      ...DEFAULT_BATTLE_CONFIG,
+      hardRequeueOffset: 1,
+      maxRequeuesPerCard: 1,
+    };
+    let s = newBattleState(fakeDeck(2), config);
+    s = reduce(s, { type: "start" });
+    // First card: rate Hard. Queue grows to 3 (c0, c1, c0).
+    s = reduce(s, { type: "flip" });
+    s = reduce(s, { type: "rate", rating: "hard" });
+    expect(s.queue.length).toBe(3);
+    // Second card (c1): rate Hard. Queue grows to 4 (c0, c1, c0, c1).
+    s = reduce(s, { type: "flip" });
+    s = reduce(s, { type: "rate", rating: "hard" });
+    expect(s.queue.length).toBe(4);
+    // Third card (the requeued c0): rate Hard. Cap kicks in — queue
+    // does NOT grow. State advances toward done.
+    s = reduce(s, { type: "flip" });
+    s = reduce(s, { type: "rate", rating: "hard" });
+    expect(s.queue.length).toBe(4);
+    expect(s.index).toBe(3);
+    // Fourth card (the requeued c1): rate Hard. Same — cap holds.
+    s = reduce(s, { type: "flip" });
+    s = reduce(s, { type: "rate", rating: "hard" });
+    expect(s.queue.length).toBe(4);
+    expect(s.phase).toBe("done");
+  });
+
   it("Hard with offset 0 does NOT requeue", () => {
     const config = { ...DEFAULT_BATTLE_CONFIG, hardRequeueOffset: 0 };
     let s = newBattleState(fakeDeck(3), config);
