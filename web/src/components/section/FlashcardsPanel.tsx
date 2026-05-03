@@ -54,7 +54,16 @@ export function FlashcardsPanel({ cards }: FlashcardsPanelProps) {
                 type="button"
                 onClick={() => toggle(card.id)}
                 aria-pressed={isFlipped}
-                aria-label={`${isFlipped ? "Showing back" : "Showing front"}: ${card.front}`}
+                // aria-label MUST mirror the visible side so screen readers
+                // hear the answer when the card is flipped to its back —
+                // not the question text. The "Question:" / "Answer:" prefix
+                // anchors the speech for SR users who don't see the visual
+                // tone difference between the two sides.
+                aria-label={
+                  isFlipped
+                    ? `Answer: ${card.back}`
+                    : `Question: ${card.front}`
+                }
                 className={cn(
                   "flip-card-inner block w-full rounded-lg text-left",
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)",

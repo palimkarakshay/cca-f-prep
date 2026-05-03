@@ -85,20 +85,22 @@ test.describe("section tabs", () => {
     await expect(page.getByText("Coming soon")).toHaveCount(6);
   });
 
-  test("Flashcards tab flips a card on click and toggles aria-pressed", async ({
+  test("Flashcards tab flips a card on click and reads the correct side", async ({
     page,
   }) => {
     await page.goto(`${SECTION_URL}?tab=flashcards`);
     const heading = page.getByRole("heading", { name: /Flashcards · /i });
     await expect(heading).toBeVisible();
     const firstCard = page
-      .getByRole("button", { name: /Showing front:/i })
+      .getByRole("button", { name: /^Question:/ })
       .first();
     await expect(firstCard).toHaveAttribute("aria-pressed", "false");
     await firstCard.click();
-    // After click the same button now reports "Showing back".
+    // After click the accessible name updates to the answer side, so
+    // screen readers hear the back-of-card content rather than still
+    // announcing the question text (codex P1 review comment from PR #10).
     const flippedCard = page
-      .getByRole("button", { name: /Showing back:/i })
+      .getByRole("button", { name: /^Answer:/ })
       .first();
     await expect(flippedCard).toHaveAttribute("aria-pressed", "true");
   });
