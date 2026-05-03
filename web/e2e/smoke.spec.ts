@@ -1,4 +1,8 @@
 import { test, expect, type ConsoleMessage } from "@playwright/test";
+import { ACTIVE_PACK } from "../src/content/active-pack";
+
+const PACK_NAME = ACTIVE_PACK.config.name;
+const PACK_TAGLINE = ACTIVE_PACK.config.tagline;
 
 test.describe("smoke", () => {
   test("home renders without console errors", async ({ page }) => {
@@ -8,10 +12,8 @@ test.describe("smoke", () => {
     });
 
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "CCA-F Prep" })).toBeVisible();
-    await expect(
-      page.getByText("Personal learning and development platform")
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: PACK_NAME })).toBeVisible();
+    await expect(page.getByText(PACK_TAGLINE)).toBeVisible();
 
     expect(errors, errors.map((e) => e.text()).join("\n")).toEqual([]);
   });

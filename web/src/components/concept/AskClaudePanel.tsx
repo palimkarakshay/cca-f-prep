@@ -3,8 +3,15 @@
 import { useState } from "react";
 import { ExternalLink, Copy } from "lucide-react";
 import { siteConfig } from "@/lib/site-config";
+import { ACTIVE_PACK } from "@/content/active-pack";
 import { Button } from "@/components/ui/button";
 import type { Lesson } from "@/content/curriculum-types";
+
+const askAI = ACTIVE_PACK.config.askAI;
+const HEADING = askAI.heading ?? "Ask Claude";
+const DESCRIPTION =
+  askAI.description ??
+  "Build a prompt with this lesson + your question, copy it, and open the chat in a new tab.";
 
 // Claude.ai reads ?q=<prompt> on /new and on project pages to pre-fill
 // the chat input. Cap the inline prompt to keep the URL under common
@@ -101,12 +108,9 @@ export function AskClaudePanel({
         id="ask-claude-heading"
         className="text-xs font-semibold uppercase tracking-wide text-(--accent-2)"
       >
-        Ask Claude
+        {HEADING}
       </h2>
-      <p className="mt-1 text-sm text-(--muted)">
-        Build a prompt with this lesson + your question, copy it, and open the
-        Claude Project in a new tab.
-      </p>
+      <p className="mt-1 text-sm text-(--muted)">{DESCRIPTION}</p>
       <label htmlFor="ask-claude-input" className="sr-only">
         Your question
       </label>

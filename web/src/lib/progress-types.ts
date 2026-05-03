@@ -5,6 +5,7 @@
    their existing progress when the new shell ships at the same origin.
 ------------------------------------------------------------------ */
 
+import { ACTIVE_PACK } from "@/content/active-pack";
 import type { OptionLetter } from "@/content/curriculum-types";
 
 export type Mastery = 0 | 1 | 2 | 3 | 4;
@@ -57,4 +58,10 @@ export interface Progress {
   };
 }
 
-export const PROGRESS_STORAGE_KEY = "cca-f-prep:progress:v1";
+/**
+ * Progress storage key — namespaced by the active pack id so different
+ * content packs do not collide on a single browser. Switching packs
+ * preserves the previous pack's progress; switching back resumes where
+ * you left off.
+ */
+export const PROGRESS_STORAGE_KEY = `${ACTIVE_PACK.config.id}:progress:v1`;

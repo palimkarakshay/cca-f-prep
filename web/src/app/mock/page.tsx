@@ -9,7 +9,8 @@ import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Mock exams",
-  description: "Independent calibration exams across all five CCA-F domains.",
+  description:
+    "Independent calibration exams covering all sections. Use them to gauge readiness before the real assessment.",
 };
 
 export default function MockIndexPage() {

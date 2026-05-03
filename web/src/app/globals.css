@@ -91,11 +91,11 @@ html.dark {
   color-scheme: dark;
 }
 
-/* Optional accent palettes — activated by data-palette on <html>. */
-html[data-palette="claude"] {
-  --accent: #d97757;
-  --accent-2: #f0a37b;
-}
+/*
+  Per-pack theme tokens are injected into <head> by `app/layout.tsx`,
+  scoped via the `[data-pack="<pack-id>"]` selector. The values above
+  are the default (cca-f-prep) palette; packs override what they need.
+*/
 
 /* Compact density — tighter rhythm for power users on dense displays. */
 html[data-density="compact"] {

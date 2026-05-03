@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { siteConfig } from "@/lib/site-config";
+import { ACTIVE_PACK } from "@/content/active-pack";
 
 describe("siteConfig", () => {
-  it("has the expected required fields", () => {
-    expect(siteConfig.name).toBe("CCA-F Prep");
-    expect(siteConfig.tagline).toMatch(/learning/i);
+  it("exposes the active pack's branding", () => {
+    expect(siteConfig.id).toBe(ACTIVE_PACK.config.id);
+    expect(siteConfig.name).toBe(ACTIVE_PACK.config.name);
+    expect(siteConfig.tagline.length).toBeGreaterThan(0);
     expect(siteConfig.url).toMatch(/^https?:\/\//);
-    expect(siteConfig.repoUrl).toMatch(/github\.com/);
   });
 
   it("nav items have label + href", () => {
@@ -17,11 +18,11 @@ describe("siteConfig", () => {
     }
   });
 
-  it("Claude project URL points at claude.ai", () => {
+  it("AskAI fallback URL is a valid https URL", () => {
     const url: string = siteConfig.claudeProjectUrl;
     if (url.length > 0) {
-      expect(url).toMatch(/^https:\/\/claude\.ai\//);
+      expect(url).toMatch(/^https?:\/\//);
     }
-    expect(siteConfig.claudeFallbackUrl).toMatch(/^https:\/\/claude\.ai\//);
+    expect(siteConfig.claudeFallbackUrl).toMatch(/^https?:\/\//);
   });
 });
