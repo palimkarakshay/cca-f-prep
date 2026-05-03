@@ -74,13 +74,27 @@ describe.each(PACKS)("pack %s satisfies the contract", (id, pack) => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("every authored quiz has 4 options A-D and a valid correct letter", () => {
+  it("every authored question is well-formed for its kind", () => {
     const allQs = pack.curriculum.sections.flatMap((s) =>
       s.concepts.flatMap((c) => c.quiz?.questions ?? [])
     );
     for (const q of allQs) {
-      expect(Object.keys(q.options).sort()).toEqual(["A", "B", "C", "D"]);
-      expect(["A", "B", "C", "D"]).toContain(q.correct);
+      const kind = (q as { kind?: string }).kind ?? "mcq";
+      if (kind === "mcq") {
+        const mcq = q as { options: Record<string, string>; correct: string };
+        expect(Object.keys(mcq.options).sort()).toEqual(["A", "B", "C", "D"]);
+        expect(["A", "B", "C", "D"]).toContain(mcq.correct);
+      } else if (kind === "true-false") {
+        const tf = q as { correct: boolean };
+        expect(typeof tf.correct).toBe("boolean");
+      } else if (kind === "fill-in") {
+        const fi = q as { acceptedAnswers: string[] };
+        expect(Array.isArray(fi.acceptedAnswers)).toBe(true);
+        expect(fi.acceptedAnswers.length).toBeGreaterThan(0);
+        expect(fi.acceptedAnswers.every((a) => a.length > 0)).toBe(true);
+      } else {
+        throw new Error(`Unknown question kind: ${kind}`);
+      }
     }
   });
 
@@ -110,19 +124,21 @@ describe.each(PACKS)("pack %s satisfies the contract", (id, pack) => {
     expect(first.concepts.some((c) => c.lesson && c.quiz)).toBe(true);
   });
 
-  it("authored quizzes do not silently skew correct-letter distribution", () => {
+  it("MCQ correct-letter distribution is not silently skewed", () => {
     // Smoke check rather than strict — flags packs where >85% of
-    // correct answers are a single letter (likely an authoring bias).
+    // correct MCQ answers are a single letter (likely an authoring
+    // bias). Non-MCQ questions are excluded from the count.
     const correct = pack.curriculum.sections
       .flatMap((s) => s.concepts.flatMap((c) => c.quiz?.questions ?? []))
-      .map((q) => q.correct);
+      .filter((q) => ((q as { kind?: string }).kind ?? "mcq") === "mcq")
+      .map((q) => (q as { correct: string }).correct);
     if (correct.length < 10) return;
     const counts: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
     for (const c of correct) counts[c]++;
     const max = Math.max(...Object.values(counts));
     expect(
       max / correct.length,
-      `correct-letter distribution: ${JSON.stringify(counts)}`
+      `MCQ correct-letter distribution: ${JSON.stringify(counts)}`
     ).toBeLessThan(0.85);
   });
 });

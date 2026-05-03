@@ -1,14 +1,30 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { Question, OptionLetter } from "@/content/curriculum-types";
-import type { CurrentAttempt, QuizAttempt } from "@/lib/progress-types";
+import type {
+  FillInQuestion,
+  MCQQuestion,
+  Question,
+  TrueFalseQuestion,
+} from "@/content/curriculum-types";
+import type {
+  AnswerValue,
+  CurrentAttempt,
+  QuizAttempt,
+} from "@/lib/progress-types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { QuizResult } from "./QuizResult";
+import {
+  isFillIn,
+  isMCQ,
+  isTrueFalse,
+  kindOf,
+  scoreAttempt,
+} from "./question-utils";
 
-const LETTERS: OptionLetter[] = ["A", "B", "C", "D"];
-const KEY_TO_LETTER: Record<string, OptionLetter> = {
+const MCQ_LETTERS: Array<"A" | "B" | "C" | "D"> = ["A", "B", "C", "D"];
+const MCQ_KEY_TO_LETTER: Record<string, "A" | "B" | "C" | "D"> = {
   "1": "A",
   "2": "B",
   "3": "C",
@@ -18,7 +34,7 @@ const KEY_TO_LETTER: Record<string, OptionLetter> = {
   C: "C",
   D: "D",
 };
-const NUM_FOR_LETTER: Record<OptionLetter, string> = {
+const MCQ_NUM_FOR_LETTER: Record<"A" | "B" | "C" | "D", string> = {
   A: "1",
   B: "2",
   C: "3",
@@ -46,7 +62,7 @@ export interface QuizRunnerProps {
 interface RunningState {
   startedAt: number;
   cursor: number;
-  answers: Record<number, OptionLetter | null>;
+  answers: Record<number, AnswerValue | null>;
   reasons: Record<number, string>;
 }
 
@@ -70,16 +86,171 @@ function initialState(
   };
 }
 
-function score(
-  questions: Question[],
-  answers: Record<number, OptionLetter | null>
-): number {
-  let n = 0;
-  for (const q of questions) {
-    if (answers[q.n] === q.correct) n++;
-  }
-  return n;
+// ------------------------------------------------------------------
+// Per-kind input renderers
+// ------------------------------------------------------------------
+
+function MCQInput({
+  question,
+  selected,
+  onPick,
+}: {
+  question: MCQQuestion;
+  selected: AnswerValue | null;
+  onPick: (letter: "A" | "B" | "C" | "D") => void;
+}) {
+  return (
+    <fieldset className="flex flex-col gap-2">
+      <legend className="sr-only">Answer choices</legend>
+      {MCQ_LETTERS.map((L) => (
+        <label
+          key={L}
+          className={cn(
+            "flex cursor-pointer items-start gap-3 rounded-md border bg-(--panel-2) p-3 transition-colors min-h-[44px]",
+            "focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-(--accent)",
+            selected === L
+              ? "border-(--accent) bg-(--accent)/10"
+              : "border-(--border) hover:border-(--accent)/50"
+          )}
+        >
+          <input
+            type="radio"
+            name={`q-${question.n}`}
+            value={L}
+            checked={selected === L}
+            onChange={() => onPick(L)}
+            className="absolute h-0 w-0 opacity-0"
+          />
+          <span
+            aria-hidden
+            className="mt-0.5 w-6 font-mono text-sm font-bold text-(--accent-2)"
+          >
+            {L}.
+          </span>
+          <span className="flex-1 text-sm md:text-base">
+            {question.options[L]}
+          </span>
+          <kbd
+            aria-hidden
+            className="hidden md:inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded border border-(--border) bg-(--panel) px-1 font-mono text-[10px] text-(--muted)"
+          >
+            {MCQ_NUM_FOR_LETTER[L]}
+          </kbd>
+        </label>
+      ))}
+    </fieldset>
+  );
 }
+
+function TrueFalseInput({
+  question,
+  selected,
+  onPick,
+}: {
+  question: TrueFalseQuestion;
+  selected: AnswerValue | null;
+  onPick: (value: boolean) => void;
+}) {
+  const isSelectedTrue = selected === true;
+  const isSelectedFalse = selected === false;
+  return (
+    <fieldset className="flex flex-col gap-2 sm:flex-row">
+      <legend className="sr-only">True or false</legend>
+      <label
+        className={cn(
+          "flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border bg-(--panel-2) p-4 text-base font-semibold transition-colors min-h-[64px]",
+          "focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-(--accent)",
+          isSelectedTrue
+            ? "border-(--accent) bg-(--accent)/10 text-(--accent)"
+            : "border-(--border) hover:border-(--accent)/50"
+        )}
+      >
+        <input
+          type="radio"
+          name={`q-${question.n}`}
+          value="true"
+          checked={isSelectedTrue}
+          onChange={() => onPick(true)}
+          className="absolute h-0 w-0 opacity-0"
+        />
+        <span>True</span>
+        <kbd
+          aria-hidden
+          className="hidden md:inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded border border-(--border) bg-(--panel) px-1 font-mono text-[10px] text-(--muted)"
+        >
+          T
+        </kbd>
+      </label>
+      <label
+        className={cn(
+          "flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border bg-(--panel-2) p-4 text-base font-semibold transition-colors min-h-[64px]",
+          "focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-(--accent)",
+          isSelectedFalse
+            ? "border-(--accent) bg-(--accent)/10 text-(--accent)"
+            : "border-(--border) hover:border-(--accent)/50"
+        )}
+      >
+        <input
+          type="radio"
+          name={`q-${question.n}`}
+          value="false"
+          checked={isSelectedFalse}
+          onChange={() => onPick(false)}
+          className="absolute h-0 w-0 opacity-0"
+        />
+        <span>False</span>
+        <kbd
+          aria-hidden
+          className="hidden md:inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded border border-(--border) bg-(--panel) px-1 font-mono text-[10px] text-(--muted)"
+        >
+          F
+        </kbd>
+      </label>
+    </fieldset>
+  );
+}
+
+function FillInInput({
+  question,
+  selected,
+  onPick,
+}: {
+  question: FillInQuestion;
+  selected: AnswerValue | null;
+  onPick: (value: string) => void;
+}) {
+  const value = typeof selected === "string" ? selected : "";
+  return (
+    <div className="flex flex-col gap-2">
+      <label htmlFor={`q-${question.n}-fillin`} className="sr-only">
+        Type your answer
+      </label>
+      <input
+        id={`q-${question.n}-fillin`}
+        type="text"
+        value={value}
+        placeholder={question.placeholder ?? "Type your answer…"}
+        onChange={(e) => onPick(e.target.value)}
+        autoComplete="off"
+        spellCheck={false}
+        className={cn(
+          "w-full rounded-md border bg-(--panel-2) p-3 text-base transition-colors min-h-[44px]",
+          "focus:border-(--accent) focus:outline-none",
+          value.trim().length > 0
+            ? "border-(--accent)"
+            : "border-(--border)"
+        )}
+      />
+      <p className="text-xs text-(--muted)">
+        Case- and whitespace-insensitive. Multiple spellings may be accepted.
+      </p>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------
+// Main runner
+// ------------------------------------------------------------------
 
 export function QuizRunner({
   title,
@@ -109,9 +280,9 @@ export function QuizRunner({
   const progress = useMemo(
     () =>
       Math.round(
-        ((Object.keys(state.answers).filter(
+        (Object.keys(state.answers).filter(
           (k) => state.answers[Number(k)] != null
-        ).length) /
+        ).length /
           total) *
           100
       ),
@@ -131,10 +302,10 @@ export function QuizRunner({
 
   // Functional setState patterns avoid stale closures so the keyboard
   // handler can be wired once and still see the latest cursor.
-  function pickAtCursor(letter: OptionLetter) {
+  function pickAtCursor(value: AnswerValue) {
     setState((s) => {
       const n = questions[s.cursor].n;
-      return { ...s, answers: { ...s.answers, [n]: letter } };
+      return { ...s, answers: { ...s.answers, [n]: value } };
     });
   }
   function setReasonAtCursor(text: string) {
@@ -150,9 +321,8 @@ export function QuizRunner({
     setState((s) => ({ ...s, cursor: Math.max(s.cursor - 1, 0) }));
   }
 
-  // Keyboard shortcuts: 1-4 / A-D pick an answer; ←/→ navigate.
-  // Disabled while focus is in the reasoning textarea so typing isn't
-  // hijacked.
+  // Keyboard shortcuts vary by question kind. Fill-in questions
+  // disable shortcuts entirely (the input would intercept anyway).
   useEffect(() => {
     if (submitted) return;
     function onKey(e: KeyboardEvent) {
@@ -165,13 +335,31 @@ export function QuizRunner({
       }
       if (e.metaKey || e.ctrlKey || e.altKey) return;
 
+      const cur = questions[state.cursor];
       const upper = e.key.length === 1 ? e.key.toUpperCase() : e.key;
-      const letter = KEY_TO_LETTER[upper];
-      if (letter) {
-        e.preventDefault();
-        pickAtCursor(letter);
-        return;
+
+      if (isMCQ(cur)) {
+        const letter = MCQ_KEY_TO_LETTER[upper];
+        if (letter) {
+          e.preventDefault();
+          pickAtCursor(letter);
+          return;
+        }
+      } else if (isTrueFalse(cur)) {
+        if (upper === "T") {
+          e.preventDefault();
+          pickAtCursor(true);
+          return;
+        }
+        if (upper === "F") {
+          e.preventDefault();
+          pickAtCursor(false);
+          return;
+        }
       }
+      // fill-in: keyboard shortcuts intentionally disabled (would
+      // hijack typing once the input loses then regains focus).
+
       if (e.key === "ArrowRight") {
         e.preventDefault();
         next();
@@ -187,10 +375,10 @@ export function QuizRunner({
     return () => window.removeEventListener("keydown", onKey);
     // pickAtCursor / next / prev capture functional updates so no deps needed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [submitted]);
+  }, [submitted, state.cursor]);
 
   function submit() {
-    const sc = score(questions, state.answers);
+    const sc = scoreAttempt(questions, state.answers);
     const finished: QuizAttempt = {
       startedAt: state.startedAt,
       completedAt: Date.now(),
@@ -225,6 +413,15 @@ export function QuizRunner({
 
   const selected = state.answers[current.n] ?? null;
   const isLast = state.cursor === total - 1;
+  const kind = kindOf(current);
+
+  // Keyboard hint adapts to the current kind.
+  const kbHint =
+    kind === "mcq"
+      ? "Tip: 1–4 / A–D to pick, ←/→ to navigate."
+      : kind === "true-false"
+        ? "Tip: T / F to pick, ←/→ to navigate."
+        : "Tip: type your answer, ←/→ to navigate.";
 
   return (
     <article>
@@ -252,56 +449,39 @@ export function QuizRunner({
 
       <p className="mb-2 text-xs text-(--muted)">
         Question {state.cursor + 1} of {total}
+        <span className="ml-2 rounded-full border border-(--border) px-2 py-0.5 text-[10px] uppercase tracking-wide">
+          {kind === "true-false"
+            ? "True / False"
+            : kind === "fill-in"
+              ? "Fill in"
+              : "Multiple choice"}
+        </span>
       </p>
       <h2 className="mb-3 text-lg md:text-xl font-semibold text-(--ink)">
         {current.question}
       </h2>
 
-      <fieldset className="flex flex-col gap-2">
-        <legend className="sr-only">Answer choices</legend>
-        {LETTERS.map((L) => (
-          <label
-            key={L}
-            className={cn(
-              "flex cursor-pointer items-start gap-3 rounded-md border bg-(--panel-2) p-3 transition-colors min-h-[44px]",
-              "focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-(--accent)",
-              selected === L
-                ? "border-(--accent) bg-(--accent)/10"
-                : "border-(--border) hover:border-(--accent)/50"
-            )}
-          >
-            <input
-              type="radio"
-              name={`q-${current.n}`}
-              value={L}
-              checked={selected === L}
-              onChange={() => pickAtCursor(L)}
-              className="absolute h-0 w-0 opacity-0"
-            />
-            <span
-              aria-hidden
-              className="mt-0.5 w-6 font-mono text-sm font-bold text-(--accent-2)"
-            >
-              {L}.
-            </span>
-            <span className="flex-1 text-sm md:text-base">
-              {current.options[L]}
-            </span>
-            <kbd
-              aria-hidden
-              className="hidden md:inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded border border-(--border) bg-(--panel) px-1 font-mono text-[10px] text-(--muted)"
-            >
-              {NUM_FOR_LETTER[L]}
-            </kbd>
-          </label>
-        ))}
-      </fieldset>
+      {isMCQ(current) ? (
+        <MCQInput
+          question={current}
+          selected={selected}
+          onPick={(letter) => pickAtCursor(letter)}
+        />
+      ) : isTrueFalse(current) ? (
+        <TrueFalseInput
+          question={current}
+          selected={selected}
+          onPick={(value) => pickAtCursor(value)}
+        />
+      ) : isFillIn(current) ? (
+        <FillInInput
+          question={current}
+          selected={selected}
+          onPick={(value) => pickAtCursor(value)}
+        />
+      ) : null}
 
-      <p className="mt-2 hidden text-xs text-(--muted) md:block">
-        Tip: press <kbd className="rounded border border-(--border) bg-(--panel-2) px-1 font-mono">1</kbd>–<kbd className="rounded border border-(--border) bg-(--panel-2) px-1 font-mono">4</kbd>{" "}or{" "}
-        <kbd className="rounded border border-(--border) bg-(--panel-2) px-1 font-mono">A</kbd>–<kbd className="rounded border border-(--border) bg-(--panel-2) px-1 font-mono">D</kbd>{" "}to pick.{" "}
-        Use <kbd className="rounded border border-(--border) bg-(--panel-2) px-1 font-mono">←</kbd>{" "}/{" "}<kbd className="rounded border border-(--border) bg-(--panel-2) px-1 font-mono">→</kbd>{" "}to navigate.
-      </p>
+      <p className="mt-2 hidden text-xs text-(--muted) md:block">{kbHint}</p>
 
       {collectReasons ? (
         <div className="mt-4">

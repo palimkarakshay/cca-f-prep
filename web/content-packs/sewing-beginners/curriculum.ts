@@ -151,6 +151,29 @@ export const CURRICULUM: Curriculum = {
                 correct: "B",
                 principle: "Consistency > speed > size.",
               },
+              {
+                kind: "true-false",
+                n: 3,
+                question:
+                  "A running stitch held under tension (e.g. on a trouser seam) will hold as long as a back stitch.",
+                correct: false,
+                explanationFalse:
+                  "Right — the running stitch's single un-doubled thread cannot survive the tension a seam takes during wear. A pull undoes the row.",
+                explanationTrue:
+                  "It won't — running stitch is for basting and gathers, not load-bearing seams.",
+                principle: "Running stitch is temporary; back stitch is structural.",
+              },
+              {
+                kind: "fill-in",
+                n: 4,
+                question:
+                  "What's the rough target stitch length (in millimetres) for hand-stitching foundations?",
+                acceptedAnswers: ["3", "3 mm", "3mm", "three", "three mm"],
+                placeholder: "e.g. 3",
+                explanation:
+                  "Around 3 mm — long enough to be quick, short enough to look even. The matching gap (3 mm) is what reads as 'consistent' to the eye.",
+                principle: "3 mm stitches with 3 mm gaps = even, professional look.",
+              },
             ],
           },
         },

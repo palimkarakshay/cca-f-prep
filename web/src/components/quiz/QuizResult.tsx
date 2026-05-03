@@ -8,6 +8,14 @@ import type { QuizAttempt } from "@/lib/progress-types";
 import { buttonVariants } from "@/components/ui/button";
 import { copy } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
+import {
+  displayCanonicalAnswer,
+  displayUserAnswer,
+  isCorrect,
+  isFillIn,
+  isMCQ,
+  isTrueFalse,
+} from "./question-utils";
 
 const LETTERS: OptionLetter[] = ["A", "B", "C", "D"];
 
@@ -116,8 +124,8 @@ export function QuizResult({
       <ul className="flex flex-col gap-3">
         {questions.map((q) => {
           const picked = attempt.answers[q.n] ?? null;
-          const correct = picked === q.correct;
           const skipped = picked == null;
+          const correct = !skipped && isCorrect(q, picked);
           const verdict = skipped ? "Skipped" : correct ? "Correct" : "Wrong";
           const verdictGlyph = skipped ? "○" : correct ? "✓" : "✗";
           return (
@@ -155,18 +163,21 @@ export function QuizResult({
                 <span>
                   <span className="mr-1 text-(--muted)">Your answer:</span>
                   <code className="rounded-sm bg-(--panel-2) px-1.5 py-0.5 text-(--code)">
-                    {picked ?? "—"}
+                    {displayUserAnswer(q, picked)}
                   </code>
                 </span>
                 <span>
                   <span className="mr-1 text-(--muted)">Correct:</span>
                   <code className="rounded-sm bg-(--panel-2) px-1.5 py-0.5 text-(--code)">
-                    {q.correct}
+                    {displayCanonicalAnswer(q)}
                   </code>
                 </span>
               </div>
 
-              {q.explanations ? (
+              {/* Per-kind detail expansion. MCQ shows per-option
+                  explanations; true/false + fill-in show the
+                  applicable single explanation if present. */}
+              {isMCQ(q) && q.explanations ? (
                 <details
                   className="group mt-3 rounded-md border border-(--border) bg-(--panel-2) [&[open]>summary>svg]:rotate-180"
                   open={!correct}
@@ -195,6 +206,57 @@ export function QuizResult({
                     ))}
                   </ul>
                 </details>
+              ) : null}
+
+              {isTrueFalse(q) && (q.explanationTrue || q.explanationFalse) ? (
+                <details
+                  className="group mt-3 rounded-md border border-(--border) bg-(--panel-2) [&[open]>summary>svg]:rotate-180"
+                  open={!correct}
+                >
+                  <summary className="flex cursor-pointer items-center gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-(--muted) marker:hidden [&::-webkit-details-marker]:hidden">
+                    <ChevronDown
+                      className="h-3.5 w-3.5 transition-transform"
+                      aria-hidden
+                    />
+                    Why
+                  </summary>
+                  <p className="px-3 pb-3 text-xs">
+                    {q.correct ? q.explanationTrue : q.explanationFalse}
+                  </p>
+                </details>
+              ) : null}
+
+              {isFillIn(q) ? (
+                <>
+                  {q.acceptedAnswers.length > 1 ? (
+                    <p className="mt-2 text-xs text-(--muted)">
+                      Also accepted:{" "}
+                      {q.acceptedAnswers.slice(1).map((a, i, arr) => (
+                        <span key={i}>
+                          <code className="rounded-sm bg-(--panel-2) px-1 py-0.5">
+                            {a}
+                          </code>
+                          {i < arr.length - 1 ? ", " : ""}
+                        </span>
+                      ))}
+                    </p>
+                  ) : null}
+                  {q.explanation ? (
+                    <details
+                      className="group mt-3 rounded-md border border-(--border) bg-(--panel-2) [&[open]>summary>svg]:rotate-180"
+                      open={!correct}
+                    >
+                      <summary className="flex cursor-pointer items-center gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-(--muted) marker:hidden [&::-webkit-details-marker]:hidden">
+                        <ChevronDown
+                          className="h-3.5 w-3.5 transition-transform"
+                          aria-hidden
+                        />
+                        Why
+                      </summary>
+                      <p className="px-3 pb-3 text-xs">{q.explanation}</p>
+                    </details>
+                  ) : null}
+                </>
               ) : null}
 
               {q.principle ? (

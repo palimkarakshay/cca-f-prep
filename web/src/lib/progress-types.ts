@@ -9,6 +9,18 @@ import { ACTIVE_PACK } from "@/content/active-pack";
 import type { OptionLetter } from "@/content/curriculum-types";
 
 /**
+ * Possible answer values across question kinds:
+ *   - OptionLetter ("A"|"B"|"C"|"D") for MCQ
+ *   - boolean for true/false
+ *   - string for fill-in
+ *
+ * Stored as a JSON-compatible primitive in localStorage; type widens
+ * over time without a schema migration because the union admits new
+ * primitives the same way the storage already did.
+ */
+export type AnswerValue = OptionLetter | boolean | string;
+
+/**
  * Mastery level index into the active pack's `masteryLevels` array.
  *
  * Conventions:
@@ -27,14 +39,15 @@ export interface QuizAttempt {
   completedAt: number;
   total: number;
   score: number;
-  answers: Record<number, OptionLetter | null>;
+  /** Question number → user's answer. Type depends on the question kind (see AnswerValue). */
+  answers: Record<number, AnswerValue | null>;
   reasons?: Record<number, string>;
 }
 
 export interface CurrentAttempt {
   startedAt: number;
   cursor: number;
-  answers: Record<number, OptionLetter | null>;
+  answers: Record<number, AnswerValue | null>;
   reasons?: Record<number, string>;
 }
 

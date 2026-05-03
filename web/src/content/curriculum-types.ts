@@ -60,17 +60,63 @@ export type LessonDepth = "easy" | "conceptual" | "deeper";
 
 export type OptionLetter = "A" | "B" | "C" | "D";
 
-export interface Question {
+/**
+ * Fields shared by every question kind. Concrete shapes
+ * (MCQQuestion, TrueFalseQuestion, FillInQuestion) extend this.
+ */
+export interface QuestionBase {
+  /** 1-based question number, stable per-quiz identifier for storage. */
   n: number;
   question: string;
+  /** One-line takeaway shown after the answer is submitted. */
+  principle?: string;
+  /** Optional CCA-F-specific skill tags (B-codes). Other packs ignore. */
+  bSkills?: string[];
+  /** Optional CCA-F-specific exam-domain tag. Other packs ignore. */
+  domain?: string;
+  /** Optional CCA-F-specific sub-area tag. */
+  subArea?: string;
+}
+
+/**
+ * 4-option multiple-choice — the original (and default) question
+ * format. `kind` is optional for backward compatibility: any question
+ * without a `kind` is treated as MCQ.
+ */
+export interface MCQQuestion extends QuestionBase {
+  kind?: "mcq";
   options: Record<OptionLetter, string>;
   correct: OptionLetter;
   explanations?: Record<OptionLetter, string>;
-  principle?: string;
-  bSkills?: string[];
-  domain?: string;
-  subArea?: string;
 }
+
+/**
+ * Boolean-answer question. Picks render as two large buttons.
+ */
+export interface TrueFalseQuestion extends QuestionBase {
+  kind: "true-false";
+  correct: boolean;
+  /** Explanation shown after submit when the answer is true. */
+  explanationTrue?: string;
+  /** Explanation shown after submit when the answer is false. */
+  explanationFalse?: string;
+}
+
+/**
+ * Free-text answer question. Comparison is case-insensitive after
+ * trim. The first entry of `acceptedAnswers` is treated as the
+ * canonical answer for display in the result view; subsequent
+ * entries are alternates that also count as correct.
+ */
+export interface FillInQuestion extends QuestionBase {
+  kind: "fill-in";
+  acceptedAnswers: string[];
+  placeholder?: string;
+  /** Optional explanation shown after submit. */
+  explanation?: string;
+}
+
+export type Question = MCQQuestion | TrueFalseQuestion | FillInQuestion;
 
 export interface Quiz {
   questions: Question[];
