@@ -113,10 +113,16 @@ export function masteryLabel(m: number): string {
    LMS extensions — section meta, per-concept domain, flashcards.
    These read from sibling lookup tables (section-meta.ts,
    domain-map.ts) so curriculum.ts stays focused on lessons + quizzes.
+
+   Lookup helpers use Object.hasOwn so inherited keys like "toString"
+   or "__proto__" can never satisfy a missing-id query — the contract
+   is `null` for unknown ids.
 ------------------------------------------------------------------ */
 
 export function getSectionMeta(sectionId: string): SectionMeta | null {
-  return SECTION_META[sectionId] ?? null;
+  return Object.hasOwn(SECTION_META, sectionId)
+    ? SECTION_META[sectionId]
+    : null;
 }
 
 /** Convenience for components that want the time as a formatted string. */
@@ -130,8 +136,9 @@ export function formatMinutes(minutes: number): string {
 }
 
 export function getConceptDomain(conceptId: string): CCAFDomainInfo | null {
+  if (!Object.hasOwn(DOMAIN_MAP, conceptId)) return null;
   const id = DOMAIN_MAP[conceptId];
-  return id ? DOMAINS[id] : null;
+  return DOMAINS[id] ?? null;
 }
 
 /**

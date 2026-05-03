@@ -119,4 +119,20 @@ describe("LMS extension data", () => {
       expect(sectionIds.has(id), `stale SECTION_META[${id}]`).toBe(true);
     }
   });
+
+  it("getSectionMeta + getConceptDomain reject inherited prototype keys", () => {
+    // A user-controlled section/concept id from a route param could be the
+    // string "toString" or "__proto__"; the lookup must return null, not
+    // the inherited Object.prototype value.
+    for (const proto of ["toString", "hasOwnProperty", "__proto__", "constructor"]) {
+      expect(
+        getSectionMeta(proto),
+        `getSectionMeta("${proto}") should be null`
+      ).toBeNull();
+      expect(
+        getConceptDomain(proto),
+        `getConceptDomain("${proto}") should be null`
+      ).toBeNull();
+    }
+  });
 });
