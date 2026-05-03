@@ -1,0 +1,48 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { CURRICULUM } from "@/content/curriculum";
+import { getSection } from "@/content/curriculum-loader";
+import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
+import { SectionTestPage } from "@/components/quiz/SectionTestPage";
+
+type Params = { sectionId: string };
+
+export function generateStaticParams(): Params[] {
+  return CURRICULUM.sections
+    .filter((s) => s.sectionTest)
+    .map((s) => ({ sectionId: s.id }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<Params>;
+}): Promise<Metadata> {
+  const { sectionId } = await params;
+  const section = getSection(sectionId);
+  if (!section) return { title: "Section test not found" };
+  return { title: `Section test · ${section.title}` };
+}
+
+export default async function SectionTestRoute({
+  params,
+}: {
+  params: Promise<Params>;
+}) {
+  const { sectionId } = await params;
+  const section = getSection(sectionId);
+  if (!section || !section.sectionTest) notFound();
+
+  return (
+    <div className="py-2">
+      <Breadcrumbs
+        trail={[
+          { label: "Dashboard", href: "/" },
+          { label: section.title, href: `/section/${section.id}` },
+          { label: "Section test" },
+        ]}
+      />
+      <SectionTestPage section={section} />
+    </div>
+  );
+}
