@@ -52,8 +52,8 @@ export const GAMES_CATALOG: readonly MiniGameMeta[] = [
     id: "flashcard-battle",
     title: "Flashcard Battle",
     blurb:
-      "Spaced-repetition battle through the section's flashcards. Hard / Good / Easy keeps the right cards in front of you.",
-    status: "soon",
+      "Self-paced battle through the section's flashcards. Hard / Good / Easy keeps the right cards in front of you.",
+    status: "live",
     category: "Memory",
     icon: "layers",
   },

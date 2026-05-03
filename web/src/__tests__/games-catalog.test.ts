@@ -36,11 +36,16 @@ describe("GAMES_CATALOG", () => {
     }
   });
 
-  it("Time Trivia is live (PR3 ships it); the rest are still 'soon' until PR4+", () => {
+  it("Time Trivia + Flashcard Battle are live; the remaining 4 are still 'soon'", () => {
     const live = GAMES_CATALOG.filter((g) => g.status === "live").map((g) => g.id);
     const soon = GAMES_CATALOG.filter((g) => g.status === "soon").map((g) => g.id);
-    expect(live).toEqual(["time-trivia"]);
-    expect(soon).toContain("flashcard-battle"); // flips in PR4
+    expect(live.sort()).toEqual(["flashcard-battle", "time-trivia"]);
+    expect(soon.sort()).toEqual([
+      "complete-the-code",
+      "concept-match",
+      "domain-rush",
+      "interactive-scenarios",
+    ]);
   });
 });
 
