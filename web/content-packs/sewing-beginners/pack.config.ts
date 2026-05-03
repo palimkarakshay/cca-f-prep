@@ -77,6 +77,28 @@ export const packConfig: PackConfig = {
     passLabel: "got it",
     belowPassGateLabel: "needs more practice",
   },
+  masteryLevels: [
+    { label: "Not started", tone: "neutral" },
+    { label: "Read the lesson", tone: "neutral" },
+    {
+      label: "Try again",
+      minScorePct: 0,
+      isUnderwhelm: true,
+      tone: "warn",
+    },
+    {
+      label: "Practiced",
+      minScorePct: 0.5,
+      countsAsMastered: true,
+      tone: "good",
+    },
+    {
+      label: "Mastered",
+      minScorePct: 0.9,
+      countsAsMastered: true,
+      tone: "good",
+    },
+  ],
   manifest: {
     backgroundColor: "#3a2418",
     themeColor: "#3a2418",

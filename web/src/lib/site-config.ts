@@ -14,13 +14,14 @@
 
 import { ACTIVE_PACK } from "@/content/active-pack";
 import type {
+  MasteryLevel,
   NavIcon,
   NavItem,
   PackConfig,
   PackCopy,
 } from "@/content/pack-types";
 
-export type { NavIcon, NavItem, PackCopy };
+export type { MasteryLevel, NavIcon, NavItem, PackCopy };
 
 /**
  * Default UI copy. Exam-coded — the original CCA-F-prep vocabulary.
@@ -62,6 +63,48 @@ export const copy: Required<PackCopy> = {
   ...DEFAULT_COPY,
   ...(ACTIVE_PACK.config.copy ?? {}),
 };
+
+/**
+ * Default 5-level mastery taxonomy — the original CCA-F vocabulary.
+ * Packs override the whole array via `pack.config.masteryLevels`.
+ *
+ * Conventions baked into the engine (see `progress.ts`):
+ *   - Index 0 = "not started" (no progress yet).
+ *   - Index 1 = "lesson read" (set by markLessonRead, not by score).
+ *   - Indices 2..N = score-driven; engine picks the highest level
+ *     whose `minScorePct` <= the attempt's score / total.
+ *   - Underwhelm (drill trigger) = the level where `isUnderwhelm`
+ *     is true. Recommendation engine uses this instead of a literal
+ *     mastery=2 check.
+ *   - Mastered count = sum of concepts whose level has
+ *     `countsAsMastered`. Stats panel + section-test eligibility
+ *     read this.
+ */
+export const DEFAULT_MASTERY_LEVELS: MasteryLevel[] = [
+  { label: "Not started", tone: "neutral" },
+  { label: "Lesson read", tone: "neutral" },
+  { label: "Below 60%", minScorePct: 0, isUnderwhelm: true, tone: "bad" },
+  {
+    label: "Passing",
+    minScorePct: 0.6,
+    countsAsMastered: true,
+    tone: "good",
+  },
+  {
+    label: "Strong",
+    minScorePct: 0.9,
+    countsAsMastered: true,
+    tone: "good",
+  },
+];
+
+/**
+ * Resolved mastery ladder. If the pack supplies `masteryLevels`,
+ * the array is used as-is. Otherwise the default 5-level system
+ * applies. Engine code reads this instead of hardcoding.
+ */
+export const masteryLevels: MasteryLevel[] =
+  ACTIVE_PACK.config.masteryLevels ?? DEFAULT_MASTERY_LEVELS;
 
 /**
  * Branding for the active pack. Compatibility shim — surfaces the

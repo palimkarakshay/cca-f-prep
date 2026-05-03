@@ -1,4 +1,5 @@
 import { CURRICULUM } from "@/content/curriculum";
+import { masteryLevels } from "@/lib/site-config";
 import {
   PROGRESS_STORAGE_KEY,
   type ConceptProgress,
@@ -73,12 +74,35 @@ export function ensureMock(p: Progress, id: string): MockProgress {
   return p.mock[id];
 }
 
+/**
+ * Map a quiz attempt score to a mastery-ladder index.
+ *
+ * Walks the resolved `masteryLevels` array (default 5-level system,
+ * pack-overridable). Levels at index 0 ("not started") and index 1
+ * ("lesson read") are skipped — those are set by other code paths,
+ * not by a quiz attempt. Among score-driven levels (index >= 2), we
+ * pick the highest one whose `minScorePct` is satisfied.
+ *
+ * Falls back to index 2 ("underwhelm" by default) when total is 0
+ * or no level matches.
+ */
 export function masteryFromScore(score: number, total: number): Mastery {
   if (total <= 0) return 0;
   const pct = score / total;
-  if (pct >= 0.9) return 4;
-  if (pct >= 0.6) return 3;
-  return 2;
+  let landed = -1;
+  for (let i = 2; i < masteryLevels.length; i++) {
+    const min = masteryLevels[i].minScorePct ?? 0;
+    if (pct >= min) landed = i;
+  }
+  return landed >= 0 ? landed : 2;
+}
+
+export function isUnderwhelm(mastery: Mastery): boolean {
+  return Boolean(masteryLevels[mastery]?.isUnderwhelm);
+}
+
+export function countsAsMastered(mastery: Mastery): boolean {
+  return Boolean(masteryLevels[mastery]?.countsAsMastered);
 }
 
 export function isSectionPassed(p: Progress, sectionId: string): boolean {

@@ -7,6 +7,7 @@ import { MasteryMeter } from "@/components/primitives/MasteryMeter";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { copy } from "@/lib/site-config";
+import { countsAsMastered } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 
 export function SectionList() {
@@ -23,7 +24,7 @@ export function SectionList() {
 
         const total = section.concepts.length;
         const mastered = hydrated
-          ? section.concepts.filter((c) => conceptMastery(c.id) >= 3).length
+          ? section.concepts.filter((c) => countsAsMastered(conceptMastery(c.id))).length
           : 0;
         const masteredPct = total === 0 ? 0 : Math.round((mastered / total) * 100);
 

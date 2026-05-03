@@ -1,4 +1,5 @@
 import { CURRICULUM } from "./curriculum";
+import { masteryLevels } from "@/lib/site-config";
 import type { Concept, MockExam, Section } from "./curriculum-types";
 
 export function getSections(): Section[] {
@@ -91,8 +92,9 @@ export function getMockExam(id: string): MockExam | null {
 }
 
 export function masteryLabel(m: number): string {
-  return (
-    ["Not started", "Lesson read", "Below 60%", "Passing", "Strong"][m] ??
-    "Not started"
-  );
+  return masteryLevels[m]?.label ?? masteryLevels[0]?.label ?? "Not started";
+}
+
+export function masteryTone(m: number): "good" | "warn" | "bad" | "neutral" {
+  return masteryLevels[m]?.tone ?? "neutral";
 }

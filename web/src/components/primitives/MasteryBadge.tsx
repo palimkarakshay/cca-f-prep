@@ -1,15 +1,16 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { masteryLabel } from "@/content/curriculum-loader";
+import { masteryLabel, masteryTone } from "@/content/curriculum-loader";
 import type { Mastery } from "@/lib/progress-types";
 
-const TONE: Record<Mastery, string> = {
-  0: "text-(--muted) border-(--border)",
-  1: "text-(--warn) border-(--warn)/50",
-  2: "text-(--bad) border-(--bad)/50",
-  3: "text-(--good) border-(--good)/50",
-  4: "text-(--good) border-(--good) bg-(--good)/10",
+// Tone → tailwind class. The four tones are pack-overridable via
+// `MasteryLevel.tone`. Unknown / missing tones fall back to neutral.
+const TONE_CLASS: Record<"good" | "warn" | "bad" | "neutral", string> = {
+  good: "text-(--good) border-(--good)/50",
+  warn: "text-(--warn) border-(--warn)/50",
+  bad: "text-(--bad) border-(--bad)/50",
+  neutral: "text-(--muted) border-(--border)",
 };
 
 export function MasteryBadge({
@@ -19,16 +20,18 @@ export function MasteryBadge({
   mastery: Mastery;
   className?: string;
 }) {
+  const label = masteryLabel(mastery);
+  const tone = masteryTone(mastery);
   return (
     <span
       className={cn(
         "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
-        TONE[mastery],
+        TONE_CLASS[tone],
         className
       )}
-      aria-label={`Mastery: ${masteryLabel(mastery)}`}
+      aria-label={`Mastery: ${label}`}
     >
-      {masteryLabel(mastery)}
+      {label}
     </span>
   );
 }

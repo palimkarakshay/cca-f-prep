@@ -43,6 +43,28 @@ export interface AskAIConfig {
 }
 
 /**
+ * One step in the mastery progression. Packs override the default
+ * 5-level system (Not started → Lesson read → Below 60% → Passing →
+ * Strong) by supplying a custom array on `PackConfig.masteryLevels`.
+ *
+ * Order matters: the array is the ordered ladder from "no progress"
+ * upward. Index 0 is "not started" and is always implicit (a learner
+ * starts here regardless of how packs define the rest).
+ */
+export interface MasteryLevel {
+  /** Visible label on the badge / meter / stats. */
+  label: string;
+  /** Minimum quiz score percentage (0–1) to land at this level. Omit for index 0 ("not started") and index 1 ("lesson read"); the engine never assigns these from a quiz score. */
+  minScorePct?: number;
+  /** Landing here triggers the "Drill" recommendation kind (i.e. the learner needs to re-read + retake before progressing). */
+  isUnderwhelm?: boolean;
+  /** Counts toward the "X concepts mastered" stat + dashboard progress bar + section-test eligibility. */
+  countsAsMastered?: boolean;
+  /** Visual hint for badges/meters. Defaults to "neutral". */
+  tone?: "good" | "warn" | "bad" | "neutral";
+}
+
+/**
  * CSS custom-property tokens applied at the document root for this pack.
  * Light + dark variants. Values are CSS color strings or any other
  * legal CSS value. Keys must match the `:root` / `html.dark` shape in
@@ -127,6 +149,8 @@ export interface PackConfig {
   };
   /** Optional theme tokens. Inlined into the document <head> at request time. */
   theme?: PackTheme;
+  /** Override the default 5-level mastery taxonomy. See MasteryLevel. */
+  masteryLevels?: MasteryLevel[];
   /** SVG markup for the foreground icon. Used at /icon.svg and embedded in the manifest. */
   iconSvg: string;
   /** SVG markup for the maskable icon. Used at /icon-maskable.svg. */

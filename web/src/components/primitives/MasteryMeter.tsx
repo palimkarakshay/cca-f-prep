@@ -1,22 +1,22 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { masteryLabel } from "@/content/curriculum-loader";
+import { masteryLabel, masteryTone } from "@/content/curriculum-loader";
+import { masteryLevels } from "@/lib/site-config";
 import type { Mastery } from "@/lib/progress-types";
 
-const STEPS: Mastery[] = [1, 2, 3, 4];
-
-const FILL_TONE: Record<Mastery, string> = {
-  0: "bg-(--border)",
-  1: "bg-(--warn)",
-  2: "bg-(--bad)",
-  3: "bg-(--good)",
-  4: "bg-(--good)",
+const TONE_FILL: Record<"good" | "warn" | "bad" | "neutral", string> = {
+  good: "bg-(--good)",
+  warn: "bg-(--warn)",
+  bad: "bg-(--bad)",
+  neutral: "bg-(--border)",
 };
 
 /**
- * 4-dot inline meter showing concept mastery 0..4. Pairs a textual label
- * (sr-only) with the visual meter so screen readers always read the level.
+ * Inline N-dot meter where N = (number of mastery levels) - 1.
+ * Pairs a textual label (sr-only) with the visual meter so screen
+ * readers always read the level. Tone of filled dots is driven by
+ * the active pack's mastery level definitions.
  */
 export function MasteryMeter({
   mastery,
@@ -25,14 +25,15 @@ export function MasteryMeter({
   mastery: Mastery;
   className?: string;
 }) {
-  const fillTone = FILL_TONE[mastery];
+  const max = Math.max(0, masteryLevels.length - 1);
+  const fillTone = TONE_FILL[masteryTone(mastery)];
   return (
     <span
       className={cn("inline-flex items-center gap-1", className)}
       role="img"
-      aria-label={`Mastery: ${masteryLabel(mastery)} (${mastery} of 4)`}
+      aria-label={`Mastery: ${masteryLabel(mastery)} (${mastery} of ${max})`}
     >
-      {STEPS.map((step) => (
+      {Array.from({ length: max }, (_, i) => i + 1).map((step) => (
         <span
           key={step}
           aria-hidden

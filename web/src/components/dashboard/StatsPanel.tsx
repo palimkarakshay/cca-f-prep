@@ -6,6 +6,7 @@ import { CURRICULUM } from "@/content/curriculum";
 import { useProgress } from "@/hooks/useProgress";
 import { computeStreak } from "@/lib/streak";
 import { copy } from "@/lib/site-config";
+import { countsAsMastered } from "@/lib/progress";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
@@ -20,8 +21,8 @@ interface Stat {
 function buildStats(progress: ReturnType<typeof useProgress>["progress"]): Stat[] {
   const allConcepts = CURRICULUM.sections.flatMap((s) => s.concepts);
   const totalConcepts = allConcepts.length;
-  const mastered = allConcepts.filter(
-    (c) => (progress.concept[c.id]?.mastery ?? 0) >= 3
+  const mastered = allConcepts.filter((c) =>
+    countsAsMastered(progress.concept[c.id]?.mastery ?? 0)
   ).length;
 
   const totalSections = CURRICULUM.sections.length;

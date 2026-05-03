@@ -8,7 +8,19 @@
 import { ACTIVE_PACK } from "@/content/active-pack";
 import type { OptionLetter } from "@/content/curriculum-types";
 
-export type Mastery = 0 | 1 | 2 | 3 | 4;
+/**
+ * Mastery level index into the active pack's `masteryLevels` array.
+ *
+ * Conventions:
+ *   0 = "not started" (always present)
+ *   1 = "lesson read" (set by markLessonRead, not by score)
+ *   2..N = score-driven (engine picks the highest level whose
+ *           minScorePct <= score/total).
+ *
+ * Stored as an integer for ergonomic JSON; bounded at runtime by
+ * `masteryLevels.length - 1`.
+ */
+export type Mastery = number;
 
 export interface QuizAttempt {
   startedAt: number;

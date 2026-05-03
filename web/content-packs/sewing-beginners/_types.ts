@@ -10,6 +10,7 @@ export type {
   ContentPack,
   PackConfig,
   PackCopy,
+  MasteryLevel,
   NavIcon,
   NavItem,
   AskAIConfig,
