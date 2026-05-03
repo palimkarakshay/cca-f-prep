@@ -48,7 +48,12 @@ export function BottomNav() {
   const pathname = usePathname();
   const siteConfig = useSiteConfig();
   const packId = packIdFromPathname(pathname);
-  const items = siteConfig.nav.filter((n) => n.mobile);
+  // On the picker (packId null), every nav item is pack-relative —
+  // surfacing them un-prefixed leads to /mock 404s and anchor-only
+  // dead links. Hide the bottom nav until the user has picked a pack.
+  const items = packId ? siteConfig.nav.filter((n) => n.mobile) : [];
+
+  if (items.length === 0) return null;
 
   return (
     <nav

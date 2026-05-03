@@ -54,18 +54,24 @@ export const packConfig: PackConfig = {
     categories: ["education", "productivity"],
   },
   theme: {
+    // Light values are tightened for WCAG AA at small text sizes —
+    // see PR #9 commit c0e0c33 (web/src/app/globals.css) for the
+    // contrast math. Re-introducing the brand-leaning #c45a36 /
+    // #d97757 here regresses axe: white-on-accent button drops to
+    // 4.31:1 against AA's 4.5 threshold; text-(--accent-2) on canvas
+    // drops to ~2.5:1.
     light: {
       "--canvas": "#fafaf9",
       "--panel": "#ffffff",
       "--panel-2": "#f4f4f3",
       "--border": "#e5e5e3",
       "--ink": "#1a1a1a",
-      "--muted": "#6b6b6b",
-      "--accent": "#c45a36",
-      "--accent-2": "#d97757",
-      "--good": "#2f7a4a",
-      "--bad": "#b53a3a",
-      "--warn": "#b58c1a",
+      "--muted": "#5a5a5a",
+      "--accent": "#b04829",
+      "--accent-2": "#913a1d",
+      "--good": "#1f6b3f",
+      "--bad": "#a32f2f",
+      "--warn": "#8a6a10",
     },
     dark: {
       "--canvas": "#0e0f12",

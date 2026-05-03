@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`section meta render > formatMinutes renders human-readable time for every section 1`] = `
+{
+  "s1-claude-101": "45 min",
+  "s2-ai-fluency": "3 hr 30 min",
+  "s3-claude-api": "3 hr 30 min",
+  "s4-mcp": "2 hr",
+  "s5-claude-code-101": "1 hr",
+  "s6-claude-code-action": "1 hr",
+  "s7-skills": "45 min",
+  "s8-subagents": "45 min",
+  "s9-cowork": "1 hr",
+}
+`;
