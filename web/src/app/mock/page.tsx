@@ -38,36 +38,38 @@ export default function MockIndexPage() {
       ) : (
         <ul className="flex flex-col gap-3">
           {mocks.map((m) => (
-            <Card key={m.id}>
-              <div className="flex flex-wrap items-baseline justify-between gap-3">
-                <h2 className="text-base font-semibold text-(--ink)">{m.title}</h2>
-                <span className="text-xs text-(--muted)">
-                  {m.questions.length} Q · {m.timeMinutes}m ·{" "}
-                  {Math.round(m.passPct * 100)}% pass
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-(--muted)">{m.blurb}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Link
-                  href={`/mock/${m.id}`}
-                  className={cn(
-                    buttonVariants({ variant: "default", size: "sm" }),
-                    "no-underline"
-                  )}
-                >
-                  Start
-                </Link>
-                <Link
-                  href={`/mock/${m.id}/result`}
-                  className={cn(
-                    buttonVariants({ variant: "ghost", size: "sm" }),
-                    "no-underline"
-                  )}
-                >
-                  Review last attempt
-                </Link>
-              </div>
-            </Card>
+            <li key={m.id}>
+              <Card>
+                <div className="flex flex-wrap items-baseline justify-between gap-3">
+                  <h2 className="text-base font-semibold text-(--ink)">{m.title}</h2>
+                  <span className="text-xs text-(--muted)">
+                    {m.questions.length} Q · {m.timeMinutes}m ·{" "}
+                    {Math.round(m.passPct * 100)}% pass
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-(--muted)">{m.blurb}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Link
+                    href={`/mock/${m.id}`}
+                    className={cn(
+                      buttonVariants({ variant: "default", size: "sm" }),
+                      "no-underline"
+                    )}
+                  >
+                    Start
+                  </Link>
+                  <Link
+                    href={`/mock/${m.id}/result`}
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "sm" }),
+                      "no-underline"
+                    )}
+                  >
+                    Review last attempt
+                  </Link>
+                </div>
+              </Card>
+            </li>
           ))}
         </ul>
       )}

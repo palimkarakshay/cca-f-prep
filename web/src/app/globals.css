@@ -41,11 +41,15 @@
   --border: #e5e5e3;
   --ink: #1a1a1a;
   --muted: #5a5a5a;
-  /* `--accent` is the canonical button-bg / surface color; `--accent-2` is
-     used for text emphasis and must meet WCAG AA (≥ 4.5:1) on `--canvas`.
-     #a04a2c on #fafaf9 = 5.6:1; #c45a36 on #fafaf9 = 4.6:1 (large text only). */
-  --accent: #c45a36;
-  --accent-2: #a04a2c;
+  /* `--accent` is the button-bg surface; `--accent-2` is text emphasis.
+     Both must clear WCAG AA at small text sizes:
+     - --accent #b04829 on white text → 5.6:1 (passes for button labels)
+     - --accent-2 #913a1d on --canvas (#fafaf9) → 7.6:1 (passes for body text)
+     Going darker than the original Anthropic salmon (#cc785c / #d97757)
+     is the only way to clear AA on a near-white canvas; dark-mode keeps
+     the brighter salmon for dark-canvas legibility. */
+  --accent: #b04829;
+  --accent-2: #913a1d;
   --good: #1f6b3f;
   --bad: #a32f2f;
   --warn: #8a6a10;
@@ -138,13 +142,23 @@ samp {
     Menlo, Consolas, monospace;
 }
 
-a {
-  color: var(--accent-2);
-  text-decoration: none;
-}
+/*
+  `<a>` defaults live in @layer base so Tailwind utility classes (which
+  live in @layer utilities, higher priority by layer order) can override
+  them with `text-(--muted)`, `text-(--ink)`, etc. Without the layer,
+  this non-layered rule wins over every utility and the footer link
+  ends up rendering in --accent-2 even when classed text-(--muted) — a
+  subtle bug that breaks both color-contrast and link-in-text-block.
+*/
+@layer base {
+  a {
+    color: var(--accent-2);
+    text-decoration: none;
+  }
 
-a:hover {
-  text-decoration: underline;
+  a:hover {
+    text-decoration: underline;
+  }
 }
 
 /* Skip link — visible on focus only. */
