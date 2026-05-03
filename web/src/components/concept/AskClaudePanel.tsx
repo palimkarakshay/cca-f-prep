@@ -93,10 +93,16 @@ export function AskClaudePanel({
   }
 
   return (
-    <section className="mt-8 border-t border-dashed border-(--border) pt-6">
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
+    <section
+      aria-labelledby="ask-claude-heading"
+      className="mt-8 border-t border-dashed border-(--border) pt-6"
+    >
+      <h2
+        id="ask-claude-heading"
+        className="text-xs font-semibold uppercase tracking-wide text-(--accent-2)"
+      >
         Ask Claude
-      </h3>
+      </h2>
       <p className="mt-1 text-sm text-(--muted)">
         Build a prompt with this lesson + your question, copy it, and open the
         Claude Project in a new tab.
