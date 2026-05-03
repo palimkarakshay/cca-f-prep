@@ -80,15 +80,21 @@ test.describe("section tabs", () => {
     await page.getByRole("tab", { name: /Games/i }).click();
     const heading = page.getByRole("heading", { name: /Mini-games/i });
     await expect(heading).toBeVisible();
-    // PR3 flipped Time Trivia to "live"; the remaining 5 tiles stay
-    // "Coming soon" until PR4+ flips Flashcard Battle and friends.
-    await expect(page.getByText("Coming soon")).toHaveCount(5);
-    // Time Trivia tile is now a real link.
+    // PR3 flipped Time Trivia; PR4 flipped Flashcard Battle. The 4
+    // remaining tiles stay "Coming soon" until later PRs.
+    await expect(page.getByText("Coming soon")).toHaveCount(4);
+    // Both live tiles render as real links.
     const ttLink = page.getByRole("link", { name: /Time Trivia/i });
     await expect(ttLink).toBeVisible();
     await expect(ttLink).toHaveAttribute(
       "href",
       /\/cca-f-prep\/section\/s1-claude-101\/games\/time-trivia$/
+    );
+    const fbLink = page.getByRole("link", { name: /Flashcard Battle/i });
+    await expect(fbLink).toBeVisible();
+    await expect(fbLink).toHaveAttribute(
+      "href",
+      /\/cca-f-prep\/section\/s1-claude-101\/games\/flashcard-battle$/
     );
   });
 
