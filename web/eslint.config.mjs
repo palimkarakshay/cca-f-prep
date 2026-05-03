@@ -1,14 +1,9 @@
-import { FlatCompat } from "@eslint/eslintrc";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({ baseDirectory: __dirname });
+import nextCore from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...nextCore,
+  ...nextTs,
   {
     rules: {
       "react/no-unescaped-entities": "off",
@@ -19,7 +14,13 @@ const eslintConfig = [
     },
   },
   {
-    ignores: [".next/**", "node_modules/**", "e2e/**", "playwright-report/**"],
+    ignores: [
+      ".next/**",
+      "node_modules/**",
+      "e2e/**",
+      "playwright-report/**",
+      "src/content/curriculum.ts",
+    ],
   },
 ];
 

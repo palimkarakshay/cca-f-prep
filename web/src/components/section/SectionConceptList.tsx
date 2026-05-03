@@ -37,7 +37,6 @@ export function SectionConceptList({ section }: { section: Section }) {
           return (
             <li
               key={c.id}
-              aria-disabled
               className={cn(
                 "flex items-center gap-3 rounded-md border border-transparent px-2 py-2 opacity-55",
                 "cursor-not-allowed"

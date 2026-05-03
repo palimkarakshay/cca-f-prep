@@ -17,9 +17,11 @@ describe("siteConfig", () => {
     }
   });
 
-  it("Claude project URL is set or empty (not malformed)", () => {
-    if (siteConfig.claudeProjectUrl !== "") {
-      expect(siteConfig.claudeProjectUrl).toMatch(/^https:\/\/claude\.ai\//);
+  it("Claude project URL points at claude.ai", () => {
+    const url: string = siteConfig.claudeProjectUrl;
+    if (url.length > 0) {
+      expect(url).toMatch(/^https:\/\/claude\.ai\//);
     }
+    expect(siteConfig.claudeFallbackUrl).toMatch(/^https:\/\/claude\.ai\//);
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -8,32 +8,48 @@ const STORAGE_KEY = "cca-f-prep:theme";
 
 type Theme = "light" | "dark";
 
-function getInitialTheme(): Theme {
+function subscribeTheme(cb: () => void): () => void {
+  if (typeof document === "undefined") return () => undefined;
+  const observer = new MutationObserver(cb);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+  return () => observer.disconnect();
+}
+
+function getThemeSnapshot(): Theme {
   if (typeof document === "undefined") return "dark";
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
-export function ThemeToggle({ className }: { className?: string }) {
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
+function getServerSnapshot(): Theme {
+  // Server doesn't know the user's saved theme; render as dark and let
+  // client hydration replace the icon. The shell colors are driven by
+  // CSS tokens that respect the .dark class set by the inline init
+  // script in <head>, which runs before paint.
+  return "dark";
+}
 
-  useEffect(() => {
-    setMounted(true);
-    setTheme(getInitialTheme());
-  }, []);
+export function ThemeToggle({ className }: { className?: string }) {
+  const theme = useSyncExternalStore(
+    subscribeTheme,
+    getThemeSnapshot,
+    getServerSnapshot
+  );
 
   function toggle() {
     const next: Theme = theme === "dark" ? "light" : "dark";
-    setTheme(next);
     document.documentElement.classList.toggle("dark", next === "dark");
     try {
       localStorage.setItem(STORAGE_KEY, next);
-    } catch (_) {
-      /* noop */
+    } catch {
+      /* quota / private mode — silently drop */
     }
   }
 
-  const label = theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
+  const label =
+    theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
   const Icon = theme === "dark" ? Sun : Moon;
 
   return (
@@ -47,7 +63,7 @@ export function ThemeToggle({ className }: { className?: string }) {
         className
       )}
     >
-      {mounted ? <Icon className="h-4 w-4" aria-hidden /> : null}
+      <Icon className="h-4 w-4" aria-hidden />
     </button>
   );
 }
