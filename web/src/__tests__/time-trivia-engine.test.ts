@@ -130,9 +130,18 @@ describe("speedBonusFor", () => {
 });
 
 describe("maxPossibleScore", () => {
-  it("matches the expected formula for the default config", () => {
+  it("matches the expected formula for a full 10-question round", () => {
     // 10 Qs * (100 base + 50 speed) + floor(10/3) * 50 = 1500 + 150 = 1650
-    expect(maxPossibleScore(DEFAULT_TRIVIA_CONFIG)).toBe(1650);
+    expect(maxPossibleScore(10, DEFAULT_TRIVIA_CONFIG)).toBe(1650);
+  });
+
+  it("scales down for shorter rounds (codex P2 — sparse sections)", () => {
+    // s9-cowork has only 9 MCQs. The denominator must reflect actual
+    // deck size or perfect plays show artificially low percentages.
+    // 9 Qs * 150 + floor(9/3) * 50 = 1350 + 150 = 1500
+    expect(maxPossibleScore(9, DEFAULT_TRIVIA_CONFIG)).toBe(1500);
+    // No streak bonuses below the threshold.
+    expect(maxPossibleScore(2, DEFAULT_TRIVIA_CONFIG)).toBe(2 * 150);
   });
 });
 

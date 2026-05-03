@@ -139,16 +139,25 @@ export function speedBonusFor(
 }
 
 /**
- * Theoretical max score for a config. Used for the GameAttempt
- * `maxScore` field + the result screen's % display. Assumes a
- * perfect run: every Q correct, full speed bonus, every Nth streak.
+ * Theoretical max score for a round of `questionCount` questions.
+ * Used for the GameAttempt `maxScore` field + the result screen's
+ * % display. Assumes a perfect run: every Q correct, full speed
+ * bonus, every Nth streak.
+ *
+ * `questionCount` is the actual deck length, NOT `config.questionCount`
+ * — sparse sections (e.g. s9-cowork has only 9 MCQs) produce a
+ * shorter deck and the denominator must match or the result %
+ * is systematically too low even on a perfect play.
  */
-export function maxPossibleScore(config: TriviaConfig): number {
+export function maxPossibleScore(
+  questionCount: number,
+  config: TriviaConfig
+): number {
   const perQ = config.basePerCorrect + config.speedBonusFullPoints;
   const streakBonuses =
-    Math.floor(config.questionCount / config.streakEvery) *
+    Math.floor(questionCount / config.streakEvery) *
     config.streakBonusPoints;
-  return perQ * config.questionCount + streakBonuses;
+  return perQ * questionCount + streakBonuses;
 }
 
 function finalizeCurrentQuestion(state: TriviaState): TriviaState {

@@ -75,11 +75,19 @@ export function TimeTriviaGame({
     recordAttempt("time-trivia", {
       sectionId: section.id,
       score: state.score,
-      maxScore: maxPossibleScore(state.config),
+      maxScore: maxPossibleScore(state.questions.length, state.config),
       durationMs: state.durationMs,
       finishedAt: now,
     });
-  }, [state.phase, state.score, state.durationMs, state.config, section.id, recordAttempt]);
+  }, [
+    state.phase,
+    state.score,
+    state.durationMs,
+    state.config,
+    state.questions.length,
+    section.id,
+    recordAttempt,
+  ]);
 
   const handleSelect = useCallback(
     (option: OptionLetter) => {
@@ -342,7 +350,7 @@ function ResultScreen({
   packId: string;
   onRetry: () => void;
 }) {
-  const max = maxPossibleScore(state.config);
+  const max = maxPossibleScore(state.questions.length, state.config);
   const pct = max > 0 ? Math.round((state.score / max) * 100) : 0;
   const correctCount = state.outcomes.filter((o) => o.correct).length;
   const totalSecs = Math.round(state.durationMs / 1000);
