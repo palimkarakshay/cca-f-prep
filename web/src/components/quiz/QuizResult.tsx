@@ -6,7 +6,7 @@ import { ChevronDown } from "lucide-react";
 import type { Question, OptionLetter } from "@/content/curriculum-types";
 import type { QuizAttempt } from "@/lib/progress-types";
 import { buttonVariants } from "@/components/ui/button";
-import { copy } from "@/lib/site-config";
+import { useCopy } from "@/content/pack-hooks";
 import { cn } from "@/lib/utils";
 import {
   displayCanonicalAnswer,
@@ -51,6 +51,7 @@ export function QuizResult({
   const pct = attempt.total > 0 ? attempt.score / attempt.total : 0;
   const passed = pct >= passPct;
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const copy = useCopy();
 
   // After submit unmounts the runner, the previously-focused Submit button
   // is gone — move focus to the result heading so screen readers re-anchor

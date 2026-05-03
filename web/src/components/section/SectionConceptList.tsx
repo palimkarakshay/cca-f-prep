@@ -3,11 +3,21 @@
 import Link from "next/link";
 import { useProgress } from "@/hooks/useProgress";
 import { MasteryBadge } from "@/components/primitives/MasteryBadge";
+import { usePackId } from "@/content/pack-hooks";
 import type { Section } from "@/content/curriculum-types";
 import { cn } from "@/lib/utils";
 
-export function SectionConceptList({ section }: { section: Section }) {
+export function SectionConceptList({
+  section,
+  packId: packIdProp,
+}: {
+  section: Section;
+  /** Override the URL pack id when rendered outside [packId] routes. */
+  packId?: string;
+}) {
   const { hydrated, conceptMastery, sectionUnlocked } = useProgress();
+  const ctxPackId = usePackId();
+  const packId = packIdProp ?? ctxPackId;
   const unlocked = !hydrated || sectionUnlocked(section.id);
 
   return (
@@ -51,7 +61,7 @@ export function SectionConceptList({ section }: { section: Section }) {
         return (
           <li key={c.id}>
             <Link
-              href={`/concept/${section.id}/${c.id}`}
+              href={`/${packId}/concept/${section.id}/${c.id}`}
               className="flex items-center gap-3 rounded-md border border-transparent px-2 py-2 no-underline hover:border-(--border) hover:bg-(--panel-2)"
             >
               {inner}

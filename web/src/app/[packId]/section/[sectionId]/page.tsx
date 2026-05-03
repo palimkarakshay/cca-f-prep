@@ -1,19 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CURRICULUM } from "@/content/curriculum";
-import { getSection } from "@/content/curriculum-loader";
+import { getPack, ALL_PACK_IDS } from "@/content/pack-registry";
+import { getSectionFrom } from "@/content/curriculum-loader";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
 import { SectionConceptList } from "@/components/section/SectionConceptList";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/Container";
-import { copy } from "@/lib/site-config";
+import { copyFor } from "@/lib/pack-helpers";
 import { cn } from "@/lib/utils";
 
-type Params = { sectionId: string };
+type Params = { packId: string; sectionId: string };
 
 export function generateStaticParams(): Params[] {
-  return CURRICULUM.sections.map((s) => ({ sectionId: s.id }));
+  // Cartesian product across packs and their sections.
+  const out: Params[] = [];
+  for (const packId of ALL_PACK_IDS) {
+    const pack = getPack(packId);
+    if (!pack) continue;
+    for (const section of pack.curriculum.sections) {
+      out.push({ packId, sectionId: section.id });
+    }
+  }
+  return out;
 }
 
 export async function generateMetadata({
@@ -21,8 +30,10 @@ export async function generateMetadata({
 }: {
   params: Promise<Params>;
 }): Promise<Metadata> {
-  const { sectionId } = await params;
-  const section = getSection(sectionId);
+  const { packId, sectionId } = await params;
+  const pack = getPack(packId);
+  if (!pack) return { title: "Section not found" };
+  const section = getSectionFrom(pack.curriculum, sectionId);
   if (!section) return { title: "Section not found" };
   return {
     title: `Section ${section.n}: ${section.title}`,
@@ -35,14 +46,20 @@ export default async function SectionPage({
 }: {
   params: Promise<Params>;
 }) {
-  const { sectionId } = await params;
-  const section = getSection(sectionId);
+  const { packId, sectionId } = await params;
+  const pack = getPack(packId);
+  if (!pack) notFound();
+  const section = getSectionFrom(pack.curriculum, sectionId);
   if (!section) notFound();
+  const copy = copyFor(pack);
 
   return (
     <Container as="article" width="prose" className="py-2">
       <Breadcrumbs
-        trail={[{ label: "Dashboard", href: "/" }, { label: section.title }]}
+        trail={[
+          { label: "Dashboard", href: `/${packId}` },
+          { label: section.title },
+        ]}
       />
       <header className="mb-4">
         <p className="font-mono text-xs text-(--muted)">
@@ -62,7 +79,7 @@ export default async function SectionPage({
         >
           Concepts
         </h2>
-        <SectionConceptList section={section} />
+        <SectionConceptList section={section} packId={packId} />
       </section>
 
       {section.sectionTest ? (
@@ -82,7 +99,7 @@ export default async function SectionPage({
             unlocks the next section.
           </p>
           <Link
-            href={`/section/${section.id}/test`}
+            href={`/${packId}/section/${section.id}/test`}
             className={cn(
               buttonVariants({ variant: "default", size: "sm" }),
               "mt-3 no-underline"
@@ -94,7 +111,10 @@ export default async function SectionPage({
       ) : null}
 
       <div className="mt-6">
-        <Link href="/" className="text-sm text-(--muted) hover:text-(--ink)">
+        <Link
+          href={`/${packId}`}
+          className="text-sm text-(--muted) hover:text-(--ink)"
+        >
           ← Back to dashboard
         </Link>
       </div>

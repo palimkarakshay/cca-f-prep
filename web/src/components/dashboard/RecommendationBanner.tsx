@@ -4,34 +4,40 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { ArrowRight, Flame } from "lucide-react";
 import { useProgress } from "@/hooks/useProgress";
-import { recommend } from "@/lib/recommendation";
+import { recommendForPack } from "@/lib/recommendation";
 import { computeStreak } from "@/lib/streak";
-import { copy } from "@/lib/site-config";
+import { useCopy, usePackId } from "@/content/pack-hooks";
+import { usePack } from "@/content/pack-context";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/primitives/Skeleton";
 import { cn } from "@/lib/utils";
 
-const KIND_LABEL: Record<string, string> = {
-  drill: copy.recoDrillLabel,
-  "section-test": copy.recoSectionTestLabel,
-  lesson: copy.recoLessonLabel,
-  quiz: copy.recoQuizLabel,
-  done: copy.recoDoneLabel,
-};
-
-const KIND_TITLE: Record<string, string> = {
-  drill: copy.recoDrillTitle,
-  "section-test": copy.recoSectionTestTitle,
-  lesson: copy.recoLessonTitle,
-  quiz: copy.recoQuizTitle,
-  done: copy.recoDoneTitle,
-};
-
 export function RecommendationBanner() {
   const { progress, hydrated } = useProgress();
-  const reco = useMemo(() => recommend(progress), [progress]);
+  const pack = usePack();
+  const packId = usePackId();
+  const copy = useCopy();
+  const reco = useMemo(
+    () => recommendForPack(progress, pack, copy, packId),
+    [progress, pack, copy, packId]
+  );
   const streak = useMemo(() => computeStreak(progress), [progress]);
+
+  const KIND_LABEL: Record<string, string> = {
+    drill: copy.recoDrillLabel,
+    "section-test": copy.recoSectionTestLabel,
+    lesson: copy.recoLessonLabel,
+    quiz: copy.recoQuizLabel,
+    done: copy.recoDoneLabel,
+  };
+  const KIND_TITLE: Record<string, string> = {
+    drill: copy.recoDrillTitle,
+    "section-test": copy.recoSectionTestTitle,
+    lesson: copy.recoLessonTitle,
+    quiz: copy.recoQuizTitle,
+    done: copy.recoDoneTitle,
+  };
 
   if (!hydrated) {
     return (

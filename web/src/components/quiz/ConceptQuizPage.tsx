@@ -3,7 +3,9 @@
 import { useCallback } from "react";
 import { useProgress } from "@/hooks/useProgress";
 import { QuizRunner } from "./QuizRunner";
-import { getAdjacentConcepts } from "@/content/curriculum-loader";
+import { getAdjacentConceptsFrom } from "@/content/curriculum-loader";
+import { usePack } from "@/content/pack-context";
+import { usePackId } from "@/content/pack-hooks";
 import type { Concept, Section } from "@/content/curriculum-types";
 import type { CurrentAttempt, QuizAttempt } from "@/lib/progress-types";
 
@@ -18,6 +20,8 @@ export function ConceptQuizPage({
 }) {
   const { progress, hydrated, recordQuizAttempt, setConceptCurrentAttempt } =
     useProgress();
+  const pack = usePack();
+  const packId = usePackId();
 
   const onCheckpoint = useCallback(
     (attempt: CurrentAttempt | null) => {
@@ -45,7 +49,11 @@ export function ConceptQuizPage({
   }
 
   const resume = progress.concept[concept.id]?.currentAttempt ?? null;
-  const { prev, next } = getAdjacentConcepts(section.id, concept.id);
+  const { prev, next } = getAdjacentConceptsFrom(
+    pack.curriculum,
+    section.id,
+    concept.id
+  );
   const learnedSummary = concept.lesson?.keyPoints;
 
   return (
@@ -58,14 +66,18 @@ export function ConceptQuizPage({
       resumeFrom={resume}
       onCheckpoint={onCheckpoint}
       onComplete={onComplete}
-      exitHref={`/concept/${section.id}/${concept.id}`}
+      exitHref={`/${packId}/concept/${section.id}/${concept.id}`}
       exitLabel="Exit to lesson"
       prevHref={
-        prev ? `/concept/${prev.section.id}/${prev.concept.id}` : undefined
+        prev
+          ? `/${packId}/concept/${prev.section.id}/${prev.concept.id}`
+          : undefined
       }
       prevLabel={prev ? `${prev.concept.code} ${prev.concept.title}` : undefined}
       nextHref={
-        next ? `/concept/${next.section.id}/${next.concept.id}` : undefined
+        next
+          ? `/${packId}/concept/${next.section.id}/${next.concept.id}`
+          : undefined
       }
       nextLabel={next ? `${next.concept.code} ${next.concept.title}` : undefined}
       learnedSummary={learnedSummary}

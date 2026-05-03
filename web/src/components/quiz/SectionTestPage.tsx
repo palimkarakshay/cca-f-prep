@@ -3,8 +3,9 @@
 import { useCallback } from "react";
 import { useProgress } from "@/hooks/useProgress";
 import { QuizRunner } from "./QuizRunner";
-import { getAdjacentSections } from "@/content/curriculum-loader";
-import { copy } from "@/lib/site-config";
+import { getAdjacentSectionsFrom } from "@/content/curriculum-loader";
+import { useCopy, usePackId } from "@/content/pack-hooks";
+import { usePack } from "@/content/pack-context";
 import type { Section } from "@/content/curriculum-types";
 import type { CurrentAttempt, QuizAttempt } from "@/lib/progress-types";
 
@@ -15,6 +16,9 @@ export function SectionTestPage({ section }: { section: Section }) {
     recordSectionTestAttempt,
     setSectionCurrentAttempt,
   } = useProgress();
+  const pack = usePack();
+  const packId = usePackId();
+  const copy = useCopy();
 
   const onCheckpoint = useCallback(
     (attempt: CurrentAttempt | null) => {
@@ -41,7 +45,7 @@ export function SectionTestPage({ section }: { section: Section }) {
 
   const passPct = section.sectionTest.passPct ?? 0.7;
   const resume = progress.section[section.id]?.currentTestAttempt ?? null;
-  const { prev, next } = getAdjacentSections(section.id);
+  const { prev, next } = getAdjacentSectionsFrom(pack.curriculum, section.id);
 
   return (
     <QuizRunner
@@ -55,11 +59,11 @@ export function SectionTestPage({ section }: { section: Section }) {
       resumeFrom={resume}
       onCheckpoint={onCheckpoint}
       onComplete={onComplete}
-      exitHref={`/section/${section.id}`}
+      exitHref={`/${packId}/section/${section.id}`}
       exitLabel="Exit to section"
-      prevHref={prev ? `/section/${prev.id}` : undefined}
+      prevHref={prev ? `/${packId}/section/${prev.id}` : undefined}
       prevLabel={prev ? prev.title : undefined}
-      nextHref={next ? `/section/${next.id}` : undefined}
+      nextHref={next ? `/${packId}/section/${next.id}` : undefined}
       nextLabel={next ? next.title : undefined}
     />
   );

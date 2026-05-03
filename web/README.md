@@ -139,19 +139,29 @@ web/
 
 ## Available features (today)
 
+- **Topic picker at `/`** — visit the root URL to choose between any
+  installed content pack. Each pack has its own URL prefix
+  (`/cca-f-prep/...`, `/sewing-beginners/...`, etc.), its own
+  progress storage, its own theme, and its own brand. The header
+  shows a "Switch topic" link when inside a pack.
 - **Lesson delivery** — TOC, scroll-progress bar, mastery badge,
-  per-lesson Simplify toggle, prev/next nav, "What you'll learn"
-  callout
-- **Concept quiz** — keyboard shortcuts, progress through questions,
-  per-option explanations after submit, mastery update
+  3-way Easy / Conceptual / Deeper depth picker (per-lesson choice
+  persists), prev/next nav, "What you'll learn" callout
+- **Concept quiz** — multiple question kinds (4-option MCQ + true/
+  false + fill-in-the-blank), keyboard shortcuts adapt per kind,
+  per-option / per-kind explanations after submit, mastery update
 - **Section test** — gates the next section behind a configurable pass
   percentage
 - **Mock exam** — independent of section progress, timed, with
   customizable score bands
-- **Progress tracker** — concepts mastered, sections complete, study
-  streak (derived from existing attempts), best mock score
+- **Custom mastery taxonomies** — packs define their own mastery
+  levels (label, score threshold, "drill"/"mastered" flags, tone).
+  Default is the original 5-level system.
+- **Progress tracker** — counts that respect each pack's mastery
+  taxonomy, study streak, best mock score
 - **Adaptive recommendation banner** — drill / section-test / next
-  lesson / next quiz / done, in priority order
+  lesson / next quiz / done, in priority order, using each pack's
+  vocabulary
 - **Concept explainer hand-off** — "Ask Claude" panel that builds a
   prompt from the current lesson + your question and opens a Claude
   chat (project URL + fallback are pack-configurable)

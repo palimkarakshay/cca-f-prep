@@ -10,9 +10,9 @@ import { AskClaudePanel } from "./AskClaudePanel";
 import { MasteryBadge } from "@/components/primitives/MasteryBadge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { getAdjacentConcepts } from "@/content/curriculum-loader";
-import { ACTIVE_PACK } from "@/content/active-pack";
-import { copy } from "@/lib/site-config";
+import { getAdjacentConceptsFrom } from "@/content/curriculum-loader";
+import { usePack } from "@/content/pack-context";
+import { useCopy, usePackId } from "@/content/pack-hooks";
 import {
   getLessonDepth,
   getServerSnapshot,
@@ -24,8 +24,6 @@ import type {
   LessonDepth,
   Section,
 } from "@/content/curriculum-types";
-
-const ASK_AI_HEADING = ACTIVE_PACK.config.askAI.heading ?? "Ask AI";
 
 const DEPTH_LABEL: Record<LessonDepth, string> = {
   easy: "Easy",
@@ -97,6 +95,10 @@ export function LessonView({
   concept: Concept;
 }) {
   const { hydrated, conceptMastery, markLessonRead } = useProgress();
+  const pack = usePack();
+  const packId = usePackId();
+  const copy = useCopy();
+  const ASK_AI_HEADING = pack.config.askAI.heading ?? "Ask AI";
   const lesson = concept.lesson;
   const scrollPct = useScrollProgress();
 
@@ -105,8 +107,8 @@ export function LessonView({
   // in sync with the storage event from other tabs and avoid the
   // setState-in-effect anti-pattern.
   const getSnapshot = useCallback(
-    () => getLessonDepth(concept.id),
-    [concept.id]
+    () => getLessonDepth(packId, concept.id),
+    [packId, concept.id]
   );
   const depth = useSyncExternalStore(
     subscribeLessonDepth,
@@ -115,8 +117,8 @@ export function LessonView({
   );
 
   const chooseDepth = useCallback(
-    (next: LessonDepth) => setLessonDepth(concept.id, next),
-    [concept.id]
+    (next: LessonDepth) => setLessonDepth(packId, concept.id, next),
+    [packId, concept.id]
   );
 
   useEffect(() => {
@@ -124,7 +126,11 @@ export function LessonView({
   }, [concept.id, lesson, markLessonRead]);
 
   const m = hydrated ? conceptMastery(concept.id) : 0;
-  const { prev, next } = getAdjacentConcepts(section.id, concept.id);
+  const { prev, next } = getAdjacentConceptsFrom(
+    pack.curriculum,
+    section.id,
+    concept.id
+  );
 
   if (!lesson) {
     return (
@@ -251,7 +257,7 @@ export function LessonView({
 
           <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-dashed border-(--border) pt-4">
             <Link
-              href={`/section/${section.id}`}
+              href={`/${packId}/section/${section.id}`}
               className={cn(
                 buttonVariants({ variant: "ghost", size: "sm" }),
                 "no-underline"
@@ -261,7 +267,7 @@ export function LessonView({
             </Link>
             {concept.quiz ? (
               <Link
-                href={`/concept/${section.id}/${concept.id}/quiz`}
+                href={`/${packId}/concept/${section.id}/${concept.id}/quiz`}
                 className={cn(
                   buttonVariants({ variant: "default", size: "sm" }),
                   "ml-auto no-underline"
@@ -283,7 +289,7 @@ export function LessonView({
             >
               {prev ? (
                 <Link
-                  href={`/concept/${prev.section.id}/${prev.concept.id}`}
+                  href={`/${packId}/concept/${prev.section.id}/${prev.concept.id}`}
                   className="flex-1 rounded-md border border-(--border) bg-(--panel-2) p-3 text-sm no-underline shadow-sm transition-colors hover:border-(--accent)"
                 >
                   <span className="block text-[11px] uppercase tracking-wide text-(--muted)">
@@ -296,7 +302,7 @@ export function LessonView({
               ) : null}
               {next ? (
                 <Link
-                  href={`/concept/${next.section.id}/${next.concept.id}`}
+                  href={`/${packId}/concept/${next.section.id}/${next.concept.id}`}
                   className="flex-1 rounded-md border border-(--border) bg-(--panel-2) p-3 text-right text-sm no-underline shadow-sm transition-colors hover:border-(--accent)"
                 >
                   <span className="block text-[11px] uppercase tracking-wide text-(--muted)">

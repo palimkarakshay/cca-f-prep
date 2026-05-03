@@ -1,18 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { CURRICULUM } from "@/content/curriculum";
 import { useProgress } from "@/hooks/useProgress";
 import { MasteryMeter } from "@/components/primitives/MasteryMeter";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import { copy } from "@/lib/site-config";
+import { useCopy, usePackId } from "@/content/pack-hooks";
+import { usePack } from "@/content/pack-context";
 import { countsAsMastered } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 
 export function SectionList() {
   const { progress, hydrated, conceptMastery, sectionUnlocked, sectionComplete } =
     useProgress();
+  const pack = usePack();
+  const packId = usePackId();
+  const copy = useCopy();
+  const CURRICULUM = pack.curriculum;
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
@@ -42,7 +46,7 @@ export function SectionList() {
                 {String(section.n).padStart(2, "0")}.
               </span>
               <Link
-                href={`/section/${section.id}`}
+                href={`/${packId}/section/${section.id}`}
                 className="text-base font-semibold text-(--ink) no-underline hover:underline"
               >
                 {section.title}
@@ -118,7 +122,7 @@ export function SectionList() {
                 return (
                   <li key={c.id}>
                     <Link
-                      href={`/concept/${section.id}/${c.id}`}
+                      href={`/${packId}/concept/${section.id}/${c.id}`}
                       className="flex items-center gap-3 rounded-md border border-transparent px-2 py-2 no-underline hover:border-(--border) hover:bg-(--panel-2)"
                     >
                       {inner}
@@ -151,7 +155,7 @@ export function SectionList() {
 
             <div className="mt-auto flex flex-wrap gap-2 border-t border-dashed border-(--border) pt-3">
               <Link
-                href={`/section/${section.id}`}
+                href={`/${packId}/section/${section.id}`}
                 className={cn(
                   buttonVariants({ variant: "secondary", size: "sm" }),
                   "no-underline"
@@ -161,7 +165,7 @@ export function SectionList() {
               </Link>
               {section.sectionTest && unlocked ? (
                 <Link
-                  href={`/section/${section.id}/test`}
+                  href={`/${packId}/section/${section.id}/test`}
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "sm" }),
                     "no-underline"

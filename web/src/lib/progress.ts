@@ -22,10 +22,10 @@ export function newProgress(): Progress {
   };
 }
 
-export function loadProgress(): Progress {
+export function loadProgressFor(storageKey: string): Progress {
   if (typeof window === "undefined") return newProgress();
   try {
-    const raw = window.localStorage.getItem(PROGRESS_STORAGE_KEY);
+    const raw = window.localStorage.getItem(storageKey);
     if (!raw) return newProgress();
     const obj = JSON.parse(raw) as Progress;
     if (!obj || obj.schemaVersion !== 1) return newProgress();
@@ -39,13 +39,21 @@ export function loadProgress(): Progress {
   }
 }
 
-export function saveProgress(p: Progress): void {
+export function saveProgressFor(storageKey: string, p: Progress): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(p));
+    window.localStorage.setItem(storageKey, JSON.stringify(p));
   } catch {
     /* quota / private mode — silently drop */
   }
+}
+
+/** Back-compat: env-var-default-pack scoped wrappers. */
+export function loadProgress(): Progress {
+  return loadProgressFor(PROGRESS_STORAGE_KEY);
+}
+export function saveProgress(p: Progress): void {
+  saveProgressFor(PROGRESS_STORAGE_KEY, p);
 }
 
 export function ensureSection(p: Progress, id: string): SectionProgress {

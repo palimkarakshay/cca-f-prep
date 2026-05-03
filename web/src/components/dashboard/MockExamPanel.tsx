@@ -1,16 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { CURRICULUM } from "@/content/curriculum";
 import { useProgress } from "@/hooks/useProgress";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import { copy } from "@/lib/site-config";
+import { useCopy, usePackId } from "@/content/pack-hooks";
+import { usePack } from "@/content/pack-context";
 import { cn } from "@/lib/utils";
 
 export function MockExamPanel() {
   const { progress, hydrated } = useProgress();
-  const mocks = CURRICULUM.mockExams ?? [];
+  const pack = usePack();
+  const packId = usePackId();
+  const copy = useCopy();
+  const mocks = pack.curriculum.mockExams ?? [];
   if (mocks.length === 0) return null;
 
   return (
@@ -80,7 +83,7 @@ export function MockExamPanel() {
                 ) : null}
                 <div className="mt-auto flex flex-wrap gap-2 pt-2">
                   <Link
-                    href={`/mock/${mock.id}`}
+                    href={`/${packId}/mock/${mock.id}`}
                     className={cn(
                       buttonVariants({
                         variant: inProgress ? "default" : "secondary",
@@ -93,7 +96,7 @@ export function MockExamPanel() {
                   </Link>
                   {last ? (
                     <Link
-                      href={`/mock/${mock.id}/result`}
+                      href={`/${packId}/mock/${mock.id}/result`}
                       className={cn(
                         buttonVariants({ variant: "ghost", size: "sm" }),
                         "no-underline"

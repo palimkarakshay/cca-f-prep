@@ -1,15 +1,17 @@
 "use client";
 
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 import {
   ensureConcept,
   ensureMock,
   ensureSection,
   isSectionPassed,
+  isUnderwhelm,
   masteryFromScore,
   unlockNextSection,
 } from "@/lib/progress";
-import { progressStore } from "@/lib/progress-store";
+import { getProgressStore } from "@/lib/progress-store";
+import { usePackId } from "@/content/pack-hooks";
 import type {
   CurrentAttempt,
   Mastery,
@@ -17,6 +19,9 @@ import type {
 } from "@/lib/progress-types";
 
 export function useProgress() {
+  const packId = usePackId();
+  const progressStore = useMemo(() => getProgressStore(packId), [packId]);
+
   const progress = useSyncExternalStore(
     progressStore.subscribe,
     progressStore.get,
@@ -24,13 +29,16 @@ export function useProgress() {
   );
   const hydrated = typeof window !== "undefined";
 
-  const markLessonRead = useCallback((conceptId: string) => {
-    progressStore.mutate((p) => {
-      const c = ensureConcept(p, conceptId);
-      c.lessonRead = true;
-      if (c.mastery < 1) c.mastery = 1;
-    });
-  }, []);
+  const markLessonRead = useCallback(
+    (conceptId: string) => {
+      progressStore.mutate((p) => {
+        const c = ensureConcept(p, conceptId);
+        c.lessonRead = true;
+        if (c.mastery < 1) c.mastery = 1;
+      });
+    },
+    [progressStore]
+  );
 
   const recordQuizAttempt = useCallback(
     (conceptId: string, attempt: QuizAttempt) => {
@@ -40,10 +48,10 @@ export function useProgress() {
         c.currentAttempt = null;
         const m = masteryFromScore(attempt.score, attempt.total);
         if (m > c.mastery) c.mastery = m;
-        else if (m === 2 && c.mastery > 1) c.mastery = 2;
+        else if (isUnderwhelm(m) && c.mastery > 1) c.mastery = m;
       });
     },
-    []
+    [progressStore]
   );
 
   const recordSectionTestAttempt = useCallback(
@@ -58,7 +66,7 @@ export function useProgress() {
         }
       });
     },
-    []
+    [progressStore]
   );
 
   const recordMockAttempt = useCallback(
@@ -69,7 +77,7 @@ export function useProgress() {
         m.currentAttempt = null;
       });
     },
-    []
+    [progressStore]
   );
 
   const setConceptCurrentAttempt = useCallback(
@@ -79,7 +87,7 @@ export function useProgress() {
         c.currentAttempt = attempt;
       });
     },
-    []
+    [progressStore]
   );
 
   const setSectionCurrentAttempt = useCallback(
@@ -89,7 +97,7 @@ export function useProgress() {
         s.currentTestAttempt = attempt;
       });
     },
-    []
+    [progressStore]
   );
 
   const setMockCurrentAttempt = useCallback(
@@ -99,7 +107,7 @@ export function useProgress() {
         m.currentAttempt = attempt;
       });
     },
-    []
+    [progressStore]
   );
 
   const conceptMastery = useCallback(

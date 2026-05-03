@@ -2,14 +2,16 @@
 
 import { useMemo } from "react";
 import { Flame, Target, BookOpenCheck, Trophy } from "lucide-react";
-import { CURRICULUM } from "@/content/curriculum";
 import { useProgress } from "@/hooks/useProgress";
 import { computeStreak } from "@/lib/streak";
-import { copy } from "@/lib/site-config";
+import { useCopy } from "@/content/pack-hooks";
+import { usePack } from "@/content/pack-context";
 import { countsAsMastered } from "@/lib/progress";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
+import type { Curriculum } from "@/content/curriculum-types";
+import type { PackCopy } from "@/content/pack-types";
 
 interface Stat {
   label: string;
@@ -18,19 +20,23 @@ interface Stat {
   Icon: LucideIcon;
 }
 
-function buildStats(progress: ReturnType<typeof useProgress>["progress"]): Stat[] {
-  const allConcepts = CURRICULUM.sections.flatMap((s) => s.concepts);
+function buildStats(
+  progress: ReturnType<typeof useProgress>["progress"],
+  curriculum: Curriculum,
+  copy: Required<PackCopy>
+): Stat[] {
+  const allConcepts = curriculum.sections.flatMap((s) => s.concepts);
   const totalConcepts = allConcepts.length;
   const mastered = allConcepts.filter((c) =>
     countsAsMastered(progress.concept[c.id]?.mastery ?? 0)
   ).length;
 
-  const totalSections = CURRICULUM.sections.length;
-  const completeSections = CURRICULUM.sections.filter(
+  const totalSections = curriculum.sections.length;
+  const completeSections = curriculum.sections.filter(
     (s) => progress.section[s.id]?.complete
   ).length;
 
-  const mocks = CURRICULUM.mockExams ?? [];
+  const mocks = curriculum.mockExams ?? [];
   let bestMockPct = 0;
   for (const m of mocks) {
     const attempts = progress.mock[m.id]?.attempts ?? [];
@@ -81,7 +87,12 @@ function buildStats(progress: ReturnType<typeof useProgress>["progress"]): Stat[
 
 export function StatsPanel({ className }: { className?: string }) {
   const { progress, hydrated } = useProgress();
-  const stats = useMemo(() => buildStats(progress), [progress]);
+  const pack = usePack();
+  const copy = useCopy();
+  const stats = useMemo(
+    () => buildStats(progress, pack.curriculum, copy),
+    [progress, pack, copy]
+  );
 
   return (
     <Card

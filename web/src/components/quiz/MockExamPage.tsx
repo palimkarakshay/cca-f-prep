@@ -4,13 +4,14 @@ import { useCallback } from "react";
 import { useProgress } from "@/hooks/useProgress";
 import { QuizRunner } from "./QuizRunner";
 import { MockResult } from "./MockResult";
-import { copy } from "@/lib/site-config";
+import { useCopy, usePackId } from "@/content/pack-hooks";
 import type { MockExam } from "@/content/curriculum-types";
 import type { CurrentAttempt, QuizAttempt } from "@/lib/progress-types";
 
 export function MockExamPage({ mock }: { mock: MockExam }) {
   const { progress, hydrated, recordMockAttempt, setMockCurrentAttempt } =
     useProgress();
+  const packId = usePackId();
 
   const onCheckpoint = useCallback(
     (attempt: CurrentAttempt | null) => {
@@ -40,7 +41,7 @@ export function MockExamPage({ mock }: { mock: MockExam }) {
       resumeFrom={resume}
       onCheckpoint={onCheckpoint}
       onComplete={onComplete}
-      exitHref="/"
+      exitHref={`/${packId}`}
       exitLabel="Exit to dashboard"
     />
   );
@@ -48,6 +49,7 @@ export function MockExamPage({ mock }: { mock: MockExam }) {
 
 export function MockResultPage({ mock }: { mock: MockExam }) {
   const { progress, hydrated } = useProgress();
+  const copy = useCopy();
   if (!hydrated) return <p className="text-sm text-(--muted)">Loading…</p>;
   const last = progress.mock[mock.id]?.attempts.slice(-1)[0] ?? null;
   if (!last) {

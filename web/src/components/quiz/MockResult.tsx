@@ -3,7 +3,7 @@
 import type { MockExam } from "@/content/curriculum-types";
 import type { QuizAttempt } from "@/lib/progress-types";
 import { QuizResult } from "./QuizResult";
-import { copy } from "@/lib/site-config";
+import { useCopy, usePackId } from "@/content/pack-hooks";
 
 function bandFor(mock: MockExam, score: number) {
   return mock.scoreBands.find((b) => score >= b.min && score <= b.max) ?? null;
@@ -17,6 +17,8 @@ export function MockResult({
   attempt: QuizAttempt;
 }) {
   const band = bandFor(mock, attempt.score);
+  const packId = usePackId();
+  const copy = useCopy();
   return (
     <div>
       {band ? (
@@ -35,9 +37,9 @@ export function MockResult({
         questions={mock.questions}
         attempt={attempt}
         passPct={mock.passPct}
-        exitHref="/"
+        exitHref={`/${packId}`}
         exitLabel="Back to dashboard"
-        nextHref="/mock"
+        nextHref={`/${packId}/mock`}
         nextLabel={`Browse ${copy.mockExamsHeading.toLowerCase()}`}
       />
     </div>

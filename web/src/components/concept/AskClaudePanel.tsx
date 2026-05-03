@@ -2,33 +2,20 @@
 
 import { useState } from "react";
 import { ExternalLink, Copy } from "lucide-react";
-import { ACTIVE_PACK } from "@/content/active-pack";
+import { usePack } from "@/content/pack-context";
 import { Button } from "@/components/ui/button";
 import type { Lesson } from "@/content/curriculum-types";
 
-const askAI = ACTIVE_PACK.config.askAI;
-const HEADING = askAI.heading ?? "Ask AI";
-const DESCRIPTION =
-  askAI.description ??
-  "Build a prompt with this lesson + your question, copy it, and open the chat in a new tab.";
-// "Ask Claude" → "Open in Claude"; "Ask AI" → "Open in chat".
-const OPEN_LABEL = (() => {
-  const after = HEADING.replace(/^Ask\s+/i, "").trim();
-  return `Open in ${after || "chat"}`;
-})();
-
-// Most chat hosts read ?q=<prompt> to pre-fill the chat input. Cap the
-// inline prompt to keep the URL under common proxy/browser limits
-// (~8 KB by default); the full prompt still lands in the clipboard
-// when truncation kicks in. Packs may override via askAI.maxPromptChars.
-const MAX_INLINE_PROMPT_CHARS = askAI.maxPromptChars ?? 6000;
-
-function appendPromptToUrl(baseUrl: string, prompt: string): string {
+function appendPromptToUrl(
+  baseUrl: string,
+  prompt: string,
+  maxInline: number
+): string {
   try {
     const url = new URL(baseUrl);
     const trimmed =
-      prompt.length > MAX_INLINE_PROMPT_CHARS
-        ? prompt.slice(0, MAX_INLINE_PROMPT_CHARS) +
+      prompt.length > maxInline
+        ? prompt.slice(0, maxInline) +
           "\n\n[Prompt truncated for URL — paste from clipboard for full context.]"
         : prompt;
     url.searchParams.set("q", trimmed);
@@ -73,6 +60,15 @@ export function AskClaudePanel({
 }) {
   const [question, setQuestion] = useState("");
   const [status, setStatus] = useState<string | null>(null);
+  const pack = usePack();
+  const askAI = pack.config.askAI;
+  const HEADING = askAI.heading ?? "Ask AI";
+  const DESCRIPTION =
+    askAI.description ??
+    "Build a prompt with this lesson + your question, copy it, and open the chat in a new tab.";
+  const after = HEADING.replace(/^Ask\s+/i, "").trim();
+  const OPEN_LABEL = `Open in ${after || "chat"}`;
+  const MAX_INLINE_PROMPT_CHARS = askAI.maxPromptChars ?? 6000;
 
   async function copyAndOpen() {
     const prompt = buildPrompt({ conceptCode, conceptTitle, question, lesson });
@@ -84,7 +80,7 @@ export function AskClaudePanel({
       // Clipboard may be blocked; we still open the chat with the prompt in the URL.
     }
     const base = askAI.projectUrl || askAI.fallbackUrl;
-    const url = appendPromptToUrl(base, prompt);
+    const url = appendPromptToUrl(base, prompt, MAX_INLINE_PROMPT_CHARS);
     setStatus(
       copied
         ? "Prompt copied and pre-filled in the chat that just opened."
