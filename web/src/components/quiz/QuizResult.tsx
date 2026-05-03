@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import type { Question, OptionLetter } from "@/content/curriculum-types";
 import type { QuizAttempt } from "@/lib/progress-types";
 import { buttonVariants } from "@/components/ui/button";
@@ -35,11 +36,23 @@ export function QuizResult({
 }) {
   const pct = attempt.total > 0 ? attempt.score / attempt.total : 0;
   const passed = pct >= passPct;
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  // After submit unmounts the runner, the previously-focused Submit button
+  // is gone — move focus to the result heading so screen readers re-anchor
+  // and keyboard users land at the top of the new view.
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, []);
 
   return (
     <article>
       <header className="mb-3">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-(--ink)">
+        <h1
+          ref={headingRef}
+          tabIndex={-1}
+          className="font-[family-name:var(--font-display)] text-2xl font-semibold text-(--ink) focus:outline-none"
+        >
           {title}
         </h1>
       </header>
