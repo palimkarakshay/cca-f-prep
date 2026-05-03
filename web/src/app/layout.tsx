@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { SiteChrome } from "@/components/layout/SiteChrome";
 import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
 
@@ -76,7 +77,7 @@ export default function RootLayout({
         <a href="#main" className="skip-link">
           Skip to content
         </a>
-        {children}
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );
