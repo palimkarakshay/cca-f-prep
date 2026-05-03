@@ -80,9 +80,16 @@ test.describe("section tabs", () => {
     await page.getByRole("tab", { name: /Games/i }).click();
     const heading = page.getByRole("heading", { name: /Mini-games/i });
     await expect(heading).toBeVisible();
-    // PR2 ships all 6 tiles disabled (Coming soon). PR3 / PR4 flip
-    // Time Trivia + Flashcard Battle to active links.
-    await expect(page.getByText("Coming soon")).toHaveCount(6);
+    // PR3 flipped Time Trivia to "live"; the remaining 5 tiles stay
+    // "Coming soon" until PR4+ flips Flashcard Battle and friends.
+    await expect(page.getByText("Coming soon")).toHaveCount(5);
+    // Time Trivia tile is now a real link.
+    const ttLink = page.getByRole("link", { name: /Time Trivia/i });
+    await expect(ttLink).toBeVisible();
+    await expect(ttLink).toHaveAttribute(
+      "href",
+      /\/cca-f-prep\/section\/s1-claude-101\/games\/time-trivia$/
+    );
   });
 
   test("Flashcards tab flips a card on click and reads the correct side", async ({

@@ -46,6 +46,10 @@ export function progressStorageKeyFor(pack: ContentPack): string {
   return `${pack.config.id}:progress:v1`;
 }
 
+export function gamesStorageKeyFor(pack: ContentPack): string {
+  return `${pack.config.id}:games:v1`;
+}
+
 export function themeStorageKeyFor(pack: ContentPack): string {
   return `${pack.config.id}:theme`;
 }

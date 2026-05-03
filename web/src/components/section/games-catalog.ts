@@ -44,7 +44,7 @@ export const GAMES_CATALOG: readonly MiniGameMeta[] = [
     title: "Time Trivia",
     blurb:
       "10 questions, 15 seconds each. Cumulative score with streak bonus. Reinforces speed under exam pressure.",
-    status: "soon",
+    status: "live",
     category: "Exam",
     icon: "timer",
   },

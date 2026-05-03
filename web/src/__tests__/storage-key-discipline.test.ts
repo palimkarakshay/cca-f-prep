@@ -36,6 +36,7 @@ const ALLOWED_FILES = new Set(
     "lib/progress-store.ts",
     "lib/progress-types.ts", // exports PROGRESS_STORAGE_KEY constant
     "lib/games-store.ts",
+    "lib/games-types.ts", // owns gamesStorageKey() factory + emits the suffix
     "lib/lesson-depth.ts",
   ].map((p) => p.replace(/\\/g, "/"))
 );

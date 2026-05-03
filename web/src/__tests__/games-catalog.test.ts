@@ -36,10 +36,11 @@ describe("GAMES_CATALOG", () => {
     }
   });
 
-  it("every entry is currently 'soon' (PR3/PR4 flip Time Trivia + Flashcard Battle)", () => {
-    for (const g of GAMES_CATALOG) {
-      expect(g.status, `${g.id} status`).toBe("soon");
-    }
+  it("Time Trivia is live (PR3 ships it); the rest are still 'soon' until PR4+", () => {
+    const live = GAMES_CATALOG.filter((g) => g.status === "live").map((g) => g.id);
+    const soon = GAMES_CATALOG.filter((g) => g.status === "soon").map((g) => g.id);
+    expect(live).toEqual(["time-trivia"]);
+    expect(soon).toContain("flashcard-battle"); // flips in PR4
   });
 });
 
