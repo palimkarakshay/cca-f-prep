@@ -28,7 +28,10 @@ export const ALL_PACK_IDS: string[] = Object.keys(PACK_REGISTRY);
 export const ALL_PACKS: ContentPack[] = Object.values(PACK_REGISTRY);
 
 export function getPack(id: string): ContentPack | null {
-  return PACK_REGISTRY[id] ?? null;
+  // Object.hasOwn guards against prototype-key leakage — route params
+  // like "toString" or "__proto__" must return null, not Object.prototype
+  // members. Same fix as SECTION_META / DOMAIN_MAP lookups.
+  return Object.hasOwn(PACK_REGISTRY, id) ? PACK_REGISTRY[id] : null;
 }
 
 /**

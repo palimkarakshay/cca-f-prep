@@ -10,22 +10,30 @@ async function readManifest(request: { get: (url: string) => Promise<{ json: () 
 }
 
 test.describe("smoke", () => {
-  test("home renders without console errors", async ({ page, request }) => {
+  test("picker at / renders without console errors", async ({ page }) => {
     const errors: ConsoleMessage[] = [];
     page.on("console", (msg) => {
       if (msg.type() === "error") errors.push(msg);
     });
 
-    const { name } = await readManifest(request);
-
     await page.goto("/");
-    await expect(page.getByRole("heading", { name })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /What do you want to learn/i })
+    ).toBeVisible();
 
     expect(errors, errors.map((e) => e.text()).join("\n")).toEqual([]);
   });
 
-  test("primary nav links resolve (no 4xx)", async ({ page, request }) => {
+  test("primary nav links from any pack route resolve (no 4xx)", async ({
+    page,
+    request,
+  }) => {
+    // Land on a pack via the picker so the chrome nav is pack-prefixed.
     await page.goto("/");
+    const firstPackLink = page.locator("a[href^='/']:not([href='/'])").first();
+    await firstPackLink.click();
+    await expect(page).toHaveURL(/^.*\/[^/]+$/);
+
     const links = page.locator("nav a[href^='/']");
     const count = await links.count();
     const seen = new Set<string>();
@@ -38,14 +46,21 @@ test.describe("smoke", () => {
     }
   });
 
-  test("first section card links to its detail page", async ({ page }) => {
+  test("from a pack, first section card links to its detail page", async ({
+    page,
+  }) => {
     await page.goto("/");
+    // Enter the first pack
+    await page.locator("a[href^='/']:not([href='/'])").first().click();
+    // Click the first section link inside that pack
     const firstSectionLink = page
-      .locator("a[href^='/section/']")
+      .locator("a[href*='/section/']")
       .first();
     await firstSectionLink.click();
     await expect(page).toHaveURL(/\/section\//);
-    await expect(page.getByRole("navigation", { name: /Breadcrumb/i })).toBeVisible();
+    await expect(
+      page.getByRole("navigation", { name: /Breadcrumb/i })
+    ).toBeVisible();
   });
 
   test("manifest reflects the active pack", async ({ request }) => {
