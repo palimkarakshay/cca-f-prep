@@ -1,12 +1,26 @@
+import type { Metadata } from "next";
+import { RecommendationBanner } from "@/components/dashboard/RecommendationBanner";
+import { SectionList } from "@/components/dashboard/SectionList";
+import { MockExamPanel } from "@/components/dashboard/MockExamPanel";
 import { siteConfig } from "@/lib/site-config";
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: siteConfig.description,
+};
+
+export default function HomePage() {
   return (
-    <div className="py-2">
-      <h1 className="mb-2 font-[family-name:var(--font-display)] text-2xl font-semibold">
-        {siteConfig.name}
-      </h1>
-      <p className="text-(--muted)">{siteConfig.tagline}</p>
+    <div className="flex flex-col gap-6 py-2">
+      <header>
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-(--ink)">
+          {siteConfig.name}
+        </h1>
+        <p className="text-sm text-(--muted)">{siteConfig.tagline}</p>
+      </header>
+      <RecommendationBanner />
+      <SectionList />
+      <MockExamPanel />
     </div>
   );
 }
