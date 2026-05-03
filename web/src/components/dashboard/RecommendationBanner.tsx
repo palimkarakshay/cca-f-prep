@@ -8,6 +8,7 @@ import { recommend } from "@/lib/recommendation";
 import { computeStreak } from "@/lib/streak";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/primitives/Skeleton";
 import { cn } from "@/lib/utils";
 
 const KIND_LABEL: Record<string, string> = {
@@ -37,8 +38,12 @@ export function RecommendationBanner() {
         tone="accent"
         className="bg-(--panel-2) p-6 md:p-8"
         aria-busy="true"
+        aria-label="Loading recommendation"
       >
-        <p className="text-sm text-(--muted)">Loading recommendation…</p>
+        <Skeleton className="h-3 w-32" />
+        <Skeleton className="mt-3 h-7 w-3/4" />
+        <Skeleton className="mt-2 h-4 w-2/3" />
+        <Skeleton className="mt-5 h-12 w-32" />
       </Card>
     );
   }
