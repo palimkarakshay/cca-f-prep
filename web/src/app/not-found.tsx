@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { Container } from "@/components/ui/Container";
 
 export default function NotFound() {
   return (
-    <div className="py-12 text-center">
+    <Container width="prose" className="py-12 text-center">
       <p className="font-mono text-xs text-(--muted)">404</p>
       <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold text-(--ink)">
         Page not found
@@ -16,6 +17,6 @@ export default function NotFound() {
       >
         ← Back to dashboard
       </Link>
-    </div>
+    </Container>
   );
 }

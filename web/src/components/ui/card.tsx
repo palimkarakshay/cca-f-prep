@@ -1,13 +1,31 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  function Card({ className, ...props }, ref) {
+export type CardTone = "default" | "accent" | "good" | "warn" | "bad";
+
+const toneClasses: Record<CardTone, string> = {
+  default: "border-(--border)",
+  accent: "border-(--border) border-l-4 border-l-(--accent)",
+  good: "border-(--border) border-l-4 border-l-(--good)",
+  warn: "border-(--border) border-l-4 border-l-(--warn)",
+  bad: "border-(--border) border-l-4 border-l-(--bad)",
+};
+
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  tone?: CardTone;
+  /** Drop the default subtle shadow when nested inside another elevated surface. */
+  flat?: boolean;
+}
+
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  function Card({ tone = "default", flat = false, className, ...props }, ref) {
     return (
       <div
         ref={ref}
         className={cn(
-          "rounded-lg border border-(--border) bg-(--panel) p-5",
+          "rounded-lg border bg-(--panel) p-5",
+          toneClasses[tone],
+          !flat && "shadow-sm",
           className
         )}
         {...props}

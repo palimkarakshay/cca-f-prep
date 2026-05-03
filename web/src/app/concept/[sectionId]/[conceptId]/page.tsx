@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { CURRICULUM } from "@/content/curriculum";
 import { getConcept } from "@/content/curriculum-loader";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
+import { Container } from "@/components/ui/Container";
 import { LessonView } from "@/components/concept/LessonView";
 
 type Params = { sectionId: string; conceptId: string };
@@ -38,7 +39,7 @@ export default async function ConceptPage({
   const { section, concept } = found;
 
   return (
-    <div className="py-2">
+    <Container width="prose" className="py-2">
       <Breadcrumbs
         trail={[
           { label: "Dashboard", href: "/" },
@@ -47,6 +48,6 @@ export default async function ConceptPage({
         ]}
       />
       <LessonView section={section} concept={concept} />
-    </div>
+    </Container>
   );
 }

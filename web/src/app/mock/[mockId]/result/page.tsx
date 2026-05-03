@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getMockExam, getMockExams } from "@/content/curriculum-loader";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
+import { Container } from "@/components/ui/Container";
 import { MockResultPage } from "@/components/quiz/MockExamPage";
 
 type Params = { mockId: string };
@@ -31,7 +32,7 @@ export default async function MockResultRoute({
   if (!mock) notFound();
 
   return (
-    <div className="py-2">
+    <Container width="narrow" className="py-2">
       <Breadcrumbs
         trail={[
           { label: "Dashboard", href: "/" },
@@ -41,6 +42,6 @@ export default async function MockResultRoute({
         ]}
       />
       <MockResultPage mock={mock} />
-    </div>
+    </Container>
   );
 }
