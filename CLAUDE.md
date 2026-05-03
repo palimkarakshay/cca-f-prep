@@ -118,6 +118,53 @@ gate — don't merge `codex-blockers` without addressing findings.
   branch that contains the historical changes — codex will review the
   PR's full diff.
 
+## LLM monitor (self-awareness feed)
+
+This repo runs an `llm-monitor` pipeline that scrapes blogs / GitHub /
+HN / Reddit / Stack Overflow / provider statuspages for current bugs,
+regressions, outages, and best-practice updates affecting the Claude
+SDK, Claude Code, MCP, Anthropic / OpenAI / Gemini APIs, and GitHub
+Actions. The classifier (Claude Opus → Gemini → OpenAI ladder)
+rewrites two auto-maintained files in `docs/llm-monitor/`:
+
+- [`docs/llm-monitor/KNOWN_ISSUES.md`](docs/llm-monitor/KNOWN_ISSUES.md)
+  — last 14 days of confirmed bugs / breaking changes (severity ≥ 4).
+- [`docs/llm-monitor/RECOMMENDATIONS.md`](docs/llm-monitor/RECOMMENDATIONS.md)
+  — running list of "the bot fleet should do X" suggestions.
+
+Adapted from `palimkarakshay/lumivara-site` — only the core pipeline
+required for code review, deep research, and automation
+self-awareness on this repo. Newsletter / dual-lane / Vercel-specific
+machinery from upstream is intentionally not ported.
+
+**Read these at the start of any session that involves code review,
+deep research, or bot-fleet automation.** The bullets are short by
+design — title + action_hint — so they fit in a prompt's "Operating
+context" without blowing the budget. If a finding lines up with the
+PR / issue under review, mention the slug in the rationale comment so
+the operator can correlate.
+
+- **Cadence:** sweep tier (`.github/workflows/llm-monitor.yml`) every
+  2h runs all 6 collectors and rewrites digest + KNOWN_ISSUES +
+  RECOMMENDATIONS. Watch tier (`.github/workflows/llm-monitor-watch.yml`)
+  every 15 min hits provider statuspages only and re-files
+  KNOWN_ISSUES on outage signals.
+- **Manual trigger:** `gh workflow run llm-monitor.yml -f mode=sweep -f dry_run=true`
+  exercises the pipeline without burning analyzer quota.
+- **Auto-issues:** severity-≥5 outages and severity-≥4 bugs with a
+  clear `action_hint` are filed automatically with the
+  `auto-discovered` + `infra-allowed` + `status/needs-triage` labels
+  (the workflow self-bootstraps these labels on first run).
+- **Architecture:** see [`scripts/llm-monitor/README.md`](scripts/llm-monitor/README.md)
+  — collectors (`scripts/llm-monitor/collectors/`), `analyzer.py`,
+  `feedback.py`, sources config in `scripts/llm-monitor/sources.json`.
+- **Secrets:** `ANTHROPIC_API_KEY` (preferred analyzer);
+  `GEMINI_API_KEY` and `OPENAI_API_KEY` already wired for codex-review
+  serve as analyzer fallbacks. `REDDIT_CLIENT_ID` /
+  `REDDIT_CLIENT_SECRET` upgrade Reddit collection from public-JSON to
+  authed; `STACKEXCHANGE_API_KEY` upgrades Stack Overflow quota. All
+  optional — pipeline degrades gracefully when keys are missing.
+
 ## Coherency review log
 
 - 2026-05-02 — Audit of committed history. Two findings:

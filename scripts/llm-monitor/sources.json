@@ -1,0 +1,111 @@
+{
+  "_comment": "Source list for llm-monitor. Edit freely; collectors read this at runtime. Keep arrays sorted alphabetically within each section to minimise merge conflicts.",
+  "_models_we_track": [
+    "claude-opus-4-7",
+    "claude-sonnet-4-6",
+    "claude-haiku-4-5",
+    "claude-code",
+    "anthropic-sdk",
+    "anthropic-mcp",
+    "gpt-5.5",
+    "openai-codex",
+    "gemini-2.5-pro",
+    "gemini-2.5-flash"
+  ],
+  "_dev_stack_we_track": [
+    "github-actions"
+  ],
+  "_keywords": [
+    "anthropic",
+    "claude",
+    "claude code",
+    "claude-code",
+    "claude opus",
+    "claude sonnet",
+    "claude haiku",
+    "mcp",
+    "model context protocol",
+    "openai sdk",
+    "gpt-5",
+    "codex",
+    "gemini",
+    "google ai studio",
+    "agent sdk",
+    "tool use"
+  ],
+  "hackernews": {
+    "queries": [
+      "claude code",
+      "anthropic",
+      "claude api",
+      "model context protocol",
+      "mcp server",
+      "agent sdk",
+      "codex cli",
+      "gemini api"
+    ],
+    "lookback_hours": 6,
+    "min_points": 5
+  },
+  "rss": {
+    "feeds": [
+      {"name": "Anthropic News", "url": "https://www.anthropic.com/news/rss.xml"},
+      {"name": "GitHub Changelog", "url": "https://github.blog/changelog/feed/"},
+      {"name": "Google DeepMind", "url": "https://deepmind.google/blog/rss.xml"},
+      {"name": "Hugging Face Blog", "url": "https://huggingface.co/blog/feed.xml"},
+      {"name": "Import AI (Jack Clark)", "url": "https://importai.substack.com/feed"},
+      {"name": "Latent Space", "url": "https://www.latent.space/feed"},
+      {"name": "OpenAI Blog", "url": "https://openai.com/blog/rss.xml"},
+      {"name": "Simon Willison", "url": "https://simonwillison.net/atom/everything/"},
+      {"name": "TLDR AI", "url": "https://tldr.tech/api/rss/ai"}
+    ],
+    "lookback_hours": 6
+  },
+  "reddit": {
+    "subreddits": [
+      "ClaudeAI",
+      "LocalLLaMA",
+      "MachineLearning",
+      "OpenAI",
+      "singularity"
+    ],
+    "lookback_hours": 6,
+    "min_score": 10,
+    "min_comments": 5
+  },
+  "github": {
+    "repos": [
+      "anthropics/anthropic-sdk-python",
+      "anthropics/anthropic-sdk-typescript",
+      "anthropics/claude-code",
+      "googleapis/python-genai",
+      "openai/openai-python"
+    ],
+    "lookback_hours": 6,
+    "include_releases": true,
+    "include_issues": true,
+    "issue_min_reactions": 3
+  },
+  "stackoverflow": {
+    "_comment": "StackExchange API v2.3 questions endpoint. Anonymous read quota (300 req/day per IP) is plenty for our every-2h cadence; STACKEXCHANGE_API_KEY in env upgrades to 10000 req/day if ever needed. Tags must match Stack Overflow's exact tag slugs (kebab-case).",
+    "tags": [
+      "anthropic",
+      "claude",
+      "claude-code",
+      "openai-api"
+    ],
+    "lookback_hours": 12,
+    "min_score": 0
+  },
+  "statuspages": {
+    "_comment": "Provider status pages — load-bearing input for the every-15-min watch lane. All listed pages run on Statuspage.io and expose /api/v2/status.json + /api/v2/incidents/unresolved.json.",
+    "providers": [
+      {"name": "Anthropic", "url": "https://status.anthropic.com"},
+      {"name": "OpenAI", "url": "https://status.openai.com"},
+      {"name": "GitHub", "url": "https://www.githubstatus.com"},
+      {"name": "Cloudflare", "url": "https://www.cloudflarestatus.com"},
+      {"name": "Hugging Face", "url": "https://status.huggingface.co"}
+    ],
+    "lookback_hours": 6
+  }
+}

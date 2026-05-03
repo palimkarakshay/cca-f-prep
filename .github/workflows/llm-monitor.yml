@@ -1,0 +1,137 @@
+name: LLM monitor — sweep (every 2h, full content pipeline)
+
+# Tiered cadence: every 2h runs the full content pipeline (HN / RSS /
+# Reddit / GitHub / StackOverflow / statuspages), refreshes the daily
+# digest, rewrites the KNOWN_ISSUES.md and RECOMMENDATIONS.md auto-
+# sections, and files auto-discovered issues for severity-≥4 bugs
+# with a clear action_hint.
+#
+# The companion fast tier — `.github/workflows/llm-monitor-watch.yml`
+# — runs every 15 min on statuspages only and handles outage
+# detection between sweeps.
+#
+# Cross-references:
+#   - scripts/llm-monitor/README.md       — architecture, source list
+#   - scripts/llm-monitor/run.py          — entrypoint (--mode=sweep)
+#   - scripts/llm-monitor/sources.json    — feeds, subreddits, repos
+#   - .github/workflows/llm-monitor-watch.yml — fast tier (15 min)
+#
+# Adapted from palimkarakshay/lumivara-site (mothership-path /
+# newsletter / dual-lane bits stripped out for this study repo).
+
+on:
+  schedule:
+    - cron: "13 */2 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "sweep | watch (sweep = full pipeline; watch = fast outage-only)"
+        required: false
+        default: "sweep"
+      dry_run:
+        description: "Skip Anthropic API + gh issue create (uses heuristic stub)"
+        required: false
+        default: "false"
+      no_issues:
+        description: "Update digest + KNOWN_ISSUES but don't file GH issues"
+        required: false
+        default: "false"
+      collectors:
+        description: "Comma-separated override (empty = derived from mode)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write   # commit digest + KNOWN_ISSUES
+  issues: write     # file auto-discovered issues
+
+concurrency:
+  group: llm-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Restore the dedupe set + raw archive from the previous run.
+      # If the artifact has aged out (90 days), we accept a one-day
+      # duplicate-digest cost rather than carry a heavier store.
+      - name: Restore dedupe state
+        uses: actions/cache@v4
+        with:
+          path: |
+            scripts/llm-monitor/state/seen.json
+            scripts/llm-monitor/state/raw
+          key: llm-monitor-state-${{ github.run_id }}
+          restore-keys: |
+            llm-monitor-state-
+
+      - name: Ensure auto-discovered labels exist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "auto-discovered" --repo "${{ github.repository }}" \
+            --color "ededed" --description "Auto-discovered by llm-monitor" 2>/dev/null || true
+          gh label create "infra-allowed" --repo "${{ github.repository }}" \
+            --color "5319e7" --description "Carve-out: bot may modify .github/, scripts/" 2>/dev/null || true
+          gh label create "status/needs-triage" --repo "${{ github.repository }}" \
+            --color "fbca04" --description "Awaiting triage" 2>/dev/null || true
+
+      - name: Run llm-monitor
+        env:
+          # Analyzer ladder: Anthropic → Gemini → OpenAI. The realistic
+          # path here is GEMINI_API_KEY / OPENAI_API_KEY since
+          # interactive Claude usage runs on Max / Pro OAuth, not raw
+          # API.
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Mirrors the OPENAI_API_KEY_BACKUP fallback used in
+          # codex-review.yml — the operator stores the key in either
+          # OPENAI_API_KEY or OPENAI_API_KEY_BACKUP depending on quota
+          # state, so always read both.
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY != '' && secrets.OPENAI_API_KEY || secrets.OPENAI_API_KEY_BACKUP }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REPO: ${{ github.repository }}
+          MODE: ${{ github.event.inputs.mode || 'sweep' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          NO_ISSUES: ${{ github.event.inputs.no_issues || 'false' }}
+          COLLECTORS: ${{ github.event.inputs.collectors || '' }}
+        run: |
+          set -euo pipefail
+          ARGS=(--mode "$MODE")
+          if [ "$DRY_RUN" = "true" ]; then ARGS+=(--dry-run); fi
+          if [ "$NO_ISSUES" = "true" ]; then ARGS+=(--no-issues); fi
+          if [ -n "$COLLECTORS" ]; then ARGS+=(--collectors "$COLLECTORS"); fi
+          python3 scripts/llm-monitor/run.py "${ARGS[@]}"
+
+      - name: Commit digest + KNOWN_ISSUES updates
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Stage only the artifacts the pipeline owns. state/ is
+          # gitignored so it never leaks.
+          git add docs/llm-monitor/digests/ \
+                  docs/llm-monitor/KNOWN_ISSUES.md \
+                  docs/llm-monitor/RECOMMENDATIONS.md || true
+
+          if git diff --staged --quiet; then
+            echo "No digest / KNOWN_ISSUES changes to commit."
+            exit 0
+          fi
+
+          DATE="$(date -u +%Y-%m-%d)"
+          git commit -m "llm-monitor: digest ${DATE}" \
+                     -m "Auto-generated by .github/workflows/llm-monitor.yml. Do not hand-edit; edit upstream config in scripts/llm-monitor/sources.json."
+          git push origin HEAD:${{ github.ref_name }}

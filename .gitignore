@@ -141,3 +141,11 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Python bytecode cache (created when llm-monitor scripts are imported).
+__pycache__/
+*.pyc
+
+# llm-monitor state (dedupe set + raw JSONL archive). Restored from
+# actions/cache between CI runs; never committed.
+scripts/llm-monitor/state/
