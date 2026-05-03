@@ -36,6 +36,8 @@ export function MockResult({
         passPct={mock.passPct}
         exitHref="/"
         exitLabel="Back to dashboard"
+        nextHref="/mock"
+        nextLabel="Browse mock exams"
       />
     </div>
   );
