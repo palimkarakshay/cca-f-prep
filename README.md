@@ -26,3 +26,22 @@ Foundations (CCA-F) exam.
 - [ ] Domain 5 notes
 - [ ] Mock exam 1
 - [ ] Mock exam 2
+
+## Platform packages
+
+This repo is also the source-of-truth for content delivered by a learning
+platform. Markdown stays canonical; an importer projects it into a Postgres
+schema for the web app.
+
+- `packages/db/` — Supabase migrations (`@ccafp/db`).
+- `packages/importer/` — markdown → JSON ingester (`@ccafp/importer`).
+
+```sh
+pnpm install
+pnpm test                                 # run all package tests
+pnpm ingest --root . --out import.json    # ingest this repo into JSON
+```
+
+See `packages/importer/README.md` for the expected MCQ / solution markdown
+format (already what this repo uses) and `packages/db/README.md` for the
+schema and free-launch entitlements posture.

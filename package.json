@@ -1,0 +1,19 @@
+{
+  "name": "cca-f-prep",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Generic learning platform — markdown-first content packs, AI-drafted with SME review",
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "ingest": "pnpm --filter @ccafp/importer exec tsx src/index.ts"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

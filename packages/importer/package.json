@@ -1,0 +1,28 @@
+{
+  "name": "@ccafp/importer",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Ingest the markdown study repo into content_pack rows (JSON output).",
+  "bin": {
+    "ccafp-import": "./dist/index.js"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./parser": "./src/parser.ts",
+    "./types": "./src/types.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "cli": "tsx src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.5"
+  }
+}
