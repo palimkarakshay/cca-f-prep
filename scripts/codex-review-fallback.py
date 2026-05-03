@@ -3,41 +3,46 @@
 Run a code-review pass with provider fallback.
 
 The Codex consistency review is the project's single sanity-check before a
-PR merges. When OpenAI is unavailable (no key, 429 quota, transient HTTP
-failure) we still want *some* second-opinion review rather than silently
-shipping unreviewed content, so this helper walks a five-leg ladder:
+PR merges. When the preferred leg is unavailable (no key, 429 quota,
+transient HTTP failure) we still want *some* second-opinion review rather
+than silently shipping unreviewed content, so this helper walks a
+four-leg ladder that prioritises FREE / CHEAP options ahead of paid:
 
-    1.  OpenAI gpt-5.5 / OPENAI_API_KEY         — preferred
-    1b. OpenAI gpt-5.5 / OPENAI_API_KEY_BACKUP  — paid account, used when
-        the primary 429s; keeps the maker-checker boundary on OpenAI
-    2.  Gemini 2.5 Pro                          — try first within Gemini:
-        stronger model, ~50 RPD free tier
-    2b. Gemini 2.5 Flash                        — same key, higher quota
-        (500 RPD); used when Pro 429s
-    3.  GitHub Models (Llama-3.3-70b)           — uses GITHUB_TOKEN; an
-        independent rate-limit pool. Falls through to gpt-4.1-mini on 429.
-    4.  OpenRouter free models                  — DeepSeek R1 (reasoning)
-        first, Qwen3 Coder second on the same key.
-    5.  defer (label PR `review-deferred`)      — last resort
+    1.  GitHub Models (Llama-3.3-70B-Instruct)  — FREE; uses the
+        always-present GITHUB_TOKEN. Falls through to gpt-4.1-mini on 429.
+    2.  Gemini Flash Lite (~$0.10/M input)      — leaderboard-leading
+        faithfulness; falls back to Gemini Pro then Flash on quota.
+    3.  OpenAI gpt-5.5                          — paid quality backstop.
+        Walks OPENAI_API_KEY then OPENAI_API_KEY_BACKUP on 429.
+    4.  OpenRouter free models                  — DeepSeek R1 first,
+        Qwen3 Coder second on the same key.
+    5.  defer (label PR `review-deferred`)      — last resort.
+
+This ordering replaces the historical OpenAI-first cascade so the typical
+PR review consumes \$0 instead of paid OpenAI tokens. Defer/recheck
+behaviour is preserved.
 
 Why these providers and not Claude? The repo's authoring loop already runs
 on Claude, so using Claude here too would defeat the maker-checker
-boundary. OpenAI / Gemini / GitHub Models / OpenRouter are the non-Claude
-options; if all defer, the recheck cron retries once quota resets.
+boundary. GitHub Models / Gemini / OpenAI / OpenRouter are the
+non-Claude options; if all defer, the recheck cron retries once quota
+resets.
 
 Inputs (env):
     PROMPT_FILE             path to a file containing the full review prompt
-    OPENAI_API_KEY          optional; tried first when set
-    OPENAI_API_KEY_BACKUP   optional; tried after OPENAI_API_KEY on
-                            429/error
-    GEMINI_API_KEY          optional; same key drives Pro and Flash
-    OPENAI_MODEL            default: gpt-5.5
-    GEMINI_PRO_MODEL        default: gemini-2.5-pro (tried first)
-    GEMINI_FLASH_MODEL      default: gemini-2.5-flash (tried after Pro 429)
-    GEMINI_MODEL            DEPRECATED back-compat alias for the Pro slot
-    GITHUB_TOKEN            optional; the standard Actions token works
+    GITHUB_TOKEN            optional; the standard Actions token works for
+                            the GitHub Models leg (now leg 1)
     GITHUB_MODELS_PRIMARY   default: meta/Llama-3.3-70B-Instruct
     GITHUB_MODELS_FALLBACK  default: openai/gpt-4.1-mini
+    GEMINI_API_KEY          optional; same key drives Lite, Pro and Flash
+    GEMINI_FLASH_LITE_MODEL default: gemini-2.5-flash-lite (tried first)
+    GEMINI_PRO_MODEL        default: gemini-2.5-pro (tried after Lite 429)
+    GEMINI_FLASH_MODEL      default: gemini-2.5-flash (last Gemini step)
+    GEMINI_MODEL            DEPRECATED back-compat alias for the Pro slot
+    OPENAI_API_KEY          optional; tried after free + cheap options
+    OPENAI_API_KEY_BACKUP   optional; tried after OPENAI_API_KEY on
+                            429/error
+    OPENAI_MODEL            default: gpt-5.5
     OPENROUTER_API_KEY      optional
     OPENROUTER_PRIMARY      default: deepseek/deepseek-r1:free
     OPENROUTER_FALLBACK     default: qwen/qwen3-coder:free
@@ -47,7 +52,7 @@ Inputs (env):
 Outputs:
     Writes the review markdown to /tmp/review.md (or $REVIEW_OUT).
     Prints two lines to stdout (one for the deferred path):
-        ENGINE=<openai|gemini|github|openrouter|deferred>
+        ENGINE=<github|gemini|openai|openrouter|deferred>
         MODEL_USED=<concrete model id, omitted when ENGINE=deferred>
     Exits 0 always (the workflow handles the "deferred" case via labelling).
 
@@ -174,26 +179,36 @@ def _try_gemini_with_model(prompt: str, key: str, model: str
 
 
 def try_gemini(prompt: str) -> tuple[str | None, str, str]:
-    """Walk Gemini Pro then Flash on the same key."""
+    """Walk Gemini Flash Lite -> Pro -> Flash on the same key.
+
+    Flash Lite (~$0.10/M input) leads the commercial faithfulness
+    leaderboard at 3.3% hallucination, so it's the cheapest viable
+    primary. Pro and Flash are paid-tier fallbacks for when Lite 429s.
+    """
     key = (os.environ.get("GEMINI_API_KEY") or "").strip()
     if not key:
         return None, "no_key", ""
 
     legacy = (os.environ.get("GEMINI_MODEL") or "").strip()
+    lite_model = os.environ.get(
+        "GEMINI_FLASH_LITE_MODEL", "gemini-2.5-flash-lite"
+    )
     pro_model = legacy or os.environ.get("GEMINI_PRO_MODEL", "gemini-2.5-pro")
     flash_model = os.environ.get("GEMINI_FLASH_MODEL", "gemini-2.5-flash")
 
     last_status = "no_key"
-    for model in (pro_model, flash_model):
-        if not model:
+    last_model = lite_model
+    seen: set[str] = set()
+    for model in (lite_model, pro_model, flash_model):
+        if not model or model in seen:
             continue
+        seen.add(model)
         review, status = _try_gemini_with_model(prompt, key, model)
         if review:
             return review, status, model
         last_status = status
-        if pro_model == flash_model:
-            break
-    return None, last_status, flash_model or pro_model
+        last_model = model
+    return None, last_status, last_model
 
 
 def _try_openai_compat(url: str, key: str, model: str, prompt: str,
@@ -305,54 +320,58 @@ def main() -> int:
         prompt = f.read()
 
     out_path = os.environ.get("REVIEW_OUT", "/tmp/review.md")
-
-    review, status = try_openai(prompt)
-    if review:
-        with open(out_path, "w") as f:
-            f.write(review)
-        print("ENGINE=openai")
-        print(f"MODEL_USED={os.environ.get('OPENAI_MODEL', 'gpt-5.5')}")
-        return 0
-    openai_status = status
-
     openai_model = os.environ.get("OPENAI_MODEL", "gpt-5.5")
-    review, status, gemini_model_used = try_gemini(prompt)
-    if review:
-        with open(out_path, "w") as f:
-            f.write(
-                f"_Engine: {gemini_model_used} fallback "
-                "(OpenAI unavailable: " + openai_status + ")._\n\n"
-                + review
-            )
-        print("ENGINE=gemini")
-        print(f"MODEL_USED={gemini_model_used}")
-        return 0
-    gemini_status = status
 
-    gemini_label = gemini_model_used or os.environ.get(
-        "GEMINI_FLASH_MODEL", "gemini-2.5-flash"
-    )
-
+    # Leg 1: GitHub Models — FREE (uses GITHUB_TOKEN, always present in
+    # Actions). Llama-3.3-70B-Instruct is plenty for consistency review.
     review, status, gh_model_used = try_github_models(prompt)
     if review:
         with open(out_path, "w") as f:
-            f.write(
-                f"_Engine: GitHub Models / {gh_model_used} fallback "
-                f"(OpenAI: {openai_status}; Gemini: {gemini_status})._"
-                "\n\n" + review
-            )
+            f.write(review)
         print("ENGINE=github")
         print(f"MODEL_USED={gh_model_used}")
         return 0
     gh_status = status
 
+    # Leg 2: Gemini — Flash Lite first (~$0.10/M, leaderboard-leading
+    # faithfulness), then Pro then Flash on quota.
+    review, status, gemini_model_used = try_gemini(prompt)
+    if review:
+        with open(out_path, "w") as f:
+            f.write(
+                f"_Engine: {gemini_model_used} fallback "
+                f"(GitHub Models unavailable: {gh_status})._\n\n" + review
+            )
+        print("ENGINE=gemini")
+        print(f"MODEL_USED={gemini_model_used}")
+        return 0
+    gemini_status = status
+    gemini_label = gemini_model_used or os.environ.get(
+        "GEMINI_FLASH_LITE_MODEL", "gemini-2.5-flash-lite"
+    )
+
+    # Leg 3: OpenAI — paid quality backstop, tried after free/cheap legs.
+    review, status = try_openai(prompt)
+    if review:
+        with open(out_path, "w") as f:
+            f.write(
+                f"_Engine: OpenAI / {openai_model} fallback "
+                f"(GitHub Models: {gh_status}; Gemini: {gemini_status})._"
+                "\n\n" + review
+            )
+        print("ENGINE=openai")
+        print(f"MODEL_USED={openai_model}")
+        return 0
+    openai_status = status
+
+    # Leg 4: OpenRouter — last-resort free models.
     review, status, or_model_used = try_openrouter(prompt)
     if review:
         with open(out_path, "w") as f:
             f.write(
                 f"_Engine: OpenRouter / {or_model_used} fallback "
-                f"(OpenAI: {openai_status}; Gemini: {gemini_status}; "
-                f"GitHub Models: {gh_status})._\n\n" + review
+                f"(GitHub Models: {gh_status}; Gemini: {gemini_status}; "
+                f"OpenAI: {openai_status})._\n\n" + review
             )
         print("ENGINE=openrouter")
         print(f"MODEL_USED={or_model_used}")
@@ -369,11 +388,11 @@ def main() -> int:
         f.write(
             "## Code review unavailable\n\n"
             f"All review legs were unavailable this pass:\n\n"
-            f"- OpenAI ({openai_model}) status: `{openai_status}`\n"
-            f"- Gemini status: `{gemini_status}` "
-            f"(last model tried: `{gemini_label}`)\n"
             f"- GitHub Models status: `{gh_status}` "
             f"(last model tried: `{gh_label}`)\n"
+            f"- Gemini status: `{gemini_status}` "
+            f"(last model tried: `{gemini_label}`)\n"
+            f"- OpenAI ({openai_model}) status: `{openai_status}`\n"
             f"- OpenRouter status: `{or_status}` "
             f"(last model tried: `{or_label}`)\n\n"
             "This PR has been labelled `review-deferred`. A scheduled "

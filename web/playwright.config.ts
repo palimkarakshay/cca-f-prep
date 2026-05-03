@@ -25,6 +25,19 @@ export default defineConfig({
       name: "chromium-mobile",
       use: { ...devices["Pixel 7"] },
     },
+    // WebKit + Firefox catch Safari- and Gecko-specific layout and
+    // a11y bugs that Chromium silently passes (Safari ≈ 25 % of mobile
+    // traffic globally; Firefox ≈ 3 % desktop). CI must install all
+    // three engines:
+    //   npx playwright install --with-deps chromium webkit firefox
+    {
+      name: "webkit-desktop",
+      use: { ...devices["Desktop Safari"] },
+    },
+    {
+      name: "firefox-desktop",
+      use: { ...devices["Desktop Firefox"] },
+    },
   ],
   webServer: {
     command: "npm run build && npm run start",

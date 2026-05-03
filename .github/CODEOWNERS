@@ -1,0 +1,41 @@
+# CODEOWNERS — security-critical-file gating.
+#
+# This file alone does NOT enforce required-reviewer behaviour. To
+# activate it, the repo owner must enable:
+#   Settings → Branches → Branch protection rules → main →
+#   "Require review from Code Owners".
+#
+# Without that setting on, this file is purely advisory (PR review
+# requests will auto-CC these owners but won't block merge).
+#
+# Reference: web/SECURITY.md § Supply-chain guardrails.
+
+# All CI / GitHub Actions workflows
+.github/workflows/*.yml         @palimkarakshay
+.github/dependabot.yml          @palimkarakshay
+.github/CODEOWNERS              @palimkarakshay
+
+# LLM review pipeline (prompt-injection blast radius)
+scripts/codex-review-fallback.py    @palimkarakshay
+scripts/codex-review-validate.py    @palimkarakshay
+
+# Build / framework / security configuration
+web/next.config.ts              @palimkarakshay
+web/vercel.json                 @palimkarakshay
+web/eslint.config.mjs           @palimkarakshay
+web/tsconfig.json               @palimkarakshay
+web/playwright.config.ts        @palimkarakshay
+web/vitest.config.ts            @palimkarakshay
+
+# Pack contracts — editing these changes the public API every pack
+# implements. Breaking changes here ripple through every pack folder.
+web/src/content/pack-types.ts       @palimkarakshay
+web/src/content/curriculum-types.ts @palimkarakshay
+web/src/content/pack-registry.ts    @palimkarakshay
+web/src/content/active-pack.ts      @palimkarakshay
+
+# Per-pack config (each pack's branding + AskAI URL + theme tokens)
+web/content-packs/*/pack.config.ts  @palimkarakshay
+
+# Security policy itself
+web/SECURITY.md                 @palimkarakshay

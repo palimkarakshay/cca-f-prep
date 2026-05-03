@@ -35,7 +35,10 @@ jobs:
         run: npm test
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        # Three engines: chromium, webkit (Safari), firefox. WebKit +
+        # Firefox catch engine-specific a11y / layout bugs Chromium
+        # passes silently. See web/playwright.config.ts.
+        run: npx playwright install --with-deps chromium webkit firefox
 
       - name: E2E tests
         run: npm run test:e2e
