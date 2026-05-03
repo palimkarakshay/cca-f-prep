@@ -11,9 +11,9 @@ export function LessonBody({ lesson }: { lesson: Lesson }) {
 
       {lesson.keyPoints && lesson.keyPoints.length > 0 ? (
         <>
-          <h3 className="mt-6 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
+          <h2 className="mt-6 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
             Key points
-          </h3>
+          </h2>
           <ul className="my-2 list-disc pl-5">
             {lesson.keyPoints.map((kp, i) => (
               <li key={i} className="my-1">
@@ -26,9 +26,9 @@ export function LessonBody({ lesson }: { lesson: Lesson }) {
 
       {lesson.examples && lesson.examples.length > 0 ? (
         <>
-          <h3 className="mt-6 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
+          <h2 className="mt-6 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
             Examples
-          </h3>
+          </h2>
           {lesson.examples.map((ex, i) => (
             <div
               key={i}
@@ -45,9 +45,9 @@ export function LessonBody({ lesson }: { lesson: Lesson }) {
 
       {lesson.pitfalls && lesson.pitfalls.length > 0 ? (
         <div className="mt-4 rounded-r-md border-l-2 border-(--bad) bg-(--bad)/5 p-3">
-          <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-(--bad)">
+          <h2 className="mb-1 text-xs font-semibold uppercase tracking-wide text-(--bad)">
             Pitfalls
-          </h3>
+          </h2>
           <ul className="list-disc pl-5">
             {lesson.pitfalls.map((p, i) => (
               <li key={i} className="my-1 text-sm">
