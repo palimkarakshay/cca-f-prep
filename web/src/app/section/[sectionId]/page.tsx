@@ -6,6 +6,7 @@ import { getSection } from "@/content/curriculum-loader";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
 import { SectionConceptList } from "@/components/section/SectionConceptList";
 import { buttonVariants } from "@/components/ui/button";
+import { Container } from "@/components/ui/Container";
 import { cn } from "@/lib/utils";
 
 type Params = { sectionId: string };
@@ -38,7 +39,7 @@ export default async function SectionPage({
   if (!section) notFound();
 
   return (
-    <article className="py-2">
+    <Container as="article" width="prose" className="py-2">
       <Breadcrumbs
         trail={[{ label: "Dashboard", href: "/" }, { label: section.title }]}
       />
@@ -96,6 +97,6 @@ export default async function SectionPage({
           ← Back to dashboard
         </Link>
       </div>
-    </article>
+    </Container>
   );
 }

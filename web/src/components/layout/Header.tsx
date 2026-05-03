@@ -5,7 +5,7 @@ import { ThemeToggle } from "@/components/primitives/ThemeToggle";
 export function Header() {
   return (
     <header className="border-b border-(--border) pb-4 mb-6">
-      <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 pt-6">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 pt-6">
         <Link href="/" className="flex flex-col gap-0.5 no-underline">
           <span className="font-[family-name:var(--font-display)] text-base font-semibold text-(--ink)">
             {siteConfig.name}

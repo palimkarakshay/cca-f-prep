@@ -4,6 +4,7 @@ import { getMockExams } from "@/content/curriculum-loader";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { Container } from "@/components/ui/Container";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 export default function MockIndexPage() {
   const mocks = getMockExams();
   return (
-    <div className="py-2">
+    <Container width="prose" className="py-2">
       <Breadcrumbs trail={[{ label: "Dashboard", href: "/" }, { label: "Mock exams" }]} />
       <header className="mb-4">
         <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-(--ink)">
@@ -70,6 +71,6 @@ export default function MockIndexPage() {
           ))}
         </ul>
       )}
-    </div>
+    </Container>
   );
 }

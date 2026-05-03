@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { CURRICULUM } from "@/content/curriculum";
 import { getSection } from "@/content/curriculum-loader";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
+import { Container } from "@/components/ui/Container";
 import { SectionTestPage } from "@/components/quiz/SectionTestPage";
 
 type Params = { sectionId: string };
@@ -34,7 +35,7 @@ export default async function SectionTestRoute({
   if (!section || !section.sectionTest) notFound();
 
   return (
-    <div className="py-2">
+    <Container width="narrow" className="py-2">
       <Breadcrumbs
         trail={[
           { label: "Dashboard", href: "/" },
@@ -43,6 +44,6 @@ export default async function SectionTestRoute({
         ]}
       />
       <SectionTestPage section={section} />
-    </div>
+    </Container>
   );
 }
