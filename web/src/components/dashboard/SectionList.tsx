@@ -29,10 +29,14 @@ export function SectionList() {
         return (
           <Card
             key={section.id}
-            tone={complete ? "good" : unlocked ? "default" : "default"}
+            tone={complete ? "good" : unlocked ? "default" : "warn"}
+            // Locked state: warn-tone left border + faded panel background
+            // (no opacity — opacity-60 nukes WCAG AA text contrast on the
+            // text inside the locked card; the warn tone + "Locked" badge
+            // communicates state visually without sacrificing contrast).
             className={cn(
-              "flex flex-col gap-3 p-5 transition-opacity",
-              !unlocked && "opacity-60"
+              "flex flex-col gap-3 p-5",
+              !unlocked && "bg-(--panel-2)"
             )}
           >
             <div className="flex items-baseline gap-3">
@@ -104,7 +108,9 @@ export function SectionList() {
                   return (
                     <li
                       key={c.id}
-                      className="flex cursor-not-allowed items-center gap-3 rounded-md border border-transparent px-2 py-2 opacity-55"
+                      // No opacity — kills text contrast. The locked Card
+                      // tone + "Locked" status badge already convey state.
+                      className="flex cursor-not-allowed items-center gap-3 rounded-md border border-transparent px-2 py-2"
                     >
                       {inner}
                     </li>

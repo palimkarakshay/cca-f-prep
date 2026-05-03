@@ -37,10 +37,9 @@ export function SectionConceptList({ section }: { section: Section }) {
           return (
             <li
               key={c.id}
-              className={cn(
-                "flex items-center gap-3 rounded-md border border-transparent px-2 py-2 opacity-55",
-                "cursor-not-allowed"
-              )}
+              // No opacity — kills text contrast for AA. Disabled state is
+              // signalled by cursor-not-allowed + the "Stub" badge.
+              className="flex cursor-not-allowed items-center gap-3 rounded-md border border-transparent px-2 py-2"
             >
               {inner}
             </li>
