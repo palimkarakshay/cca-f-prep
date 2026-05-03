@@ -1,0 +1,130 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useProgress } from "@/hooks/useProgress";
+import { LessonBody, SimplifiedBody } from "./LessonBody";
+import { AskClaudePanel } from "./AskClaudePanel";
+import { MasteryBadge } from "@/components/primitives/MasteryBadge";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { Concept, Section } from "@/content/curriculum-types";
+
+export function LessonView({
+  section,
+  concept,
+}: {
+  section: Section;
+  concept: Concept;
+}) {
+  const { hydrated, conceptMastery, markLessonRead } = useProgress();
+  const [simplified, setSimplified] = useState(false);
+  const lesson = concept.lesson;
+
+  useEffect(() => {
+    if (lesson) markLessonRead(concept.id);
+  }, [concept.id, lesson, markLessonRead]);
+
+  const m = hydrated ? conceptMastery(concept.id) : 0;
+  const hasSimplified = Boolean(lesson?.simplified);
+  const showSimplified = simplified && hasSimplified;
+
+  if (!lesson) {
+    return (
+      <section
+        aria-label="Lesson stub"
+        className="rounded-r-md border-l-4 border-(--warn) bg-(--warn)/10 p-4 text-sm text-(--ink)"
+      >
+        <strong className="text-(--warn)">Lesson coming.</strong> The notes
+        for this concept exist in the repo but the in-app lesson hasn't been
+        authored yet.
+      </section>
+    );
+  }
+
+  return (
+    <article>
+      <header className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="rounded-full border border-(--border) px-2 py-0.5 text-[11px] uppercase tracking-wide text-(--muted)">
+          {concept.code}
+        </span>
+        <span className="rounded-full border border-(--border) px-2 py-0.5 text-[11px] uppercase tracking-wide text-(--muted)">
+          Bloom · {concept.bloom}
+        </span>
+        <MasteryBadge mastery={m} />
+        <div className="ml-auto">
+          <button
+            type="button"
+            onClick={() => setSimplified((v) => !v)}
+            className={cn(
+              "rounded-full border px-3 py-1 text-xs transition-colors",
+              showSimplified
+                ? "border-(--accent) bg-(--accent) font-semibold text-white"
+                : "border-(--border) bg-(--panel-2) text-(--ink) hover:border-(--accent)"
+            )}
+            aria-pressed={showSimplified}
+          >
+            {showSimplified ? "Showing simplified" : "Simplify"}
+          </button>
+        </div>
+      </header>
+
+      <h1 className="mb-1 font-[family-name:var(--font-display)] text-2xl font-semibold text-(--ink)">
+        {concept.title}
+      </h1>
+
+      {showSimplified && lesson.simplified ? (
+        <>
+          <p className="mb-3 rounded-md border border-dashed border-(--warn)/40 bg-(--warn)/5 p-2 text-xs text-(--muted)">
+            <span className="mr-1 text-[11px] font-semibold uppercase tracking-wide text-(--warn)">
+              Simplified
+            </span>
+            Toggle off to read the canonical lesson.
+          </p>
+          <SimplifiedBody simplified={lesson.simplified} />
+        </>
+      ) : (
+        <LessonBody lesson={lesson} />
+      )}
+
+      {simplified && !hasSimplified ? (
+        <p className="mt-4 text-xs text-(--muted)">
+          No simplified version authored — use Ask Claude below to request one.
+        </p>
+      ) : null}
+
+      <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-dashed border-(--border) pt-4">
+        <Link
+          href={`/section/${section.id}`}
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "sm" }),
+            "no-underline"
+          )}
+        >
+          ← Back to section
+        </Link>
+        {concept.quiz ? (
+          <Link
+            href={`/concept/${section.id}/${concept.id}/quiz`}
+            className={cn(
+              buttonVariants({ variant: "default", size: "sm" }),
+              "ml-auto no-underline"
+            )}
+          >
+            Take quiz →
+          </Link>
+        ) : (
+          <span className="ml-auto text-xs text-(--muted)">
+            Quiz not yet authored
+          </span>
+        )}
+      </div>
+
+      <AskClaudePanel
+        conceptCode={concept.code}
+        conceptTitle={concept.title}
+        lesson={lesson}
+      />
+    </article>
+  );
+}
