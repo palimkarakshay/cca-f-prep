@@ -39,7 +39,7 @@ export default async function ConceptPage({
   const { section, concept } = found;
 
   return (
-    <Container width="prose" className="py-2">
+    <Container width="widest" className="py-2">
       <Breadcrumbs
         trail={[
           { label: "Dashboard", href: "/" },

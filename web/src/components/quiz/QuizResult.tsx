@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { ChevronDown } from "lucide-react";
 import type { Question, OptionLetter } from "@/content/curriculum-types";
 import type { QuizAttempt } from "@/lib/progress-types";
 import { buttonVariants } from "@/components/ui/button";
@@ -51,7 +52,7 @@ export function QuizResult({
         <h1
           ref={headingRef}
           tabIndex={-1}
-          className="font-[family-name:var(--font-display)] text-2xl font-semibold text-(--ink) focus:outline-none"
+          className="font-[family-name:var(--font-display)] text-2xl md:text-3xl font-semibold text-(--ink) focus:outline-none"
         >
           {title}
         </h1>
@@ -59,10 +60,15 @@ export function QuizResult({
 
       <section
         aria-label="Score"
-        className="mb-6 flex flex-wrap items-center gap-6 rounded-lg border border-(--border) bg-(--panel) p-5"
+        className="mb-6 flex flex-wrap items-center gap-6 rounded-lg border border-(--border) bg-(--panel) p-5 shadow-sm"
       >
-        <div>
-          <div className="font-[family-name:var(--font-display)] text-5xl font-bold leading-none text-(--accent-2)">
+        <div
+          className={cn(
+            "rounded-md px-2",
+            passed && "animate-pass-pulse"
+          )}
+        >
+          <div className="font-[family-name:var(--font-display)] text-5xl md:text-6xl font-bold leading-none text-(--accent-2)">
             {attempt.score}/{attempt.total}
           </div>
           <div className="mt-2 text-sm text-(--muted)">
@@ -113,7 +119,7 @@ export function QuizResult({
             <li
               key={q.n}
               className={cn(
-                "rounded-lg border-l-4 border-(--border) bg-(--panel) p-4",
+                "rounded-lg border-l-4 border-(--border) bg-(--panel) p-4 shadow-sm",
                 correct
                   ? "border-l-(--good)"
                   : skipped
@@ -156,11 +162,18 @@ export function QuizResult({
               </div>
 
               {q.explanations ? (
-                <div className="mt-3 rounded-md border border-(--border) bg-(--panel-2) p-3">
-                  <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-(--muted)">
+                <details
+                  className="group mt-3 rounded-md border border-(--border) bg-(--panel-2) [&[open]>summary>svg]:rotate-180"
+                  open={!correct}
+                >
+                  <summary className="flex cursor-pointer items-center gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-(--muted) marker:hidden [&::-webkit-details-marker]:hidden">
+                    <ChevronDown
+                      className="h-3.5 w-3.5 transition-transform"
+                      aria-hidden
+                    />
                     Why each option
-                  </h4>
-                  <ul className="flex flex-col gap-1">
+                  </summary>
+                  <ul className="flex flex-col gap-1 px-3 pb-3">
                     {LETTERS.map((L) => (
                       <li
                         key={L}
@@ -169,12 +182,14 @@ export function QuizResult({
                           L === q.correct && "text-(--good)"
                         )}
                       >
-                        <code className="mr-2 font-mono font-semibold">{L}.</code>
+                        <code className="mr-2 font-mono font-semibold">
+                          {L}.
+                        </code>
                         {q.explanations?.[L]}
                       </li>
                     ))}
                   </ul>
-                </div>
+                </details>
               ) : null}
 
               {q.principle ? (

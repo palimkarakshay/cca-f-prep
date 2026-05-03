@@ -8,6 +8,22 @@ import { cn } from "@/lib/utils";
 import { QuizResult } from "./QuizResult";
 
 const LETTERS: OptionLetter[] = ["A", "B", "C", "D"];
+const KEY_TO_LETTER: Record<string, OptionLetter> = {
+  "1": "A",
+  "2": "B",
+  "3": "C",
+  "4": "D",
+  A: "A",
+  B: "B",
+  C: "C",
+  D: "D",
+};
+const NUM_FOR_LETTER: Record<OptionLetter, string> = {
+  A: "1",
+  B: "2",
+  C: "3",
+  D: "4",
+};
 
 export interface QuizRunnerProps {
   title: string;
@@ -113,21 +129,65 @@ export function QuizRunner({
     });
   }, [state, submitted, onCheckpoint]);
 
-  function pick(letter: OptionLetter) {
-    setState((s) => ({ ...s, answers: { ...s.answers, [current.n]: letter } }));
+  // Functional setState patterns avoid stale closures so the keyboard
+  // handler can be wired once and still see the latest cursor.
+  function pickAtCursor(letter: OptionLetter) {
+    setState((s) => {
+      const n = questions[s.cursor].n;
+      return { ...s, answers: { ...s.answers, [n]: letter } };
+    });
   }
-
-  function setReason(text: string) {
-    setState((s) => ({ ...s, reasons: { ...s.reasons, [current.n]: text } }));
+  function setReasonAtCursor(text: string) {
+    setState((s) => {
+      const n = questions[s.cursor].n;
+      return { ...s, reasons: { ...s.reasons, [n]: text } };
+    });
   }
-
   function next() {
     setState((s) => ({ ...s, cursor: Math.min(s.cursor + 1, total - 1) }));
   }
-
   function prev() {
     setState((s) => ({ ...s, cursor: Math.max(s.cursor - 1, 0) }));
   }
+
+  // Keyboard shortcuts: 1-4 / A-D pick an answer; ←/→ navigate.
+  // Disabled while focus is in the reasoning textarea so typing isn't
+  // hijacked.
+  useEffect(() => {
+    if (submitted) return;
+    function onKey(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null;
+      if (
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLInputElement
+      ) {
+        return;
+      }
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      const upper = e.key.length === 1 ? e.key.toUpperCase() : e.key;
+      const letter = KEY_TO_LETTER[upper];
+      if (letter) {
+        e.preventDefault();
+        pickAtCursor(letter);
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        next();
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        prev();
+        return;
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // pickAtCursor / next / prev capture functional updates so no deps needed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submitted]);
 
   function submit() {
     const sc = score(questions, state.answers);
@@ -169,7 +229,7 @@ export function QuizRunner({
   return (
     <article>
       <header className="mb-3">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-(--ink)">
+        <h1 className="font-[family-name:var(--font-display)] text-2xl md:text-3xl font-semibold text-(--ink)">
           {title}
         </h1>
         {subtitle ? (
@@ -193,7 +253,7 @@ export function QuizRunner({
       <p className="mb-2 text-xs text-(--muted)">
         Question {state.cursor + 1} of {total}
       </p>
-      <h2 className="mb-3 text-lg font-semibold text-(--ink)">
+      <h2 className="mb-3 text-lg md:text-xl font-semibold text-(--ink)">
         {current.question}
       </h2>
 
@@ -203,7 +263,7 @@ export function QuizRunner({
           <label
             key={L}
             className={cn(
-              "flex cursor-pointer items-start gap-3 rounded-md border bg-(--panel-2) p-3 transition-colors",
+              "flex cursor-pointer items-start gap-3 rounded-md border bg-(--panel-2) p-3 transition-colors min-h-[44px]",
               "focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-(--accent)",
               selected === L
                 ? "border-(--accent) bg-(--accent)/10"
@@ -215,7 +275,7 @@ export function QuizRunner({
               name={`q-${current.n}`}
               value={L}
               checked={selected === L}
-              onChange={() => pick(L)}
+              onChange={() => pickAtCursor(L)}
               className="absolute h-0 w-0 opacity-0"
             />
             <span
@@ -224,10 +284,24 @@ export function QuizRunner({
             >
               {L}.
             </span>
-            <span className="flex-1 text-sm">{current.options[L]}</span>
+            <span className="flex-1 text-sm md:text-base">
+              {current.options[L]}
+            </span>
+            <kbd
+              aria-hidden
+              className="hidden md:inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded border border-(--border) bg-(--panel) px-1 font-mono text-[10px] text-(--muted)"
+            >
+              {NUM_FOR_LETTER[L]}
+            </kbd>
           </label>
         ))}
       </fieldset>
+
+      <p className="mt-2 hidden text-xs text-(--muted) md:block">
+        Tip: press <kbd className="rounded border border-(--border) bg-(--panel-2) px-1 font-mono">1</kbd>–<kbd className="rounded border border-(--border) bg-(--panel-2) px-1 font-mono">4</kbd>{" "}or{" "}
+        <kbd className="rounded border border-(--border) bg-(--panel-2) px-1 font-mono">A</kbd>–<kbd className="rounded border border-(--border) bg-(--panel-2) px-1 font-mono">D</kbd>{" "}to pick.{" "}
+        Use <kbd className="rounded border border-(--border) bg-(--panel-2) px-1 font-mono">←</kbd>{" "}/{" "}<kbd className="rounded border border-(--border) bg-(--panel-2) px-1 font-mono">→</kbd>{" "}to navigate.
+      </p>
 
       {collectReasons ? (
         <div className="mt-4">
@@ -240,7 +314,7 @@ export function QuizRunner({
           <textarea
             id={`reason-${current.n}`}
             value={state.reasons[current.n] ?? ""}
-            onChange={(e) => setReason(e.target.value)}
+            onChange={(e) => setReasonAtCursor(e.target.value)}
             rows={3}
             className="w-full resize-y rounded-md border border-(--border) bg-(--panel-2) p-2 text-sm leading-relaxed focus:border-(--accent) focus:outline-none"
           />
