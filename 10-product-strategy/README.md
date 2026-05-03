@@ -11,6 +11,7 @@ operations, validation pipelines.
 | File | What it is |
 | --- | --- |
 | [`b2b-viability-2026-05.md`](./b2b-viability-2026-05.md) | Viability writeup for the shell as a B2B learning tool across arbitrary topics. Five blockers (adoption, stickiness, SME extraction, freshness, validation) framed in change-management + behavioral-psych terms, mapped to concrete file-level interventions in this codebase. Includes Appendix A — a shippable SME extraction protocol. |
+| [`implementation-plan-validate-pack-2026-05.md`](./implementation-plan-validate-pack-2026-05.md) | Deep-dive build plan for §5.S of the viability writeup — the `validate-pack.ts` static analyzer. Six check specs, file list, build sequence, test plan, CI wiring, open questions. One-PR scope. |
 
 ## Conventions
 
