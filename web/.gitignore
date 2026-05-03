@@ -1,0 +1,30 @@
+node_modules
+.next
+out
+dist
+coverage
+.vercel
+.turbo
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# env
+.env*.local
+
+# editor
+.DS_Store
+.vscode/
+.idea/
+
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
