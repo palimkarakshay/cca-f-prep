@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { useProgress } from "@/hooks/useProgress";
 import { QuizRunner } from "./QuizRunner";
+import { getAdjacentSections } from "@/content/curriculum-loader";
 import type { Section } from "@/content/curriculum-types";
 import type { CurrentAttempt, QuizAttempt } from "@/lib/progress-types";
 
@@ -39,6 +40,7 @@ export function SectionTestPage({ section }: { section: Section }) {
 
   const passPct = section.sectionTest.passPct ?? 0.7;
   const resume = progress.section[section.id]?.currentTestAttempt ?? null;
+  const { prev, next } = getAdjacentSections(section.id);
 
   return (
     <QuizRunner
@@ -54,6 +56,10 @@ export function SectionTestPage({ section }: { section: Section }) {
       onComplete={onComplete}
       exitHref={`/section/${section.id}`}
       exitLabel="Exit to section"
+      prevHref={prev ? `/section/${prev.id}` : undefined}
+      prevLabel={prev ? prev.title : undefined}
+      nextHref={next ? `/section/${next.id}` : undefined}
+      nextLabel={next ? next.title : undefined}
     />
   );
 }

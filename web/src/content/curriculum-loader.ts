@@ -73,6 +73,19 @@ export function getAdjacentConcepts(
   return { prev, next };
 }
 
+export function getAdjacentSections(sectionId: string): {
+  prev: Section | null;
+  next: Section | null;
+} {
+  const sections = CURRICULUM.sections;
+  const idx = sections.findIndex((s) => s.id === sectionId);
+  if (idx === -1) return { prev: null, next: null };
+  return {
+    prev: idx > 0 ? sections[idx - 1] : null,
+    next: idx < sections.length - 1 ? sections[idx + 1] : null,
+  };
+}
+
 export function getMockExam(id: string): MockExam | null {
   return getMockExams().find((m) => m.id === id) ?? null;
 }
