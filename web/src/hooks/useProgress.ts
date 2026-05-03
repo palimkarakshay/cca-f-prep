@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   ensureConcept,
   ensureMock,
@@ -27,7 +33,13 @@ export function useProgress() {
     progressStore.get,
     progressStore.getServerSnapshot
   );
-  const hydrated = typeof window !== "undefined";
+  // Flip after the first commit so the initial client render matches
+  // the server (both `false`). Evaluating `typeof window` directly
+  // during render diverges between server and client and trips React
+  // #418, which then unmounts and silently breaks any consumer that
+  // gates UI on `hydrated`.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
 
   const markLessonRead = useCallback(
     (conceptId: string) => {

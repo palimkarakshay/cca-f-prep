@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { getGamesStore } from "@/lib/games-store";
 import { usePackId } from "@/content/pack-hooks";
 import type { GameAttempt } from "@/lib/games-types";
@@ -20,7 +26,10 @@ export function useGamesStore() {
     store.get,
     store.getServerSnapshot
   );
-  const hydrated = typeof window !== "undefined";
+  // See useProgress.ts for the same fix — `typeof window` during
+  // render trips React #418 and unmounts the gated subtree.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
 
   const recordAttempt = useCallback(
     (gameId: MiniGameId, attempt: GameAttempt) => {
