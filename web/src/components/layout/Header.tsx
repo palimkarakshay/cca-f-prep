@@ -41,7 +41,15 @@ export function Header() {
   // Top header surfaces the actionable destinations on tablet+ where there
   // is no bottom nav. On mobile, the brand stays visible but the nav
   // collapses to the bottom-tab bar.
-  const visibleNav = siteConfig.nav.filter((n) => n.href !== "/");
+  //
+  // On the picker (packId null), every nav item is pack-relative (the
+  // siteConfig.nav hrefs assume a pack context — e.g. "/mock" really
+  // means "/<active pack>/mock"). Surfacing them un-prefixed leads
+  // visitors to 404s like /mock or anchor-only pages. Hide the inline
+  // nav until the user has picked a pack; the brand + ThemeToggle stay.
+  const visibleNav = packId
+    ? siteConfig.nav.filter((n) => n.href !== "/")
+    : [];
   const homeHref = packId ? `/${packId}` : "/";
 
   return (
