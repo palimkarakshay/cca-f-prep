@@ -15,6 +15,11 @@ export function QuizResult({
   passPct,
   exitHref,
   exitLabel = "Back",
+  prevHref,
+  prevLabel,
+  nextHref,
+  nextLabel,
+  learnedSummary,
 }: {
   title: string;
   questions: Question[];
@@ -22,6 +27,11 @@ export function QuizResult({
   passPct: number;
   exitHref: string;
   exitLabel?: string;
+  prevHref?: string;
+  prevLabel?: string;
+  nextHref?: string;
+  nextLabel?: string;
+  learnedSummary?: string[];
 }) {
   const pct = attempt.total > 0 ? attempt.score / attempt.total : 0;
   const passed = pct >= passPct;
@@ -62,6 +72,22 @@ export function QuizResult({
           </p>
         </div>
       </section>
+
+      {learnedSummary && learnedSummary.length > 0 ? (
+        <section
+          aria-label="What you learnt"
+          className="mb-6 rounded-r-md border-l-4 border-(--accent) bg-(--accent)/5 p-4"
+        >
+          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
+            What you learnt
+          </h2>
+          <ul className="ml-4 list-disc space-y-1 text-sm text-(--ink)">
+            {learnedSummary.map((point, i) => (
+              <li key={i}>{point}</li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <ul className="flex flex-col gap-3">
         {questions.map((q) => {
@@ -158,7 +184,18 @@ export function QuizResult({
         })}
       </ul>
 
-      <div className="mt-6">
+      <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-dashed border-(--border) pt-4">
+        {prevHref ? (
+          <Link
+            href={prevHref}
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "sm" }),
+              "no-underline"
+            )}
+          >
+            ← {prevLabel ?? "Previous lesson"}
+          </Link>
+        ) : null}
         <Link
           href={exitHref}
           className={cn(
@@ -168,6 +205,17 @@ export function QuizResult({
         >
           {exitLabel}
         </Link>
+        {nextHref ? (
+          <Link
+            href={nextHref}
+            className={cn(
+              buttonVariants({ variant: "default", size: "sm" }),
+              "ml-auto no-underline"
+            )}
+          >
+            {nextLabel ?? "Next lesson"} →
+          </Link>
+        ) : null}
       </div>
     </article>
   );

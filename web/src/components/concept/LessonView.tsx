@@ -8,6 +8,7 @@ import { AskClaudePanel } from "./AskClaudePanel";
 import { MasteryBadge } from "@/components/primitives/MasteryBadge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { getAdjacentConcepts } from "@/content/curriculum-loader";
 import type { Concept, Section } from "@/content/curriculum-types";
 
 export function LessonView({
@@ -28,6 +29,7 @@ export function LessonView({
   const m = hydrated ? conceptMastery(concept.id) : 0;
   const hasSimplified = Boolean(lesson?.simplified);
   const showSimplified = simplified && hasSimplified;
+  const { prev, next } = getAdjacentConcepts(section.id, concept.id);
 
   if (!lesson) {
     return (
@@ -72,6 +74,30 @@ export function LessonView({
       <h1 className="mb-1 font-[family-name:var(--font-display)] text-2xl font-semibold text-(--ink)">
         {concept.title}
       </h1>
+
+      {lesson.simplified?.oneLiner ||
+      (lesson.keyPoints && lesson.keyPoints.length > 0) ? (
+        <section
+          aria-label="What you'll learn"
+          className="mb-5 mt-3 rounded-r-md border-l-4 border-(--accent-2) bg-(--accent-2)/5 p-4"
+        >
+          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
+            What you'll learn
+          </h2>
+          {lesson.simplified?.oneLiner ? (
+            <p className="mb-2 text-sm text-(--ink)">
+              {lesson.simplified.oneLiner}
+            </p>
+          ) : null}
+          {lesson.keyPoints && lesson.keyPoints.length > 0 ? (
+            <ul className="ml-4 list-disc space-y-1 text-sm text-(--ink)">
+              {lesson.keyPoints.slice(0, 3).map((point, i) => (
+                <li key={i}>{point}</li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
+      ) : null}
 
       {showSimplified && lesson.simplified ? (
         <>
@@ -119,6 +145,40 @@ export function LessonView({
           </span>
         )}
       </div>
+
+      {prev || next ? (
+        <nav
+          aria-label="Lesson navigation"
+          className="mt-3 flex flex-wrap items-stretch gap-2"
+        >
+          {prev ? (
+            <Link
+              href={`/concept/${prev.section.id}/${prev.concept.id}`}
+              className="flex-1 rounded-md border border-(--border) bg-(--panel-2) p-3 text-sm no-underline transition-colors hover:border-(--accent)"
+            >
+              <span className="block text-[11px] uppercase tracking-wide text-(--muted)">
+                ← Previous lesson
+              </span>
+              <span className="mt-0.5 block font-medium text-(--ink)">
+                {prev.concept.code} {prev.concept.title}
+              </span>
+            </Link>
+          ) : null}
+          {next ? (
+            <Link
+              href={`/concept/${next.section.id}/${next.concept.id}`}
+              className="flex-1 rounded-md border border-(--border) bg-(--panel-2) p-3 text-right text-sm no-underline transition-colors hover:border-(--accent)"
+            >
+              <span className="block text-[11px] uppercase tracking-wide text-(--muted)">
+                Next lesson →
+              </span>
+              <span className="mt-0.5 block font-medium text-(--ink)">
+                {next.concept.code} {next.concept.title}
+              </span>
+            </Link>
+          ) : null}
+        </nav>
+      ) : null}
 
       <AskClaudePanel
         conceptCode={concept.code}

@@ -34,6 +34,45 @@ export function findConcept(
   return null;
 }
 
+export function getAdjacentConcepts(
+  sectionId: string,
+  conceptId: string
+): {
+  prev: { section: Section; concept: Concept } | null;
+  next: { section: Section; concept: Concept } | null;
+} {
+  const sections = CURRICULUM.sections;
+  const sIdx = sections.findIndex((s) => s.id === sectionId);
+  if (sIdx === -1) return { prev: null, next: null };
+  const section = sections[sIdx];
+  const cIdx = section.concepts.findIndex((c) => c.id === conceptId);
+  if (cIdx === -1) return { prev: null, next: null };
+
+  const prev =
+    cIdx > 0
+      ? { section, concept: section.concepts[cIdx - 1] }
+      : sIdx > 0
+        ? (() => {
+            const prevSection = sections[sIdx - 1];
+            const last = prevSection.concepts[prevSection.concepts.length - 1];
+            return last ? { section: prevSection, concept: last } : null;
+          })()
+        : null;
+
+  const next =
+    cIdx < section.concepts.length - 1
+      ? { section, concept: section.concepts[cIdx + 1] }
+      : sIdx < sections.length - 1
+        ? (() => {
+            const nextSection = sections[sIdx + 1];
+            const first = nextSection.concepts[0];
+            return first ? { section: nextSection, concept: first } : null;
+          })()
+        : null;
+
+  return { prev, next };
+}
+
 export function getMockExam(id: string): MockExam | null {
   return getMockExams().find((m) => m.id === id) ?? null;
 }

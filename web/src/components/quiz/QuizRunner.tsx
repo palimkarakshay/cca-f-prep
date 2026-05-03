@@ -20,6 +20,11 @@ export interface QuizRunnerProps {
   onComplete: (attempt: QuizAttempt) => void;
   exitHref: string;
   exitLabel?: string;
+  prevHref?: string;
+  prevLabel?: string;
+  nextHref?: string;
+  nextLabel?: string;
+  learnedSummary?: string[];
 }
 
 interface RunningState {
@@ -71,6 +76,11 @@ export function QuizRunner({
   onComplete,
   exitHref,
   exitLabel = "Exit",
+  prevHref,
+  prevLabel,
+  nextHref,
+  nextLabel,
+  learnedSummary,
 }: QuizRunnerProps) {
   const [state, setState] = useState<RunningState>(() =>
     initialState(questions, resumeFrom)
@@ -144,6 +154,11 @@ export function QuizRunner({
         passPct={passPct}
         exitHref={exitHref}
         exitLabel={exitLabel}
+        prevHref={prevHref}
+        prevLabel={prevLabel}
+        nextHref={nextHref}
+        nextLabel={nextLabel}
+        learnedSummary={learnedSummary}
       />
     );
   }

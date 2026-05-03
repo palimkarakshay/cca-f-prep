@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { useProgress } from "@/hooks/useProgress";
 import { QuizRunner } from "./QuizRunner";
+import { getAdjacentConcepts } from "@/content/curriculum-loader";
 import type { Concept, Section } from "@/content/curriculum-types";
 import type { CurrentAttempt, QuizAttempt } from "@/lib/progress-types";
 
@@ -44,6 +45,8 @@ export function ConceptQuizPage({
   }
 
   const resume = progress.concept[concept.id]?.currentAttempt ?? null;
+  const { prev, next } = getAdjacentConcepts(section.id, concept.id);
+  const learnedSummary = concept.lesson?.keyPoints;
 
   return (
     <QuizRunner
@@ -57,6 +60,15 @@ export function ConceptQuizPage({
       onComplete={onComplete}
       exitHref={`/concept/${section.id}/${concept.id}`}
       exitLabel="Exit to lesson"
+      prevHref={
+        prev ? `/concept/${prev.section.id}/${prev.concept.id}` : undefined
+      }
+      prevLabel={prev ? `${prev.concept.code} ${prev.concept.title}` : undefined}
+      nextHref={
+        next ? `/concept/${next.section.id}/${next.concept.id}` : undefined
+      }
+      nextLabel={next ? `${next.concept.code} ${next.concept.title}` : undefined}
+      learnedSummary={learnedSummary}
     />
   );
 }
