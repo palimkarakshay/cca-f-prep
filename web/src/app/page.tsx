@@ -13,6 +13,10 @@ export const metadata: Metadata = {
 export default function PickerPage() {
   return (
     <Container width="wide" className="flex flex-col gap-6 py-2">
+      {/* Page-level h1 (the chrome Header already shows the tagline; we
+          keep the wordmark visible here as a landmark heading but skip
+          the tagline so it doesn't duplicate-render and break strict-mode
+          locators). */}
       <header>
         <h1 className="font-[family-name:var(--font-display)] text-2xl md:text-3xl font-semibold text-(--ink)">
           What do you want to learn today?

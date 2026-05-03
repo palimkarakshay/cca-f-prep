@@ -44,6 +44,7 @@ export function RecommendationBanner() {
       <Card
         tone="accent"
         className="bg-(--panel-2) p-6 md:p-8"
+        role="status"
         aria-busy="true"
         aria-label="Loading recommendation"
       >

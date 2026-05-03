@@ -5,7 +5,6 @@ import { useProgress } from "@/hooks/useProgress";
 import { MasteryBadge } from "@/components/primitives/MasteryBadge";
 import { usePackId } from "@/content/pack-hooks";
 import type { Section } from "@/content/curriculum-types";
-import { cn } from "@/lib/utils";
 
 export function SectionConceptList({
   section,
@@ -49,10 +48,9 @@ export function SectionConceptList({
           return (
             <li
               key={c.id}
-              className={cn(
-                "flex items-center gap-3 rounded-md border border-transparent px-2 py-2 opacity-55",
-                "cursor-not-allowed"
-              )}
+              // No opacity — kills text contrast for AA. Disabled state is
+              // signalled by cursor-not-allowed + the "Stub" badge.
+              className="flex cursor-not-allowed items-center gap-3 rounded-md border border-transparent px-2 py-2"
             >
               {inner}
             </li>

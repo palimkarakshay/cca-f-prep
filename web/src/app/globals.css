@@ -40,12 +40,19 @@
   --panel-2: #f4f4f3;
   --border: #e5e5e3;
   --ink: #1a1a1a;
-  --muted: #6b6b6b;
-  --accent: #c45a36;
-  --accent-2: #d97757;
-  --good: #2f7a4a;
-  --bad: #b53a3a;
-  --warn: #b58c1a;
+  --muted: #5a5a5a;
+  /* `--accent` is the button-bg surface; `--accent-2` is text emphasis.
+     Both must clear WCAG AA at small text sizes:
+     - --accent #b04829 on white text → 5.6:1 (passes for button labels)
+     - --accent-2 #913a1d on --canvas (#fafaf9) → 7.6:1 (passes for body text)
+     Going darker than the original Anthropic salmon (#cc785c / #d97757)
+     is the only way to clear AA on a near-white canvas; dark-mode keeps
+     the brighter salmon for dark-canvas legibility. */
+  --accent: #b04829;
+  --accent-2: #913a1d;
+  --good: #1f6b3f;
+  --bad: #a32f2f;
+  --warn: #8a6a10;
   --code: #2a2a2a;
 
   /* Layered shadows tuned for light backgrounds. */
@@ -92,9 +99,18 @@ html.dark {
 }
 
 /*
-  Per-pack theme tokens are injected into <head> by `app/layout.tsx`,
-  scoped via the `[data-pack="<pack-id>"]` selector. The values above
-  are the default palette; packs override what they need.
+  Per-pack theme tokens are injected into <head> by both
+  `app/layout.tsx` (env-var default pack) and `app/[packId]/layout.tsx`
+  (URL-resolved pack), scoped via the `[data-pack="<pack-id>"]`
+  selector. The values above are the contrast-safe light + dark
+  defaults; packs override what they need.
+
+  Note: light-mode --accent / --accent-2 / --good / --bad / --warn /
+  --muted above are tightened past the original Anthropic salmon for
+  WCAG AA on the near-white canvas. Packs that want the brighter
+  salmon for branding (e.g. cca-f-prep) override --accent / --accent-2
+  in dark mode only via `pack.config.theme.dark` — light mode keeps
+  the AA-safe values.
 */
 
 /* Compact density — tighter rhythm for power users on dense displays. */
@@ -128,13 +144,23 @@ samp {
     Menlo, Consolas, monospace;
 }
 
-a {
-  color: var(--accent-2);
-  text-decoration: none;
-}
+/*
+  `<a>` defaults live in @layer base so Tailwind utility classes (which
+  live in @layer utilities, higher priority by layer order) can override
+  them with `text-(--muted)`, `text-(--ink)`, etc. Without the layer,
+  this non-layered rule wins over every utility and the footer link
+  ends up rendering in --accent-2 even when classed text-(--muted) — a
+  subtle bug that breaks both color-contrast and link-in-text-block.
+*/
+@layer base {
+  a {
+    color: var(--accent-2);
+    text-decoration: none;
+  }
 
-a:hover {
-  text-decoration: underline;
+  a:hover {
+    text-decoration: underline;
+  }
 }
 
 /* Skip link — visible on focus only. */
