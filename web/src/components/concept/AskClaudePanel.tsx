@@ -6,6 +6,27 @@ import { siteConfig } from "@/lib/site-config";
 import { Button } from "@/components/ui/button";
 import type { Lesson } from "@/content/curriculum-types";
 
+// Claude.ai reads ?q=<prompt> on /new and on project pages to pre-fill
+// the chat input. Cap the inline prompt to keep the URL under common
+// proxy/browser limits (~8 KB); the full prompt still lands in the
+// clipboard when truncation kicks in.
+const MAX_INLINE_PROMPT_CHARS = 6000;
+
+function appendPromptToUrl(baseUrl: string, prompt: string): string {
+  try {
+    const url = new URL(baseUrl);
+    const trimmed =
+      prompt.length > MAX_INLINE_PROMPT_CHARS
+        ? prompt.slice(0, MAX_INLINE_PROMPT_CHARS) +
+          "\n\n[Prompt truncated for URL — paste from clipboard for full context.]"
+        : prompt;
+    url.searchParams.set("q", trimmed);
+    return url.toString();
+  } catch {
+    return baseUrl;
+  }
+}
+
 function buildPrompt(opts: {
   conceptCode: string;
   conceptTitle: string;
@@ -44,13 +65,20 @@ export function AskClaudePanel({
 
   async function copyAndOpen() {
     const prompt = buildPrompt({ conceptCode, conceptTitle, question, lesson });
+    let copied = false;
     try {
       await navigator.clipboard.writeText(prompt);
-      setStatus("Prompt copied — paste into the chat that just opened.");
+      copied = true;
     } catch {
-      setStatus("Copy failed — paste the prompt manually.");
+      // Clipboard may be blocked; we still open Claude with the prompt in the URL.
     }
-    const url = siteConfig.claudeProjectUrl || siteConfig.claudeFallbackUrl;
+    const base = siteConfig.claudeProjectUrl || siteConfig.claudeFallbackUrl;
+    const url = appendPromptToUrl(base, prompt);
+    setStatus(
+      copied
+        ? "Prompt copied and pre-filled in the chat that just opened."
+        : "Prompt pre-filled in the chat that just opened (clipboard copy was blocked)."
+    );
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
