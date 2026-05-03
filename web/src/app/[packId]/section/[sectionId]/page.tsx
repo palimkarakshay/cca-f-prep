@@ -14,8 +14,8 @@ import { SectionTabs } from "@/components/section/SectionTabs";
 import { resolveTab } from "@/components/section/section-tabs-shared";
 import { GoalsPanel } from "@/components/section/GoalsPanel";
 import { QuizLauncherPanel } from "@/components/section/QuizLauncherPanel";
-import { GAMES_CATALOG, gameHrefFor } from "@/components/section/games-catalog";
-import { MiniGameCard } from "@/components/section/MiniGameCard";
+import { FlashcardsPanel } from "@/components/section/FlashcardsPanel";
+import { GamesPanel } from "@/components/section/GamesPanel";
 import { Container } from "@/components/ui/Container";
 import { copyFor } from "@/lib/pack-helpers";
 
@@ -85,21 +85,7 @@ export default async function SectionPage({
     </section>
   );
 
-  // Placeholder for PR2.5 — flip-card UI replaces this listing.
-  const flashcardsPanel = (
-    <section aria-labelledby="flashcards-heading">
-      <h2
-        id="flashcards-heading"
-        className="mb-2 text-xs font-semibold uppercase tracking-wide text-(--accent-2)"
-      >
-        Flashcards · {flashcards.length} cards
-      </h2>
-      <p className="text-sm text-(--muted)">
-        Flip-card UI lands in PR2.5. Cards are derived from concept titles +
-        keyPoints + analogies — no hand-authoring required.
-      </p>
-    </section>
-  );
+  const flashcardsPanel = <FlashcardsPanel cards={flashcards} />;
 
   const quizPanel = (
     <QuizLauncherPanel
@@ -109,32 +95,7 @@ export default async function SectionPage({
     />
   );
 
-  const gamesPanel = (
-    <section aria-labelledby="games-heading">
-      <h2
-        id="games-heading"
-        className="mb-2 text-xs font-semibold uppercase tracking-wide text-(--accent-2)"
-      >
-        Mini-games
-      </h2>
-      <p className="mb-4 text-sm text-(--muted)">
-        These mini-games unlock as we ship them — Time Trivia next.
-      </p>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {GAMES_CATALOG.map((g) => (
-          <MiniGameCard
-            key={g.id}
-            title={g.title}
-            blurb={g.blurb}
-            category={g.category}
-            icon={g.icon}
-            status={g.status}
-            href={g.status === "live" ? gameHrefFor(packId, sectionId, g.id) : undefined}
-          />
-        ))}
-      </div>
-    </section>
-  );
+  const gamesPanel = <GamesPanel packId={packId} sectionId={sectionId} />;
 
   return (
     <Container as="article" width="wide" className="py-2">

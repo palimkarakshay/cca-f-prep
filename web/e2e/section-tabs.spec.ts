@@ -84,4 +84,46 @@ test.describe("section tabs", () => {
     // Time Trivia + Flashcard Battle to active links.
     await expect(page.getByText("Coming soon")).toHaveCount(6);
   });
+
+  test("Flashcards tab flips a card on click and toggles aria-pressed", async ({
+    page,
+  }) => {
+    await page.goto(`${SECTION_URL}?tab=flashcards`);
+    const heading = page.getByRole("heading", { name: /Flashcards · /i });
+    await expect(heading).toBeVisible();
+    const firstCard = page
+      .getByRole("button", { name: /Showing front:/i })
+      .first();
+    await expect(firstCard).toHaveAttribute("aria-pressed", "false");
+    await firstCard.click();
+    // After click the same button now reports "Showing back".
+    const flippedCard = page
+      .getByRole("button", { name: /Showing back:/i })
+      .first();
+    await expect(flippedCard).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("Goals tab shows the time badge + academy link", async ({ page }) => {
+    await page.goto(SECTION_URL);
+    // Default tab is Goals; the link target is anthropic.skilljar.com.
+    const link = page.getByRole("link", {
+      name: /Watch on Anthropic Academy/i,
+    });
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute("href", /skilljar\.com/);
+  });
+
+  test("Quiz tab shows the section-test launcher CTA", async ({ page }) => {
+    await page.goto(`${SECTION_URL}?tab=quiz`);
+    // Section 1 has a section test authored. The launcher CTA links
+    // to /[packId]/section/[id]/test.
+    const launcherCta = page.getByRole("link", {
+      name: /Take section test|Re-take section test/i,
+    });
+    await expect(launcherCta).toBeVisible();
+    await expect(launcherCta).toHaveAttribute(
+      "href",
+      `${SECTION_URL}/test`
+    );
+  });
 });
