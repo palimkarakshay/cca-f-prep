@@ -204,6 +204,7 @@ export function QuizRunner({
             key={L}
             className={cn(
               "flex cursor-pointer items-start gap-3 rounded-md border bg-(--panel-2) p-3 transition-colors",
+              "focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-(--accent)",
               selected === L
                 ? "border-(--accent) bg-(--accent)/10"
                 : "border-(--border) hover:border-(--accent)/50"
@@ -215,7 +216,7 @@ export function QuizRunner({
               value={L}
               checked={selected === L}
               onChange={() => pick(L)}
-              className="sr-only"
+              className="absolute h-0 w-0 opacity-0"
             />
             <span
               aria-hidden
