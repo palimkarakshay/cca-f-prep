@@ -27,6 +27,8 @@ export type {
   Section,
   Concept,
   Lesson,
+  LessonDeeper,
+  LessonDepth,
   LessonExample,
   LessonSimplified,
   LessonStatus,

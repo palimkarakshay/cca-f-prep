@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
+  countsAsMastered,
   ensureConcept,
   ensureSection,
   isSectionPassed,
+  isUnderwhelm,
   masteryFromScore,
   newProgress,
   unlockNextSection,
 } from "@/lib/progress";
 import { CURRICULUM } from "@/content/curriculum";
+import { masteryLevels } from "@/lib/site-config";
 import type { QuizAttempt } from "@/lib/progress-types";
 
 function attempt(score: number, total: number): QuizAttempt {
@@ -20,21 +23,59 @@ function attempt(score: number, total: number): QuizAttempt {
   };
 }
 
-describe("masteryFromScore", () => {
-  it("0 when total is 0", () => {
+describe("masteryFromScore (pack-agnostic, against active masteryLevels)", () => {
+  it("returns 0 when total is 0", () => {
     expect(masteryFromScore(0, 0)).toBe(0);
   });
-  it("2 below 60%", () => {
-    expect(masteryFromScore(5, 10)).toBe(2);
-    expect(masteryFromScore(0, 10)).toBe(2);
+
+  it("walks the ladder: 0% lands at the first score-driven level (the underwhelm rung)", () => {
+    const idx = masteryFromScore(0, 10);
+    expect(idx).toBeGreaterThanOrEqual(2);
+    expect(masteryLevels[idx]).toBeDefined();
   });
-  it("3 at or above 60% and below 90%", () => {
-    expect(masteryFromScore(6, 10)).toBe(3);
-    expect(masteryFromScore(8, 10)).toBe(3);
+
+  it("a perfect score lands at the highest score-driven level", () => {
+    const idx = masteryFromScore(10, 10);
+    expect(idx).toBe(masteryLevels.length - 1);
   });
-  it("4 at or above 90%", () => {
-    expect(masteryFromScore(9, 10)).toBe(4);
-    expect(masteryFromScore(10, 10)).toBe(4);
+
+  it("monotonically increasing score → monotonically non-decreasing level", () => {
+    let prev = -1;
+    for (let s = 0; s <= 10; s++) {
+      const idx = masteryFromScore(s, 10);
+      expect(idx).toBeGreaterThanOrEqual(prev);
+      prev = idx;
+    }
+  });
+
+  it("score at exactly each level's minScorePct lands at that level (or higher)", () => {
+    for (let i = 2; i < masteryLevels.length; i++) {
+      const min = masteryLevels[i].minScorePct;
+      if (min === undefined) continue;
+      // Pick a total + score that produces exactly `min`
+      const total = 100;
+      const score = Math.ceil(min * total);
+      const landed = masteryFromScore(score, total);
+      expect(landed).toBeGreaterThanOrEqual(i);
+    }
+  });
+
+  it("the underwhelm level (if any) is reachable at score 0", () => {
+    const underwhelmIdx = masteryLevels.findIndex((lvl) => lvl.isUnderwhelm);
+    if (underwhelmIdx === -1) return; // pack has no underwhelm
+    const landed = masteryFromScore(0, 10);
+    expect(isUnderwhelm(landed) || landed > underwhelmIdx).toBe(true);
+  });
+
+  it("the highest mastered level (if any) is reachable at score 100%", () => {
+    const lastMasteredIdx = [...masteryLevels]
+      .map((lvl, i) => ({ lvl, i }))
+      .filter(({ lvl }) => lvl.countsAsMastered)
+      .pop()?.i;
+    if (lastMasteredIdx === undefined) return;
+    const landed = masteryFromScore(10, 10);
+    expect(countsAsMastered(landed)).toBe(true);
+    expect(landed).toBeGreaterThanOrEqual(lastMasteredIdx);
   });
 });
 

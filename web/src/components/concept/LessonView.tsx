@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { useProgress } from "@/hooks/useProgress";
 import { useScrollProgress } from "@/hooks/useScrollProgress";
-import { LessonBody, SimplifiedBody } from "./LessonBody";
+import { LessonBody, SimplifiedBody, DeeperBody } from "./LessonBody";
 import { LessonTOC } from "./LessonTOC";
 import { AskClaudePanel } from "./AskClaudePanel";
 import { MasteryBadge } from "@/components/primitives/MasteryBadge";
@@ -13,9 +13,81 @@ import { cn } from "@/lib/utils";
 import { getAdjacentConcepts } from "@/content/curriculum-loader";
 import { ACTIVE_PACK } from "@/content/active-pack";
 import { copy } from "@/lib/site-config";
-import type { Concept, Section } from "@/content/curriculum-types";
+import {
+  getLessonDepth,
+  getServerSnapshot,
+  setLessonDepth,
+  subscribeLessonDepth,
+} from "@/lib/lesson-depth";
+import type {
+  Concept,
+  LessonDepth,
+  Section,
+} from "@/content/curriculum-types";
 
 const ASK_AI_HEADING = ACTIVE_PACK.config.askAI.heading ?? "Ask AI";
+
+const DEPTH_LABEL: Record<LessonDepth, string> = {
+  easy: "Easy",
+  conceptual: "Conceptual",
+  deeper: "Deeper",
+};
+
+const DEPTH_HELP: Record<LessonDepth, string> = {
+  easy: "Plain-language take with an analogy. Use when first encountering the topic.",
+  conceptual: "The canonical lesson — the default. Use to learn it the first time properly.",
+  deeper: "Advanced detail, edge cases, source citations. Use after the canonical lesson lands.",
+};
+
+function DepthPicker({
+  available,
+  value,
+  onChange,
+}: {
+  available: Record<LessonDepth, boolean>;
+  value: LessonDepth;
+  onChange: (next: LessonDepth) => void;
+}) {
+  const ORDER: LessonDepth[] = ["easy", "conceptual", "deeper"];
+  return (
+    <div
+      role="radiogroup"
+      aria-label="Lesson depth"
+      className="inline-flex rounded-full border border-(--border) bg-(--panel-2) p-0.5 text-xs"
+    >
+      {ORDER.map((depth) => {
+        const enabled = available[depth];
+        const active = value === depth;
+        return (
+          <button
+            key={depth}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            aria-disabled={!enabled}
+            disabled={!enabled}
+            title={
+              enabled
+                ? DEPTH_HELP[depth]
+                : `${DEPTH_LABEL[depth]} not authored for this lesson`
+            }
+            onClick={() => enabled && onChange(depth)}
+            className={cn(
+              "rounded-full px-3 py-1 transition-colors",
+              active
+                ? "bg-(--accent) font-semibold text-white"
+                : enabled
+                  ? "text-(--ink) hover:text-(--accent)"
+                  : "cursor-not-allowed text-(--muted) opacity-60"
+            )}
+          >
+            {DEPTH_LABEL[depth]}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 export function LessonView({
   section,
@@ -25,17 +97,33 @@ export function LessonView({
   concept: Concept;
 }) {
   const { hydrated, conceptMastery, markLessonRead } = useProgress();
-  const [simplified, setSimplified] = useState(false);
   const lesson = concept.lesson;
   const scrollPct = useScrollProgress();
+
+  // Per-lesson depth choice persists in localStorage (namespaced by
+  // pack id). useSyncExternalStore reads on every commit so we stay
+  // in sync with the storage event from other tabs and avoid the
+  // setState-in-effect anti-pattern.
+  const getSnapshot = useCallback(
+    () => getLessonDepth(concept.id),
+    [concept.id]
+  );
+  const depth = useSyncExternalStore(
+    subscribeLessonDepth,
+    getSnapshot,
+    getServerSnapshot
+  );
+
+  const chooseDepth = useCallback(
+    (next: LessonDepth) => setLessonDepth(concept.id, next),
+    [concept.id]
+  );
 
   useEffect(() => {
     if (lesson) markLessonRead(concept.id);
   }, [concept.id, lesson, markLessonRead]);
 
   const m = hydrated ? conceptMastery(concept.id) : 0;
-  const hasSimplified = Boolean(lesson?.simplified);
-  const showSimplified = simplified && hasSimplified;
   const { prev, next } = getAdjacentConcepts(section.id, concept.id);
 
   if (!lesson) {
@@ -50,6 +138,15 @@ export function LessonView({
       </section>
     );
   }
+
+  const available: Record<LessonDepth, boolean> = {
+    easy: Boolean(lesson.simplified),
+    conceptual: true,
+    deeper: Boolean(lesson.deeper),
+  };
+  // If the persisted choice is no longer available for this lesson,
+  // fall back to conceptual silently.
+  const effectiveDepth: LessonDepth = available[depth] ? depth : "conceptual";
 
   return (
     <>
@@ -80,19 +177,11 @@ export function LessonView({
             ) : null}
             <MasteryBadge mastery={m} />
             <div className="ml-auto">
-              <button
-                type="button"
-                onClick={() => setSimplified((v) => !v)}
-                className={cn(
-                  "rounded-full border px-3 py-1 text-xs transition-colors",
-                  showSimplified
-                    ? "border-(--accent) bg-(--accent) font-semibold text-white"
-                    : "border-(--border) bg-(--panel-2) text-(--ink) hover:border-(--accent)"
-                )}
-                aria-pressed={showSimplified}
-              >
-                {showSimplified ? "Showing simplified" : "Simplify"}
-              </button>
+              <DepthPicker
+                available={available}
+                value={effectiveDepth}
+                onChange={chooseDepth}
+              />
             </div>
           </header>
 
@@ -103,7 +192,7 @@ export function LessonView({
           {lesson.simplified?.oneLiner ||
           (lesson.keyPoints && lesson.keyPoints.length > 0) ? (
             <section
-              aria-label="What you'll learn"
+              aria-label={copy.whatYoullLearnHeading}
               className="mb-5 mt-3 rounded-r-md border-l-4 border-(--accent-2) bg-(--accent-2)/5 p-4"
             >
               <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
@@ -124,24 +213,39 @@ export function LessonView({
             </section>
           ) : null}
 
-          {showSimplified && lesson.simplified ? (
+          {effectiveDepth === "easy" && lesson.simplified ? (
             <>
-              <p className="mb-3 rounded-md border border-dashed border-(--warn)/40 bg-(--warn)/5 p-2 text-xs text-(--muted)">
-                <span className="mr-1 text-[11px] font-semibold uppercase tracking-wide text-(--warn)">
-                  Simplified
+              <p className="mb-3 rounded-md border border-dashed border-(--accent)/40 bg-(--accent)/5 p-2 text-xs text-(--muted)">
+                <span className="mr-1 text-[11px] font-semibold uppercase tracking-wide text-(--accent)">
+                  Easy
                 </span>
-                Toggle off to read the canonical lesson.
+                Plain-language take. Switch to Conceptual for the canonical lesson.
               </p>
               <SimplifiedBody simplified={lesson.simplified} />
             </>
-          ) : (
-            <LessonBody lesson={lesson} />
-          )}
+          ) : null}
 
-          {simplified && !hasSimplified ? (
+          {effectiveDepth === "conceptual" ? <LessonBody lesson={lesson} /> : null}
+
+          {effectiveDepth === "deeper" && lesson.deeper ? (
+            <>
+              <p className="mb-3 rounded-md border border-dashed border-(--accent-2)/40 bg-(--accent-2)/5 p-2 text-xs text-(--muted)">
+                <span className="mr-1 text-[11px] font-semibold uppercase tracking-wide text-(--accent-2)">
+                  Deeper
+                </span>
+                Advanced detail. Switch back to Conceptual for the canonical lesson.
+              </p>
+              <DeeperBody deeper={lesson.deeper} />
+            </>
+          ) : null}
+
+          {/* If a depth was chosen but isn't authored, point at Ask-AI as the
+              fallback for an on-demand version. */}
+          {(depth === "easy" && !available.easy) ||
+          (depth === "deeper" && !available.deeper) ? (
             <p className="mt-4 text-xs text-(--muted)">
-              No simplified version authored — use {ASK_AI_HEADING} below to
-              request one.
+              {DEPTH_LABEL[depth]} not authored for this lesson — use{" "}
+              {ASK_AI_HEADING} below to request one.
             </p>
           ) : null}
 

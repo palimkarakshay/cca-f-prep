@@ -13,6 +13,11 @@ export interface LessonExample {
   body: string;
 }
 
+/**
+ * Easier-than-canonical version of a lesson. Renders when the learner
+ * picks "Easy" on the depth toggle in LessonView. The historical name
+ * is `simplified`; "Easy" is the user-facing label.
+ */
 export interface LessonSimplified {
   oneLiner?: string;
   analogy?: string;
@@ -20,15 +25,38 @@ export interface LessonSimplified {
   keyPoints?: string[];
 }
 
+/**
+ * Deeper-than-canonical version of a lesson. Renders when the learner
+ * picks "Deeper" on the depth toggle. Use this for advanced detail,
+ * extra examples, edge cases, citations to source material, "going
+ * further" reading suggestions — anything an experienced learner
+ * would want that would slow down a beginner.
+ */
+export interface LessonDeeper {
+  oneLiner?: string;
+  paragraphs?: string[];
+  keyPoints?: string[];
+  examples?: LessonExample[];
+  pitfalls?: string[];
+  furtherReading?: { title: string; href: string }[];
+}
+
 export interface Lesson {
   status: LessonStatus;
+  /** Canonical "Conceptual" body — the default depth. */
   paragraphs: string[];
   keyPoints?: string[];
   examples?: LessonExample[];
   pitfalls?: string[];
   notesRef?: string;
+  /** Easier rendering of the same lesson. Picker disables "Easy" if absent. */
   simplified?: LessonSimplified;
+  /** Deeper / advanced take on the same lesson. Picker disables "Deeper" if absent. */
+  deeper?: LessonDeeper;
 }
+
+/** Three-way depth selector backing the LessonView toggle. */
+export type LessonDepth = "easy" | "conceptual" | "deeper";
 
 export type OptionLetter = "A" | "B" | "C" | "D";
 

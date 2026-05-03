@@ -122,6 +122,26 @@ export const CURRICULUM: Curriculum = {
                 "RAG = search first, then send only the matching pieces.",
                 "More files in a Project = worse answers, not better."
               ]
+            },
+            "deeper": {
+              "oneLiner": "The 'noisier prompt' degradation isn't model failure — it's measurable attention dilution that scales with token-distance between the question and the relevant span.",
+              "paragraphs": [
+                "The mechanism behind Project-with-many-files degradation is well-studied: as input length grows, attention has to spread over more tokens, and irrelevant tokens that semantically resemble the question (e.g. shared vocabulary, similar structure) compete with the truly relevant span for attention weight. This is not a bug; it's the cost of dense attention on long inputs.",
+                "Empirically, the 'lost in the middle' effect (Liu et al., 2023) shows that even when the answer is in context, models attend more reliably to spans near the start or end. A Project with 40 PDFs places the relevant span deep in the middle on average — directly into the lowest-attention zone.",
+                "RAG sidesteps both problems: the retriever filters before the model sees anything, so the prompt stays short, and the relevant span is always at a predictable location (the retrieved chunks block) instead of buried."
+              ],
+              "keyPoints": [
+                "Attention dilution scales with prompt length even when the answer is present.",
+                "'Lost in the middle' (Liu et al., 2023) — the middle of long inputs is the worst place for the answer to live.",
+                "RAG fixes both length and position by filtering before the model and pinning the relevant chunks at a fixed location.",
+                "Hybrid pattern (RAG + small Project) works: tiny Project for stable instructions, RAG for the variable corpus."
+              ],
+              "furtherReading": [
+                {
+                  "title": "Lost in the Middle: How Language Models Use Long Contexts (Liu et al., 2023)",
+                  "href": "https://arxiv.org/abs/2307.03172"
+                }
+              ]
             }
           },
           "quiz": {

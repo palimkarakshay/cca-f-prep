@@ -43,6 +43,25 @@ export const CURRICULUM: Curriculum = {
                 "If you keep missing the eye, your thread end is probably fanned out. Re-cut it on a steep angle with sharp scissors and try again.",
               ],
             },
+            deeper: {
+              oneLiner:
+                "Needle eye geometry, thread twist (S vs Z), and thread weight all interact with how much thread you can pull through cleanly.",
+              paragraphs: [
+                "Needle eyes aren't all the same. A 'sharps' needle has an oblong eye sized for one strand of standard cotton. A 'crewel' or 'embroidery' needle has a longer eye to fit floss or doubled thread. Trying to pull two strands through a sharps eye is the most common cause of fraying mid-stitch.",
+                "Thread twist matters too. Most cotton thread is Z-twist (the fibers spiral up-and-to-the-right). Pulling against the twist (e.g. dragging the thread over fabric in the wrong direction) progressively unspins it. If you find your thread getting visibly fluffier as you sew, flip the spool over and try again — you've been pulling against the twist.",
+              ],
+              keyPoints: [
+                "Match needle eye size to thread weight. Sharps for 1 strand, crewel for floss / doubled thread.",
+                "Z-twist thread (most cotton) unspins when pulled against the twist — flip the spool if it's fraying.",
+                "Beeswax run on the thread (one short pass) reduces tangling on long stitching runs.",
+              ],
+              furtherReading: [
+                {
+                  title: "Singer needle compatibility chart",
+                  href: "https://www.singer.com/needle-compatibility",
+                },
+              ],
+            },
           },
           quiz: {
             questions: [
