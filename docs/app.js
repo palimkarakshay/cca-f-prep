@@ -11,6 +11,14 @@
 (function () {
   "use strict";
 
+  // ---------------- Config ----------------
+  // Ask Claude → opens this URL. Pointing it at a Project preserves the
+  // exam-prep system prompt + project knowledge across questions, instead
+  // of starting from a blank claude.ai/new chat. Leave empty to fall back
+  // to a fresh chat.
+  const CLAUDE_PROJECT_URL = "https://claude.ai/project/019deb60-3da7-7585-b1ef-97577eabe2ef";
+  const CLAUDE_FALLBACK_URL = "https://claude.ai/new";
+
   // ---------------- Persistence ----------------
   const NS = "cca-f-prep";
   const PROGRESS_KEY = NS + ":progress:v1";
@@ -649,9 +657,12 @@
   function renderAskClaudePanel(section, concept, L) {
     const wrap = el("div", { class: "ask-claude" });
     wrap.appendChild(el("h3", null, "Ask Claude for a simpler take"));
+    const opensProject = !!CLAUDE_PROJECT_URL;
     wrap.appendChild(el("p", { class: "ask-claude-help" },
       "Type a question (or leave blank for a default simpler explanation). " +
-      "We'll copy a prompt with this lesson's content to your clipboard and open Claude in a new tab."
+      "We'll copy a prompt with this lesson's content to your clipboard and open " +
+      (opensProject ? "your CCA-F Claude Project" : "Claude") +
+      " in a new tab."
     ));
 
     const ta = el("textarea", {
@@ -670,7 +681,7 @@
         // Open the new tab synchronously while the click's user-activation
         // is still live — awaiting clipboard.writeText() first can drop
         // activation in Safari/Firefox and trigger their popup blocker.
-        window.open("https://claude.ai/new", "_blank", "noopener");
+        window.open(CLAUDE_PROJECT_URL || CLAUDE_FALLBACK_URL, "_blank", "noopener");
 
         // Try the synchronous execCommand path first so we never have to
         // await before any other side-effect that needs activation.
@@ -687,8 +698,9 @@
         } catch (e) { copied = false; }
 
         const finish = (ok) => {
+          const dest = opensProject ? "Claude Project" : "Claude";
           status.textContent = ok
-            ? "Prompt copied. Paste it into the new Claude tab."
+            ? "Prompt copied. Paste it into the new " + dest + " tab."
             : "Could not auto-copy — the prompt is shown below; copy it manually.";
           if (!ok) {
             ta.value = prompt;
@@ -712,7 +724,7 @@
           finish(false);
         }
       }
-    }, "Open in Claude →");
+    }, opensProject ? "Open in Claude Project →" : "Open in Claude →");
 
     const previewBtn = el("button", {
       class: "ghost",

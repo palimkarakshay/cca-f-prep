@@ -105,10 +105,15 @@ Each lesson view exposes two ways to get a simpler explanation:
    paragraphs + simpler key points). Toggle off to return to the
    canonical lesson. If `simplified` isn't authored, the button focuses
    the Ask Claude input below instead.
-2. **Ask Claude panel** — a textarea + "Open in Claude →" button. The
-   app builds a self-contained prompt (lesson body + your question),
-   copies it to the clipboard, and opens `claude.ai/new` in a new tab.
-   No API key needed; works on a static GitHub Pages host.
+2. **Ask Claude panel** — a textarea + "Open in Claude Project →"
+   button. The app builds a self-contained prompt (lesson body + your
+   question), copies it to the clipboard, and opens the configured
+   Claude Project in a new tab. The destination is set by the
+   `CLAUDE_PROJECT_URL` constant near the top of `app.js`; routing to a
+   Project (instead of `claude.ai/new`) preserves the exam-prep system
+   prompt + project knowledge across questions. Leave the constant
+   empty to fall back to a fresh `claude.ai/new` chat. No API key
+   needed; works on a static GitHub Pages host.
 
 Authoring a `simplified` block is optional but recommended — it gives
 the toggle something to flip to without leaving the app.
