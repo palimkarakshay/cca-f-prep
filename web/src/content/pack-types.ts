@@ -34,10 +34,12 @@ export interface AskAIConfig {
   projectUrl: string;
   /** Fresh-chat fallback URL for the same provider. */
   fallbackUrl: string;
-  /** Visible heading for the panel — defaults to "Ask Claude" if omitted. */
+  /** Visible heading for the panel — defaults to "Ask AI" if omitted. The "Open in X" button label is derived from this (drops a leading "Ask " prefix). */
   heading?: string;
   /** Sub-copy under the heading. */
   description?: string;
+  /** Cap on inline prompt characters appended to the chat URL. Different providers / proxies have different URL limits; the rest still lands on the clipboard. Defaults to 6000. */
+  maxPromptChars?: number;
 }
 
 /**

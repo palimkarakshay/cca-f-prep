@@ -6,7 +6,7 @@
    quizzes / mock exams (or copy the cca-f-prep curriculum and edit).
 ------------------------------------------------------------------ */
 
-import type { Curriculum } from "@/content/curriculum-types";
+import type { Curriculum } from "./_types";
 
 export const CURRICULUM: Curriculum = {
   schemaVersion: 1,

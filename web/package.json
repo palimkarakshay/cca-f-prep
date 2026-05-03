@@ -1,8 +1,8 @@
 {
-  "name": "cca-f-prep-web",
+  "name": "learning-app-shell",
   "version": "0.1.1",
   "private": true,
-  "description": "CCA-F Prep — personal learning and development platform.",
+  "description": "Content-agnostic learning-app shell — sections / lessons / quizzes / mock exams. Pair with any content pack in content-packs/.",
   "engines": {
     "node": ">=20"
   },
@@ -15,7 +15,8 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "test": "vitest run",
     "test:unit": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "smoke:swap": "bash scripts/swap-smoke.sh"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

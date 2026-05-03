@@ -7,7 +7,7 @@
    The app shell consumes this via `src/content/active-pack.ts`.
 ------------------------------------------------------------------ */
 
-import type { PackConfig } from "@/content/pack-types";
+import type { PackConfig } from "./_types";
 import { ICON_SVG, ICON_MASKABLE_SVG } from "./icons";
 
 export const packConfig: PackConfig = {

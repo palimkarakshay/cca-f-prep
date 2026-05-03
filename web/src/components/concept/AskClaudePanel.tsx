@@ -2,22 +2,26 @@
 
 import { useState } from "react";
 import { ExternalLink, Copy } from "lucide-react";
-import { siteConfig } from "@/lib/site-config";
 import { ACTIVE_PACK } from "@/content/active-pack";
 import { Button } from "@/components/ui/button";
 import type { Lesson } from "@/content/curriculum-types";
 
 const askAI = ACTIVE_PACK.config.askAI;
-const HEADING = askAI.heading ?? "Ask Claude";
+const HEADING = askAI.heading ?? "Ask AI";
 const DESCRIPTION =
   askAI.description ??
   "Build a prompt with this lesson + your question, copy it, and open the chat in a new tab.";
+// "Ask Claude" → "Open in Claude"; "Ask AI" → "Open in chat".
+const OPEN_LABEL = (() => {
+  const after = HEADING.replace(/^Ask\s+/i, "").trim();
+  return `Open in ${after || "chat"}`;
+})();
 
-// Claude.ai reads ?q=<prompt> on /new and on project pages to pre-fill
-// the chat input. Cap the inline prompt to keep the URL under common
-// proxy/browser limits (~8 KB); the full prompt still lands in the
-// clipboard when truncation kicks in.
-const MAX_INLINE_PROMPT_CHARS = 6000;
+// Most chat hosts read ?q=<prompt> to pre-fill the chat input. Cap the
+// inline prompt to keep the URL under common proxy/browser limits
+// (~8 KB by default); the full prompt still lands in the clipboard
+// when truncation kicks in. Packs may override via askAI.maxPromptChars.
+const MAX_INLINE_PROMPT_CHARS = askAI.maxPromptChars ?? 6000;
 
 function appendPromptToUrl(baseUrl: string, prompt: string): string {
   try {
@@ -77,9 +81,9 @@ export function AskClaudePanel({
       await navigator.clipboard.writeText(prompt);
       copied = true;
     } catch {
-      // Clipboard may be blocked; we still open Claude with the prompt in the URL.
+      // Clipboard may be blocked; we still open the chat with the prompt in the URL.
     }
-    const base = siteConfig.claudeProjectUrl || siteConfig.claudeFallbackUrl;
+    const base = askAI.projectUrl || askAI.fallbackUrl;
     const url = appendPromptToUrl(base, prompt);
     setStatus(
       copied
@@ -127,7 +131,7 @@ export function AskClaudePanel({
           <Copy className="h-3.5 w-3.5" aria-hidden /> Copy prompt
         </Button>
         <Button variant="default" size="sm" onClick={copyAndOpen}>
-          <ExternalLink className="h-3.5 w-3.5" aria-hidden /> Open in Claude
+          <ExternalLink className="h-3.5 w-3.5" aria-hidden /> {OPEN_LABEL}
         </Button>
       </div>
       {status ? (

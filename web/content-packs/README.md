@@ -143,6 +143,85 @@ from your curriculum.
 These are framework / mechanism / infrastructure — they should not
 need editing when you swap packs.
 
+## Pack self-containment
+
+Each pack folder is independent of the shell *except for one file*:
+`<pack>/_types.ts` re-exports the contract types from
+`@/content/pack-types` and `@/content/curriculum-types`. Every other
+pack file (`pack.config.ts`, `curriculum.ts`, `index.ts`, `icons.ts`)
+imports types via the local `./_types` path.
+
+```
+content-packs/cca-f-prep/
+├── _types.ts        ← only file that touches the shell (@/* alias)
+├── pack.config.ts   ← `import type { PackConfig } from "./_types"`
+├── curriculum.ts    ← `import type { Curriculum } from "./_types"`
+├── icons.ts         ← no imports
+└── index.ts         ← `import type { ContentPack } from "./_types"`
+```
+
+This means the *whole pack folder* can be copied into another repo
+and only `_types.ts` needs to change for it to type-check.
+
+## Cross-repo extraction recipe
+
+When you're ready to move a pack into its own git repo:
+
+1. **Copy the pack folder** to a new repo:
+   ```sh
+   git init learning-content-cca-f-prep
+   cp -r web/content-packs/cca-f-prep/* learning-content-cca-f-prep/
+   ```
+
+2. **Replace `_types.ts`** in the new repo. Pick one:
+
+   - **Inlined** — copy the type declarations from
+     `web/src/content/pack-types.ts` and
+     `web/src/content/curriculum-types.ts` into a single
+     `_types.ts` (or split into two files). Pros: zero deps, fully
+     self-contained. Cons: schema drift if the shell type evolves —
+     mitigated by the pack-contract test in the shell, which fails
+     CI on the shell side if a pack stops satisfying the contract.
+
+   - **Shared types package** — publish a tiny
+     `@your-org/learning-content-types` npm package that exports the
+     contract types. Have both shell and pack depend on it. Pros:
+     one source of truth. Cons: third repo to maintain. Replace the
+     `_types.ts` body with re-exports from the shared package.
+
+3. **Add a minimal `package.json`** to the new pack repo:
+   ```json
+   {
+     "name": "@your-org/learning-content-cca-f-prep",
+     "version": "1.0.0",
+     "main": "index.ts",
+     "types": "index.ts",
+     "files": ["*.ts", "_types.ts", "icons.ts"]
+   }
+   ```
+
+4. **Wire it up in the shell.** In the shell repo, edit
+   `src/content/active-pack.ts`:
+   ```diff
+   -import { pack as activePack } from "../../content-packs/cca-f-prep";
+   +import { pack as activePack } from "@your-org/learning-content-cca-f-prep";
+   ```
+   And add to shell `package.json` dependencies (or use a git
+   submodule, or use `npm link` for local dev).
+
+5. **Verify the swap end-to-end:**
+   ```sh
+   cd web
+   npm install
+   npm run smoke:swap   # iterates every pack still in content-packs/
+   npm run build        # builds with the externally-sourced pack
+   ```
+
+If you want a *no-build, copy-on-deploy* model instead, leave the
+relative import in `active-pack.ts` and add a CI step that
+`git clone`s the pack repo into `content-packs/<id>/` before `next
+build` runs. The shell never needs to change.
+
 ## Multiple packs at runtime
 
 The current swap is build-time (one import). If you want runtime

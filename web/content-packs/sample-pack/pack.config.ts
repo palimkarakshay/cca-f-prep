@@ -4,7 +4,7 @@
    AskAI provider from the cca-f-prep pack so a swap is visibly real.
 ------------------------------------------------------------------ */
 
-import type { PackConfig } from "@/content/pack-types";
+import type { PackConfig } from "./_types";
 import { ICON_SVG, ICON_MASKABLE_SVG } from "./icons";
 
 export const packConfig: PackConfig = {

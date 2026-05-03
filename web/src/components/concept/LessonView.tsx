@@ -11,7 +11,10 @@ import { MasteryBadge } from "@/components/primitives/MasteryBadge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getAdjacentConcepts } from "@/content/curriculum-loader";
+import { ACTIVE_PACK } from "@/content/active-pack";
 import type { Concept, Section } from "@/content/curriculum-types";
+
+const ASK_AI_HEADING = ACTIVE_PACK.config.askAI.heading ?? "Ask AI";
 
 export function LessonView({
   section,
@@ -134,7 +137,8 @@ export function LessonView({
 
           {simplified && !hasSimplified ? (
             <p className="mt-4 text-xs text-(--muted)">
-              No simplified version authored — use Ask Claude below to request one.
+              No simplified version authored — use {ASK_AI_HEADING} below to
+              request one.
             </p>
           ) : null}
 

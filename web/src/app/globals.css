@@ -94,7 +94,7 @@ html.dark {
 /*
   Per-pack theme tokens are injected into <head> by `app/layout.tsx`,
   scoped via the `[data-pack="<pack-id>"]` selector. The values above
-  are the default (cca-f-prep) palette; packs override what they need.
+  are the default palette; packs override what they need.
 */
 
 /* Compact density — tighter rhythm for power users on dense displays. */

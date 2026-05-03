@@ -26,7 +26,7 @@ procedure and authoring guide.
 | Persistence | `localStorage`, namespaced by `<pack-id>:` prefix                   |
 | Tests       | Vitest 4 (unit) + Playwright 1.59 + `@axe-core/playwright` (e2e)    |
 | Lint/format | ESLint 9 flat (`eslint-config-next`), Prettier 3 + tailwind plugin  |
-| Deploy      | Vercel (`vercel.json` with `ignoreCommand`)                         |
+| Deploy      | Vercel (`vercel.json`, `next build`, framework auto-detect)         |
 
 ## Run locally
 
@@ -40,12 +40,19 @@ npm run dev               # http://localhost:3000
 # checks
 npm run lint
 npm run type-check
-npm test                  # vitest
+npm test                  # vitest (includes pack-contract suite)
 npm run test:e2e          # playwright (boots build + start)
+npm run smoke:swap        # build every pack in content-packs/ end-to-end
 
 # build
 npm run build && npm start
 ```
+
+`npm run smoke:swap` rotates the active-pack pointer through every
+folder under `content-packs/`, runs `type-check` + `test` + `build`
+for each, and restores the original pointer on exit. Use it after
+authoring a new pack or before merging changes that touch the
+contract.
 
 ## Architecture — shell vs. content pack
 

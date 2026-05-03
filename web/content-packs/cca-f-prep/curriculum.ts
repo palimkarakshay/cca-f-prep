@@ -68,7 +68,7 @@
      R = Remember, U = Understand, A = Apply, An = Analyze, E = Evaluate, C = Create
 ------------------------------------------------------------------ */
 
-import type { Curriculum } from "@/content/curriculum-types";
+import type { Curriculum } from "./_types";
 
 export const CURRICULUM: Curriculum = {
   "schemaVersion": 1,

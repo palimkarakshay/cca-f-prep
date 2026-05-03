@@ -19,7 +19,8 @@ const eslintConfig = [
       "node_modules/**",
       "e2e/**",
       "playwright-report/**",
-      "src/content/curriculum.ts",
+      // Pack-authored curriculum files mark themselves with their own
+      // /* eslint-disable */ header — no global ignore needed here.
     ],
   },
 ];
