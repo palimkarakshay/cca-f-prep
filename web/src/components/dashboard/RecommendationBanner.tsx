@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
+import { ArrowRight, Flame } from "lucide-react";
 import { useProgress } from "@/hooks/useProgress";
 import { recommend } from "@/lib/recommendation";
+import { computeStreak } from "@/lib/streak";
 import { Card } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const KIND_LABEL: Record<string, string> = {
   drill: "Drill",
@@ -25,31 +29,66 @@ const KIND_TITLE: Record<string, string> = {
 export function RecommendationBanner() {
   const { progress, hydrated } = useProgress();
   const reco = useMemo(() => recommend(progress), [progress]);
+  const streak = useMemo(() => computeStreak(progress), [progress]);
 
   if (!hydrated) {
     return (
-      <Card className="border-l-4 border-l-(--accent) bg-(--panel-2)">
+      <Card
+        tone="accent"
+        className="bg-(--panel-2) p-6 md:p-8"
+        aria-busy="true"
+      >
         <p className="text-sm text-(--muted)">Loading recommendation…</p>
       </Card>
     );
   }
 
   return (
-    <Card className="border-l-4 border-l-(--accent) bg-(--panel-2)">
-      <div className="text-[11px] font-semibold uppercase tracking-wide text-(--accent-2)">
-        Recommended next · {KIND_LABEL[reco.kind] ?? "Next"}
+    <Card tone="accent" className="bg-(--panel-2) p-6 md:p-8">
+      <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+        <div className="flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-(--accent-2)">
+            Recommended next · {KIND_LABEL[reco.kind] ?? "Next"}
+          </p>
+          <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl md:text-3xl font-semibold text-(--ink)">
+            {KIND_TITLE[reco.kind] ?? "Next step"}
+          </h2>
+          <p className="mt-2 max-w-prose text-sm md:text-base text-(--muted)">
+            {reco.why}
+          </p>
+        </div>
+        {reco.kind !== "done" ? (
+          <Link
+            href={reco.href}
+            className={cn(
+              buttonVariants({ variant: "default", size: "lg" }),
+              "no-underline w-full md:w-auto"
+            )}
+          >
+            Continue
+            <ArrowRight className="h-5 w-5" aria-hidden />
+          </Link>
+        ) : null}
       </div>
-      <div className="mt-1 text-base font-semibold text-(--ink)">
-        {KIND_TITLE[reco.kind] ?? "Next step"}
-      </div>
-      <p className="mt-1 text-sm text-(--muted)">{reco.why}</p>
-      {reco.kind !== "done" ? (
-        <Link
-          href={reco.href}
-          className="mt-3 inline-flex items-center gap-2 rounded-md bg-(--accent) px-4 py-2 text-sm font-semibold text-white no-underline hover:bg-(--accent-2)"
+
+      {streak.current > 0 ? (
+        <div
+          className="mt-5 inline-flex items-center gap-2 rounded-full border border-(--border) bg-(--panel) px-3 py-1.5 text-xs"
+          aria-label={`Study streak: ${streak.current} day${streak.current === 1 ? "" : "s"}${streak.studiedToday ? ", today complete" : ", study today to keep it"}`}
         >
-          Go →
-        </Link>
+          <Flame className="h-3.5 w-3.5 text-(--accent-2)" aria-hidden />
+          <span className="text-(--muted)">
+            <strong className="font-semibold text-(--ink)">
+              {streak.current}-day
+            </strong>{" "}
+            study streak
+            {streak.studiedToday ? (
+              <span className="text-(--good)"> · today complete</span>
+            ) : (
+              <span> · study today to keep it</span>
+            )}
+          </span>
+        </div>
       ) : null}
     </Card>
   );

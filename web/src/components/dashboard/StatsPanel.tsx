@@ -1,0 +1,120 @@
+"use client";
+
+import { useMemo } from "react";
+import { Flame, Target, BookOpenCheck, Trophy } from "lucide-react";
+import { CURRICULUM } from "@/content/curriculum";
+import { useProgress } from "@/hooks/useProgress";
+import { computeStreak } from "@/lib/streak";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import type { LucideIcon } from "lucide-react";
+
+interface Stat {
+  label: string;
+  value: string;
+  sub?: string;
+  Icon: LucideIcon;
+}
+
+function buildStats(progress: ReturnType<typeof useProgress>["progress"]): Stat[] {
+  const allConcepts = CURRICULUM.sections.flatMap((s) => s.concepts);
+  const totalConcepts = allConcepts.length;
+  const mastered = allConcepts.filter(
+    (c) => (progress.concept[c.id]?.mastery ?? 0) >= 3
+  ).length;
+
+  const totalSections = CURRICULUM.sections.length;
+  const completeSections = CURRICULUM.sections.filter(
+    (s) => progress.section[s.id]?.complete
+  ).length;
+
+  const mocks = CURRICULUM.mockExams ?? [];
+  let bestMockPct = 0;
+  for (const m of mocks) {
+    const attempts = progress.mock[m.id]?.attempts ?? [];
+    for (const a of attempts) {
+      const pct = a.total > 0 ? a.score / a.total : 0;
+      if (pct > bestMockPct) bestMockPct = pct;
+    }
+  }
+
+  const streak = computeStreak(progress);
+
+  return [
+    {
+      label: "Study streak",
+      value:
+        streak.current > 0 ? `${streak.current} day${streak.current === 1 ? "" : "s"}` : "—",
+      sub: streak.studiedToday
+        ? "today complete"
+        : streak.current > 0
+          ? "study today to keep it"
+          : "start a new streak today",
+      Icon: Flame,
+    },
+    {
+      label: "Concepts mastered",
+      value: `${mastered} / ${totalConcepts}`,
+      sub: totalConcepts > 0 ? `${Math.round((mastered / totalConcepts) * 100)}%` : undefined,
+      Icon: Target,
+    },
+    {
+      label: "Sections complete",
+      value: `${completeSections} / ${totalSections}`,
+      Icon: BookOpenCheck,
+    },
+    {
+      label: "Best mock score",
+      value: bestMockPct > 0 ? `${Math.round(bestMockPct * 100)}%` : "—",
+      sub:
+        mocks.length === 0
+          ? "no mock authored"
+          : bestMockPct === 0
+            ? "not yet attempted"
+            : undefined,
+      Icon: Trophy,
+    },
+  ];
+}
+
+export function StatsPanel({ className }: { className?: string }) {
+  const { progress, hydrated } = useProgress();
+  const stats = useMemo(() => buildStats(progress), [progress]);
+
+  return (
+    <Card
+      id="progress"
+      aria-label="Your progress"
+      className={cn("scroll-mt-24", className)}
+    >
+      <CardHeader>
+        <CardTitle className="text-sm font-semibold uppercase tracking-wide text-(--accent-2)">
+          Your progress
+        </CardTitle>
+      </CardHeader>
+      <ul className="flex flex-col gap-4">
+        {stats.map((s) => (
+          <li key={s.label} className="flex items-start gap-3">
+            <span
+              aria-hidden
+              className="mt-0.5 inline-flex h-8 w-8 flex-none items-center justify-center rounded-md bg-(--panel-2) text-(--accent-2)"
+            >
+              <s.Icon className="h-4 w-4" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs uppercase tracking-wide text-(--muted)">
+                {s.label}
+              </div>
+              <div className="mt-0.5 text-lg font-semibold text-(--ink)">
+                {hydrated ? s.value : "—"}
+              </div>
+              {s.sub ? (
+                <div className="mt-0.5 text-xs text-(--muted)">{s.sub}</div>
+              ) : null}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
