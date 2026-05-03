@@ -162,6 +162,28 @@ a:hover {
   outline-offset: 2px;
 }
 
+/* One-shot celebration on a passing quiz score. The pulse is muted in
+   tone (single half-second beat) so it reads as confirmation rather
+   than confetti. Disabled under prefers-reduced-motion below. */
+@keyframes pass-pulse {
+  0% {
+    transform: scale(0.96);
+    box-shadow: 0 0 0 0 var(--good);
+  }
+  60% {
+    transform: scale(1.03);
+    box-shadow: 0 0 0 10px transparent;
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.animate-pass-pulse {
+  animation: pass-pulse 600ms ease-out;
+}
+
 /*
   Respect users who request reduced motion. We strip animations and
   transitions to near-instant rather than removing them entirely so

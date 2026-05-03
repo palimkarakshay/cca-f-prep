@@ -1,3 +1,4 @@
+import { Lightbulb, Terminal, AlertTriangle } from "lucide-react";
 import type { Lesson } from "@/content/curriculum-types";
 
 export function LessonBody({ lesson }: { lesson: Lesson }) {
@@ -10,29 +11,39 @@ export function LessonBody({ lesson }: { lesson: Lesson }) {
       ))}
 
       {lesson.keyPoints && lesson.keyPoints.length > 0 ? (
-        <>
-          <h2 className="mt-6 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
+        <section
+          id="key-points"
+          aria-label="Key points"
+          className="mt-6 scroll-mt-24 rounded-lg border border-(--border) bg-(--panel-2) p-4"
+        >
+          <h2 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
+            <Lightbulb className="h-3.5 w-3.5" aria-hidden />
             Key points
           </h2>
-          <ul className="my-2 list-disc pl-5">
+          <ul className="my-1 list-disc pl-5">
             {lesson.keyPoints.map((kp, i) => (
               <li key={i} className="my-1">
                 {kp}
               </li>
             ))}
           </ul>
-        </>
+        </section>
       ) : null}
 
       {lesson.examples && lesson.examples.length > 0 ? (
-        <>
-          <h2 className="mt-6 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
+        <section
+          id="examples"
+          aria-label="Examples"
+          className="mt-6 scroll-mt-24"
+        >
+          <h2 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
+            <Terminal className="h-3.5 w-3.5" aria-hidden />
             Examples
           </h2>
           {lesson.examples.map((ex, i) => (
             <div
               key={i}
-              className="my-3 rounded-md border border-(--border) bg-(--panel-2) p-3"
+              className="my-3 rounded-md border border-(--border) bg-(--panel-2) p-3 shadow-sm"
             >
               <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
                 {ex.title}
@@ -40,12 +51,17 @@ export function LessonBody({ lesson }: { lesson: Lesson }) {
               <p className="whitespace-pre-wrap text-sm">{ex.body}</p>
             </div>
           ))}
-        </>
+        </section>
       ) : null}
 
       {lesson.pitfalls && lesson.pitfalls.length > 0 ? (
-        <div className="mt-4 rounded-r-md border-l-2 border-(--bad) bg-(--bad)/5 p-3">
-          <h2 className="mb-1 text-xs font-semibold uppercase tracking-wide text-(--bad)">
+        <section
+          id="pitfalls"
+          aria-label="Pitfalls"
+          className="mt-6 scroll-mt-24 rounded-r-md border-l-4 border-(--bad) bg-(--bad)/8 p-3"
+        >
+          <h2 className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-(--bad)">
+            <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
             Pitfalls
           </h2>
           <ul className="list-disc pl-5">
@@ -55,7 +71,7 @@ export function LessonBody({ lesson }: { lesson: Lesson }) {
               </li>
             ))}
           </ul>
-        </div>
+        </section>
       ) : null}
 
       {lesson.notesRef ? (
