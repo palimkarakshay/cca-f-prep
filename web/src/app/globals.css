@@ -40,12 +40,15 @@
   --panel-2: #f4f4f3;
   --border: #e5e5e3;
   --ink: #1a1a1a;
-  --muted: #6b6b6b;
+  --muted: #5a5a5a;
+  /* `--accent` is the canonical button-bg / surface color; `--accent-2` is
+     used for text emphasis and must meet WCAG AA (≥ 4.5:1) on `--canvas`.
+     #a04a2c on #fafaf9 = 5.6:1; #c45a36 on #fafaf9 = 4.6:1 (large text only). */
   --accent: #c45a36;
-  --accent-2: #d97757;
-  --good: #2f7a4a;
-  --bad: #b53a3a;
-  --warn: #b58c1a;
+  --accent-2: #a04a2c;
+  --good: #1f6b3f;
+  --bad: #a32f2f;
+  --warn: #8a6a10;
   --code: #2a2a2a;
 
   /* Layered shadows tuned for light backgrounds. */
@@ -91,8 +94,15 @@ html.dark {
   color-scheme: dark;
 }
 
-/* Optional accent palettes — activated by data-palette on <html>. */
-html[data-palette="claude"] {
+/*
+  Optional accent palettes — activated by data-palette on <html>.
+
+  Scoped to dark mode only. The "claude" salmon (#d97757 / #f0a37b) does
+  not meet WCAG AA contrast on the light canvas (#fafaf9), so we let
+  light mode keep the contrast-safe defaults. In dark mode the salmon
+  reads cleanly against the near-black canvas.
+*/
+html.dark[data-palette="claude"] {
   --accent: #d97757;
   --accent-2: #f0a37b;
 }
