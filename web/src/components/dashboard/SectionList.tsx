@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { CURRICULUM } from "@/content/curriculum";
 import { useProgress } from "@/hooks/useProgress";
-import { MasteryBadge } from "@/components/primitives/MasteryBadge";
+import { MasteryMeter } from "@/components/primitives/MasteryMeter";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -13,17 +13,27 @@ export function SectionList() {
     useProgress();
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
       {CURRICULUM.sections.map((section) => {
         const unlocked = !hydrated || sectionUnlocked(section.id);
         const complete = hydrated && sectionComplete(section.id);
         const lastTest =
           progress.section[section.id]?.testAttempts.slice(-1)[0] ?? null;
 
+        const total = section.concepts.length;
+        const mastered = hydrated
+          ? section.concepts.filter((c) => conceptMastery(c.id) >= 3).length
+          : 0;
+        const masteredPct = total === 0 ? 0 : Math.round((mastered / total) * 100);
+
         return (
           <Card
             key={section.id}
-            className={cn("p-5", !unlocked && "opacity-55")}
+            tone={complete ? "good" : unlocked ? "default" : "default"}
+            className={cn(
+              "flex flex-col gap-3 p-5 transition-opacity",
+              !unlocked && "opacity-60"
+            )}
           >
             <div className="flex items-baseline gap-3">
               <span className="font-mono text-xs text-(--muted)">
@@ -37,20 +47,43 @@ export function SectionList() {
               </Link>
               <span
                 className={cn(
-                  "ml-auto text-[11px] uppercase tracking-wide",
+                  "ml-auto rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
                   complete
-                    ? "text-(--good)"
+                    ? "border-(--good)/40 bg-(--good)/10 text-(--good)"
                     : unlocked
-                      ? "text-(--muted)"
-                      : "text-(--warn)"
+                      ? "border-(--border) text-(--muted)"
+                      : "border-(--warn)/40 text-(--warn)"
                 )}
               >
                 {complete ? "Complete" : unlocked ? "In progress" : "Locked"}
               </span>
             </div>
-            <p className="mt-1 text-sm text-(--muted)">{section.blurb}</p>
+            <p className="text-sm text-(--muted)">{section.blurb}</p>
 
-            <ul className="mt-3 flex flex-col gap-1">
+            {/* Aggregate progress bar — concepts mastered / total. */}
+            <div>
+              <div className="flex items-baseline justify-between text-xs text-(--muted)">
+                <span>
+                  {hydrated ? mastered : 0} / {total} concepts mastered
+                </span>
+                <span>{hydrated ? `${masteredPct}%` : ""}</span>
+              </div>
+              <div
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={total}
+                aria-valuenow={hydrated ? mastered : 0}
+                aria-label={`${section.title} concepts mastered`}
+                className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-(--panel-2)"
+              >
+                <div
+                  className="h-full bg-(--accent) transition-all"
+                  style={{ width: `${masteredPct}%` }}
+                />
+              </div>
+            </div>
+
+            <ul className="flex flex-col gap-1">
               {section.concepts.map((c) => {
                 const authored = Boolean(c.lesson && c.quiz);
                 const m = hydrated ? conceptMastery(c.id) : 0;
@@ -60,11 +93,11 @@ export function SectionList() {
                     <span className="w-12 font-mono text-[11px] text-(--accent-2)">
                       {c.code}
                     </span>
-                    <span className="flex-1 text-sm">{c.title}</span>
+                    <span className="flex-1 truncate text-sm">{c.title}</span>
                     <span className="rounded-full border border-(--border) px-2 py-0.5 text-[10px] text-(--muted)">
                       {c.bloom}
                     </span>
-                    <MasteryBadge mastery={m} />
+                    <MasteryMeter mastery={m} />
                   </span>
                 );
                 if (disabled) {
@@ -93,7 +126,7 @@ export function SectionList() {
             {section.sectionTest ? (
               <div
                 className={cn(
-                  "mt-3 rounded-md border border-dashed px-3 py-2 text-sm",
+                  "rounded-md border border-dashed px-3 py-2 text-xs",
                   unlocked && hydrated
                     ? "border-(--accent)/50 text-(--ink)"
                     : "border-(--border) text-(--muted)"
@@ -111,7 +144,7 @@ export function SectionList() {
               </div>
             ) : null}
 
-            <div className="mt-3 flex flex-wrap gap-2 border-t border-dashed border-(--border) pt-3">
+            <div className="mt-auto flex flex-wrap gap-2 border-t border-dashed border-(--border) pt-3">
               <Link
                 href={`/section/${section.id}`}
                 className={cn(
