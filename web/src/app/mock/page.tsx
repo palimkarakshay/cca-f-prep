@@ -5,32 +5,29 @@ import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/Container";
+import { copy } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Mock exams",
-  description:
-    "Independent calibration exams covering all sections. Use them to gauge readiness before the real assessment.",
+  title: copy.mockExamsHeading,
+  description: copy.mockExamsMetaDescription,
 };
 
 export default function MockIndexPage() {
   const mocks = getMockExams();
   return (
     <Container width="prose" className="py-2">
-      <Breadcrumbs trail={[{ label: "Dashboard", href: "/" }, { label: "Mock exams" }]} />
+      <Breadcrumbs trail={[{ label: "Dashboard", href: "/" }, { label: copy.mockExamsHeading }]} />
       <header className="mb-4">
         <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-(--ink)">
-          Mock exams
+          {copy.mockExamsHeading}
         </h1>
-        <p className="mt-1 text-sm text-(--muted)">
-          Independent of section progress. Use for calibration before the real
-          exam.
-        </p>
+        <p className="mt-1 text-sm text-(--muted)">{copy.mockExamsBlurb}</p>
       </header>
 
       {mocks.length === 0 ? (
         <p className="text-sm text-(--muted)">
-          No mock exams authored yet. They live at the top level of
+          None authored yet. They live at the top level of
           <code className="mx-1 rounded-sm bg-(--panel-2) px-1.5 py-0.5">
             CURRICULUM.mockExams
           </code>

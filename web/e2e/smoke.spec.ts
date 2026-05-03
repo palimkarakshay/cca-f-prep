@@ -1,19 +1,25 @@
 import { test, expect, type ConsoleMessage } from "@playwright/test";
-import { ACTIVE_PACK } from "../src/content/active-pack";
 
-const PACK_NAME = ACTIVE_PACK.config.name;
-const PACK_TAGLINE = ACTIVE_PACK.config.tagline;
+// Pack metadata is read from the live PWA manifest so the smoke spec
+// stays decoupled from the active-pack TypeScript alias (which lives
+// in webpack / vitest config and isn't visible to Playwright's TS).
+
+async function readManifest(request: { get: (url: string) => Promise<{ json: () => Promise<unknown> }> }) {
+  const res = await request.get("/manifest.webmanifest");
+  return (await res.json()) as { name: string; description: string };
+}
 
 test.describe("smoke", () => {
-  test("home renders without console errors", async ({ page }) => {
+  test("home renders without console errors", async ({ page, request }) => {
     const errors: ConsoleMessage[] = [];
     page.on("console", (msg) => {
       if (msg.type() === "error") errors.push(msg);
     });
 
+    const { name } = await readManifest(request);
+
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: PACK_NAME })).toBeVisible();
-    await expect(page.getByText(PACK_TAGLINE)).toBeVisible();
+    await expect(page.getByRole("heading", { name })).toBeVisible();
 
     expect(errors, errors.map((e) => e.text()).join("\n")).toEqual([]);
   });
@@ -40,5 +46,11 @@ test.describe("smoke", () => {
     await firstSectionLink.click();
     await expect(page).toHaveURL(/\/section\//);
     await expect(page.getByRole("navigation", { name: /Breadcrumb/i })).toBeVisible();
+  });
+
+  test("manifest reflects the active pack", async ({ request }) => {
+    const { name, description } = await readManifest(request);
+    expect(name.length).toBeGreaterThan(0);
+    expect(description.length).toBeGreaterThan(0);
   });
 });

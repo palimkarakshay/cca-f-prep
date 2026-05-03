@@ -12,6 +12,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getAdjacentConcepts } from "@/content/curriculum-loader";
 import { ACTIVE_PACK } from "@/content/active-pack";
+import { copy } from "@/lib/site-config";
 import type { Concept, Section } from "@/content/curriculum-types";
 
 const ASK_AI_HEADING = ACTIVE_PACK.config.askAI.heading ?? "Ask AI";
@@ -72,9 +73,11 @@ export function LessonView({
             <span className="rounded-full border border-(--border) px-2 py-0.5 text-[11px] uppercase tracking-wide text-(--muted)">
               {concept.code}
             </span>
-            <span className="rounded-full border border-(--border) px-2 py-0.5 text-[11px] uppercase tracking-wide text-(--muted)">
-              Bloom · {concept.bloom}
-            </span>
+            {concept.bloom ? (
+              <span className="rounded-full border border-(--border) px-2 py-0.5 text-[11px] uppercase tracking-wide text-(--muted)">
+                Bloom · {concept.bloom}
+              </span>
+            ) : null}
             <MasteryBadge mastery={m} />
             <div className="ml-auto">
               <button
@@ -104,7 +107,7 @@ export function LessonView({
               className="mb-5 mt-3 rounded-r-md border-l-4 border-(--accent-2) bg-(--accent-2)/5 p-4"
             >
               <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
-                What you'll learn
+                {copy.whatYoullLearnHeading}
               </h2>
               {lesson.simplified?.oneLiner ? (
                 <p className="mb-2 text-sm text-(--ink)">

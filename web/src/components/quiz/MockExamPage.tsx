@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { useProgress } from "@/hooks/useProgress";
 import { QuizRunner } from "./QuizRunner";
 import { MockResult } from "./MockResult";
+import { copy } from "@/lib/site-config";
 import type { MockExam } from "@/content/curriculum-types";
 import type { CurrentAttempt, QuizAttempt } from "@/lib/progress-types";
 
@@ -52,7 +53,7 @@ export function MockResultPage({ mock }: { mock: MockExam }) {
   if (!last) {
     return (
       <p className="rounded-r-md border-l-4 border-(--warn) bg-(--warn)/10 p-4 text-sm">
-        No attempts recorded yet for this mock exam.
+        No attempts recorded yet for this {copy.mockExamsHeading.toLowerCase().replace(/s$/, "")}.
       </p>
     );
   }

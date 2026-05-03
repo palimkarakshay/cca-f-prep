@@ -3,6 +3,7 @@
 import type { MockExam } from "@/content/curriculum-types";
 import type { QuizAttempt } from "@/lib/progress-types";
 import { QuizResult } from "./QuizResult";
+import { copy } from "@/lib/site-config";
 
 function bandFor(mock: MockExam, score: number) {
   return mock.scoreBands.find((b) => score >= b.min && score <= b.max) ?? null;
@@ -37,7 +38,7 @@ export function MockResult({
         exitHref="/"
         exitLabel="Back to dashboard"
         nextHref="/mock"
-        nextLabel="Browse mock exams"
+        nextLabel={`Browse ${copy.mockExamsHeading.toLowerCase()}`}
       />
     </div>
   );

@@ -4,6 +4,7 @@ import { getMockExam, getMockExams } from "@/content/curriculum-loader";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
 import { Container } from "@/components/ui/Container";
 import { MockExamPage } from "@/components/quiz/MockExamPage";
+import { copy } from "@/lib/site-config";
 
 type Params = { mockId: string };
 
@@ -18,7 +19,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { mockId } = await params;
   const mock = getMockExam(mockId);
-  if (!mock) return { title: "Mock exam not found" };
+  if (!mock) return { title: `${copy.mockExamsHeading} not found` };
   return { title: mock.title };
 }
 
@@ -36,7 +37,7 @@ export default async function MockRoute({
       <Breadcrumbs
         trail={[
           { label: "Dashboard", href: "/" },
-          { label: "Mock exams", href: "/mock" },
+          { label: copy.mockExamsHeading, href: "/mock" },
           { label: mock.title },
         ]}
       />

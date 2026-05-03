@@ -56,7 +56,9 @@ export interface Concept {
   id: string;
   code: string;
   title: string;
-  bloom: Bloom;
+  /** Bloom-taxonomy level for educational packs. Optional — non-academic
+   *  packs can omit it; the badge then doesn't render. */
+  bloom?: Bloom;
   lesson: Lesson | null;
   quiz: Quiz | null;
 }

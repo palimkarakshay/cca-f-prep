@@ -7,6 +7,7 @@ import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
 import { SectionConceptList } from "@/components/section/SectionConceptList";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/Container";
+import { copy } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 type Params = { sectionId: string };
@@ -73,7 +74,7 @@ export default async function SectionPage({
             id="section-test-heading"
             className="text-base font-semibold text-(--ink)"
           >
-            Section test
+            {copy.sectionTestSingular}
           </h2>
           <p className="mt-1 text-sm text-(--muted)">
             {section.sectionTest.questions.length} questions ·{" "}
@@ -87,7 +88,7 @@ export default async function SectionPage({
               "mt-3 no-underline"
             )}
           >
-            Take section test
+            Take {copy.sectionTestSingular.toLowerCase()}
           </Link>
         </section>
       ) : null}

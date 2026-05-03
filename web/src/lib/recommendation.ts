@@ -12,6 +12,7 @@
 
 import { CURRICULUM } from "@/content/curriculum";
 import type { Section } from "@/content/curriculum-types";
+import { copy } from "@/lib/site-config";
 import { ensureConcept, ensureSection, isSectionPassed } from "./progress";
 import type { Progress } from "./progress-types";
 
@@ -89,6 +90,6 @@ export function recommend(p: Progress): Recommendation {
 
   return {
     kind: "done",
-    why: "Every authored concept is passing. New content lands as it's authored.",
+    why: copy.recoDoneMessage,
   };
 }

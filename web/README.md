@@ -177,18 +177,55 @@ component changes needed.
 
 ## Deploy to Vercel
 
+### Single deploy
+
 1. `vercel link` from `web/`.
-2. Push to `main`. Vercel builds when anything under `src/`,
+2. Push to `main`. Vercel rebuilds on changes under `src/`,
    `content-packs/`, `public/`, `package.json`, `next.config.ts`, or
-   `postcss.config.mjs` changes.
-3. No environment variables required.
+   `postcss.config.mjs`.
+3. No environment variables required if you're shipping the default
+   pack (`cca-f-prep`).
 
-## Running with the alternate (sample) pack
+### Parallel deploys (one shell, many packs)
 
-```ts
-// src/content/active-pack.ts
-import { pack as activePack } from "../../content-packs/sample-pack";
+Same repo, multiple Vercel projects, one pack per project.
+
+1. Create one Vercel project per pack — all pointing at the same
+   GitHub repository / branch.
+2. In each project's *Settings → Environment Variables*, add:
+
+   ```
+   NEXT_PUBLIC_CONTENT_PACK_ID = <pack-id>
+   ```
+
+   For example: `cca-f-prep`, `sewing-beginners`, `learn-french`,
+   `leadership-conflict`. The id must match a folder under
+   `content-packs/<pack-id>/`.
+3. Push to the branch. Each project rebuilds independently with its
+   own pack. Different deployment URLs; bind your own domains as
+   you like.
+
+The shell tree-shakes — only the env-var-selected pack lands in
+each bundle.
+
+See [`content-packs/README.md`](content-packs/README.md) for the
+full authoring guide, the cross-repo extraction recipe, and the
+list of overridable UI labels (`pack.copy`).
+
+## Switching the active pack locally
+
+```sh
+# default — cca-f-prep
+npm run dev
+
+# pick a different pack for this run
+NEXT_PUBLIC_CONTENT_PACK_ID=sewing-beginners npm run dev
+NEXT_PUBLIC_CONTENT_PACK_ID=sample-pack npm run dev
+
+# permanently change the default (edits tsconfig path)
+# see content-packs/README.md § "How to swap" for details
 ```
 
-Then `npm run dev`. The dashboard, manifest, icon, and theme all swap
-to the sample pack. Switch back by reverting the import.
+Every dependent surface — dashboard, sections, concepts, quizzes,
+mocks, sitemap, llms.txt, manifest, icons, theme tokens, AskAI
+heading — re-derives from the env-var-selected pack. No code change.

@@ -1,21 +1,27 @@
 /* ------------------------------------------------------------------
    Active content pack — the single swap-point.
 
-   To run this app with a different curriculum / branding:
-     1. Add or copy a pack under `web/content-packs/<your-pack-id>/`
-        following the shape exported by the existing packs (see
-        `web/content-packs/README.md`).
-     2. Change the import below from `cca-f-prep` to your pack id.
-     3. Run `npm install && npm run dev` — every dependent surface
-        (dashboard, sections, concepts, quizzes, mocks, sitemap,
-        llms.txt, manifest, icons, OG tags, tests) re-derives from
-        the new pack with no other code changes.
+   The actual pack to load is chosen by the `@active-pack` webpack /
+   vitest / TypeScript alias, which is configured per environment to
+   point at one of the folders under `web/content-packs/`. The default
+   is `cca-f-prep`; override per-deploy with the environment variable
+   `NEXT_PUBLIC_CONTENT_PACK_ID=<pack-id>` (read by `next.config.ts`
+   and `vitest.config.ts`).
 
-   The indirection is a single import so build-time tree-shaking still
-   eliminates the inactive packs from the bundle.
+   For parallel Vercel deploys: create one Vercel project per pack
+   and set a different `NEXT_PUBLIC_CONTENT_PACK_ID` in each
+   project's environment variables. Same shell, same code, different
+   content per deploy.
+
+   For local one-off swaps without env vars: change the alias's
+   tsconfig paths default OR run with the env var prefixed:
+     NEXT_PUBLIC_CONTENT_PACK_ID=sample-pack npm run dev
+
+   The alias indirection lets webpack tree-shake — only the active
+   pack lands in the bundle.
 ------------------------------------------------------------------ */
 
-import { pack as activePack } from "../../content-packs/cca-f-prep";
+import { pack as activePack } from "@active-pack";
 import type { ContentPack } from "./pack-types";
 
 export const ACTIVE_PACK: ContentPack = activePack;

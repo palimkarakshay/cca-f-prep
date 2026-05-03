@@ -14,6 +14,7 @@
 export type {
   ContentPack,
   PackConfig,
+  PackCopy,
   NavIcon,
   NavItem,
   AskAIConfig,

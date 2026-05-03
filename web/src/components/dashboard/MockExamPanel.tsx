@@ -5,6 +5,7 @@ import { CURRICULUM } from "@/content/curriculum";
 import { useProgress } from "@/hooks/useProgress";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { copy } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 export function MockExamPanel() {
@@ -19,11 +20,9 @@ export function MockExamPanel() {
           id="mock-heading"
           className="text-xs font-semibold uppercase tracking-wide text-(--accent-2)"
         >
-          Mock exams
+          {copy.mockExamsHeading}
         </h2>
-        <p className="text-sm text-(--muted)">
-          Independent of section progress. Use for calibration.
-        </p>
+        <p className="text-sm text-(--muted)">{copy.mockExamsBlurb}</p>
       </div>
       <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
         {mocks.map((mock) => {
@@ -47,9 +46,9 @@ export function MockExamPanel() {
             status === "in-progress"
               ? "In progress"
               : status === "pass"
-                ? `Last attempt: ${last!.score}/${last!.total} — pass`
+                ? `Last attempt: ${last!.score}/${last!.total} — ${copy.passLabel}`
                 : status === "fail"
-                  ? `Last attempt: ${last!.score}/${last!.total} — below pass-gate`
+                  ? `Last attempt: ${last!.score}/${last!.total} — ${copy.belowPassGateLabel}`
                   : null;
 
           return (

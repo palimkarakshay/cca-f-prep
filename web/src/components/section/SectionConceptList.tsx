@@ -22,9 +22,11 @@ export function SectionConceptList({ section }: { section: Section }) {
               {c.code}
             </span>
             <span className="flex-1 text-sm">{c.title}</span>
-            <span className="rounded-full border border-(--border) px-2 py-0.5 text-[10px] text-(--muted)">
-              {c.bloom}
-            </span>
+            {c.bloom ? (
+              <span className="rounded-full border border-(--border) px-2 py-0.5 text-[10px] text-(--muted)">
+                {c.bloom}
+              </span>
+            ) : null}
             <MasteryBadge mastery={m} />
             {!authored ? (
               <span className="rounded-full border border-(--warn)/40 px-2 py-0.5 text-[10px] text-(--warn)">

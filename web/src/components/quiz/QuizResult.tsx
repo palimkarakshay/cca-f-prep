@@ -6,9 +6,14 @@ import { ChevronDown } from "lucide-react";
 import type { Question, OptionLetter } from "@/content/curriculum-types";
 import type { QuizAttempt } from "@/lib/progress-types";
 import { buttonVariants } from "@/components/ui/button";
+import { copy } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 const LETTERS: OptionLetter[] = ["A", "B", "C", "D"];
+
+function capitalize(s: string): string {
+  return s.length === 0 ? s : s[0].toUpperCase() + s.slice(1);
+}
 
 export function QuizResult({
   title,
@@ -82,7 +87,7 @@ export function QuizResult({
           )}
         >
           <div className="text-base font-semibold">
-            {passed ? "Pass" : "Below pass-gate"}
+            {passed ? capitalize(copy.passLabel) : capitalize(copy.belowPassGateLabel)}
           </div>
           <p className="mt-1 text-(--muted)">
             {passed

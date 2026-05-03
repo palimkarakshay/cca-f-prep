@@ -5,6 +5,7 @@ import { getSection } from "@/content/curriculum-loader";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
 import { Container } from "@/components/ui/Container";
 import { SectionTestPage } from "@/components/quiz/SectionTestPage";
+import { copy } from "@/lib/site-config";
 
 type Params = { sectionId: string };
 
@@ -21,8 +22,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { sectionId } = await params;
   const section = getSection(sectionId);
-  if (!section) return { title: "Section test not found" };
-  return { title: `Section test · ${section.title}` };
+  if (!section) return { title: `${copy.sectionTestSingular} not found` };
+  return { title: `${copy.sectionTestSingular} · ${section.title}` };
 }
 
 export default async function SectionTestRoute({
@@ -40,7 +41,7 @@ export default async function SectionTestRoute({
         trail={[
           { label: "Dashboard", href: "/" },
           { label: section.title, href: `/section/${section.id}` },
-          { label: "Section test" },
+          { label: copy.sectionTestSingular },
         ]}
       />
       <SectionTestPage section={section} />

@@ -25,6 +25,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@active-pack": [
+        "./content-packs/cca-f-prep"
       ]
     }
   },

@@ -54,6 +54,52 @@ export interface PackTheme {
   dark?: Record<string, string>;
 }
 
+/**
+ * Pack-overridable UI strings for surfaces whose default copy is
+ * exam-coded ("Mock exams", "Section test", "below pass-gate"). A
+ * non-exam pack (sewing, cooking, leadership coaching) overrides only
+ * the labels that don't fit its domain; everything else inherits the
+ * default. Resolved via `resolveCopy()` in `src/lib/site-config.ts`.
+ */
+export interface PackCopy {
+  // Mock-exam surface — heading on dashboard panel + meta description
+  // on /mock + the panel blurb. Default uses the word "Mock".
+  mockExamsHeading?: string;
+  mockExamsBlurb?: string;
+  mockExamsMetaDescription?: string;
+
+  // Section-test labels surfaced on dashboard cards + section detail
+  // page + section-test runner.
+  sectionTestSingular?: string;
+
+  // Stats-panel + dashboard labels.
+  conceptsMasteredLabel?: string;
+  sectionsCompleteLabel?: string;
+  bestMockScoreLabel?: string;
+  studyStreakLabel?: string;
+
+  // Recommendation banner kind labels (small uppercase eyebrow + big
+  // headline). Defaults are exam-flavored.
+  recoDrillLabel?: string;
+  recoDrillTitle?: string;
+  recoSectionTestLabel?: string;
+  recoSectionTestTitle?: string;
+  recoLessonLabel?: string;
+  recoLessonTitle?: string;
+  recoQuizLabel?: string;
+  recoQuizTitle?: string;
+  recoDoneLabel?: string;
+  recoDoneTitle?: string;
+  recoDoneMessage?: string;
+
+  // Lesson-view callout heading.
+  whatYoullLearnHeading?: string;
+
+  // Quiz / mock pass-gate language.
+  passLabel?: string;
+  belowPassGateLabel?: string;
+}
+
 export interface PackConfig {
   /** Stable id, used in storage keys and manifest. Lowercase, kebab-case. */
   id: string;
@@ -69,8 +115,10 @@ export interface PackConfig {
   author?: string;
   /** Primary nav. Item with href "/" is the home anchor and is hidden in the desktop header. */
   nav: NavItem[];
-  /** Configures the AskAIPanel ("Ask Claude" by default). */
+  /** Configures the AskAIPanel (heading defaults to "Ask AI"). */
   askAI: AskAIConfig;
+  /** Optional terminology overrides for exam-coded UI strings. See PackCopy. */
+  copy?: PackCopy;
   /** PWA manifest payload. The icons resolve to /icon.svg and /icon-maskable.svg, served from the active pack. */
   manifest: {
     backgroundColor: string;

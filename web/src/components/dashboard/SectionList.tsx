@@ -6,6 +6,7 @@ import { useProgress } from "@/hooks/useProgress";
 import { MasteryMeter } from "@/components/primitives/MasteryMeter";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { copy } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 export function SectionList() {
@@ -60,11 +61,12 @@ export function SectionList() {
             </div>
             <p className="text-sm text-(--muted)">{section.blurb}</p>
 
-            {/* Aggregate progress bar — concepts mastered / total. */}
+            {/* Aggregate progress bar — uses copy.conceptsMasteredLabel. */}
             <div>
               <div className="flex items-baseline justify-between text-xs text-(--muted)">
                 <span>
-                  {hydrated ? mastered : 0} / {total} concepts mastered
+                  {hydrated ? mastered : 0} / {total}{" "}
+                  {copy.conceptsMasteredLabel.toLowerCase()}
                 </span>
                 <span>{hydrated ? `${masteredPct}%` : ""}</span>
               </div>
@@ -73,7 +75,7 @@ export function SectionList() {
                 aria-valuemin={0}
                 aria-valuemax={total}
                 aria-valuenow={hydrated ? mastered : 0}
-                aria-label={`${section.title} concepts mastered`}
+                aria-label={`${section.title} ${copy.conceptsMasteredLabel.toLowerCase()}`}
                 className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-(--panel-2)"
               >
                 <div
@@ -94,9 +96,11 @@ export function SectionList() {
                       {c.code}
                     </span>
                     <span className="flex-1 truncate text-sm">{c.title}</span>
-                    <span className="rounded-full border border-(--border) px-2 py-0.5 text-[10px] text-(--muted)">
-                      {c.bloom}
-                    </span>
+                    {c.bloom ? (
+                      <span className="rounded-full border border-(--border) px-2 py-0.5 text-[10px] text-(--muted)">
+                        {c.bloom}
+                      </span>
+                    ) : null}
                     <MasteryMeter mastery={m} />
                   </span>
                 );
@@ -132,9 +136,9 @@ export function SectionList() {
                     : "border-(--border) text-(--muted)"
                 )}
               >
-                Section test ·{" "}
+                {copy.sectionTestSingular} ·{" "}
                 {section.sectionTest.questions.length} questions ·{" "}
-                {Math.round((section.sectionTest.passPct ?? 0.7) * 100)}% pass
+                {Math.round((section.sectionTest.passPct ?? 0.7) * 100)}% {copy.passLabel}
                 {lastTest ? (
                   <>
                     {" "}
@@ -162,7 +166,9 @@ export function SectionList() {
                     "no-underline"
                   )}
                 >
-                  {lastTest ? "Re-take section test" : "Take section test"}
+                  {lastTest
+                    ? `Re-take ${copy.sectionTestSingular.toLowerCase()}`
+                    : `Take ${copy.sectionTestSingular.toLowerCase()}`}
                 </Link>
               ) : null}
             </div>

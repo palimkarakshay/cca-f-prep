@@ -6,25 +6,26 @@ import { ArrowRight, Flame } from "lucide-react";
 import { useProgress } from "@/hooks/useProgress";
 import { recommend } from "@/lib/recommendation";
 import { computeStreak } from "@/lib/streak";
+import { copy } from "@/lib/site-config";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/primitives/Skeleton";
 import { cn } from "@/lib/utils";
 
 const KIND_LABEL: Record<string, string> = {
-  drill: "Drill",
-  "section-test": "Section test",
-  lesson: "Continue — read lesson",
-  quiz: "Continue — take quiz",
-  done: "All caught up",
+  drill: copy.recoDrillLabel,
+  "section-test": copy.recoSectionTestLabel,
+  lesson: copy.recoLessonLabel,
+  quiz: copy.recoQuizLabel,
+  done: copy.recoDoneLabel,
 };
 
 const KIND_TITLE: Record<string, string> = {
-  drill: "Re-take a missed concept",
-  "section-test": "Section test ready",
-  lesson: "Read the next lesson",
-  quiz: "Take the next quiz",
-  done: "All authored content complete",
+  drill: copy.recoDrillTitle,
+  "section-test": copy.recoSectionTestTitle,
+  lesson: copy.recoLessonTitle,
+  quiz: copy.recoQuizTitle,
+  done: copy.recoDoneTitle,
 };
 
 export function RecommendationBanner() {

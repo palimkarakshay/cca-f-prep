@@ -12,11 +12,13 @@
 import { describe, expect, it } from "vitest";
 import { pack as ccaPack } from "../../content-packs/cca-f-prep";
 import { pack as samplePack } from "../../content-packs/sample-pack";
+import { pack as sewingPack } from "../../content-packs/sewing-beginners";
 import type { ContentPack } from "@/content/pack-types";
 
 const PACKS: Array<[string, ContentPack]> = [
   ["cca-f-prep", ccaPack],
   ["sample-pack", samplePack],
+  ["sewing-beginners", sewingPack],
 ];
 
 describe.each(PACKS)("pack %s satisfies the contract", (id, pack) => {

@@ -5,6 +5,7 @@ import { Flame, Target, BookOpenCheck, Trophy } from "lucide-react";
 import { CURRICULUM } from "@/content/curriculum";
 import { useProgress } from "@/hooks/useProgress";
 import { computeStreak } from "@/lib/streak";
+import { copy } from "@/lib/site-config";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
@@ -42,7 +43,7 @@ function buildStats(progress: ReturnType<typeof useProgress>["progress"]): Stat[
 
   return [
     {
-      label: "Study streak",
+      label: copy.studyStreakLabel,
       value:
         streak.current > 0 ? `${streak.current} day${streak.current === 1 ? "" : "s"}` : "—",
       sub: streak.studiedToday
@@ -53,22 +54,22 @@ function buildStats(progress: ReturnType<typeof useProgress>["progress"]): Stat[
       Icon: Flame,
     },
     {
-      label: "Concepts mastered",
+      label: copy.conceptsMasteredLabel,
       value: `${mastered} / ${totalConcepts}`,
       sub: totalConcepts > 0 ? `${Math.round((mastered / totalConcepts) * 100)}%` : undefined,
       Icon: Target,
     },
     {
-      label: "Sections complete",
+      label: copy.sectionsCompleteLabel,
       value: `${completeSections} / ${totalSections}`,
       Icon: BookOpenCheck,
     },
     {
-      label: "Best mock score",
+      label: copy.bestMockScoreLabel,
       value: bestMockPct > 0 ? `${Math.round(bestMockPct * 100)}%` : "—",
       sub:
         mocks.length === 0
-          ? "no mock authored"
+          ? "none authored"
           : bestMockPct === 0
             ? "not yet attempted"
             : undefined,

@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { useProgress } from "@/hooks/useProgress";
 import { QuizRunner } from "./QuizRunner";
 import { getAdjacentSections } from "@/content/curriculum-loader";
+import { copy } from "@/lib/site-config";
 import type { Section } from "@/content/curriculum-types";
 import type { CurrentAttempt, QuizAttempt } from "@/lib/progress-types";
 
@@ -33,7 +34,7 @@ export function SectionTestPage({ section }: { section: Section }) {
   if (!section.sectionTest) {
     return (
       <p className="rounded-r-md border-l-4 border-(--warn) bg-(--warn)/10 p-4 text-sm">
-        Section test not yet authored for this section.
+        {copy.sectionTestSingular} not yet authored for this section.
       </p>
     );
   }
@@ -44,7 +45,7 @@ export function SectionTestPage({ section }: { section: Section }) {
 
   return (
     <QuizRunner
-      title={`${section.title} — Section test`}
+      title={`${section.title} — ${copy.sectionTestSingular}`}
       subtitle={`Pass-gate ${Math.round(
         passPct * 100
       )}% · passing unlocks the next section`}

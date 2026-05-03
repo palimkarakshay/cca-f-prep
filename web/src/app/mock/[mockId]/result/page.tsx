@@ -4,6 +4,7 @@ import { getMockExam, getMockExams } from "@/content/curriculum-loader";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
 import { Container } from "@/components/ui/Container";
 import { MockResultPage } from "@/components/quiz/MockExamPage";
+import { copy } from "@/lib/site-config";
 
 type Params = { mockId: string };
 
@@ -36,7 +37,7 @@ export default async function MockResultRoute({
       <Breadcrumbs
         trail={[
           { label: "Dashboard", href: "/" },
-          { label: "Mock exams", href: "/mock" },
+          { label: copy.mockExamsHeading, href: "/mock" },
           { label: mock.title, href: `/mock/${mock.id}` },
           { label: "Result" },
         ]}
