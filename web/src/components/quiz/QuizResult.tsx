@@ -108,6 +108,7 @@ export function QuizResult({
           const correct = picked === q.correct;
           const skipped = picked == null;
           const verdict = skipped ? "Skipped" : correct ? "Correct" : "Wrong";
+          const verdictGlyph = skipped ? "○" : correct ? "✓" : "✗";
           return (
             <li
               key={q.n}
@@ -122,7 +123,7 @@ export function QuizResult({
             >
               <div
                 className={cn(
-                  "text-xs font-semibold uppercase tracking-wide",
+                  "flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide",
                   correct
                     ? "text-(--good)"
                     : skipped
@@ -130,6 +131,9 @@ export function QuizResult({
                       : "text-(--bad)"
                 )}
               >
+                <span aria-hidden className="font-mono text-sm leading-none">
+                  {verdictGlyph}
+                </span>
                 {verdict}
               </div>
               <h3 className="mt-1 text-sm font-semibold text-(--ink)">
