@@ -20,7 +20,9 @@ export default function HomePage() {
         <p className="text-sm text-(--muted)">{siteConfig.tagline}</p>
       </header>
       <RecommendationBanner />
-      <SectionList />
+      <section id="sections" aria-label="All sections">
+        <SectionList />
+      </section>
       <MockExamPanel />
     </Container>
   );
