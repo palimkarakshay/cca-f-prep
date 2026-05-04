@@ -1661,3 +1661,261 @@ CONSTRAINTS:
 
 ---
 
+## Part 6 — Acceptance & verification
+
+### 6.1 — Phase 1 end-to-end test plan (12 steps; must all pass before declaring P6 done)
+
+1. **Sign up two test accounts** — one B2C learner, one operator. Verify both land on `/` and roles are correct in Drizzle Studio.
+2. **Operator creates a catalog "test"** via `/admin/catalogs` and imports one concept from a sample JSON. Validators pass; publish succeeds.
+3. **Learner browses the catalog**, opens the concept, takes the quiz. `progress.status` advances `viewed → quizzed → complete`.
+4. **Learner submits a suggestion**; operator sees it in `/admin/suggestions` queue.
+5. **Operator runs `/draft-topic <suggestion>`** in Claude Code; gets validated JSON; pastes into `/admin/catalogs/[id]/import`; publishes.
+6. **Learner refreshes**, sees the new concept; receives in-app notification "your suggestion is live."
+7. **Lint mode** flags any latent bias in seeded content (run against `cca-f-prep`'s known B-bias quizzes; expect findings).
+8. **Rollback**: import a v2 of a concept, then rollback to v1; learner sees v1 on next request.
+9. **Multi-tenant isolation**: operator B (separate Clerk org) cannot see operator A's drafts. RLS test green.
+10. **Lighthouse mobile** on `/catalogs/test` ≥ 90.
+11. **Marketing-side metric loop**: submit B2B LOI form on `www.<domain>` → row appears in `/admin/leads` within 2s.
+12. **Pre-order loop**: click Stripe Payment Link → complete test charge → webhook fires → `lead.kind = 'b2c_preorder'` row written with `stripe_payment_intent_id`.
+
+### 6.2 — Phase 2 verification additions
+
+13. Generate a quiz via `/admin/generate`; SSE streams; validators run; critic returns confidence; auto-publish at confidence ≥ 0.85.
+14. Force a low-confidence draft; ends up in human queue; reviewer approves with edits; goes live.
+15. Per-user rate limit: 11th generation in a day rejected.
+16. Per-tenant budget cap: 80% threshold shows banner; 100% blocks generation.
+17. B2B human-required: new draft cannot be auto-published even at confidence 0.99.
+18. Two-eye gate: admin approval + SME approval both required.
+19. Calibration: rejected draft's reason appears in next generation's prompt within ~1 min.
+20. Quality signal: simulate 30 attempts on a question with 20% correct rate → question paused for new sessions.
+21. Stripe upgrade → `tenant.plan` flips → quota lifted.
+22. Cross-tenant import (P12 only): pinned version doesn't drift when source publishes a new version.
+
+### 6.3 — Continuous quality bars
+
+| Bar | Tool | Gate |
+|---|---|---|
+| TypeScript strict, zero `any` (without justification comment) | tsc + ESLint | CI required |
+| Unit + integration tests | Vitest | ≥ 80% line coverage on `packages/shared` and `packages/db` |
+| End-to-end happy paths | Playwright | All steps green |
+| Accessibility | axe-core/playwright | 0 violations on listed surfaces |
+| Lighthouse | lhci CI action | Mobile perf ≥ 90 (learner), ≥ 95 (marketing) |
+| Bundle budget | next-bundle-analyzer | ≤ 220 kB gzipped on learner home |
+| RLS isolation | Custom integration test | Adversarial scenario passes |
+| Codex review | `.github/workflows/codex-review.yml` | `codex-blockers` label = no merge |
+
+### 6.4 — Phase 1 success-metric gate (the business-side acceptance test)
+
+Phase 2 work does not start until **all** of these are true:
+
+- [ ] **B2B**: 3 signed Letters of Intent in hand. (Operator owns this.)
+- [ ] **B2C**: 50 waitlist signups + 10 paid Stripe pre-orders.
+- [ ] **Engagement floor** (sanity check): ≥ 50% of waitlist who tried the platform completed at least one full lesson + quiz.
+- [ ] **Operator availability**: at least 12 weeks of focused build time available for P7–P11.
+
+If the engagement floor fails, do **not** spend on Phase 2 — the issue is product, not capacity. Iterate Phase 1 instead.
+
+---
+
+## Part 7 — Operating playbooks (post-launch)
+
+### 7.1 — Daily authoring loop (Phase 1)
+
+**Time budget: ~30 min/day.**
+
+1. Open Claude Code in the repo.
+2. Visit `/admin/suggestions`. Pick the top-voted open suggestion. Click "Accept" (copies a draft prompt to clipboard).
+3. Paste into Claude Code: `/draft-topic <pasted-text>`.
+4. Wait ~3 minutes for the skill to draft + auto-validate.
+5. If lint passes, paste the JSON into `/admin/catalogs/[id]/import`. Review the diff. Publish.
+6. If lint fails after 3 auto-iterations, manually fix the JSON or refine the prompt.
+7. Move the suggestion to "Accepted" status; learner gets a notification.
+
+### 7.2 — Weekly business loop
+
+**Time budget: ~2 hours/week.**
+
+1. Run the lead funnel report: marketing visits → form submits → LOIs → pre-orders.
+2. Reach out to any B2B leads from the past week (target ≤ 24h response time).
+3. Update the Phase 1 success-metric scoreboard (a one-page doc the operator maintains).
+4. Run `/admin/quality` (Phase 2): any newly paused questions? Investigate root cause.
+5. Run `/admin/billing` (Phase 2): tenants near their token budget? Send proactive notice.
+
+### 7.3 — Quality incident response
+
+**Triggers:**
+- A learner reports a concept (`report_content` event).
+- A question is auto-paused by the quality aggregator.
+- A B2B SME flags an approved concept after publish.
+
+**Steps:**
+
+1. **Triage within 24h.** Open the concept in `/admin/catalogs/[id]/lint`. Re-run validators. Check the post-publish event stream.
+2. **If the issue is content**: rollback to the previous catalog_version, regenerate the concept (Phase 2) or hand-edit (Phase 1), publish, test.
+3. **If the issue is systemic** (e.g. validator missed a class of failure): add a new validator to `packages/shared`, run it across all published versions, identify other affected concepts, batch-fix.
+4. **If the issue is critic-related** (Phase 2): consider activating the cross-vendor critic for the next 2 weeks while you tune the same-family critic.
+5. **Always**: write a post-mortem in `plans/incidents/YYYY-MM-DD-<short-slug>.md` with timeline, root cause, fix, prevention. The discipline matters more than the doc.
+
+### 7.4 — Cost monitoring (Phase 2)
+
+**Daily**: glance at /admin/dashboard → token-burn meter. Any tenant > 50% of monthly cap before mid-month? Open a conversation.
+
+**Weekly**: download Anthropic + Stripe + Vercel usage reports. Compare against the tenant_policy.monthly_token_budget_usd column. Recompute unit economics.
+
+**Monthly**: write a one-page cost-vs-revenue summary. Adjust pricing or budgets if margin drops below 80%.
+
+### 7.5 — Operator-side regression discipline
+
+Every time an issue causes a content-quality miss:
+
+1. Reproduce the failure as a fixture under `packages/shared/__fixtures__/regressions/`.
+2. Add a validator (or extend an existing one) that catches it.
+3. Run the validator across all published versions of all catalogs.
+4. The fixture becomes part of CI; the failure cannot recur silently.
+
+This is the **"strict validation loop"** principle from the cca-f-prep `CLAUDE.md`. Honour it without exception.
+
+### 7.6 — Migration off vendors (escape hatches)
+
+| If we need to leave… | Path | ETA |
+|---|---|---|
+| Clerk | Auth.js + WorkOS (for SAML/SCIM); user table is portable | ~5 days |
+| Inngest | Vercel Cron + DB-backed queue (`inngest_state` → custom queue table) | ~3 days |
+| Anthropic | OpenAI / Google via a thin shim layer at `apps/web/src/server/llm-client.ts`; same JSON tool-use shape | ~7 days |
+| Vercel | AWS Amplify / SST + RDS + S3 (Postgres + R2 already standard APIs) | ~10 days |
+| Cloudflare R2 | AWS S3 (drop-in API) | ~2 days |
+
+None of these are pre-built. Document them; build only when forced.
+
+---
+
+## Part 8 — Appendices
+
+### 8.1 — Full environment-variable reference
+
+See §2.5. Every variable on every host must be set; missing values cause a startup failure (`zod`-validated `env.ts` at app boot).
+
+```typescript
+// apps/web/src/env.ts
+import { z } from "zod";
+
+const envSchema = z.object({
+  // DB
+  DATABASE_URL: z.string().url(),
+  DATABASE_URL_HTTP: z.string().url(),
+  // R2
+  R2_ACCOUNT_ID: z.string(),
+  R2_ACCESS_KEY_ID: z.string(),
+  R2_SECRET_ACCESS_KEY: z.string(),
+  R2_BUCKET: z.string(),
+  R2_PUBLIC_URL: z.string().url(),
+  // Auth
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string(),
+  CLERK_SECRET_KEY: z.string(),
+  // Email
+  RESEND_API_KEY: z.string(),
+  RESEND_FROM_EMAIL: z.string().email(),
+  // Analytics & errors
+  NEXT_PUBLIC_POSTHOG_KEY: z.string(),
+  NEXT_PUBLIC_POSTHOG_HOST: z.string().url(),
+  SENTRY_DSN: z.string(),
+  NEXT_PUBLIC_SENTRY_DSN: z.string(),
+  // Payments
+  STRIPE_SECRET_KEY: z.string(),
+  STRIPE_WEBHOOK_SECRET: z.string(),
+  STRIPE_PREORDER_PAYMENT_LINK: z.string().url(),
+  // Phase 2
+  ANTHROPIC_API_KEY: z.string().optional(),
+  INNGEST_EVENT_KEY: z.string().optional(),
+  INNGEST_SIGNING_KEY: z.string().optional(),
+  VOYAGE_API_KEY: z.string().optional(),
+  // App
+  NEXT_PUBLIC_APP_URL: z.string().url(),
+  NEXT_PUBLIC_MARKETING_URL: z.string().url(),
+  TENANT_DEFAULT_PLAN: z.enum(["free", "pro", "enterprise"]).default("free"),
+});
+
+export const env = envSchema.parse(process.env);
+```
+
+### 8.2 — API surface (canonical list)
+
+| Method | Path | Purpose | Auth | Phase |
+|---|---|---|---|---|
+| POST | `/api/leads` | Marketing lead capture | none (CORS-locked) | P2 |
+| POST | `/api/stripe-webhook` | Stripe events | signature | P2 |
+| GET | `/api/health` | Liveness probe | none | P6 |
+| POST | `/api/progress` | Update learner progress | Clerk + tenant | P3 |
+| GET | `/api/search` | Cross-catalog search | Clerk + tenant | P3 |
+| POST | `/api/suggestions` | Submit a suggestion | Clerk + tenant | P3 |
+| POST | `/api/catalogs/[id]/import` | Operator publish | admin | P4 |
+| POST | `/api/knowledge/upload` | Knowledge file upload | admin | P4 |
+| POST | `/api/inngest` | Inngest function entry | signature | P8 |
+| POST | `/api/generate` | Trigger AI generation | admin + plan | P8 |
+| POST | `/api/billing/portal` | Stripe Customer Portal | admin | P7 |
+
+### 8.3 — Common errors & fixes
+
+| Error | Fix |
+|---|---|
+| `permission denied for table catalog` | RLS is enabled but `app.tenant_id` not set. Wrap the call in `withTenant(...)`. |
+| `connection terminated due to connection timeout` (Neon) | Using the pooler driver instead of HTTP for RLS-bearing queries. Switch to `DATABASE_URL_HTTP`. |
+| Vercel deploy fails: "Hobby plan does not allow commercial use" | Upgrade the app project to Pro. Marketing site can stay on Hobby. |
+| Clerk session loops on `/sign-in` | `middleware.ts` matcher includes `/sign-in`. Exclude it. |
+| Stripe webhook returns 400 in CI | Test events are being sent without a signature. Use `stripe.webhooks.constructEvent` in dev mode with a test secret. |
+| `validators[6].letterDistribution returned no findings` on B-biased quiz | The validator's threshold is set too lax. Default: flag if ≥ 75% of correct answers in a quiz are the same letter. |
+| PostHog events not recording | EU vs US host mismatch. Confirm `NEXT_PUBLIC_POSTHOG_HOST` matches the project's region. |
+| Sentry double-recording errors | Both server-side and client-side SDKs initialised on a server component. Use server SDK only on server. |
+
+### 8.4 — Migration matrix (Phase 1 → Phase 2 layer-by-layer)
+
+| Layer | Phase 1 state | Phase 2 change |
+|---|---|---|
+| Routes | `apps/web` with `(public) / (learner) / (admin)` route groups | Same; add `(admin)/sme`, `(admin)/generate`, `(admin)/review`, `(admin)/billing`, `(admin)/quality`, `(admin)/sso` |
+| DB | Neon free | Neon Scale; add `subscription`, `embedding`, `calibration_rule`, `catalog_import`, `token_usage`. No schema breaks. |
+| R2 | one bucket, `packs/` + `tenants/<id>/knowledge/` | Add `tenants/<id>/private/` for B2B-private catalogs; presigned URLs |
+| Auth | Clerk free | Clerk Pro; Organizations everywhere; SAML/SCIM on Enterprise |
+| AI | none on server | Anthropic API (Sonnet drafter + Opus critic) + Inngest |
+| Validators | shared lib runs in lint + import | Same lib runs additionally in critic + post-publish quality aggregator |
+| Billing | none | Stripe; `tenant.plan` gated by webhook |
+| Observability | basic | Token usage burn meter; per-tenant cost dashboard |
+
+### 8.5 — Files this implementation guide expects to be created
+
+POC (Phase 1):
+
+- `pnpm-workspace.yaml`
+- `apps/web/`, `apps/marketing/`
+- `packages/shared/`, `packages/db/`, `packages/shared-ui/`, `packages/design-tokens/`
+- `apps/web/src/app/{(public),(learner),(admin)}/...`
+- `apps/web/src/middleware.ts`, `apps/web/src/server/{r2-client,with-tenant}.ts`
+- `apps/web/src/app/api/{leads,stripe-webhook,progress,search,suggestions,health,catalogs/[id]/import,knowledge/upload}/route.ts`
+- `apps/marketing/src/pages/{index,b2b,b2c,pricing-preview,about,blog/index}.astro`
+- `scripts/{seed-from-existing-packs,lint-draft,load-test}.ts`
+- `.claude/skills/draft-topic/SKILL.md`
+- `plans/IMPLEMENTATION.md` (this document — operator copies it in Part 2)
+- `plans/OPERATOR_RUNBOOK.md`
+- `plans/VERIFICATION_LOG.md`
+
+Commercial (Phase 2):
+
+- `apps/web/src/inngest/{generate,validate,critique,publish,quality-aggregator}.ts`
+- `apps/web/src/server/{anthropic-client,critic-prompts,billing-stripe,llm-client-shim}.ts`
+- `apps/web/src/app/api/{generate,billing/portal,inngest}/route.ts`
+- `apps/web/src/app/(admin)/{generate,review,sme,billing,quality,sso}/...`
+
+### 8.6 — Glossary (terms used throughout)
+
+- **Catalog** — a course or topic-stream. Has a slug, a current version, and many concepts.
+- **Catalog version** — an immutable snapshot of a catalog's content. New versions are minted on publish; learners always read the catalog's `current_version_id`.
+- **Concept** — one unit of learning: a lesson + a 3-question quiz.
+- **F-code** — one of F1–F8, the cognitive failure-mode taxonomy used to tag validator findings.
+- **HITL** — Human-in-the-loop. The publish gate is always a human in this product.
+- **Pause-not-pull** — when a question performs poorly, hide it for new sessions; never pull it from in-flight quizzes.
+- **RLS** — Row-Level Security in Postgres; enforced via `current_setting('app.tenant_id')`.
+- **Tenant** — a B2C personal account or a B2B organization. Every row is tenant-scoped.
+- **Validator** — a deterministic code-only check that runs over a draft Concept JSON. 22 of them in Phase 1, 23 in Phase 2.
+
+### 8.7 — Where the strategy doc lives
+
+The "why" of this plan (market, pricing, two-phase rationale, decision triggers, founder fit) lives at `plans/content-pack-management-plan.md` plus four audience-specific decks (`deck-overview.md`, `deck-investor.md`, `deck-b2b-prospect.md`, `deck-collaborator.md`). This document is the "how"; that document is the "why". Keep them in sync — when a decision changes, update both.
