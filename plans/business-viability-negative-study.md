@@ -717,3 +717,109 @@ This is not budgeted anywhere in the plan.
 Selling AI-generated training content from a one-person team without
 SOC2 to a mid-market buyer in 2026 is not a hard sell. It is no sale.
 
+---
+
+## 11. Pricing math is upside-down (the pilot economics)
+
+Already covered in §4.5. Summary for the table-of-contents:
+
+The B2B pilot fee ($5,000, fully credited toward 12 months) exceeds
+year-1 revenue at the entry tier (50 seats × $5/mo × 12mo = $3,000).
+The platform pays the customer to be a customer at the lowest pricing
+band, which is the band most likely to bite. At $10 Pro, year-1 net
+revenue is ~$1,000 against ~50 hours of operator pilot labour plus AI
+generation cost plus SME training time — net loss-making per
+"successful" pilot.
+
+The decks do not contain a sensitivity analysis on this. The pilot is
+priced as if the goal is to *acquire logos*, not revenue. That is a
+venture-funded play; the operator is not venture-funded.
+
+---
+
+## 12. Vendor concentration risk is severe and underbudgeted
+
+The platform binds itself to **seven free-tier vendors** simultaneously
+(`deck-collaborator.md:298–308`): Vercel, Neon, Clerk, R2, Resend,
+PostHog, Sentry. Plus Anthropic for both drafter and critic — a single
+vendor is the entire AI substrate.
+
+| Vendor | Lock-in | Migration cost |
+|---|---|---|
+| Anthropic | Sonnet drafter + Opus critic + Claude Skills + Claude Code authoring | Prompt-portable in theory; behaviour-portable in practice = 4–8 weeks of re-tuning, plus full re-eval suite |
+| Clerk | Auth + Organizations + SAML/SCIM + JWT shape | Auth migrations are quarter-long projects; user re-onboarding is non-negotiable for SSO tenants |
+| Neon (Postgres) | HTTP driver, RLS, schema | "Standard Postgres" but query plans differ; HTTP driver to pooled = re-test every endpoint |
+| Vercel | Edge + ISR + image optimisation + cron | "Cloudflare Pages or self-host AWS" listed as escape — unbuilt; 6–12 weeks |
+| Cloudflare R2 | Egress-free is R2's pricing today, **not a moat the platform owns** |
+| Inngest, Stripe, Resend, PostHog, Sentry | Each independently switchable — but combined, the test surface is enormous |
+
+**The deck claims "data shapes are portable"** (`deck-investor.md:301`).
+That is true at the schema level and meaningless at the operational
+level. A Postgres dump does not migrate Clerk users, R2 file URLs,
+Inngest function IDs, or Stripe customer IDs.
+
+### 12.1 Anthropic-specific risks
+
+- **Pricing changes**: Sonnet/Opus pricing has changed three times
+  inside 12 months across the industry. A 3× hike on Opus output rate
+  pushes AI cost from $5–10k/mo (§4.2) to $15–30k/mo at the same scale.
+- **Model deprecation**: Claude 4.x → 4.7 happened in Jan 2026. Each
+  model upgrade requires re-tuning the validator suite, the critic
+  prompt, and the drafter system prompt.
+- **TOS shifts**: Anthropic added an enterprise zero-data-retention
+  toggle in 2025; the B2B pitch (`deck-b2b-prospect.md:328`) sells this
+  as a feature. If Anthropic rebundles or restricts it, the pitch
+  breaks.
+- **Anthropic's own products**: Claude for Education, Claude Skills,
+  Claude Marketplace are direct or adjacent competitors. The platform
+  is selling Anthropic's models against Anthropic's own first-party
+  motion.
+
+The collaborator deck's only hedge is *"OpenRouter as v2 escape hatch"*
+(`deck-collaborator.md:141, :325`) — i.e., unbuilt.
+
+The "$10k/day burn" admission (`deck-collaborator.md:40`) is real but
+the only mitigation is a UI burn meter, not a hard circuit-breaker.
+A bug in the per-tenant budget logic — entirely possible in a 18-day
+build — leaks into a runaway invoice.
+
+---
+
+## 13. The validator "moat" decays with each model release
+
+The plan's stated technical moat is *"23 documented AI-content failure
+modes catalogued in our existing CCA-F study repo's
+`06-failure-analysis/error-log.md`"* (`deck-investor.md:127`) plus an
+"F1–F12 cognitive failure-mode taxonomy" (`deck-investor.md:128`).
+
+**The moat decays automatically with every model release.**
+
+- **F1 letter-bias validator**: per `CLAUDE.md`, the operator's own
+  auto-generated CCA-F quizzes shipped with **76% B-bias**. The
+  validator that's pitched as the moat **already failed once on its
+  author's own content** and the operator logged the regression as a
+  follow-up (`letter-bias-2026-05`). A moat that doesn't catch the
+  author's own slip is, by demonstration, not a moat.
+- **F5 fabricated-rule detector**: pattern-matches phrasing like
+  "exceeds N tools". LLMs trivially route around regex by paraphrasing.
+- **F12 cue-bias via distractor-length heuristic**: a model that varies
+  distractor lengths randomly bypasses the check.
+- **F23 answer-justification audit**: only works if the critic LLM
+  agrees the cited span is sufficient. That collapses into "trust the
+  critic", which is just "trust the LLM" with extra steps.
+
+Per the collaborator-deck audit, only **~6 of 23** validators are
+actually coded; the rest are commented stubs (`// 17 more...`). The
+moat the platform claims to have is **74% imaginary at the time of
+pitch**.
+
+The investor deck repurposes the same failure log as moat
+(`deck-investor.md:127`). What it actually is: a study tool for one
+person's exam prep, repackaged as commercial IP. As soon as Claude 4.8
+or GPT-6 ships and reduces the failure surface by another 30–40%, the
+catalogue is partially obsolete.
+
+The dossier's own line, paraphrased: *"these take months to invent and
+tune. We have them already."* The honest version: *"these are months
+of work that are nearly worthless six months from now."*
+
