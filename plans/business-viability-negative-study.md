@@ -197,3 +197,115 @@ which is the range the operator is actually going to occupy.
 - *[Freemius State of Micro-SaaS 2025](https://freemius.com/blog/state-of-micro-saas-2025/)* — 70% of micro-SaaS makers earn under $1k MRR; median profitable micro-SaaS at $4.2k MRR.
 - *[HolonIQ EdTech VC](https://www.holoniq.com/notes/edtech-vc-collapse-at-580m-for-q1-not-even-an-ai-tailwind-could-hold-up-the-10-year-low)* — Q1 2026 at 10-year low ($580M).
 
+---
+
+## 4. Unit economics are a mirage
+
+**Headline claim**: gross margin > 95%, NRR Year-1 ≥ 110%, Year-2 ≥ 120%,
+B2C CAC payback ~3 months at $9/mo and ~$25 CAC, B2B payback < 12 months
+(`deck-investor.md:64–73`).
+
+Every assumption in that paragraph is benchmarked against top-quartile
+SaaS — and even there the numbers are aspirational, not achievable.
+
+### 4.1 Founder labour priced at zero
+
+Dossier `:1391`: *"CAC is operator-time-only in Phase 1."* Operator time
+is the single binding resource of the entire enterprise. Pricing it at
+$0 is the trick that keeps margin >95%. Strip it out and the picture
+inverts:
+
+- 60–80 hr/week of operator labour at any reasonable opportunity cost
+  ($75/hr conservative for a senior developer) = **$15k–$25k/month
+  loaded labour cost** before a dollar of revenue. That dwarfs every
+  infra and AI line on the cost slide combined.
+- The investor deck implicitly admits this — "side bet, not a
+  stake-everything-on-it situation" (`deck-investor.md:273`). Side bets
+  do not produce 24-month roadmaps to $100k MRR.
+
+### 4.2 The Phase 2 AI cost is off by ~25–30×
+
+The plan claims **~$200 Sonnet drafter + ~$100 Opus reviewer = $300/mo
+AI** at "100 tenants, 10k MAU, 50k generations/mo"
+(`deck-overview.md:101–104`).
+
+Sonnet 4.5 list pricing: $3/MTok input, $15/MTok output.
+Opus list pricing: $15/MTok input, $75/MTok output.
+A "long-form lesson + 3-Q quiz with explanations + intake JSON" runs
+~2k input, ~3k output per draft.
+
+| Line | Tokens × rate | Monthly cost |
+|---|---|---|
+| Sonnet input  | 50k drafts × 2k tok × $3/MTok | $300 |
+| Sonnet output | 50k drafts × 3k tok × $15/MTok | $2,250 |
+| Opus input (with knowledge-file context for span citation) | 50k crit × 5k tok × $15/MTok | $3,750 |
+| Opus output | 50k crit × 1k tok × $75/MTok | $3,750 |
+| **Sub-total** | | **$10,050/mo** |
+| With 50% optimistic prompt-caching savings | | ~**$5–6k/mo** |
+| With realistic 0–30% caching at sporadic traffic | | ~**$8–10k/mo** |
+
+Even after generous caching, **AI cost is $5–10k/mo, not $300**. The
+"95% gross margin" headline assumes the wrong order of magnitude on the
+single largest line item.
+
+The dossier itself flags this risk at `:1429–1434`: caching savings
+assumed at 30–60%; if caching drops to 0%, AI cost rises 3×. The
+expert-review audit notes the same concern but never reconciles
+(`expert-review-audit.md:454–455`).
+
+### 4.3 NRR 110%/120% is wishful for the actual segment mix
+
+Pavilion / SaaS Capital 2025 data on real-world NRR
+([Pavilion 2025 B2B SaaS Benchmarks](https://www.joinpavilion.com/resource/b2b-saas-performance-benchmarks)):
+
+- SMB segments cluster **90–105%** NRR.
+- Median market NRR has compressed to **101%**.
+- ACV $25–50k median is **102%**.
+- **SMB churn is 8.2× enterprise.**
+
+The investor deck's lead price tier is $9.99/mo B2C
+(`deck-investor.md:47`). Consumer subscriptions bottom out at **70–90%
+NRR** — there is nothing to expand into. The 110/120% target silently
+assumes the B2B mix dominates within Year 1, which contradicts the GTM
+ordering that puts B2C cert-prep first.
+
+### 4.4 B2C unit economics at $9/mo do not pencil
+
+EdTech B2C subscription churn case studies cite improvements from 15%
+to 50% retention as a published win
+([loyalty.cx](https://loyalty.cx/edtech-churn-rate/)). At a realistic
+**8% monthly churn**, a $9 subscription has LTV ≈ $112. Against any paid
+acquisition channel (Google Ads CPC for "CCA-F practice" or "AI
+certification prep"), CAC is structurally above $40 and probably above
+$80 once you include ad creative and landing-page optimisation. **The
+LTV:CAC ratio is sub-2x**, often sub-1x. The decks claim "B2C ~3 months
+at $9/mo and ~$25 CAC" with no source.
+
+### 4.5 Pilot pricing is upside-down
+
+The B2B pilot offer (`deck-b2b-prospect.md:240–251`):
+- Up to 50 employees
+- Pilot fee: **$5,000**, fully credited to the first 12 months if they
+  continue.
+
+If they continue at the entry tier ($5/seat/mo) at 50 seats, year-1
+revenue is **50 × $5 × 12 = $3,000**. **The credit is greater than
+year-1 revenue.** The operator has paid the customer to be a customer
+and still not recovered the implementation cost.
+
+If they continue at the $10 Pro tier: $6k/yr. Net of credit: $1k.
+Against ~50 hours of pilot operator labour + AI generation at cost +
+SME training time, this is structurally loss-making in Year 1 even
+on a "successful" pilot.
+
+### 4.6 Sales / implementation cost erased entirely
+
+Mid-market SaaS sales cycles run **60–120 days**, lengthened **22%
+since 2022** ([Optifai sales-cycle benchmarks](https://optif.ai/learn/questions/sales-cycle-length-benchmark/)).
+Mid-market wins close at **30–39%** of opportunities; solo founders
+close ~25–31% ([The Digital Bloom](https://thedigitalbloom.com/learn/pipeline-performance-benchmarks-2025/)).
+The decks contain **no SDR, demo, implementation-services, or field-sales
+line**. Either someone runs the sales motion (then loaded labour cost is
+materially higher than zero) or no one does (then the pipeline doesn't
+fill).
+
