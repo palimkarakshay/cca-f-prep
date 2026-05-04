@@ -1321,6 +1321,71 @@ DELIVERABLES:
 - [ ] Bundle size budget met.
 - [ ] All tests green; codex review passed.
 
+#### P3 Section D extensions (LM2 / LM3 / LM5 / LM6 — learner-side absorption mechanics)
+
+These extensions can be built inside P3 or split into a P3.b PR — operator's choice. **Add these sub-bullets to the P3 AI prompt** above:
+
+```
+ADDITIONAL OBJECTIVES (Section D — read §3.8 first):
+
+11. RetrievalGate (LM2) inside LessonView:
+    - After ~50% of paragraphs, render a "Quick check" gate: a 1-Q recall prompt
+      (sourced from concept.lesson.keyPoints[0] or a draft.intake.onePrinciple
+      if available); learner types a sentence; "Next" stays disabled until
+      submit; on submit, write a retrieval_event row.
+    - Self-judged correctness (radio: "I covered this | I missed it"); the
+      Phase-2 critic adds model-judging later. Latency captured for L3.
+
+12. PrincipleWrite (LM3) before answer reveal in QuizRunner:
+    - Add a small textarea labelled "In one sentence, what's the principle
+      this question tests?" that must be non-empty before the answer reveal
+      button enables. Compare similarity (Levenshtein over normalised text)
+      to question.principle; surface a soft "your wording is close / very
+      different" note (no blocking).
+
+13. JOL slider (LM6) in QuizRunner:
+    - Before submit, show a 1–5 confidence slider ("How sure are you?").
+    - On submit, POST /api/calibration/event with {jolBefore, actualCorrect}.
+      Server computes delta = |jol_normalised - score| and writes a
+      calibration_event row.
+    - The /me/progress page gains a "Calibration trend" chart (sparkline of
+      |delta| over the last 30 events).
+
+14. Depth-4-rung "solo" (LM5) in LessonView:
+    - The depth toggle gains a 4th option "Solo" that disables hints,
+      examples, and pitfalls — only paragraphs render.
+    - "Solo" is gated: visible-but-disabled until a derived mastery score
+      ≥ 0.7 (correct ≥ 70% on the last 5 attempts of this concept's quiz).
+    - Mastery score helper at packages/shared/src/mastery.ts.
+
+15. /api/calibration/event (POST):
+    - Validates body, computes delta, writes calibration_event with
+      withTenant, emits a 'calibration_recorded' PostHog event for L2 funnel.
+
+16. Tests:
+    - Vitest: nextInterval helper from §3.8.7 (correct ladder + leech rule).
+    - Vitest: retrieval-event write-through; rls-isolation for retrieval_event.
+    - Vitest: calibration delta computed correctly across normalisation cases.
+    - Playwright: a quiz attempt submits with JOL captured and chart updates.
+
+CONSTRAINTS for Section D extensions:
+- These features add weight; preserve P3's bundle budget (≤ 220 kB gzipped on
+  /catalogs/[slug]/[code]) — lazy-load the calibration chart.
+- The retrieval-event self-judging is intentionally generous in Phase 1
+  (no model-judging yet); Phase 2 P9 critic upgrades the judge.
+- Each Section D mechanic is independently feature-flagged via
+  tenant_policy.rule_overrides.flags so a tenant can opt out (B2B compliance).
+```
+
+#### P3 Section D — Definition of Done (additions)
+
+- [ ] RetrievalGate renders in any lesson with ≥ 4 paragraphs; "Next" is gated.
+- [ ] PrincipleWrite blocks reveal until a non-empty sentence is typed.
+- [ ] JOL slider captured for every quiz submit; calibration_event row written; rls-isolated.
+- [ ] Depth-4-rung "Solo" hidden until mastery threshold met; transitions correctly.
+- [ ] `/api/calibration/event` end-to-end test green.
+- [ ] Mobile Lighthouse stays ≥ 90 even with the new surfaces.
+
 ---
 
 ### P4 — Admin app: import draft, lint, suggestions, knowledge files, leads (~4 days)
