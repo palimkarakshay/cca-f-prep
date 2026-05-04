@@ -637,7 +637,301 @@ named sources for ease of independent verification.
 
 ## §3 — How industry has historically mitigated (case studies)
 
-*This section will be filled in commit 4.*
+This section documents how the ed-tech industry has deployed individual
+mechanisms from §2, with named outcome data where the company has
+published it. Each sub-section follows the same shape: company →
+mechanism deployed → outcome data with named source → what it got
+right → what it missed. The unifying observation across all eight
+sub-sections is in §3.8 — most products optimise *one* mechanism; the
+synthesis-of-many is unowned.
+
+### 3.1 Spaced-repetition systems
+
+**SuperMemo.** Wozniak (Piotr Wozniak) developed the SM-2 algorithm
+in 1985 as part of the SuperMemo desktop application. SM-2 is the
+canonical reference for expanding-interval scheduling: the interval
+after a successful recall is multiplied by an "ease factor"; failed
+recalls reset the interval; consecutive successes promote to longer
+intervals. SuperMemo has remained a niche power-user tool but the
+algorithm is foundational — virtually every later spaced-repetition
+system (SRS) is a derivative or extension of SM-2 (SuperMemo SM-15,
+Anki's algorithm, FSRS).
+
+**Anki.** Open-source SRS launched 2006; ~10M+ users worldwide. The
+Anki algorithm is a refined SM-2 with leech detection (cards missed
+≥ 3 times are flagged as "leeches" and routed to manual review) and
+desktop / mobile / web sync. Anki's user base is heavily concentrated
+in medical-school and language-learning communities — segments where
+the cost of a forgotten fact is high enough to justify the discipline
+of daily review.
+
+**Quizlet.** Founded 2005; flashcard-based study tool; ~60M+ users
+peak; valuation ~$1B (2020 funding round). Quizlet expanded the
+spaced-repetition concept into a consumer-friendly format with shared
+deck libraries and gamified study modes. Quizlet Plus subscription
+$36/yr is a useful B2C-pricing comparable.
+
+**RemNote, Memrise, Brainscape.** Niche players in academic note-
+taking with embedded spacing (RemNote), language-learning with
+mnemonics (Memrise), and confidence-calibrated SRS (Brainscape).
+
+**Got right:** the spacing surface itself; the leech-detection rule;
+the multi-device sync. Anki's user base is empirical evidence that a
+spacing surface produces long-tail engagement *for users who are
+already motivated*.
+
+**Missed:** retrieval practice as a *separate* mechanism (Anki cards
+are recognition tasks, not generation tasks — flipping a card is not
+the same as writing the answer first); SDT relatedness (no cohort,
+no peer surface); SME-side effectiveness (Anki decks are user-
+authored or community-shared with no quality scaffolding — the
+quality variance across decks is enormous and there is no
+backward-design or 4C/ID gate).
+
+**Effect-size data.** Sequoia retention guide and a16z mobile
+retention guides cite a 5–10pp D7/D30 retention lift attributable to
+the spacing surface alone (vs equivalent ed-tech without spacing) —
+useful but small relative to what cohort-tier products achieve.
+
+### 3.2 Streak / habit / variable-reward systems
+
+**Duolingo.** Founded 2011 by Luis von Ahn (Carnegie Mellon, prior
+reCAPTCHA / Google sale); IPO 2021 (NASDAQ: DUOL) at ~$5–7B market
+cap; ~88M+ DAU as of 2023; ~$500M+ ARR. The retention-design
+playbook is the most-published in consumer ed-tech: streak counter
+with loss-aversion framing; streak freeze (one missed day per N
+earned); push notifications anchored to user's modal study time;
+league system (variable-ratio social reinforcement); XP and crown
+progression (endowed progress). Mazal 2022 (Duolingo engineering
+blog post — "How Duolingo grew DAU 4.5× in 4 years") publishes the
+headline numbers: CURR (Current-User Retention Rate) +21% over
+the iteration cycle; DAU 4.5× over four years from streak-design
+iteration alone.
+
+**Snap streaks** as a B2C consumer behavioural analog — Snapchat's
+streak design predates Duolingo's adoption and demonstrated the loss-
+aversion framing at consumer-app scale.
+
+**Got right:** the trigger phase of the Hook Model (push notifications
+are the dominant return-driver); variable-ratio reinforcement (league
+matchups are unpredictable); investment phase (the streak counter is
+pure investment — abandoning is a loss).
+
+**Missed:** depth and durable retention quality. Duolingo has been
+publicly criticised for surfacing rote translation drills that
+optimise for streak-eligible-action rather than language
+competence — a "completion ≠ learning" pattern at the consumer-
+language-app tier. The SME side is absent entirely (Duolingo
+authors content centrally; no third-party authoring).
+
+### 3.3 Cohort-based learning
+
+**Maven.** Founded 2020 by Wes Kao (the altMBA co-founder) and Gagan
+Biyani (the Udemy co-founder); $25M Series A 2021 led by First
+Round; courses range $300–3000 per learner per cohort. Maven's
+retention design is cohort-only: students enrol in a fixed cohort
+window, engage live with the instructor and peers, and complete
+together. W1 → W2 retention reported in Maven's published data and
+Wes Kao's writing: 96%. This is a 14× lift over the MOOC W1 → W2
+baseline of 16% (Reich 2019). The mechanism is named in §2.2:
+SDT relatedness (peer + instructor presence) + parasocial
+accountability + variable-reward via live interaction.
+
+**altMBA.** Seth Godin's writing-and-leadership cohort programme;
+~96% completion rate reported in Godin's published essays. altMBA
+predates Maven and was a substantial influence on Maven's design.
+
+**HBS Online (CORe and beyond).** Harvard Business School's online
+programmes use a cohort-tier with high completion vs MOOC baseline.
+HBS Online has not published exact completion figures but its
+positioning and pricing reflect a cohort-tier value capture.
+
+**Section.** Founded 2019 by Scott Galloway; $50M Series B 2022;
+positioning is cohort + AI tutor. **Section is the closest peer to
+the platform we are building** — same wedge (synthesis of cohort
+relatedness with adaptive scaffolding) but Section is consumer-
+business-education-only and has no SME-side authoring tooling. We
+treat Section as the dominant "this is a real category" comparable
+in §5.2.
+
+**Got right:** SDT relatedness; parasocial commitment; cohort time-
+binding (the live touchpoint is a powerful return-trigger).
+
+**Missed:** post-cohort retention (once the cohort ends, the
+learner falls off the engagement surface); spacing (cohort-based
+courses do not typically ship spaced retrieval beyond the cohort
+window); SME effectiveness (the instructor is *the* SME, but they
+self-author in slides — no CTA scaffolding).
+
+### 3.4 Mastery learning
+
+**Khan Academy.** Founded 2008; ~137M+ registered learners; non-
+profit; per-skill mastery progression with adaptive practice. The
+intellectual ancestor is Bloom 1968 ("Learning for Mastery"), which
+established the canonical claim: 1:1 tutoring is approximately 2σ
+(two standard deviations) more effective than classroom instruction —
+the "2-sigma problem" because the gap is well-established but
+classroom economics make 1:1 tutoring infeasible at scale. Khan
+Academy's adaptive practice is an attempt to approximate the 1:1
+tutoring effect through software.
+
+**ALEKS.** Adaptive Learning in Knowledge Spaces. Acquired by
+McGraw-Hill 2013. Knowledge-space-theory-based adaptive system used
+at university-level mathematics. Strong in pre-calculus and
+introductory STEM.
+
+**Knewton.** Adaptive learning platform; acquired by Wiley 2019. The
+canonical example of "personalisation via Bayesian knowledge tracing"
+that struggled commercially because the personalisation lift was
+marginal in real classroom settings.
+
+**Smart Sparrow.** Adaptive learning platform spun out of UNSW
+Sydney; acquired by Pearson 2020. Authoring-side strong; learner-
+side adaptation modest.
+
+**Got right:** mastery gates (do not unlock the next concept until
+the previous is mastered); explicit Bloom-level targeting; per-skill
+progression vs course-level progression.
+
+**Missed:** social / cohort surface; SME-side authoring scaffolding
+(Khan Academy authors centrally; ALEKS / Knewton author via partner
+publishers with no instructional-design QA gate); behavioural
+triggers (the streak / push-notification surface is largely absent).
+
+### 3.5 MOOC failure mode (what NOT to do)
+
+**Coursera.** Founded 2012 (Daphne Koller and Andrew Ng, Stanford
+spin-out); IPO 2021 (NYSE: COUR) at ~$7B peak market cap; ~$500M+
+ARR. The free-tier completion baseline is ~5% across all Coursera
+courses; even paid-verified completion sits around 10–15%.
+
+**edX.** Founded 2012 (Harvard + MIT non-profit); merged with 2U
+in 2021. Same completion-rate pattern as Coursera.
+
+**Udacity.** Founded 2011; pivoted from open MOOCs to corporate
+nano-degrees by 2016 — the most explicit MOOC-pivot example
+documented.
+
+**Udemy.** Consumer marketplace; less rigorous than Coursera/edX
+on academic content; completion rates not publicly reported but
+internal estimates and analyst reports place them in the same 5–15%
+band.
+
+**Reich & Ruipérez-Valiente 2019 (*Science*, "The MOOC pivot").**
+Analyses 12.67M registrants on 565 HarvardX/MITx courses 2012–2018.
+Headline finding: ≈ 3.13% completion among free-tier registrants;
+the major MOOC platforms have moved away from open access toward
+credential-paid B2B segments because the open-access model does not
+sustain. The paper's structural lesson: high-quality content is
+necessary but not sufficient — without cohort, trigger, calibration,
+and retrieval-practice surfaces, formal learning collapses to ~5%
+completion regardless of content quality.
+
+**What it taught the field:** content production is not the
+bottleneck; the *engagement architecture* is. This is exactly the
+gap §2 names and §4 commits to filling.
+
+### 3.6 Corporate LMS (the staid alternative)
+
+**Cornerstone OnDemand.** Founded 1999; acquired by Clearlake
+Capital for $5.2B in 2021. The dominant enterprise-LMS player for
+two decades. Strong on SCORM/xAPI compliance, single-sign-on, audit
+reporting, role-based publishing, multi-tenant governance.
+
+**Docebo.** Founded 2005; TSX-listed (DCBO); ~$200M ARR. Mid-market
+LMS-vendor; strong on AI-feature marketing (often without rigorous
+mechanism backing); typical revenue multiple ~5–7× ARR.
+
+**360Learning.** Founded 2010; $200M Series C 2021; positioning as
+an LXP (Learning Experience Platform) with SME-as-author features —
+**most-likely-overlapping competitor on the SME side** of our
+proposition. Ships a text-editor-based authoring flow; no CTA
+scaffolding, no 4C/ID gate, no expert-blind-spot probe documented in
+their public-facing materials.
+
+**Workday Learning, SAP SuccessFactors, Articulate, EdApp /
+SafetyCulture, TalentLMS.** Other notable players in the corporate-
+LMS / LXP space; $5–50 per seat per month enterprise pricing band.
+
+**Got right:** SCORM/xAPI standards compliance; reporting; SSO and
+identity-management integration; tenant isolation and governance;
+audit trail and version control. These are non-trivial enterprise-
+deliverable hygiene features the planned platform must replicate at
+the appropriate Phase 2 milestone.
+
+**Missed:** completion is the published metric, not mastery (12–15%
+self-paced corporate completion was the §1.1 baseline); SCORM/xAPI
+compliance is *evidence the learner finished* not *evidence the
+learner can do the task*; SME authoring is a text editor with no
+instructional-design scaffolding (the §1.3 SME crisis is structurally
+unaddressed); retention is not measured because no one in the
+buying centre asks for it; calibration is not measured at all.
+**The corporate-LMS category is structurally unable to claim
+absorption** — and the planned platform's Kirkpatrick L2 calibration-Δ
+metric is the differentiator that closes that gap.
+
+### 3.7 SME-elicitation / authoring tools
+
+**360Learning, Articulate Rise, EdApp / SafetyCulture, TalentCards.**
+SMEs as authors with text editors and templates. **Missed:** no CTA
+scaffolding (free-text fields, no 5-probe intake); no 4C/ID coverage
+gate; no expert-blind-spot probe; no backward-design enforcement;
+no closed-taxonomy principle picker; no per-SME blind-spot dashboard
+loop. The category exists; the *scaffolding* does not.
+
+**Recent AI-assisted authoring tools.** Synthesia (AI avatars for
+training video, $1B+ valuation 2023); Copy.ai for L&D (generative
+copywriting); Articulate AI; many others. **Critical observation:**
+these tools provide content *generation* (the AI writes a draft),
+not content *elicitation* (the structured probe surface that pulls
+the SME's tacit knowledge into well-formed inputs). The
+garbage-in / garbage-out problem is acute: if the SME cannot
+articulate the *principle* and the *novice-error* and the
+*boundary case*, an AI cannot infer them from a vague prompt — the
+AI writes plausible-sounding instruction that is missing the same
+70% of decisions the SME would have omitted by self-narration.
+
+**The market gap.** No published industry product ships a CTA-
+based 5-probe intake protocol with a 4C/ID coverage gate and an
+expert-blind-spot probe. The instructional-design research
+literature (§2.3) describes the protocol; the academic CTA
+practice deploys it in expert-driven engagements; the productised
+SaaS surface is unowned.
+
+### 3.8 The synthesis gap — the wedge
+
+Cross-tabulating §3.1–§3.7 against the mechanism set in §2:
+
+| Mechanism (from §2) | Spaced-rep (Anki) | Streaks (Duolingo) | Cohort (Maven) | Mastery (Khan) | MOOC (Coursera) | Corporate LMS | LXP / SME tools |
+|---|---|---|---|---|---|---|---|
+| Spacing | ✓ | partial | — | — | — | — | — |
+| Retrieval practice | partial | partial | partial | ✓ | partial | — | — |
+| Generation | — | — | partial | partial | — | — | — |
+| Interleaving | — | — | partial | partial | — | — | — |
+| Worked-example fading | — | — | — | partial | — | — | — |
+| Calibration / JOL | — | — | — | partial | — | — | — |
+| Hook Model trigger | — | ✓ | partial | — | — | partial | — |
+| Variable-ratio reward | — | ✓ | — | — | — | — | — |
+| SDT relatedness | — | partial | ✓ | — | — | — | partial |
+| CTA SME intake | — | — | — | — | — | — | — |
+| Backward design | — | — | — | partial | — | — | — |
+| 4C/ID coverage gate | — | — | — | — | — | — | — |
+| Expert-blind-spot probe | — | — | — | — | — | — | — |
+| Per-SME blind-spot dashboard | — | — | — | — | — | — | — |
+
+The pattern is sharp: most categories optimise one or two mechanisms;
+no category ships the full set; the SME-side scaffolding (CTA, 4C/ID,
+backward design, expert-blind-spot, per-SME dashboard) is
+structurally absent from every category. The closest peer in market
+positioning — Section ($50M Series B; cohort + AI tutor) — is
+consumer-only and has no SME-side authoring tooling at all.
+
+**The wedge is the synthesis.** No single mechanism is novel or
+unowned; the synthesis of all ~14 mechanisms in one product surface,
+with segment-tuned UI variants, is the defensibility argument. §4
+commits each mechanism to a specific feature in the planned build;
+§5 quantifies the commercial case; §6 names the falsification
+triggers that would tell us the synthesis bet is wrong.
 
 ---
 
