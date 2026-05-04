@@ -84,3 +84,49 @@ prep repo as a personal study tool. If the AI-content quality discipline
 is genuinely interesting, ship it as an open-source library or a Claude
 Skill — not as a SaaS. The salvage path is in §17.
 
+---
+
+## 2. The fundamental contradiction (AI fixes AI)
+
+The wedge sentence appears verbatim across decks: *"AI-generated learning
+content is everywhere — and most of it is bad enough to actively erode
+trust."* (`deck-investor.md:19`). The pitched cure is then…
+AI-generated learning content, with two extra LLM passes (drafter, critic)
+and a checklist of validators in front. The decks are aware of this and
+quote themselves arguing the opposite about competitors:
+
+> "An AI writes plausible-sounding instruction that is missing the same 70%
+> of decisions the SME would have omitted by self-narration."
+> — `research-and-strategy-dossier.md:884–892`, attacking Synthesia /
+> Articulate AI / Copy.ai.
+
+The platform's own SME flow uses Sonnet to draft from voice transcript and
+Opus to critique. Same tooling, same failure mode. The 5-field intake
+schema and the critic prompt are the only things between the platform and
+the failure mode it just attacked Synthesia for. **The critic is another
+LLM judging another LLM with no human ground truth in the loop** until the
+SME spot-check — and the SME's job, on the platform's own pitch, is
+*review, not authoring*, so they are not in fact verifying the model's
+reasoning, only its surface plausibility.
+
+Two consequences:
+
+- **The "23 documented failure modes" validator set is a checklist of
+  yesterday's LLM mistakes.** Every model release reduces the surface
+  area by some amount and changes what the remaining failures look like.
+  The validator suite is a perpetual treadmill, not a moat. The plan
+  implicitly admits this — the collaborator deck reveals only ~6 of the
+  23 validators are coded; comments read `// 17 more...`
+  (`deck-collaborator.md:168`).
+- **"Stronger model audits weaker model" is a deliberate self-handicap.**
+  If Opus is good enough to be the trusted critic, why not just have
+  Opus do the drafting? The Sonnet/Opus price differential explains it,
+  but that means the entire architecture is engineered around running
+  the inferior model in the customer-visible path — the customer pays
+  for a deliberately downgraded experience so the operator preserves
+  margin.
+
+The plan trades one set of AI-content risks for another and labels the
+trade a moat. It is not a moat. It is a process step that any competitor
+can copy in two prompt iterations.
+
