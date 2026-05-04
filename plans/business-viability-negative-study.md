@@ -130,3 +130,70 @@ The plan trades one set of AI-content risks for another and labels the
 trade a moat. It is not a moat. It is a process step that any competitor
 can copy in two prompt iterations.
 
+---
+
+## 3. TAM/SAM/SOM math doesn't survive a pencil
+
+The decks deploy the textbook *percentage-of-a-huge-number* fallacy.
+
+**The investor deck claim** (`deck-investor.md:54–59`):
+- TAM: "global L&D spend ~$370B/year"
+- SAM: "online certification + corporate compliance/onboarding ~$50B/year"
+- SOM (5-year): "$50M–$500M slice"
+- *"A 0.05% share of SAM = $25M ARR."*
+
+The dossier is more careful but still indefensible
+(`research-and-strategy-dossier.md:1249–1289`):
+- Quotes "$315B global e-learning" (Mordor) **plus** "$399B corporate
+  training" (Training Industry) as if additive — these overlap heavily.
+- Asserts a "$20–40B SAM" with **zero bottoms-up derivation**; the word
+  *"defensible"* is doing all the work.
+- SOM derivation (`:1280–1285`): "1,000 B2B SMB tenants × $5k blended ACV
+  ≈ $5M ARR by Y3." A solo operator landing 1,000 paying SMB tenants in
+  36 months = **roughly one new tenant every working day for three years
+  straight**, with zero churn. That is not a sales plan; it's an
+  arithmetic identity.
+
+**Source-quality issues found in the cited TAM evidence:**
+
+- The "2.7B deskless workers" statistic (`deck-investor.md:186`) traces to
+  a **2018** Deskless Workforce report, recycled by TalentCards / eduMe.
+  Eight years old, sold as current. *([eduMe blog source](https://www.edume.com/blog/deskless-workforce-training))*
+- Mordor's microlearning numbers vary substantially across reports:
+
+  | Source | 2024–25 TAM | 2030–34 TAM | CAGR |
+  |---|---|---|---|
+  | Mordor (current) | $3.32B (2026) | $5.81B (2031) | 11.83% |
+  | Fortune Business Insights | $3.1B (2025) | $9.63B (2034) | 13.43% |
+  | Verified Market Reports | $3.76B (2024) | $12.73B (2033) | 15.2% |
+
+  Same market, vendor-defined scope. Treat any single TAM figure as
+  marketing.
+
+- The LinkedIn "39% reskilling by 2030" number is a **WEF 2025 Future of
+  Jobs *projection***, not a measured customer-pain signal. The decks
+  use it as if it were demand evidence.
+
+**Even the dossier's own "no single authoritative source"
+admission** (`:1267`) — "pieced together" — concedes the SAM is
+constructed, not measured.
+
+**The fatal disconnect.** The decks book enterprise revenue ($50k–$1M ACV
+per dossier `:1324–1325`) into Year-3 SOM while simultaneously deferring
+SOC2 to Year 2 (dossier `:1288, :1470`) and pricing CAC at $0
+(dossier `:1391`). **Three claims that cannot all be true.** Pick any two
+and the third collapses. As-stated, the SOM is unreachable for the
+operator profile described.
+
+**Bottom-up reality check.** A solo operator running outbound + warm
+intros into mid-market L&D realistically lands 2–6 paying B2B tenants in
+Year 1, at average ACV of $2–5k (because SOC2 is missing and the platform
+is unproven). That's $4k–$30k ARR Year 1, not $5M. The decks do not
+contain a single bottoms-up calculation that ends inside this range —
+which is the range the operator is actually going to occupy.
+
+**Sources for cross-checks:**
+- *[Pavilion 2025 B2B SaaS Benchmarks](https://www.joinpavilion.com/resource/b2b-saas-performance-benchmarks)* — SMB NRR clusters 90–105%, not 110–120%.
+- *[Freemius State of Micro-SaaS 2025](https://freemius.com/blog/state-of-micro-saas-2025/)* — 70% of micro-SaaS makers earn under $1k MRR; median profitable micro-SaaS at $4.2k MRR.
+- *[HolonIQ EdTech VC](https://www.holoniq.com/notes/edtech-vc-collapse-at-580m-for-q1-not-even-an-ai-tailwind-could-hold-up-the-10-year-low)* — Q1 2026 at 10-year low ($580M).
+
