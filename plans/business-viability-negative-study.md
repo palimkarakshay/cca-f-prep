@@ -823,3 +823,150 @@ The dossier's own line, paraphrased: *"these take months to invent and
 tune. We have them already."* The honest version: *"these are months
 of work that are nearly worthless six months from now."*
 
+---
+
+## 14. Multi-segment GTM with one operator is a fatal sprawl
+
+The decks claim to attack at minimum **seven** distinct segments
+simultaneously (`deck-overview.md:215–229`,
+`deck-b2b-prospect.md:201–211`, dossier `:82–84, :1318–1326`):
+
+1. B2C cert-prep (CCA-F flagship)
+2. Deskless workers (manufacturing, retail, healthcare frontline,
+   field-services)
+3. Financial-services compliance
+4. Healthcare clinical SMEs (HIPAA scope)
+5. Manufacturing / shop-floor
+6. SaaS engineering onboarding
+7. Single-SME-bottleneck SMBs (succession-of-knowledge)
+8. High-PDI / face-saving cultures (Japan, Korea, India, MENA, LATAM)
+
+The dossier offers a "wedge order" (`deck-investor.md:198–207`) that
+sequences deskless-then-regulated-then-B2C, but the decks themselves do
+not narrow further. Each segment is a distinct ICP with distinct
+messaging, distinct compliance posture, distinct sales channel, distinct
+content shape, and distinct success metric.
+
+**A solo operator can serve at most one segment well in Year 1.** The
+implementation plan's own validator suite was tuned for the operator's
+CCA-F study repo — i.e., for the *operator's* segment of one. Every
+other segment requires its own:
+
+- Sample knowledge files (PDFs, slides, runbooks specific to the
+  domain)
+- Domain-specific principle taxonomy
+- Domain-specific failure modes (clinical phrasing vs SOX phrasing vs
+  shop-floor phrasing)
+- Domain-specific compliance posture (HIPAA vs SOX vs OSHA vs FERPA)
+- Domain-specific buyer language (the b2b-prospect deck's own
+  segment-by-segment table at `:201–211` proves the operator knows this
+  but doesn't budget for it)
+
+There is no scenario where one person, on a side bet, calibrates seven
+configurations of one engine inside an 18-day Phase 1. The "one engine,
+calibrated per segment" framing (`deck-overview.md:229`) sounds
+efficient; in practice it means the operator owes seven solutions to
+the seven segments and ships zero.
+
+The same trap kills the B2C↔B2B framing. The two motions need:
+
+- B2C: SEO + content marketing + PostHog funnel optimisation + Stripe
+  + reactivation email + paid acquisition + churn investigation. A
+  full-time job.
+- B2B: outbound + warm intros + discovery calls + LOIs + procurement
+  + SSO config + SME onboarding + pilot success criteria. A full-time
+  job.
+
+Neither happens half-well in parallel. The decks pitch both as if they
+share infrastructure. They share infrastructure; they don't share
+labour.
+
+---
+
+## 15. The expert-review audit is a comfort blanket, not an audit
+
+`expert-review-audit.md` is presented as adversarial expert review.
+On reading: **it is a template for a hypothetical future audit that
+has never been performed.**
+
+- Lines 258–470: every Score, Recommendation, and Notes column is
+  empty (`| | | |`).
+- Lines 66–68: "Three distinct reviewer profiles" — described in the
+  abstract; no names, no signatures.
+- Lines 675–714: §G "Review submission template" — blank Mad-Libs with
+  empty signature lines.
+- Lines 8–10: operator "uses the result to strengthen, hedge, or
+  abandon" — future tense.
+
+The "harsh critic" is the same person who wrote the decks. There is no
+provenance signal of an actual external expert; the doc enumerates
+*what an expert would be asked* and stops there.
+
+### 15.1 What it catches and immediately defers
+
+- L519–523: SOC2 admitted as gating; *"Compliance-vertical pricing
+  ($100k–1M ACV) is **ambitious without formal SOC 2**. Phase-1 budget
+  reality is closer to $50k–$200k ACV pre-SOC2."* Acknowledged then
+  re-classified as "conditional, not committed".
+- L454: margin compression at scale flagged: *"At 1000 tenants, AI cost
+  may scale more linearly — does margin compress to 80%?"* Posed as a
+  question; no answer.
+- L437: *"Is this conversion rate (operator → 1k SMB tenants in 3 years)
+  realistic given operator-time-only sales motion?"* Question, not
+  finding.
+- L463: *"Is this defensible in serious LP-level due diligence, or do
+  LPs require fully-loaded cost (including operator-time at market
+  rate)?"* — admits the $0 incremental claim is not LP-defensible.
+
+### 15.2 What it misses entirely
+
+- TAM/SAM/SOM math is never stress-tested.
+- The 18-day Phase 1 timeline is conspicuously absent — §F (L637)
+  declares "Phase 1 P1–P6 sequencing detail" *out of scope*.
+- 95% gross margin is touched at C19 (L454) but never reconciled with
+  the prompt-caching uncertainty at C20 (L455). If caching is 0% and
+  AI scales linearly, the 95% claim is dead. The audit puts these
+  on adjacent rows and never connects them.
+- Competitive landscape — Sana ($1.1B exit), Synthesia ($4B), Articulate
+  AI, NotebookLM, Claude Marketplace — none named.
+- B2C $9/mo CAC, churn, payback — entirely absent.
+
+### 15.3 Self-serving framing
+
+- L57–60: pre-emptive *"The audit is not a rubber-stamp"* rhetorical
+  inoculation.
+- L495–547 §D "Acknowledged hedges": pre-confessed minor sins to look
+  thorough. L543–547: *"Operator background is senior ABAP developer,
+  not academic cognitive psychologist"* — a charm-offensive disclosure
+  that costs nothing.
+- L593–633 §E "What we'd abandon if disproven": exits are **always to
+  a smaller version of the same business**, never "shut down because
+  TAM is wrong." Exit move 5 (L627–633) admits possible shutdown only
+  if ≥ 4 of 14 mechanics fail simultaneously — a deliberately
+  implausible bar.
+- L637–663 §F "Out-of-scope": deflects engineering, sequencing, data-
+  model, marketing-copy, and Phase-1 ordering to other docs. Anything
+  financially load-bearing is bounced.
+
+### 15.4 Findings logged but not addressed
+
+L501–511 admits the synthesis-of-14-mechanisms thesis *"has no published
+precedent at scale"* — then immediately rationalises it as *"plausible."*
+L527–532 admits Kirkpatrick L4 self-report is *"the weakest empirical
+link"* and defers the fix to *"year-3+."* L538–541 admits the 3.5×
+compliance correlation (the **entire monetisation argument** for the
+regulated-vertical pitch) *"is from one industry source"* and *"may not
+generalise"* — recommendation: *"Reviewers should flag."* No reviewer
+exists to flag.
+
+The audit is **a procedural shield, not a critique**. It performs the
+rituals of adversarial review (scoring rubric, COI disclosure, signed
+submissions, 30-day commitments) without ever generating a single
+binding finding. Every existential weakness — SOC2 gate, margin scaling,
+competitive moat, founder bandwidth, TAM math, $0-cost fiction — is
+either deflected to "reviewer's view" (questions for an absent reviewer),
+dropped to §D as a pre-confessed hedge, or pushed out of scope in §F.
+
+A real adversarial review would produce findings. This produces
+inoculations.
+
