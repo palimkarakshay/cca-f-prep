@@ -633,6 +633,38 @@ The per-mechanic detail (LM1–LM8 implementation paths and SM1–SM8
 elicitation tooling) lives in §§ D1–D2 below; outcome targets in § D4;
 segment-specific variants in § D6.
 
+#### Implementation cross-reference (where each mechanic ships)
+
+The chain reads **mechanic → implementation guide section → AI prompt
+phase that builds it**. See [`./IMPLEMENTATION.md`](./IMPLEMENTATION.md)
+for the full runbook.
+
+| Code | Mechanic | Data contract | Implementation phase |
+|---|---|---|---|
+| LM1 | Spaced retrieval | IMPLEMENTATION §3.8.2 `SpacedReviewItem` + §3.8.7 ladder | P11 (cron enqueue) + P3 banner |
+| LM2 | Mid-lesson retrieval gate | §3.8.2 `RetrievalGateResponse` | P3 LessonView extension |
+| LM3 | Generation effect (write-the-principle) | §3.8.2 `PrincipleWrite` | P3 QuizRunner extension |
+| LM4 | Interleaving recommender | (uses existing schema) | P3 + P10 (cohort calendar) |
+| LM5 | Worked-example fading + expertise reversal | §3.8.2 `DepthRung` | P3 LessonView extension |
+| LM6 | Calibration capture (JOL) | §3.8.2 `JOLCapture` + §3.8.5 `calibration_event` | P3 + P11 dashboard |
+| LM7 | Streak with variable-ratio reinforcement | §3.8.2 `Streak` + §3.8.8 cadence | P11 push cron |
+| LM8 | Cohort surface | §3.8.2 `CohortContext` + §3.8.5 `cohort` table | P10 routes + P11 completion email |
+| SM1 | CTA 5-probe drafter intake | §3.8.3 `DrafterIntake` + validator 25 | P4 form + P5 skill + P8 generator |
+| SM2 | Backward-design lock | §3.8.3 `BackwardDesignState` + validator 26 | P4 lock + P5 prompt order |
+| SM3 | Worked-example pair editor | §3.8.3 (in `DrafterIntake`) + validator 27 | P4 editor |
+| SM4 | Expert blind-spot probe | §3.8.3 `BlindSpotProbe` + validator 30 | P4 textarea + P9 critic |
+| SM5 | Closed-taxonomy principle picker | §3.8.3 `PrincipleTag` + validator 28 | P4 picker |
+| SM6 | 4C/ID coverage gate | §3.8.3 `FourCidCoverage` + §3.8.4 `CriticOutput.missingComponents` + validator 29 | P9 critic |
+| SM7 | Voice-first / camera-first authoring | (R2 + Whisper transcript → DrafterIntake pre-fill) | P10 |
+| SM8 | Per-SME blind-spot dashboard | §3.8.3 `SmeBlindSpotSignal` + §3.8.5 table | P4 scaffold + P9 increment + P11 aggregator |
+| F9–F12 | Extended cognitive failure-mode taxonomy | §3.8.1 codes | P9 critic checks; surface via §3.8.4 `CriticOutput.fcodeRisks` |
+| L1–L4 | Kirkpatrick measurement | §3.8.10 contracts + §6.6 thresholds | P11 `/admin/measurement` |
+| TTFV | Time-to-first-value gates | §3.8.9 markers + §6.5 acceptance | P3 (learner) + P4/P5/P8/P9 (SME) |
+
+If a Section-D problem (L1–L8 or S1–S8 in the §D0 matrix) lacks an
+entry in the right-hand columns above, the implementation is not yet
+specified — open an issue tagged `section-d-gap` and reference the row.
+
 ### D1. Learner-absorption mechanics for Phase 2
 
 Eight mechanics. Each tagged to research source, repo lever, and Phase-2
