@@ -1281,3 +1281,383 @@ DELIVERABLES:
 
 ---
 
+## Part 5 — Phase 2 (Commercial) implementation
+
+**Phase 2 starts only after the Phase 1 success metric is hit** (3 signed B2B LOIs OR 50 waitlist + 10 pre-orders). Six phases, ~6–8 weeks. Everything is additive on Phase 1; no schema breaks.
+
+### P7 — Vercel Pro + Stripe billing + plan gating (~3 days)
+
+**Goal:** the app is on Vercel Pro (commercial-use compliant), Stripe subscriptions are live, `tenant.plan` flips on webhook, paid-plan features are gated server-side.
+
+#### P7 Pre-tasks (operator)
+
+- [ ] Upgrade to Vercel Pro ($20/mo). Migrate the app project; the marketing site stays on Hobby.
+- [ ] Activate Stripe live mode. Create products: `B2C Pro` ($9/mo), `B2B Standard / Pro / Enterprise` ($5/$10/$15 per learner per month with $100/mo platform minimum).
+- [ ] Update Stripe webhook endpoint to live mode; rotate `STRIPE_WEBHOOK_SECRET`.
+
+#### P7 AI prompt
+
+```
+You are building Phase 2 P7 of the Content Pack Management Platform.
+Read plans/IMPLEMENTATION.md §1, §3.4 (subscription table coming), §5-P7.
+
+OBJECTIVES:
+
+1. Add a `subscription` table:
+   - tenant_id, stripe_customer_id, stripe_subscription_id, plan, status,
+     current_period_end, seats (B2B), cancel_at_period_end, updated_at
+   - Drizzle migration; idempotent.
+
+2. Implement /api/stripe-webhook (extend P2's): handle
+   customer.subscription.{created,updated,deleted} + invoice.payment_succeeded.
+   Update tenant.plan and subscription rows.
+
+3. Implement /admin/billing:
+   - Shows current plan, seats, next renewal, last invoice
+   - "Upgrade" / "Manage" buttons → Stripe Customer Portal
+   - For B2B: shows seats currently in use vs subscribed seats; alert if over
+
+4. Implement plan gating middleware:
+   - packages/shared/src/plan-gate.ts: maps features → required plan
+   - Examples: `feature:custom-catalog → pro|enterprise`,
+     `feature:sme-role → enterprise`, `feature:over-100-mau → not-free`
+   - Server handlers wrap protected actions with assertPlan(tenant, feature)
+
+5. Tests:
+   - Vitest: webhook signature verification (good + tampered)
+   - Vitest: subscription created → tenant.plan flips → gated feature
+     becomes available
+   - Vitest: subscription canceled → tenant.plan flips back at period end
+   - Playwright e2e: upgrade flow (test mode) → /admin/billing reflects
+
+6. Commit. PR "P7: Stripe billing + plan gating".
+
+CONSTRAINTS:
+- Webhook handler is idempotent (Stripe can deliver the same event twice).
+- Plan downgrade does not delete data; it gates UI/actions.
+- Free tier hard cap: 5 catalogs, 100 quiz attempts/month per learner.
+```
+
+#### P7 Definition of Done
+
+- [ ] Subscription created in test mode → tenant.plan = "pro".
+- [ ] Subscription canceled → tenant.plan reverts at period end.
+- [ ] Free-plan tenant blocked from creating a 6th catalog.
+- [ ] Stripe Customer Portal accessible from /admin/billing.
+
+---
+
+### P8 — Inngest pipeline + Sonnet drafter + budget enforcement (~5 days)
+
+**Goal:** in-app generation pipeline live with Sonnet drafter; per-tenant monthly token budget enforced; UI burn meter.
+
+#### P8 Pre-tasks (operator)
+
+- [ ] Top up Anthropic API account with $200 (covers a month at planned scale).
+- [ ] Create Inngest app; copy `INNGEST_EVENT_KEY` and `INNGEST_SIGNING_KEY` to `.env`.
+
+#### P8 AI prompt
+
+```
+You are building Phase 2 P8.
+Read plans/IMPLEMENTATION.md §3, §5-P8 in full.
+
+OBJECTIVES:
+
+1. Add Inngest to apps/web. Mount /api/inngest. Define functions:
+   - draft.requested → calls Sonnet, writes draft row, emits draft.created
+   - draft.created → runs validators, writes findings to draft.lintFindings
+     (Phase 2 critic stage P9 takes over from here)
+
+2. Implement Sonnet drafter at apps/web/src/server/anthropic-client.ts:
+   - Uses @anthropic-ai/sdk
+   - Model: claude-sonnet-4-6
+   - System prompt loads: schema (§3.1), F1–F8 (§3.2), F-code anti-pattern
+     rules from packages/shared/src/anti-patterns.ts, plus the tenant's
+     calibration rules (calibration_rule rows where tenant_id matches)
+   - Prompt caching enabled on system prompt (5-min default TTL; budget
+     30–60% input savings at sustained traffic)
+   - Tool use schema mirrors §3.1 Concept type for structured output
+
+3. Build /admin/generate:
+   - Form: topic, scope (lesson|quiz|both), knowledge file selector, model
+     toggle (Sonnet default, Opus advanced)
+   - On submit: emits draft.requested event; SSE-streams progress to UI
+   - Renders the resulting draft in the same diff viewer as P4
+
+4. Implement per-tenant token budget:
+   - Track usage in a `token_usage` table: tenant_id, month (YYYY-MM-DD-01),
+     input_tokens, output_tokens, usd_cost
+   - Inngest function increments after each Sonnet call
+   - Hard cap: tenant_policy.monthly_token_budget_usd; reject new generations
+     above 100% with a friendly error
+   - Soft cap: alert at 80% via Resend email + UI banner
+   - /admin/dashboard shows a burn meter (current usage vs cap)
+
+5. Implement per-user daily generation rate limit:
+   - Redis-free: in-memory LRU is fine at Phase 2 v1 (single Vercel region)
+   - Replace with @upstash/ratelimit when traffic warrants
+
+6. Tests:
+   - Vitest with mocked Anthropic SDK: drafter returns valid §3.1 Concept
+   - Vitest: budget cap rejects beyond 100%
+   - Vitest: rate limit rejects 11th generation in a day
+   - Playwright e2e: /admin/generate happy path
+
+7. Commit. PR "P8: Inngest pipeline + Sonnet drafter + budget".
+
+CONSTRAINTS:
+- Anthropic client must respect the tenant's calibration rules (load from
+  calibration_rule table; cap at 8 most-recent + summarised anti-pattern
+  rules per §10 of plans/content-pack-management-plan.md).
+- Inngest functions must be idempotent (use the event ID as dedup key).
+- Token usage tracking is the cost-control safety belt — write a test that
+  asserts no Sonnet call can complete without the usage row being updated.
+```
+
+#### P8 Definition of Done
+
+- [ ] Generating via /admin/generate produces a valid draft + lint findings.
+- [ ] Budget cap blocks at 100%; banner shows at 80%.
+- [ ] Rate limit blocks 11th attempt.
+- [ ] Token usage table updates on every call.
+
+---
+
+### P9 — Critic stage (Opus) + answer-justification audit + confidence routing (~4 days)
+
+**Goal:** every drafted concept passes through an Opus critic that audits the drafter; confidence routing decides auto-publish vs human queue; answer-justification audit blocks publish if the critic can't cite the source span.
+
+#### P9 AI prompt
+
+```
+You are building Phase 2 P9.
+Read plans/IMPLEMENTATION.md §3.3 (especially validator 23), §5-P9.
+
+OBJECTIVES:
+
+1. Extend the Inngest pipeline:
+   draft.requested → drafter → draft.drafted →
+   critic → draft.reviewed → router → (publish | queue.review)
+
+2. Build the Opus critic at apps/web/src/server/critic-prompts.ts:
+   - Model: claude-opus-4-7
+   - Reviewer prompt: schema, F1–F8, validator findings from §3.3, plus
+     for quizzes: "for each MCQ, point at the exact span of the knowledge
+     file that justifies the marked answer. If you cannot cite a span,
+     mark answerJustified=false."
+   - Outputs: { confidence: 0..1, findings: Finding[], suggested_edits, answerJustifications }
+
+3. Implement validator 23 (answerJustificationAuditValidator):
+   - For each MCQ, require answerJustifications[i].cited === true
+   - If any false, returns an error finding with fCode=F4
+   - This is a publish blocker
+
+4. Implement confidence routing:
+   - tenant_policy.approval_mode: always-human | confidence-routed | auto-publish
+   - If confidence-routed and confidence ≥ tenant_policy.confidence_threshold
+     and no validator errors, auto-publish.
+   - Else, queue to /admin/review (human queue).
+   - Sample 1 in 20 of auto-published drafts to /admin/review for calibration
+     (does NOT block; calibration only).
+
+5. Build /admin/review (human queue):
+   - List of drafts with critic findings + suggested_edits + diff vs current
+   - Three-button decision: Approve / Approve+Edit / Reject with reason
+   - Reject reason inserts into calibration_rule (after deduping similar reasons)
+   - Approve flips draft.status, writes catalog_version, R2 blob, revalidates
+
+6. B2B default policy: on tenant creation for B2B kind, set approval_mode =
+   always-human. B2C: confidence-routed with threshold 0.85.
+
+7. Tests:
+   - Vitest with mocked Opus: low confidence routes to human queue
+   - Vitest: missing answerJustification blocks publish
+   - Vitest: rejected draft creates calibration_rule row
+   - Vitest: B2B tenant always-human regardless of confidence
+
+8. Commit. PR "P9: Opus critic + justification audit + routing".
+
+CONSTRAINTS:
+- The critic prompt MUST be at least as strict as the drafter — never let
+  the critic relax the rules.
+- Calibration_rule rows are bounded: prune to ≤ 8 most-recent per tenant on
+  insert; older ones are summarised into anti-pattern text in tenant_policy.
+- Cross-vendor critic (OpenRouter → GPT) is NOT built here — it's the v2
+  escape hatch documented in §C5 of plans/content-pack-management-plan.md.
+```
+
+#### P9 Definition of Done
+
+- [ ] Auto-publish path works at confidence ≥ 0.85.
+- [ ] Human queue receives low-confidence drafts.
+- [ ] Justification audit blocks a fabricated quiz.
+- [ ] Spot-check sampling lands ~5% of auto-published in queue.
+- [ ] B2B tenant cannot auto-publish even at confidence 0.99.
+
+---
+
+### P10 — B2B controls: SME role + two-eye gate + per-tenant catalogs + SAML (~5 days)
+
+**Goal:** B2B tenants get the SME role for review-only access, an optional two-eye gate (admin + SME both approve), per-tenant private catalogs, and SAML/SCIM via Clerk Enterprise.
+
+#### P10 AI prompt
+
+```
+You are building Phase 2 P10.
+Read plans/IMPLEMENTATION.md §3.4 (tenant_policy fields), §5-P10.
+
+OBJECTIVES:
+
+1. Add `sme` to the tenant_member.role enum. Existing tenants are unaffected.
+
+2. Build /admin/sme:
+   - Role: sme. Cannot edit tenant settings, cannot publish without admin co-sign.
+   - Sees the same /admin/review queue but with a "Co-sign" button (when
+     two-eye gate is enabled).
+
+3. Implement two-eye gate logic:
+   - tenant_policy.two_eye_gate (boolean) gates publish on draft.status='approved'
+     AND draft.coSignedAt IS NOT NULL
+   - admin can approve; SME can approve OR co-sign; both required when gate is on
+
+4. Per-tenant catalogs:
+   - catalog.visibility ∈ {public, tenant-private, shared}
+   - tenant-private: only that tenant's members see it
+   - shared: cross-tenant pinned imports (deferred to v2 commercial — out of
+     scope for P10)
+
+5. SAML / SCIM via Clerk Enterprise:
+   - Document the operator steps to enable per tenant
+   - Add a /admin/sso page that surfaces the SAML metadata URL when enabled
+   - SCIM provisions tenant_member rows on user create
+
+6. Tests:
+   - Vitest: SME cannot publish unilaterally
+   - Vitest: two-eye gate requires both approvals
+   - Vitest: tenant-private catalog not visible to other tenant's learners
+   - Playwright e2e: SAML sign-in flow on a test SAML IdP (Mock SAML)
+
+7. Commit. PR "P10: B2B SME role + two-eye gate + tenant-private catalogs".
+
+CONSTRAINTS:
+- All previous role checks must be re-audited for the new role (sme).
+- SAML/SCIM paths must not affect non-SAML tenants.
+```
+
+#### P10 Definition of Done
+
+- [ ] B2B tenant with two-eye gate ON cannot publish until admin + SME both approve.
+- [ ] SME role cannot edit tenant_policy or other admin-gated settings.
+- [ ] Tenant-private catalog isolation verified via RLS test.
+- [ ] SAML test sign-in works.
+
+---
+
+### P11 — Embeddings dedup + post-publish quality signals + cron aggregation (~3 days)
+
+**Goal:** suggestion dedup upgrades from TF-IDF to embeddings; question-level quality signals aggregate nightly and pause-not-pull bad questions for new sessions.
+
+#### P11 AI prompt
+
+```
+You are building Phase 2 P11.
+Read plans/IMPLEMENTATION.md §3.4 (event + question_signal tables), §5-P11.
+
+OBJECTIVES:
+
+1. Add `embedding` table:
+   - id, tenant_id, kind ("suggestion"|"concept"|"knowledge"), source_id,
+     vector vector(1024), model_name, created_at
+   - pgvector extension on Neon (enable via SQL migration)
+
+2. Replace TF-IDF dedup with Voyage embeddings:
+   - On suggestion submit, compute embedding with voyage-3-lite, insert row,
+     query for cosine similarity > 0.85 against existing suggestions
+   - If hit, surface the matching suggestion in /admin/suggestions; the
+     operator decides "Link to existing" or "Treat as separate"
+
+3. Build the quality-signal aggregator:
+   - Inngest cron: daily 03:00 UTC
+   - For each (tenant, catalog_version, concept, question_n), aggregate
+     attempts and correctAttempts from event table where kind='quiz_submit'
+   - Update question_signal row
+   - If attempts ≥ 30 and correct_pct < 30, set paused_at = NOW(), emit
+     event 'quality_signal_pause' for operator alerting
+
+4. Implement pause-not-pull:
+   - Quiz runner skips questions with paused_at IS NOT NULL when starting
+     a new attempt (in-flight attempts unaffected)
+   - /admin/quality shows the list of paused questions for review
+
+5. Tests:
+   - Vitest: simulated 30 attempts at 20% correct → question paused
+   - Vitest: new quiz session skips paused question; running quiz unaffected
+   - Vitest with mocked Voyage: dedup links a near-duplicate suggestion
+
+6. Commit. PR "P11: embeddings dedup + quality signals".
+
+CONSTRAINTS:
+- pgvector index: HNSW with cosine distance, m=16, ef_construction=64.
+- Aggregator must be idempotent: running twice in one day is safe.
+- Pause-not-pull means we never delete or change the question content; we
+  hide it for new sessions only.
+```
+
+#### P11 Definition of Done
+
+- [ ] Voyage embedding lookup works on suggestion submit.
+- [ ] Daily aggregator pauses a bad question after 30 attempts.
+- [ ] In-flight quizzes are not affected when a question pauses.
+- [ ] /admin/quality shows the paused question.
+
+---
+
+### P12 — Cross-tenant catalog import (v2 commercial; only build at first request) (~3 days)
+
+**Goal:** B2B admin can import a B2C public catalog into their tenant, version-pinned, with an "update available" prompt when the source publishes a new version. **Build only when a real B2B prospect requests it.**
+
+#### P12 AI prompt (deferred — only run when triggered)
+
+```
+You are building Phase 2 P12.
+Read plans/IMPLEMENTATION.md §3.4 (catalog_import) + §5-P12.
+
+OBJECTIVES:
+
+1. Activate the catalog_import table (already in schema; create migration).
+
+2. Build /admin/catalogs/import-shared:
+   - Lists public catalogs from other tenants
+   - On import: writes catalog_import row pinning source_catalog_id +
+     pinned_version_id
+   - The B2B tenant's learners see the imported catalog as if it were native,
+     but the underlying R2 blob is the source's pinned version
+
+3. Implement update-available banner:
+   - When the source catalog publishes a new catalog_version, all importers
+     get a banner in /admin: "Update available: <catalog> v3 → v4. Review
+     diff." Importer chooses "Upgrade now" (re-points pinned_version_id) or
+     "Stay on v3".
+
+4. Tests:
+   - Vitest: importer's learners see source's pinned version
+   - Vitest: source publishes v4; importer still on v3 until they upgrade
+   - Vitest: upgrade flips pinned_version_id, learners see v4
+
+5. Commit. PR "P12: cross-tenant catalog import".
+
+CONSTRAINTS:
+- Source tenant retains full ownership; importer cannot modify content.
+- Billing implications: token spend on generation in v4 belongs to source
+  tenant, not importer (importers consume; sources produce).
+```
+
+#### P12 Definition of Done
+
+- [ ] B2B importer sees the C2B public catalog in /admin/catalogs/import-shared.
+- [ ] Pinned version doesn't drift when source publishes.
+- [ ] Update-available banner appears; upgrade flow works.
+
+---
+
