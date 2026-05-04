@@ -69,8 +69,6 @@ export interface GamesStore {
 function createStore(packId: string): GamesStore {
   const storageKey = gamesStorageKey(packId);
   let current: GamesProgress | null = null;
-  // Stable server snapshot — see progress-store.ts for the rationale.
-  const serverSnapshot: GamesProgress = newGamesProgress();
   const listeners = new Set<() => void>();
   let storageWired = false;
 
@@ -104,7 +102,7 @@ function createStore(packId: string): GamesStore {
 
   return {
     get: () => ensure(),
-    getServerSnapshot: () => serverSnapshot,
+    getServerSnapshot: () => newGamesProgress(),
     subscribe: (cb) => {
       wireStorageOnce();
       listeners.add(cb);
