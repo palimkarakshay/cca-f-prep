@@ -415,3 +415,82 @@ Even **if** the unit economics worked and **if** the operator could
 clear SOC2 and **if** the product reached parity with incumbents,
 follow-on capital would not be available at any reasonable valuation.
 
+---
+
+## 6. Pedagogical-research moat is not a moat
+
+The decks lean on ~50 years of cognitive-science citations as a moat —
+spacing, retrieval practice, generation effect, interleaving, worked-
+example fading, calibration, streak design, cohort effect (LM1–LM8 in
+`deck-investor.md:211–222`). Eight elicitation scaffolds for SMEs
+(SM1–SM8). Every claim has a peer-reviewed source. None of this is in
+dispute.
+
+**What's in dispute is the leap from "X works in lab studies" to "X is
+a defensible product moat."**
+
+### 6.1 The lab-to-app gap
+
+Every cited effect was measured under conditions the platform cannot
+reproduce:
+
+- **Spacing (Cepeda 2008).** Subjects participated. They couldn't
+  ignore the schedule. The platform serves voluntary $9/mo subscribers
+  who can dismiss the spaced-review banner forever. The intervention's
+  effect size is conditional on **compliance with the intervention** —
+  which is the entire question, and it is hand-waved.
+- **Retrieval practice (Roediger & Karpicke 2006).** Subjects took
+  forced retrieval tests. The platform offers "mid-lesson retrieval
+  gates" the user can skip. Same compliance gap.
+- **Cohort effect (Maven 96%).** The 96% number is **altMBA's** W1→W2
+  retention, not Maven's. **Maven's own Series A press release cites
+  "more than 75%" completion**
+  ([PR Newswire](https://www.prnewswire.com/news-releases/maven-raises-20-million-in-series-a-funding-led-by-andreessen-horowitz-301295905.html)).
+  Maven sells **$1k–$10k/seat live cohort programs with synchronous
+  instructors and small-group accountability**. The completion premium
+  comes from **instructor pressure, sunk-cost commitment, and price
+  signal** — not the platform shape. Comparing $9/mo asynchronous SaaS
+  to $2k+ instructor-led cohorts and claiming the same outcomes is an
+  apples-to-oranges fallacy that the dossier `:1075–1085` makes
+  explicitly. The decks repeat it without reservation.
+- **Streak / variable reward (Mazal 2022, Duolingo).** Duolingo's
+  CURR +21% / DAU 4.5× came from a **staffed retention team running
+  hundreds of A/B tests over four years** on a free product with
+  consumer brand recognition. The platform proposes to clone the result
+  with a single-operator mobile push at "user's modal study time."
+
+### 6.2 None of these mechanisms are owned
+
+Spacing, retrieval, interleaving, generation, cohort accountability,
+streaks: every one has been implemented by Duolingo, Anki, Quizlet, Khan
+Academy, Brilliant, Coursera, Memrise, Canvas, Sana Labs, NotebookLM
+chat, ChatGPT Study Mode, Gemini in Classroom. The dossier itself
+(`:1085`) names the lift it expects to claim and concedes it has **no
+pilot data**.
+
+The investor deck's framing — *"50 years of cognitive-science evidence
+operationalised as product surface — Not new IP, an unowned synthesis"*
+(`deck-investor.md:139–140`) — is honest about the lack of IP, then
+inverts the conclusion. **An unowned synthesis is, by definition, not a
+moat.** It is a feature checklist any competitor can copy in a sprint.
+The cognitive-science citations make the planning document feel
+serious; they do not generate defensibility.
+
+### 6.3 Falsifiability theatre
+
+The dossier promises L1–L4 Kirkpatrick measurement *"falsifiable from
+day one"* (`:1485–1540`). Each falsification trigger requires
+**8-week trends with treatment-vs-control cohorts**
+(`:968, :988, :1007`). At pre-revenue scale, **N is too small for any
+of these triggers to fire**. Every metric will be "inconclusive" rather
+than "falsified". The framework is falsificationist in form, not in
+practice.
+
+The platform is therefore in the position of:
+1. Borrowing the credibility of peer-reviewed effect sizes.
+2. Owning none of the underlying mechanisms.
+3. Designing measurement triggers that, by construction, will never
+   reach statistical significance at the operator's actual N.
+
+The "pedagogical moat" is decorative, not load-bearing.
+
