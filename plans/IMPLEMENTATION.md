@@ -1680,6 +1680,51 @@ DELIVERABLES:
 - [ ] `/draft-topic` skill iterates on validator failures up to 3 times automatically.
 - [ ] All tests green; PR merged.
 
+#### P5 Section D extensions (CTA-style drafting in the local Claude Code skill)
+
+**Add these sub-bullets to the P5 AI prompt** above:
+
+```
+ADDITIONAL OBJECTIVES (Section D — read §3.8.3 + §3.8.6 first):
+
+7. Update .claude/skills/draft-topic/ to emit a DrafterIntake JSON
+   alongside the Concept JSON:
+   - The skill output is now { intake: DrafterIntake, concept: Concept }.
+   - Skill prompt instructs Claude to (a) draft the 5-probe intake first
+     (novice-error → one-principle → worked + faded pair → boundary case
+     → nearest confusable + SM4 noviceWouldGetWrong), THEN (b) draft the
+     quiz from the intake's onePrinciple and boundaryCase, THEN (c) draft
+     the lesson last (backward design — SM2).
+   - Save: drafts/<slug>.intake.json + drafts/<slug>.concept.json.
+
+8. Update scripts/lint-draft.ts to validate BOTH files:
+   - Validators 1–22 against concept.json
+   - Validators 25, 27, 28, 30 against intake.json
+   - Exit 0 only if all pass.
+
+9. The admin import endpoint (P4) accepts a tar/zip of intake + concept
+   together OR two file uploads; backward-design lock pre-fills from intake.
+
+10. Update plans/OPERATOR_RUNBOOK.md with the new authoring sequence:
+    intake → quiz → lesson, ≤ 10 min target preserved.
+
+CONSTRAINTS:
+- Skill still uses no API keys; all drafting via the operator's Claude
+  Max 20x via Claude Code locally.
+- The skill's iteration loop (max 3) now considers BOTH intake and concept
+  validator failures together — feedback merged before the next attempt.
+- Backward-design ordering is enforced by the skill prompt structure;
+  there is no separate enforcement layer in P5 (the server-side enforcement
+  is in P4).
+```
+
+#### P5 Section D — Definition of Done (additions)
+
+- [ ] /draft-topic emits both intake.json and concept.json.
+- [ ] Local lint passes both files together; exits 1 if either fails.
+- [ ] Authored sequence audit log shows intake → quiz → lesson order.
+- [ ] OPERATOR_RUNBOOK.md updated with the new flow.
+
 ---
 
 ### P6 — Verification, hardening, accessibility (~2 days)
@@ -1914,6 +1959,54 @@ CONSTRAINTS:
 - [ ] Budget cap blocks at 100%; banner shows at 80%.
 - [ ] Rate limit blocks 11th attempt.
 - [ ] Token usage table updates on every call.
+
+#### P8 Section D extensions (Sonnet drafter emits CTA + worked/faded; Phase-1 → Phase-2 parity)
+
+**Add these sub-bullets to the P8 AI prompt** above:
+
+```
+ADDITIONAL OBJECTIVES (Section D — read §3.8.3, §3.8.6, §3.8.10 first):
+
+7. The Sonnet drafter's tool-use schema emits { intake, concept } — same
+   shape as the P5 local skill. Single source of truth for the structure.
+   The system prompt cites §3.8.3 DrafterIntake interface verbatim plus
+   the SM4 novice-would-get-wrong probe.
+
+8. Drafter loads tenant's calibration_rule rows + the closed B-skill
+   taxonomy (§3.8.6 validator 28) at request time. The taxonomy is included
+   in the cached prompt prefix to maximise prompt-caching hit rate.
+
+9. Server-side validator pipeline after generate:
+   - validators 1–22 on concept.json
+   - validators 25, 27, 28, 30 on intake.json
+   - on any failure, retry up to 2 times with findings prepended to the
+     next prompt (Phase-2 calibration loop)
+   - on persistent failure, queue for /admin/review
+
+10. Token usage tracking (existing) extended with model_kind tag
+    ("drafter"|"critic") so the burn meter can split Sonnet vs Opus spend.
+
+11. Tests:
+    - Vitest with mocked Anthropic SDK: drafter returns valid intake + concept.
+    - Vitest: validator-fail retry path increments counter, eventually
+      gives up and queues.
+    - Vitest: token_usage row carries model_kind tag.
+
+CONSTRAINTS:
+- Prompt caching — the system prompt (schema + F1–F12 anti-patterns + closed
+  taxonomy + calibration rules) MUST be the cacheable prefix. Operator
+  variable bits (topic, scope, knowledge files) come last.
+- The drafter NEVER omits intake fields in its tool-use output; if the model
+  attempts an empty field, the tool-call validator at the SDK boundary
+  rejects the call before incrementing token usage.
+```
+
+#### P8 Section D — Definition of Done (additions)
+
+- [ ] Drafter output validates against intake + concept schema together.
+- [ ] Caching prefix includes the closed B-skill taxonomy.
+- [ ] Token usage tagged by model_kind in /admin/dashboard.
+- [ ] Validator-fail retry path verified by integration test.
 
 ---
 
