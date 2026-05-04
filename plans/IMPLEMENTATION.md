@@ -2204,6 +2204,68 @@ CONSTRAINTS:
 - [ ] Tenant-private catalog isolation verified via RLS test.
 - [ ] SAML test sign-in works.
 
+#### P10 Section D extensions (LM8 cohort surface + SM7 voice-first authoring)
+
+**Add these sub-bullets to the P10 AI prompt** above:
+
+```
+ADDITIONAL OBJECTIVES (Section D — read §3.8.2 + §3.8.3 SM7 path):
+
+8. Cohort surface (LM8):
+   - Routes under apps/web/src/app/(learner)/[catalogSlug]/cohort/[cohortId]/...
+   - /admin/cohorts: create / edit / list cohorts (admin-only)
+   - Cohort fields: catalogId, slug, startDate, endDate, liveTouchpointSlot
+   - Members joined via invite link OR auto-add when a tenant subscribes
+     to a cohort tier
+   - Per-cohort dashboard for learners: progress, peer-comparison panel
+     (anonymised opt-out for face-saving cultures — tenant_policy flag),
+     group leaderboard primitive (top 10 by progress, opt-in)
+   - Cohort-completion email cron: 7 days after cohort.endDate, send Resend
+     summary email to all cohort members with their progress + cohort stats
+
+9. Voice-first / camera-first authoring (SM7):
+   - Add /admin/draft/voice route accessible to admin + sme roles
+   - UI: drag-drop or record-in-place an audio (≤ 5 min) or video (≤ 5 min)
+   - Server uploads to R2 at tenants/<id>/sme-recordings/<id>.<ext>
+   - Phase-2 backend: send audio to Whisper (or Anthropic if available)
+     for transcription; the transcript pre-fills the DrafterIntake form
+     fields by mapping to the 5 probes via the existing Sonnet drafter
+     (P8 reused with a new system prompt suffix that says "extract 5-probe
+     intake from this transcript")
+   - SME edits the pre-filled intake before submit (does NOT compose from blank)
+
+10. Cohort routing in recommender (LM4 enforcement):
+    - When a learner is in a cohort, the next-pick recommender prefers
+      concepts whose sub-area differs from the last 1–2 picks AND
+      sequences with the cohort calendar (e.g. "this week we cover X")
+    - Per-cohort weekly calendar stored in cohort.scheduleJson; learners
+      see "this week" prompt on the cohort dashboard
+
+11. Tests:
+    - Vitest: cohort RLS isolation — learner in cohort A cannot see cohort B
+    - Vitest: cohort_complete event fires when a member's progress on the
+      catalog reaches the threshold (default 80% of concepts complete)
+    - Playwright: SME records 30s audio → transcribed → intake pre-filled
+    - Vitest: peer-comparison panel anonymised when tenant_policy flag set
+
+CONSTRAINTS:
+- LM8 cohort routes are tenant-scoped (RLS). Cross-tenant cohort sharing
+  is OUT of scope until P12.
+- SM7 voice authoring requires Phase-2 API spend (Whisper or equivalent);
+  per-tenant token-budget cap applies — voice transcription billed against
+  the same monthly_token_budget_usd cap.
+- Anonymised peer-comparison is a tenant_policy flag, default OFF for B2C
+  (signal stronger un-anonymised) and ON for B2B (face-saving / DEI).
+```
+
+#### P10 Section D — Definition of Done (additions)
+
+- [ ] Learner can join a cohort and see the cohort dashboard.
+- [ ] Cohort completion email fires 7 days after end-date.
+- [ ] SME records audio → DrafterIntake pre-filled from transcript.
+- [ ] Anonymised peer-comparison toggleable per tenant.
+- [ ] All cohort routes RLS-isolated.
+
 ---
 
 ### P11 — Embeddings dedup + post-publish quality signals + cron aggregation (~3 days)
@@ -2262,6 +2324,76 @@ CONSTRAINTS:
 - [ ] Daily aggregator pauses a bad question after 30 attempts.
 - [ ] In-flight quizzes are not affected when a question pauses.
 - [ ] /admin/quality shows the paused question.
+
+#### P11 Section D extensions (cron aggregators — LM1 / LM7 / LM8 / SM8 + Kirkpatrick L2/L3)
+
+**Add these sub-bullets to the P11 AI prompt** above:
+
+```
+ADDITIONAL OBJECTIVES (Section D — read §3.8.5, §3.8.7, §3.8.8, §3.8.10):
+
+7. Spaced-review enqueue (LM1) — Inngest cron daily 03:00 UTC:
+   - For each (tenant, user, conceptId, catalogVersionId) with a
+     completed quiz: insert/update spaced_review_item using the
+     §3.8.7 nextInterval helper.
+   - On miss with consecutiveMisses ≥ 3, set isLeech=true and add to a
+     leech queue surfaced in /me/progress.
+   - Emit 'spaced_review_enqueued' PostHog event for L3 tracking.
+
+8. Streak push cadence (LM7) — Inngest function:
+   - Trigger: Inngest cron at 5-min granularity, evaluating each user with
+     pushOptIn=true and a streak.lastActiveDay older than today.
+   - Use the §3.8.8 Thompson-sampling bandit to decide whether to send
+     today; honour the 22:00–07:00 user-local floor and the modal-study-time
+     anchor ± 30 min jitter.
+   - Send via web-push (browser) AND Resend digest fallback when push not
+     granted; record outcome (return-visit-within-24h) for bandit update.
+
+9. Cohort-completion aggregator (LM8) — Inngest cron daily 04:00 UTC:
+   - For each cohort whose endDate is exactly 7 days ago: send Resend
+     summary email to each member with personal progress + cohort stats
+     (mean completion %, top-quartile, peer rank if opt-in).
+   - Emit 'cohort_complete' event so the L3 retention dashboard updates.
+
+10. Per-SME blind-spot aggregator (SM8) — Inngest cron daily 05:00 UTC:
+    - For each SME (tenant_member.role IN ('admin','sme')) authoring drafts
+      in the past 30 days, recompute sme_blind_spot_signal:
+      - draftsAuthored: count of drafts in window
+      - rejectionsByCategory: counts from CriticOutput history
+      - trend: linear regression slope over weekly buckets ⇒
+        'improving' (slope < -0.1), 'flat', 'regressing' (> 0.1)
+    - Surface a one-sentence personalised authoring prompt on the SME's
+      next /admin/draft page based on the highest-count category.
+
+11. Kirkpatrick L2/L3 dashboards at /admin/measurement:
+    - L2 calibration-Δ trend per cohort (from calibration_event)
+    - L3 D1/D7/D30 retention curves per cohort (from signup + lesson_view)
+    - L3 spaced-review same-session clearance rate (target ≥ 60%)
+    - L3 course-completion rate (cohort_complete / cohort_join)
+    - All charts read-through withTenant; admin role required.
+
+12. Tests:
+    - Vitest: nextInterval round-trips correct ladder (1→3→7→14→30→60).
+    - Vitest: leech rule fires at consecutiveMisses=3.
+    - Vitest with mocked Inngest: cohort-completion cron sends correct
+      email count.
+    - Vitest: blind-spot aggregator computes 'regressing' on increasing trend.
+    - Vitest: L2 calibration-Δ chart query is rls-isolated.
+
+CONSTRAINTS:
+- All Inngest crons must be idempotent — running twice in a window is safe.
+- L3 retention queries must use materialised views (refreshed nightly) to
+  keep the dashboard cheap; raw event-table scans are forbidden at this scale.
+- Streak push frequency capped: never more than 1 per day per user.
+```
+
+#### P11 Section D — Definition of Done (additions)
+
+- [ ] Spaced-review banner surfaces ≥ 1 due item the morning after a quiz.
+- [ ] Streak push fires at modal-study-time and respects 22-07 floor.
+- [ ] Cohort-completion email goes out exactly 7 days post end-date.
+- [ ] SME blind-spot trend computed correctly for fixture data.
+- [ ] /admin/measurement renders L2 + L3 charts; rls-isolated.
 
 ---
 
