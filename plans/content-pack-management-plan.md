@@ -553,6 +553,11 @@ This plan is the third pass. Earlier rounds had these issues; record them so the
 
 ---
 
-## Companion document
+## Companion documents
 
-A slide-deck version of this plan, designed for sharing with non-technical stakeholders, is in [`./content-pack-management-deck.md`](./content-pack-management-deck.md).
+Audience-specific deck versions of this plan:
+
+- [`./deck-overview.md`](./deck-overview.md) — general non-technical overview (default for most stakeholders).
+- [`./deck-investor.md`](./deck-investor.md) — investor / advisor brief: TAM, unit economics, capital-efficiency story, founder fit.
+- [`./deck-b2b-prospect.md`](./deck-b2b-prospect.md) — B2B prospect brief: buyer-language pitch, pilot terms, security & compliance, comparison vs LMS / DIY.
+- [`./deck-collaborator.md`](./deck-collaborator.md) — technical collaborator brief: architecture, hard problems, what you'd build in P1–P6, deliberate tech debt.

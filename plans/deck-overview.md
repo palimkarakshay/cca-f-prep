@@ -1,6 +1,7 @@
 # Content Pack Management Platform — Deck
 
-> Slide-style summary of the build plan. Designed for a 10-minute walk-through with a non-technical stakeholder. Slide breaks are marked by `---`. The detailed plan is in [`./content-pack-management-plan.md`](./content-pack-management-plan.md).
+> Slide-style summary of the build plan. Designed for a 10-minute walk-through with a non-technical stakeholder. Slide breaks are marked by `---`.
+> Companion docs: [`./content-pack-management-plan.md`](./content-pack-management-plan.md) (detailed plan), [`./deck-investor.md`](./deck-investor.md) (investor/advisor angle), [`./deck-b2b-prospect.md`](./deck-b2b-prospect.md) (B2B sales angle), [`./deck-collaborator.md`](./deck-collaborator.md) (technical collaborator angle).
 
 ---
 
