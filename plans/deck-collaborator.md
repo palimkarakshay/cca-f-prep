@@ -214,7 +214,10 @@ outcome. The L-codes are referenced from
 **Coverage assertion.** Every problem maps to ≥ 1 specific feature
 (file path or component named); every feature maps to ≥ 1 cited source.
 No problem is closed by exhortation alone. Cross-ref §D0 in the build
-plan for the canonical matrix.
+plan for the canonical matrix; full evidentiary basis in
+[`research-and-strategy-dossier.md`](./research-and-strategy-dossier.md)
+(industry case studies, problem-by-problem mitigation walkthrough with
+falsification triggers, full bibliography).
 
 ---
 

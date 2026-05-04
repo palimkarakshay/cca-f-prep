@@ -583,6 +583,16 @@ commitments, critic-prompt design, Kirkpatrick L1–L4 measurement, TTFV
 acceptance criteria, segment-specific wedges, mechanism rationale, and
 the business-case foundation.
 
+> **Companion dossier.** [`research-and-strategy-dossier.md`](./research-and-strategy-dossier.md)
+> is the consolidated evidentiary basis for the claims §D makes — full
+> problem catalogue with industry-source citations, mechanism set with
+> peer-reviewed citations, industry-historical case studies (Anki,
+> Duolingo, Maven, Khan Academy, Coursera, Cornerstone, 360Learning,
+> Section), problem-by-problem walkthrough of all 16 L1–L8 + S1–S8
+> mitigations with falsification triggers, commercial-viability case
+> with TAM / comparables / pricing / unit economics / NRR / scalability,
+> and full bibliography. Hand the dossier to any due-diligence reader.
+
 ### D0. Problem catalogue & feature-mitigation matrix
 
 The single canonical mapping the rest of § D elaborates. Every row reads

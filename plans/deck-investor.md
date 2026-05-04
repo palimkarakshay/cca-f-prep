@@ -256,7 +256,12 @@ not by founder-charisma. This is the audit.
 **The moat is the matrix.** Anyone can build an AI tutor. The defensibility
 is the named-mechanism → shipped-feature → falsifiable-metric chain — and
 the willingness to be measured against L1–L4 Kirkpatrick targets in §D4
-of the build plan.
+of the build plan. Full diligence dossier in
+[`research-and-strategy-dossier.md`](./research-and-strategy-dossier.md)
+— TAM/SAM/SOM, named industry comparables (Duolingo, Coursera, Maven,
+Section, Cornerstone, Docebo), pricing tiers, unit economics, NRR
+targets (Y1 ≥ 110%, Y2 ≥ 120% per SaaS Capital 2025), and capital-
+efficiency case.
 
 ---
 
