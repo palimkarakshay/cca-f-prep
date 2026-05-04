@@ -245,6 +245,161 @@ with explicit citation that the dossier has passed expert review.
 
 ---
 
-*§A, §B, §C, §D, §E, §F, §G filled in subsequent commits per the
-plan in `/root/.claude/plans/`. Each is gated by the verification
-checks listed in that plan.*
+## §A — Psychology-specialist audit checklist
+
+**Reviewer scope:** dossier §1.2 (knowledge-decay), §1.4 (engagement),
+§2.1 (cognitive mechanisms), §2.2 (behavioural mechanisms), §4.1–§4.8
+(L1–L8 problem-mitigation walkthrough). 18 mechanism rows below. Fill
+**Score**, **Recommendation**, **Notes** for each. Standard 5-point
+scoring rubric (§3); standard four recommendations (§4).
+
+### A.1 — Cognitive mechanisms (dossier §2.1)
+
+| # | Claim | Cited source | Built today | Planned (Phase) | Score | Recommendation | Notes |
+|---|---|---|---|---|---|---|---|
+| A1 | **Spacing effect** — expanding-interval review (1/3/7/14/30d) lifts long-term retention ~2× vs massed practice; optimal gap ≈ 10–20% of retention horizon. | Cepeda et al. 2008 *Psych Sci*; Cepeda 2006 254-study meta | `09-progress-tracker/spaced-review.md` schema only — no scheduler, no surface. | LM1 — `SpacedReviewBanner.tsx` + `web/src/lib/spaced-review.ts` scheduler + cron-driven nightly enqueue; leech rule on 3+ misses (Phase 2). | | | |
+| A2 | **Testing effect / retrieval practice** — single self-test produces ~50% lift on 1-week delayed recall vs re-reading. | Roediger & Karpicke 2006 *Psych Sci*; Karpicke & Blunt 2011 *Science* | Lesson-depth toggle (re-reading-shaped) — no retrieval gate. | LM2 — `RetrievalGate` primitive in `LessonView.tsx`; recall-write before reveal (Phase 2). | | | |
+| A3 | **Generation effect** — self-generated answers retained ~30% better than read answers. | Slamecka & Graf 1978 *J Exp Psych: HLM* | Quiz reveal is recognition-only. | LM3 — principle-write field in `QuizRunner.tsx` before reveal (Phase 2). | | | |
+| A4 | **Interleaving > blocked** — shuffled-practice 63% accuracy vs blocked 20% on 1-week delayed transfer test (3× lift). | Rohrer & Taylor 2007; Rohrer 2012 review | Methodology cites it; recommender does not enforce. | LM4 — `nextPick.subArea !== lastPick.subArea` constraint in `recommendation.ts` (Phase 2). | | | |
+| A5 | **Desirable difficulties** — slowing acquisition (spacing, interleaving, generation, varied context) accelerates long-term retention and transfer. | Bjork 1994; Bjork & Bjork 2011 | Methodology cites; surfaces default to Easy (re-reading). | LM2 + LM3 + LM4 collectively; Easy depth-toggle becomes opt-out, not default (Phase 2). | | | |
+| A6 | **Cognitive Load Theory + worked-example fading** — fully-worked examples for novices, faded for intermediates, solo for experts; mismatch produces extraneous load. | Sweller 1988; Sweller, van Merriënboer & Paas 2019 | Lesson depth toggle (Easy / Conceptual / Deeper) — fixed scaffolding, not adaptive. | LM5 — depth-toggle gains "solo" rung that disables hints once mastery ≥ 3 (Phase 2). | | | |
+| A7 | **Expertise-reversal effect** — scaffolding that helps novices hurts intermediate-and-above learners. | Kalyuga 2003 *Edu Psych Rev* | Mastery rungs 0–4 in `progress-types.ts`. | LM5 — rung-3 cutover trigger for fading-to-solo (Phase 2). | | | |
+| A8 | **Metacognitive calibration / JOL** — re-reading produces high judgment-of-learning + low actual recall (fluency illusion); pre-answer JOL capture closes the gap. | Dunlosky & Bjork (Handbook of Metamemory); Kruger & Dunning 1999 | `Gap` column in `09-progress-tracker/skills-matrix.md` (formalised as Calibration Δ on `main`). | LM6 — JOL slider in `QuizRunner.tsx` + Δ trend in `StatsPanel.tsx` (Phase 2). | | | |
+| A9 | **Transfer (near vs far)** — far transfer requires varied contextualised practice with explicit principles; encoding-specificity dominates near transfer. | Barnett & Ceci 2002 *Psych Bull* | Diagnostic-01 is flat 10-Q; real exam is 4 scenarios × 15 Q. | LM4 — `MockExamPage.tsx` restructured to scenario-anchored shape with persisted scenario context (Phase 2). | | | |
+| A10 | **Andragogy** — adult learners are self-directed, problem-centred, anchored to prior experience; need rationale-first. | Knowles 1973 *The Adult Learner* | Methodology cites; no rationale-first lesson structure enforced. | Cross-cuts SM1–SM5 (rationale exposed at every required SME field). | | | |
+| A11 | **Dual-coding** — verbal + visual encoding outperforms either alone, but only when non-redundant (Mayer redundancy principle). | Paivio 1971/1986; Mayer multimedia learning principles | Lessons are text-heavy; visual content optional. | Phase 2 — image / diagram fields in lesson schema; critic checks for non-redundancy. | | | |
+
+**Row-level question prompts (psychology specialist).** For each row,
+note your answer in the **Notes** column:
+- Is the cited effect size from a peer-reviewed meta-analysis, or a
+  single study?
+- Does the cited population (typically K-12 or undergraduate) generalise
+  to adult professional learners in vocational / certification /
+  compliance domains?
+- Is our planned implementation faithful to the original mechanism, or
+  only inspired-by? Specifically: A6 worked-example fading — is our
+  implementation problem-internal (faithful to Sweller) or concept-
+  external (a re-interpretation)?
+- A1 spacing — is the 10–20% optimal-gap rule applicable at 30-day
+  retention horizons, or does it break down for shorter horizons?
+- A8 JOL — does pre-answer JOL capture actually train calibration, or
+  does it merely measure it?
+
+### A.2 — Behavioural mechanisms (dossier §2.2)
+
+| # | Claim | Cited source | Built today | Planned (Phase) | Score | Recommendation | Notes |
+|---|---|---|---|---|---|---|---|
+| A12 | **Hook Model** — trigger → action → variable reward → investment; trigger phase is the under-leveraged ed-tech surface. | Eyal 2014 *Hooked* | `computeStreak()` returns flags; no notification or trigger surface. | LM7 — web-push at modal study-time + email digest fallback; streak-freeze affordance (Phase 2). | | | |
+| A13 | **Fogg B = MAP** — when behaviour fails, raise Ability before Motivation; add Prompt before changing user dispositions. | Fogg 2009 (Persuasive '09) | Recommendation engine prioritises drill → continue → done; no Prompt surface. | LM7 (prompt) + LM8 (cohort = Ability raise via cohort-format reduces friction); decision-trees.md §5 re-engagement tree (Phase 2). | | | |
+| A14 | **Self-Determination Theory (SDT)** — autonomy + competence + relatedness drive intrinsic motivation; solo learning surfaces leave relatedness unmet. | Ryan & Deci 2000; Ryan & Deci 2017 *SDT* | Solo surfaces only; no cohort, no peer. | LM8 — per-cohort routes + peer-comparison + group leaderboard + live touchpoint (Phase 2). | | | |
+| A15 | **Variable-ratio reinforcement** — unpredictable reward schedules produce most extinction-resistant behaviour. | Skinner 1957 *Schedules of Reinforcement* | None. | LM7 push-cadence — variable not fixed; bandit-optimised (Phase 2). | | | |
+| A16 | **Loss aversion via streaks** — losses loom ~2× as large as gains; streak-as-asset framing exploits this. | Kahneman & Tversky 1979 *Econometrica* | Streak counter computed; not surfaced. | LM7 — streak counter in Header; streak-freeze (Phase 2). | | | |
+| A17 | **Goal-gradient + endowed progress** — pre-stamped progress and proximity-to-goal accelerate completion. | Hull (drive-reduction); Kivetz, Urminsky & Zheng 2006 *J Marketing Res* (34% faster completion with 2-of-12 pre-marked vs 0-of-10) | Progress tracking exists; no endowed-progress surface. | Phase 2 — progress bar shows fractional credit early; "you're 78% to mastery on this concept" framing. | | | |
+| A18 | **Cohort-commitment / parasocial accountability** — cohort-format effect from social identity + parasocial commitment + peer accountability. | Maven W1→W2 96% (vs MOOC 16%); Reich 2019 *Science* (14× MOOC); altMBA 96%; HBS Online | None. | LM8 — cohort surface (Phase 2). | | | |
+
+**Row-level question prompts (behavioural side).**
+- A12 Hook Model — is the published Eyal framework rigorous enough to
+  cite as evidence, or is it a popular-press synthesis that we should
+  hedge?
+- A14 SDT — relatedness in our cohort surface is mediated by group
+  leaderboard + peer-comparison; is that *actually* relatedness in the
+  Ryan & Deci sense, or is it competence with a social wrapper?
+- A18 cohort effect — what fraction of the 96% Maven W1→W2 retention
+  is attributable to (a) self-selection (only motivated learners pay
+  $300+); (b) cohort mechanism; (c) instructor quality? The published
+  data does not decompose this — should we hedge?
+
+### A.3 — Learner-side problem-mitigation rows (dossier §4.1–§4.8)
+
+For each of L1–L8 in dossier §4: assess whether the planned feature
+faithfully implements the cited mechanism, and whether the falsification
+trigger is the right metric.
+
+| # | Problem | Mechanism + planned feature (cross-ref dossier §4) | Falsification trigger | Score | Recommendation | Notes |
+|---|---|---|---|---|---|---|
+| A19 | L1 knowledge decay without review | spacing → SpacedReviewBanner + scheduler | D7 lift < 12pp at 8 weeks | | | |
+| A20 | L2 streak no return-trigger | Hook + variable-ratio → web-push + email digest | CURR lift < 10pp at 8 weeks | | | |
+| A21 | L3 re-reading not retrieval | testing + generation → RetrievalGate + principle-write | mock pass-rate < 8pp lift | | | |
+| A22 | L4 flat mocks | encoding-specificity → 4 scenarios × 15 Q | r < 0.6 with cert pass | | | |
+| A23 | L5 no JOL capture | calibration → JOL slider + Δ trend | \|Δ\| not converging at 60% | | | |
+| A24 | L6 letter-bias | cue-validity → validator | distribution not uniform within ±5pp | | | |
+| A25 | L7 interleaving not enforced | Rohrer & Taylor → recommender constraint | transfer accuracy < 15pp | | | |
+| A26 | L8 no cohort surface | SDT relatedness → cohort routes | cohort vs solo < 20pp | | | |
+
+**Row-level question prompts (problem mitigation).**
+- A19 — is the +1d / +3d / +7d / +14d / +30d cadence the right one for
+  the platform's retention horizon (~30–60 days from concept first
+  exposure to certification)? Or should it be SM-2-with-ease-factor
+  (Anki-style adaptive)?
+- A24 — is `> 55% any single letter` the right validator threshold?
+  Or should it be statistical (chi-square against uniform)?
+- A25 — does `nextPick.subArea !== lastPick.subArea` produce *enough*
+  interleaving, or does it merely prevent immediate-adjacency repeats?
+
+---
+
+## §B — Learning-specialist audit checklist
+
+**Reviewer scope:** dossier §1.3 (SME crisis), §2.3 (instructional-design
+mechanisms), §3.7 (SME-elicitation tools), §4.9–§4.16 (S1–S8 problem-
+mitigation walkthrough). 18+ rows below.
+
+### B.1 — Instructional-design mechanisms (dossier §2.3)
+
+| # | Claim | Cited source | Built today | Planned (Phase) | Score | Recommendation | Notes |
+|---|---|---|---|---|---|---|---|
+| B1 | **Cognitive Task Analysis (CTA)** — SMEs omit ~70% of decisions in self-narration; CTA-built instruction +46% gain, d ≈ 1.72. | Clark, Feldon, van Merriënboer, Yates & Early; Clark & Estes 1996; Lee 2004; Tofel-Grehl & Feldon 2013 | None — content authored by hand-editing `curriculum.js`. | SM1 — `DrafterIntake` schema with 5 required JSON fields (Phase 2). | | | |
+| B2 | **4C/ID** — four components (learning tasks / supportive info / JIT info / part-task practice) required for complex-skill instruction. | van Merriënboer 1997; van Merriënboer & Kirschner 2018 *Ten Steps to Complex Learning* | Quiz schema captures correct/distractors but no 4C/ID coverage. | SM6 — critic returns `missing_components` (Phase 2). | | | |
+| B3 | **Backward design / Understanding by Design** — assessment first, lesson second; produces measurable lessons. | Wiggins & McTighe 1998/2005 *Understanding by Design* | Quiz authoring is post-hoc to lesson. | SM2 — admin app at `/admin/draft/[slug]` opens to assessment intake; lesson editor locked until passing assessment authored (Phase 2). | | | |
+| B4 | **Worked-example fading** — pair every concept with worked + faded variant; worked → faded → solo across mastery rungs. | Sweller 1988; Sweller, van Merriënboer & Paas 2019; Renkl 2014 | None — examples are SME's choice; no pair structure. | SM3 — pair editor with worked + faded mandatory fields (Phase 2). | | | |
+| B5 | **Andragogy applied to SME interview design** — SMEs are adult learners of "how to teach"; intake protocol must surface why before what. | Knowles 1973; adapted to SME interview design | None. | Tooltips and inline rationale at every required SME field (Phase 2). | | | |
+| B6 | **Tacit knowledge capture** — text-from-blank is unrecoverable for ~80% of operationally-relevant knowledge in skilled-trades / clinical domains. | Polanyi 1966; Nonaka & Takeuchi 1995 | None — text-only authoring. | SM7 — voice / camera-first authoring with auto-draft (Phase 2). | | | |
+| B7 | **Deliberate practice + feedback specificity** — skill improvement requires specific, repeated feedback on a named dimension over time. | Ericsson 1993; Ericsson & Pool 2016 *Peak* | Critic feedback is per-draft; not aggregated per-SME. | SM8 — per-SME blind-spot dashboard at `/admin/sme/[id]/` (Phase 2). | | | |
+| B8 | **Question-led authoring** — start from "what should the learner be able to do?" not "what do I know?". | Dirksen *Design for How People Learn* 2nd ed. 2016 | None. | SM2 (backward design surface implements this in product form). | | | |
+| B9 | **Expert blind spot** — high-content-knowledge instructors over-estimate novice prerequisites. | Nathan & Petrosino 2003 *AERJ* | None. | SM4 — "what would a novice get wrong here?" textarea required at submission (Phase 2). | | | |
+| B10 | **Curse of expertise** — experts can't simulate novice mental state; under-predict task duration. | Hinds 1999 *J Exp Psych: Applied* | None. | SM4 (same mitigation as B9). | | | |
+
+**Row-level question prompts (learning specialist).**
+- B1 CTA — is our 5-probe intake (`novice_error`, `one_principle`,
+  `worked_example`, `faded_variant`, `boundary_case`,
+  `nearest_confusable`) faithful to the canonical CTA protocol
+  (knowledge audit, simulation interview, critical-decision method)?
+  Or is it a *productisation* that loses fidelity? If lossy, what's
+  lost?
+- B2 4C/ID — does our critic's `missing_components` check actually
+  enforce 4C/ID at the lesson level, or only at the concept level?
+  van Merriënboer's protocol is whole-task; concept-level enforcement
+  is a re-interpretation.
+- B3 backward design — does locking the lesson editor until a passing
+  assessment is authored produce *better* lessons, or just *measurable*
+  ones? The former is the goal; the latter is the metric.
+- B5 closed-taxonomy principle picker — does it meaningfully reduce
+  drift (the goal), or merely impose surface uniformity (an artefact)?
+  Reviewer's view on whether the taxonomy itself is the bottleneck.
+- B7 per-SME blind-spot dashboard — is this a deliberate-practice
+  feedback channel in the Ericsson sense, or just analytics? The
+  dossier claims the former; reviewer assess.
+
+### B.2 — SME-side problem-mitigation rows (dossier §4.9–§4.16)
+
+| # | Problem | Mechanism + planned feature (cross-ref dossier §4) | Falsification trigger | Score | Recommendation | Notes |
+|---|---|---|---|---|---|---|
+| B11 | S1 70% omission | CTA → DrafterIntake 5 probes | learner pass-rate < 20pp lift | | | |
+| B12 | S2 telling-what-I-know | backward design → assessment-locked lesson editor | gate-bypass > 20% at month 1 | | | |
+| B13 | S3 no worked-example pair | Sweller / Renkl → mandatory pair editor | faded compliance < 95% at month 3 | | | |
+| B14 | S4 no novice-error probe | Nathan & Petrosino → required textarea | rejection-rate not declining | | | |
+| B15 | S5 free-typed principle drift | closed taxonomy → principle picker | drift > 5% same-principle different-strings | | | |
+| B16 | S6 no 4C/ID gate | van Merriënboer → critic missing_components | ≥ 5% lessons missing components at audit | | | |
+| B17 | S7 tacit knowledge | Polanyi / CTA-for-trades → voice / camera | SME TTFV > 1h at deskless pilot | | | |
+| B18 | S8 critic feedback no loop | Ericsson → per-SME dashboard | rejection-rate not flat-or-improving at 8w | | | |
+
+**Row-level question prompts (SME problem-mitigation).** For each:
+- Is the problem real and at the cited prevalence in the populations
+  the platform targets (compliance, technical certifications,
+  vocational, clinical)? Or is it K-12-only?
+- Does the planned feature actually mitigate the problem, or only
+  address a symptom?
+- What's the strongest counter-example — a published case where the
+  planned mitigation failed or the problem proved different?
+- Is the falsification trigger the right metric, or is it gameable
+  / proxy-only?
