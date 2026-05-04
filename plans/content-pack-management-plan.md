@@ -583,6 +583,56 @@ commitments, critic-prompt design, Kirkpatrick L1–L4 measurement, TTFV
 acceptance criteria, segment-specific wedges, mechanism rationale, and
 the business-case foundation.
 
+### D0. Problem catalogue & feature-mitigation matrix
+
+The single canonical mapping the rest of § D elaborates. Every row reads
+**identified problem → specific app/platform feature that mitigates →
+source**. Same shape across the five plans/-folder documents (this plan
+plus the four decks) so a reader can audit the chain end-to-end.
+
+#### Learner-side: retention + absorption problems (L1–L8)
+
+| # | Identified problem | Specific platform feature | Source |
+|---|---|---|---|
+| **L1** | Knowledge decays exponentially without review (~25% retained at day 6) yet the spaced-review queue is invisible to the learner | **`SpacedReviewBanner.tsx`** widget at top of `/[packId]/` dashboard — surfaces 3 oldest due items with one-tap "Start review"; expanding-interval scheduler (1/3/7/14/30d) in `web/src/lib/spaced-review.ts`; cron-driven nightly enqueue; +1d reset on miss, leech rule on 3+ misses (LM1) | Cepeda et al. 2008 *Psych Sci*; Cepeda 2006 (254-study meta); Murre & Dros 2015 (Ebbinghaus replication) |
+| **L2** | Streak is computed but never used as a return-trigger; daily intent decays without an external prompt | **Streak counter** in `web/src/components/layout/Header.tsx` + **web-push notification** anchored to user's modal study-time (variable-ratio cadence to avoid extinction); streak-freeze affordance; email-digest fallback when push not granted (LM7) | Eyal 2014 (Hook Model — trigger phase); Fogg B = MAP (prompt leg); Skinner variable-ratio reinforcement; Mazal 2022 / Duolingo: CURR +21%, DAU 4.5× |
+| **L3** | Lesson "depth toggle" is re-reading, which produces a fluency illusion (high JOL, low actual recall) — not learning | **Mid-lesson `RetrievalGate` primitive** in `LessonView.tsx`: body hidden until learner types a recall sentence; **principle-write field** in `QuizRunner.tsx` before answer reveal (generation effect) (LM2 + LM3) | Roediger & Karpicke 2006 (~50% lift on 1-week delayed test); Karpicke & Blunt 2011 *Science*; Slamecka & Graf 1978 (generation effect ~+30%); Bjork & Bjork 2011 (stability vs fluency) |
+| **L4** | Mocks are flat 60-Q lists; the real exam is 4 scenarios × 15 questions, so practice fails encoding-specificity / transfer-appropriate processing | **`MockExamPage.tsx`** restructured to scenario-anchored: 4 scenarios × 15 Q with persisted scenario-context across the block; transfer-format variety per scenario; flat mocks deprecated to "warmup" tier | Bjork; Barnett & Ceci 2002 (taxonomy of transfer); encoding-specificity principle |
+| **L5** | No metacognitive calibration capture — "predict-then-test" is described in methodology but never instrumented; learners can't see Dunning-Kruger gap close | **JOL 1–5 slider** in `QuizRunner.tsx` before reveal; **calibration-Δ column** in `StatsPanel.tsx`; weekly trend persisted; \|Δ\| > 1 triggers a generation-effect drill at +1d (LM6) | Dunlosky & Bjork (handbook of metamemory); Kruger & Dunning 1999; Kalyuga 2003 (expertise-reversal sets the under-confident remediation) |
+| **L6** | Letter-bias (~76% B in concept quizzes) was tracked as `letter-bias-2026-05` but uncommitted; learners build a positional cue rather than principle reasoning | **Pre-publish content-lint validator** (`packages/shared/src/validators.ts`) rejects MCQ sets with > 55% any single letter or with shorter-distractor patterns; F12 (cue-bias) added to error-log doctrine; admin app blocks publish on lint fail | Cue-validity / spurious-cue learning literature; F12 doctrine in `06-failure-analysis/error-log.md` |
+| **L7** | Interleaving is documented but not enforced; learners (and SMEs scheduling content) default to blocked practice, which transfers ~30% worse | **Recommender constraint** in `web/src/lib/recommendation.ts`: `nextPick.subArea !== lastPick.subArea`; rotation forced ≥ 2 sub-areas per session; weekly-cohort calendar interleaves (LM4) | Rohrer & Taylor 2007 (63% shuffled vs 20% blocked at 1-week delayed test); Bjork desirable difficulties |
+| **L8** | No social / cohort surface; the SDT relatedness need is unmet — the single largest gap between MOOC (3–10% completion) and cohort-based courses (Maven 96%) | **Per-cohort routes** under `/[packId]/cohort/[cohortId]/`; **peer-comparison panel** + **group leaderboard** primitive; weekly-cohort live touchpoint slot; cohort-completion email (LM8) | Ryan & Deci (Self-Determination Theory — relatedness); Maven W1→W2 96% vs MOOC 16% (14× retention multiplier); Reich & Ruipérez-Valiente 2019 *Science* |
+
+#### SME-side: knowledge-sharing effectiveness problems (S1–S8)
+
+The unifying thesis: SMEs are not bad teachers — Cognitive Task Analysis
+finds they omit ~70% of decisions when self-narrating (Clark, Feldon, van
+Merriënboer, Yates & Early). The platform substitutes structured
+elicitation for the missing tacit-knowledge transfer, so SMEs share more
+without needing to *learn how to teach*.
+
+| # | Identified problem | Specific platform feature | Source |
+|---|---|---|---|
+| **S1** | SMEs self-narrating expertise omit ~70% of decisions; instruction built from narration is ~46% less effective than CTA-built equivalent | **`DrafterIntake` TypeScript schema** — five required JSON fields (`novice_error`, `one_principle`, `worked_example`, `faded_variant`, `boundary_case`, `nearest_confusable`); admin app cannot submit lesson if any field empty (SM1) | Clark, Feldon, van Merriënboer, Yates & Early; Lee 2004 (+46% post-training learning gain, Cohen's d ≈ 1.72 — CTA-built vs expert-narrated); Tofel-Grehl & Feldon 2013 |
+| **S2** | SMEs default to "telling what I know" instead of designing toward an assessment; lessons end up unmeasurable | **Backward-design "write the test first" mode** in `/admin/draft/[slug]` — the assessment intake editor unlocks first; lesson editor only unlocks once a passing test is authored (SM2) | Wiggins & McTighe 1998 *Understanding by Design*; Dirksen *Design for How People Learn* |
+| **S3** | SMEs ship principle-only or example-only — never paired-then-faded — so worked-example fading effect is unavailable | **Worked-example pair editor** with two mandatory side-by-side fields (worked + faded variant); critic refuse-to-publish if either missing; faded variant validated as having ≥ 1 hint removed (SM3) | Sweller 1988; Sweller, van Merriënboer & Paas 2019; Renkl (faded worked examples) |
+| **S4** | "Curse of expertise" — SMEs over-estimate novice prerequisites and under-explain bridging steps; learners stall at the implicit gap | **"What would a novice get wrong here?" textarea** required at submission; critic surfaces blind-spot flags via `blind_spot_flags: string[]` in `CriticOutput`; SME prompted to address each before re-submit (SM4) | Nathan & Petrosino 2003 (preservice-teacher expert blind spot); Hinds 1999 (curse of expertise) |
+| **S5** | Free-typed principles drift across SMEs; learners can't accumulate a stable schema; Bloom-rung tagging breaks down | **Closed-taxonomy principle-picker** (autocomplete from approved B-skill list); admin app rejects free-typed principles unmapped to taxonomy; principle-tag is required and indexed for cross-concept retrieval (SM5) | Knowles andragogy (anchor to existing schema); Bloom revised taxonomy |
+| **S6** | SMEs over-deliver supportive information (4C/ID component b) and under-deliver learning tasks (a), just-in-time info (c), and part-task practice (d) | **Critic-prompt 4C/ID coverage gate** — `CriticOutput.missing_components` returns any of `{learning_tasks, supportive_info, jit_info, part_task_practice}` absent from the lesson; refuse-to-publish on any missing component (SM6) | van Merriënboer 1997 — Four-Component Instructional Design (4C/ID) |
+| **S7** | Tacit knowledge (skilled-trades, deskless, founder-built workflows) is unrecoverable from text-from-blank — the SME literally cannot type what they know | **Voice-first / camera-first authoring**: SME records 3-min audio or video; transcription + auto-draft into the 5-probe intake; SME edits, doesn't compose; mobile-first capture for shop-floor / field-services SMEs (SM7) | Polanyi 1966 (tacit knowledge); CTA-for-skilled-trades research; TalentCards: ~2.7B deskless workers globally |
+| **S8** | Critic feedback is destination, not loop — SMEs see one-off corrections but never their own pattern, so no deliberate-practice channel exists for the SME themselves | **Per-SME blind-spot dashboard** at `/admin/sme/[id]/` aggregating critic-feedback over time; personalised authoring prompts surfaced before next draft ("you've omitted the boundary case in 4 of last 6 lessons"); critic-rejection-rate trend visible to SME (SM8) | Ericsson 1993 (deliberate-practice feedback channel); deliberate-practice literature on feedback specificity |
+
+#### Coverage assertion
+
+Every problem in the catalogue maps to ≥ 1 specific feature; every
+feature maps to ≥ 1 cited source. No problem is addressed by exhortation
+alone (e.g., "remind learners to review") — every mitigation is a
+shipped surface in the Phase-2 build.
+
+The per-mechanic detail (LM1–LM8 implementation paths and SM1–SM8
+elicitation tooling) lives in §§ D1–D2 below; outcome targets in § D4;
+segment-specific variants in § D6.
+
 ### D1. Learner-absorption mechanics for Phase 2
 
 Eight mechanics. Each tagged to research source, repo lever, and Phase-2

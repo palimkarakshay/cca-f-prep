@@ -204,6 +204,39 @@ artefacts that don't transfer without specific elicitation tooling.
 
 ---
 
+## Problems we mitigate, and how
+
+The chain reads left-to-right: identified problem → specific feature in
+the platform → research source. Same matrix elaborated in
+`content-pack-management-plan.md` §D0 and mirrored in every deck.
+
+**Learner retention + absorption:**
+
+| Problem | Platform feature | Source |
+|---|---|---|
+| ~25% knowledge retained at day 6 without review | Spaced-review banner on the dashboard with one-tap "Start review"; expanding interval 1/3/7/14/30d | Cepeda 2008; Murre & Dros 2015 |
+| Streaks computed but no return-trigger | Streak counter + web-push at user's modal study-time; streak-freeze | Eyal 2014; Mazal 2022 (Duolingo CURR +21%) |
+| Re-reading produces fluency illusion, not learning | Mid-lesson retrieval gate (recall before reveal); write-the-principle field | Roediger & Karpicke 2006; Slamecka & Graf 1978 |
+| No metacognitive calibration capture | JOL slider before reveal; calibration-Δ trend visible | Dunlosky & Bjork; Kruger & Dunning 1999 |
+| Blocked practice transfers ~30% worse | Recommender enforces sub-area rotation per session | Rohrer & Taylor 2007 |
+| No social/cohort surface; SDT relatedness unmet | Per-cohort routes + peer-comparison + group leaderboard | Ryan & Deci; Maven 96% vs MOOC 16% |
+
+**SME knowledge-sharing:**
+
+| Problem | Platform feature | Source |
+|---|---|---|
+| SMEs omit ~70% of decisions when self-narrating | 5-probe `DrafterIntake` schema with required JSON fields | Clark / Feldon; Lee 2004 (+46% gain, d ≈ 1.72) |
+| "Telling what I know" instead of designing toward an assessment | Backward-design "write the test first" mode; lesson editor locked until assessment authored | Wiggins & McTighe 1998 |
+| Curse of expertise — under-explained bridging steps | "What would a novice get wrong?" probe required at submission | Nathan & Petrosino 2003 |
+| Tacit knowledge unrecoverable from text-from-blank | Voice-first / camera-first authoring with auto-draft | Polanyi 1966; CTA-for-skilled-trades |
+| Critic feedback is destination, not loop | Per-SME blind-spot dashboard aggregating feedback over time | Ericsson 1993 (deliberate-practice feedback channel) |
+
+Every mitigation is a shipped Phase-2 surface — not exhortation, not a
+"best-practice guideline." Outcome targets per Kirkpatrick L1–L4 in
+`content-pack-management-plan.md` §D4.
+
+---
+
 ## Eight segments, one engine
 
 The mechanism set is the same regardless of segment. The *surface* varies.

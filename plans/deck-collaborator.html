@@ -212,20 +212,39 @@ The retention claims aren't aspirational. Each product surface is wired
 to a peer-reviewed cognitive-psychology mechanism with a measurable
 outcome. The L-codes are referenced from
 [`./content-pack-management-plan.md`](./content-pack-management-plan.md)
-§ D1 / § D7.
+§ D0 / § D1 / § D7. **Read each row left-to-right: identified problem
+→ shipped feature → research source → falsifiable metric.**
 
-| Feature | Research source | Measured outcome |
-|---|---|---|
-| LM1 Spaced-review banner (expanding interval 1/3/7/14/30d) | Cepeda et al. 2008 (*Psych Sci*); Murre & Dros 2015 | D7 cohort-retention lift |
-| LM2 Mid-lesson retrieval gate | Roediger & Karpicke 2006; Karpicke & Blunt 2011 (*Science*) | Mock pass-rate lift; calibration-Δ closure |
-| LM3 Generation-before-reveal | Slamecka & Graf 1978 | Long-term retention +30% |
-| LM4 Interleaved recommender | Rohrer & Taylor 2007 | Transfer-question accuracy lift |
-| LM5 Worked-example fading + expertise-reversal cutover | Sweller, van Merriënboer & Paas 2019; Kalyuga 2003 | Per-rung intervention efficacy |
-| LM6 Calibration column | Dunlosky & Bjork; Kruger & Dunning 1999 | Calibration-Δ trend toward 0.5 |
-| LM7 Streak push (variable-ratio) | Eyal 2014; Skinner; Mazal 2022 (Duolingo) | CURR +21%, DAU 4.5× precedent |
-| LM8 Cohort surface | Maven W1→W2 96% vs MOOC 16%; Reich & Ruipérez-Valiente 2019 (*Science*) | Course-completion rate ≥ 60% target |
+**Learner side (LM1–LM8):**
 
-SME side (SM1–SM8) is the same shape — see §D2 of the plan.
+| Problem solved | Feature (specific surface) | Source | Measured outcome |
+|---|---|---|---|
+| ~25% retained at day 6 without review | LM1 Spaced-review banner (`SpacedReviewBanner.tsx`); 1/3/7/14/30d scheduler in `web/src/lib/spaced-review.ts`; cron-driven enqueue; leech rule | Cepeda et al. 2008 (*Psych Sci*); Murre & Dros 2015 | D7 cohort-retention curve ≥ 40% (cohort tier) |
+| Re-reading produces fluency illusion, not learning | LM2 Mid-lesson retrieval gate (`RetrievalGate` primitive in `LessonView.tsx`); recall-write before reveal | Roediger & Karpicke 2006; Karpicke & Blunt 2011 (*Science*) | Mock pass-rate lift; calibration-Δ closure |
+| Recognition-ease beats generation in default UX | LM3 Generation-before-reveal field in `QuizRunner.tsx`; principle-write required before answer | Slamecka & Graf 1978 | Long-term retention +30% precedent |
+| Blocked practice transfers ~30% worse | LM4 Interleaving constraint in `recommendation.ts`: `nextPick.subArea !== lastPick.subArea` | Rohrer & Taylor 2007 (63% shuffled vs 20% blocked) | Transfer-question accuracy lift |
+| Static scaffolding hurts intermediates (expertise-reversal) | LM5 Worked-example fading + rung-3 cutover; lesson-depth toggle gains "solo" rung | Sweller, van Merriënboer & Paas 2019; Kalyuga 2003 | Per-rung intervention efficacy |
+| Dunning-Kruger gap invisible | LM6 JOL slider before reveal; calibration-Δ in `StatsPanel.tsx`; weekly trend persisted | Dunlosky & Bjork; Kruger & Dunning 1999 | \|Δ\| trend toward 0.5 over 8-week window |
+| Streak computed but no return-trigger | LM7 Web-push at modal study-time + email digest; bandit-optimised cadence; streak-freeze | Eyal 2014; Skinner (variable-ratio); Mazal 2022 (Duolingo) | CURR +21%, DAU 4.5× precedent |
+| MOOC 3–10% completion — no relatedness surface | LM8 Per-cohort routes; peer-comparison panel; group leaderboard primitive; live-cohort touchpoint | Ryan & Deci (SDT — relatedness); Maven W1→W2 96% vs MOOC 16%; Reich 2019 *Science* | Course-completion rate ≥ 60% target |
+
+**SME side (SM1–SM8):**
+
+| Problem solved | Feature (specific surface) | Source | Measured outcome |
+|---|---|---|---|
+| SMEs omit ~70% of decisions self-narrating | SM1 `DrafterIntake` schema — 5 required JSON fields; admin app blocks publish if any empty | Clark / Feldon; Lee 2004 (+46% gain, d ≈ 1.72); Tofel-Grehl & Feldon 2013 | SME-content learner-pass-rate vs unscaffolded baseline |
+| "Telling what I know" instead of designing toward an assessment | SM2 Backward-design "write the test first" mode; lesson editor locked until assessment authored | Wiggins & McTighe 1998 | Lesson measurability gate (every lesson has a passing assessment) |
+| Principle-only or example-only ships | SM3 Worked-example pair editor (worked + faded mandatory); critic refuse-to-publish if either missing | Sweller; Renkl (faded worked examples) | 4C/ID supportive-info coverage |
+| Curse of expertise — bridging steps under-explained | SM4 "What would a novice get wrong here?" textarea required; critic surfaces `blind_spot_flags` | Nathan & Petrosino 2003; Hinds 1999 | Critic-rejection-rate trend per SME |
+| Free-typed principle drift | SM5 Closed-taxonomy principle-picker; rejection if free-typed and unmapped | Knowles; Bloom revised | Cross-concept retrieval consistency |
+| 4C/ID component coverage gaps | SM6 Critic returns `missing_components: ('learning_tasks' \| 'supportive_info' \| 'jit_info' \| 'part_task_practice')[]`; refuse-to-publish on any missing | van Merriënboer 1997 (4C/ID) | All four components present per published lesson |
+| Tacit knowledge unrecoverable from text-from-blank | SM7 Voice-first / camera-first authoring + auto-draft into 5-probe intake (mobile-first for deskless) | Polanyi 1966; CTA-for-skilled-trades; TalentCards (~2.7B deskless) | SME TTFV ≤ 1 hour for tacit-knowledge segments |
+| Critic feedback is destination, not loop | SM8 Per-SME blind-spot dashboard at `/admin/sme/[id]/`; aggregated critic-feedback over time; personalised authoring prompts | Ericsson 1993 (deliberate-practice feedback channel) | Critic-rejection-rate trends down month-over-month per SME |
+
+**Coverage assertion.** Every problem maps to ≥ 1 specific feature
+(file path or component named); every feature maps to ≥ 1 cited source.
+No problem is closed by exhortation alone. Cross-ref §D0 in the build
+plan for the canonical matrix.
 
 ---
 
