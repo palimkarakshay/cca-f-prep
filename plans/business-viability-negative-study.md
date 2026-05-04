@@ -598,3 +598,122 @@ the operator has been auto-generating CCA-F study content with a
 authoring discipline that's pitched as the moat does not yet hold for
 the operator's own study material.
 
+---
+
+## 9. Free-tier infrastructure for commercial use is a TOS violation
+
+Phase 1 is pitched at "essentially free" (`deck-overview.md:76–89`):
+Vercel Hobby, Neon free, R2 free, Clerk free, Resend free, PostHog free,
+Sentry free.
+
+**Vercel Hobby's TOS explicitly forbids commercial use.** The plan
+acknowledges this in passing (`IMPLEMENTATION.md:95, :174, :2691`) but
+designs the business to launch *on* Hobby and "flip to Pro at first
+paying customer." This means:
+
+- Phase 1 traffic from B2B prospects on `app.<domain>` — being demoed
+  for purchase — *is already a TOS breach the moment any pre-order is
+  collected* via the Stripe Payment Link (`deck-overview.md:69`).
+- The plan's own audit (C12 row 3, `IMPLEMENTATION.md:546`) admits Hobby
+  was "wrong indefinitely" yet still uses it day one.
+- Vercel can rate-limit, suspend, or revoke without notice. A single
+  buyer demo that triggers a usage spike on Hobby tier is a customer-
+  facing outage.
+
+**The other free tiers also fail under load:**
+
+| Service | Free limit | Breaks at |
+|---|---|---|
+| Neon | 0.5 GB | 10k MAU × event/progress/calibration_event/retrieval_event/spaced_review_item rows blow 0.5 GB in **weeks** |
+| Clerk | 10k MAU but **~100 free orgs cap** | 100 B2B tenants = at the cap on Phase 2 day one |
+| PostHog | 1M events/mo | 10k MAU × 100 events/MAU/mo = 1M with **zero headroom** |
+| Sentry | 5k events/mo | A single bad release at 10k MAU exhausts in minutes |
+| Resend | 3k emails/mo | Cohort-completion email cron alone (`IMPLEMENTATION.md:2353`) sends to every cohort member 7 days post-end. 100 tenants × 50 learners = **5k emails in one cron run** |
+
+The plan's $450–1000/mo Phase 2 estimate is therefore wrong on **two**
+ends: AI cost is 25–30× too low (§4.2), and infra-tier upgrade costs
+are also undercounted because the gating limits arrive earlier than the
+plan models.
+
+### 9.1 "Phase 1 carries over without rewrites" is false
+
+The plan repeatedly claims (`deck-overview.md:258`,
+`deck-investor.md:81`) that "nothing from Phase 1 is thrown away."
+Concrete forced rewrites at the Phase 1 → Phase 2 cutover:
+
+1. **Vercel Hobby → Pro:** project re-import, env migration, build
+   budget changes, cold-start behaviour shifts.
+2. **Neon free → Scale:** connection pooling changes (HTTP driver vs
+   pooled), reads-on-replicas, query-plan differences.
+3. **Clerk free → Pro+Enterprise:** the org model fundamentally
+   changes; existing personal-tenant rows
+   (`IMPLEMENTATION.md:1049`) don't map cleanly to enterprise SAML/SCIM
+   without a data migration.
+4. **No queue → Inngest:** every draft path becomes event-driven; the
+   Phase 1 synchronous flow is rewritten.
+5. **No vector store → pgvector + HNSW indexes
+   (`IMPLEMENTATION.md:2315`):** embedding dedup paths must be rebuilt.
+6. **New tables (token_usage, subscription, calibration_rule,
+   embedding):** every one introduces new RLS surfaces requiring a
+   re-audit of every existing query.
+
+That is not "additive". That is a multi-week rewrite at the moment the
+operator is also trying to close their first commercial deal.
+
+---
+
+## 10. Compliance / SOC2 chicken-and-egg
+
+The plan defers SOC2 to "5 enterprise tenants pipeline"
+(`deck-overview.md:281`, `deck-b2b-prospect.md:225`). The dossier
+deferst it to year 2 (`research-and-strategy-dossier.md:1288, :1470`).
+Both are inverted from how mid-market procurement actually works.
+
+### 10.1 Procurement reality
+
+A mid-market HR / L&D buyer's security questionnaire — sent **before**
+the discovery call's contract phase — asks:
+
+- SOC 2 Type II report (current, not "in progress")
+- ISO 27001 (sometimes)
+- HIPAA BAA (for healthcare)
+- GDPR / Data Processing Agreement
+- Vendor security review (penetration test report, SBOM)
+- Cyber-insurance certificate
+- Sub-processor list with each sub-processor's SOC2
+
+The plan handwaves "compliance deferred until 5+ pipeline"
+(`IMPLEMENTATION.md:111`). That means the **first** regulated buyer is
+told "no" — losing the segment the dossier explicitly counts on for
+$50k–$1M ACV (`research-and-strategy-dossier.md:1324–1325`).
+
+### 10.2 The free-tier sub-processors don't sign BAAs
+
+- **Clerk** free tier: no BAA, no DPA at the level enterprise
+  procurement requires.
+- **Resend** free: no BAA.
+- **Anthropic API**: BAA available only on Enterprise plans.
+
+Phase 1 Phase 1 → Phase 2 cutover therefore must include a re-tier of
+*every* sub-processor before the first regulated tenant signs. None of
+this is in the timeline, the cost model, or the risk register.
+
+### 10.3 SOC2 takes 6–12 months
+
+Even started today, SOC2 Type II requires a 3–12 month observation
+window after controls are implemented. To have it "ready when the 5th
+pipeline opens" the operator must start the audit **before** any
+revenue exists — paying $20–40k for the auditor and ~$10k/yr for
+ongoing tooling (Drata, Vanta, Secureframe).
+
+This is not budgeted anywhere in the plan.
+
+### 10.4 "Sources confirm SOC2 is now table stakes"
+
+> *"SOC 2, HIPAA, FedRAMP requirements are increasingly standard even
+> outside regulated industries."*
+> — [Optifai sales-cycle benchmarks](https://optif.ai/learn/questions/sales-cycle-length-benchmark/)
+
+Selling AI-generated training content from a one-person team without
+SOC2 to a mid-market buyer in 2026 is not a hard sell. It is no sale.
+
