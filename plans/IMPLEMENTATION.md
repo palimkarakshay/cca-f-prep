@@ -1510,6 +1510,80 @@ DELIVERABLES:
 - [ ] Rollback round-trip works (v1 → v2 → v1 → v2).
 - [ ] All tests green; codex review passed.
 
+#### P4 Section D extensions (SM1 / SM2 / SM3 / SM4 / SM5 — drafter-side scaffolds)
+
+**Add these sub-bullets to the P4 AI prompt** above:
+
+```
+ADDITIONAL OBJECTIVES (Section D — read §3.8.3 before starting):
+
+10. Drafter Intake form (SM1) at /admin/catalogs/[id]/import:
+    - Render the 5 required fields from §3.8.3 DrafterIntake before the
+      JSON paste / lesson editor: noviceError, onePrinciple, workedExample
+      (worked + faded sub-fields), boundaryCase, nearestConfusable, plus
+      the SM4 "What would a novice get wrong here?" textarea (≥ 30 chars).
+    - On submit: write a drafter_intake row keyed to a freshly-created
+      draft.id; only THEN unlock the lesson editor (this implements SM2).
+    - Validators 25 + 30 (§3.8.6) run server-side; missing fields block.
+
+11. Backward-design lock (SM2):
+    - The lesson editor on /admin/catalogs/[id]/draft/[draftId] is
+      disabled until drafter_intake is written AND a passing-test exists
+      (the SME drafts the quiz first; the SME's own attempt at the quiz
+      must score ≥ passPct).
+    - State persisted in BackwardDesignState fields on the draft row
+      (assessmentAuthoredAt, passingTestExists, lessonUnlockedAt).
+    - UI shows the locked sequence as a 3-step stepper: Intake → Test → Lesson.
+
+12. Worked-example pair editor (SM3) inside DrafterIntake:
+    - The workedExample.worked and workedExample.faded textareas are
+      side-by-side. Validator 27 enforces the faded variant has ≥ 1 hint
+      removed (length-delta heuristic threshold tunable per pack; manual
+      override flag visible to admin only).
+    - Submit blocked if either field empty.
+
+13. Closed-taxonomy principle picker (SM5):
+    - For every quiz question, principle is selected from an autocomplete
+      of approved B-skills loaded from packages/shared/src/principle-taxonomy.ts.
+    - Free-typed principles unmapped to taxonomy → validator 28 blocks
+      submit. Admin role can extend the taxonomy via /admin/settings (this
+      writes to a tenant-scoped principle_taxonomy_extension table or a
+      JSONB array on tenant_policy — implementer's pick).
+
+14. Per-SME blind-spot dashboard scaffolding (SM8 — read-only in P4; the
+    aggregator job lands in P11):
+    - /admin/sme/[smeUserId] page (admin or self-only) reads from
+      sme_blind_spot_signal and renders:
+        - drafts authored in window
+        - rejection-by-category table (placeholder zeros until P11/P9 land)
+        - trend pill (improving|flat|regressing)
+        - "personalised authoring prompts" panel — empty in Phase 1
+    - The page must render even when no signal row exists (cold-start UX).
+
+15. Tests:
+    - Vitest: validator 25 rejects an intake with empty fields.
+    - Vitest: validator 27 rejects a faded variant identical to worked.
+    - Vitest: validator 28 rejects a free-typed principle outside taxonomy.
+    - Vitest: validator 30 rejects noviceWouldGetWrong < 30 chars.
+    - Playwright: SME cannot reach lesson editor until intake + test pass.
+
+CONSTRAINTS for Section D extensions:
+- SM7 (voice-first authoring) is OUT of scope for P4; tracked for P10.
+- The principle taxonomy is shared library code (packages/shared); a tenant
+  can extend it but cannot replace the closed list.
+- The backward-design lock can be feature-flagged off via
+  tenant_policy.rule_overrides — early B2C tenants may not need the gate.
+```
+
+#### P4 Section D — Definition of Done (additions)
+
+- [ ] DrafterIntake form blocks submit until all 6 fields valid (SM1 + SM4).
+- [ ] Lesson editor inaccessible until intake written and passing-test exists (SM2).
+- [ ] Worked-example pair: faded variant validated against worked variant (SM3).
+- [ ] Principle picker autocomplete from taxonomy; free-typed rejects (SM5).
+- [ ] /admin/sme/[id] renders with cold-start UX (SM8 scaffolding).
+- [ ] Validators 25, 27, 28, 30 all green; rls-isolated tests pass.
+
 ---
 
 ### P5 — Operator authoring loop (~2 days)
