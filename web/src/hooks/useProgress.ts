@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 import {
   ensureConcept,
   ensureMock,
@@ -17,6 +11,7 @@ import {
   unlockNextSection,
 } from "@/lib/progress";
 import { getProgressStore } from "@/lib/progress-store";
+import { useHydrated } from "@/hooks/useHydrated";
 import { usePackId } from "@/content/pack-hooks";
 import type {
   CurrentAttempt,
@@ -33,13 +28,12 @@ export function useProgress() {
     progressStore.get,
     progressStore.getServerSnapshot
   );
-  // Flip after the first commit so the initial client render matches
-  // the server (both `false`). Evaluating `typeof window` directly
-  // during render diverges between server and client and trips React
-  // #418, which then unmounts and silently breaks any consumer that
-  // gates UI on `hydrated`.
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
+  // `false` during SSR + initial client render; flips on the first
+  // post-hydration commit. Routed through `useHydrated` so the flip is
+  // driven by `useSyncExternalStore` rather than setState-in-effect —
+  // PR #20 used the latter and shipped with red CI (eslint
+  // react-hooks/set-state-in-effect).
+  const hydrated = useHydrated();
 
   const markLessonRead = useCallback(
     (conceptId: string) => {

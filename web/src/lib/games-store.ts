@@ -47,7 +47,13 @@ export function saveGamesProgressFor(
   next: GamesProgress
 ): void {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(storageKey, JSON.stringify(next));
+  try {
+    window.localStorage.setItem(storageKey, JSON.stringify(next));
+  } catch {
+    // Quota / private mode — silently drop, mirroring saveProgressFor.
+    // Without the catch, recordAttempt() throws into the React event
+    // handler and the result screen never renders.
+  }
 }
 
 export interface GamesStore {
@@ -63,6 +69,8 @@ export interface GamesStore {
 function createStore(packId: string): GamesStore {
   const storageKey = gamesStorageKey(packId);
   let current: GamesProgress | null = null;
+  // Stable server snapshot — see progress-store.ts for the rationale.
+  const serverSnapshot: GamesProgress = newGamesProgress();
   const listeners = new Set<() => void>();
   let storageWired = false;
 
@@ -96,7 +104,7 @@ function createStore(packId: string): GamesStore {
 
   return {
     get: () => ensure(),
-    getServerSnapshot: () => newGamesProgress(),
+    getServerSnapshot: () => serverSnapshot,
     subscribe: (cb) => {
       wireStorageOnce();
       listeners.add(cb);

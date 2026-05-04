@@ -28,6 +28,12 @@ export interface ProgressStore {
 function createStore(packId: string): ProgressStore {
   const storageKey = `${packId}:progress:v1`;
   let current: Progress | null = null;
+  // Stable server snapshot: React requires getServerSnapshot to return
+  // referentially equal results across calls. `newProgress()` returns a
+  // fresh object identity each call, so caching once at store-creation
+  // time keeps useSyncExternalStore from seeing a phantom state change
+  // between SSR and the first client render.
+  const serverSnapshot: Progress = newProgress();
   const listeners = new Set<() => void>();
   let storageWired = false;
 
@@ -52,7 +58,7 @@ function createStore(packId: string): ProgressStore {
 
   return {
     get: () => ensure(),
-    getServerSnapshot: () => newProgress(),
+    getServerSnapshot: () => serverSnapshot,
     subscribe: (cb) => {
       wireStorageOnce();
       listeners.add(cb);
