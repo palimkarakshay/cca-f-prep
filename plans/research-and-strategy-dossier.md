@@ -1539,12 +1539,16 @@ named); every feature maps to ≥ 1 cited research source. No problem
 is closed by exhortation alone — every mitigation is a shipped Phase-2
 surface or a refused-to-publish gate.
 
-**Independent review channel.** Cross-ref [`expert-review-audit.md`](./expert-review-audit.md)
+**Independent review channel.** [`expert-review-audit.md`](./expert-review-audit.md)
 — structured audit framework for an external psychology / learning /
 business-partner reviewer to critique each claim against the cited
-evidence and the live + planned build. Reviewer recommendations
-(ship-as-is / strengthen-claim / add-evidence / abandon-claim) feed
-back into dossier revisions.
+evidence and the live + planned build. The audit doc has 68+ pre-
+populated rows across §A (psychology, 26 rows), §B (learning, 18 rows),
+and §C (business partner, 24 rows); reviewers fill score (1–5) +
+recommendation (ship-as-is / strengthen-claim / add-evidence /
+abandon-claim) per row; operator commits to acting on every "abandon"
+or "add-evidence" recommendation within 30 days. Submission template
+in §G of the audit doc.
 
 ---
 

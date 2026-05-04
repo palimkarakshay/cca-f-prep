@@ -592,6 +592,16 @@ the business-case foundation.
 > mitigations with falsification triggers, commercial-viability case
 > with TAM / comparables / pricing / unit economics / NRR / scalability,
 > and full bibliography. Hand the dossier to any due-diligence reader.
+>
+> **Companion audit framework.** [`expert-review-audit.md`](./expert-review-audit.md)
+> is the structured critical-review template for an external psychology /
+> learning / business-partner reviewer to audit the dossier's claims
+> against (a) the cited evidence, (b) what the platform has built, and
+> (c) what is planned in §D. 68+ pre-populated audit rows; per-row
+> score + recommendation; operator commits to acting on every
+> "abandon-claim" within 30 days. Hand to a domain expert for
+> independent critique before committing dossier claims to buyer-facing
+> material.
 
 ### D0. Problem catalogue & feature-mitigation matrix
 

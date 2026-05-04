@@ -482,3 +482,264 @@ case studies. Same scoring rubric (§3) and recommendations (§4).
 - Is the L4-Kirkpatrick compliance-pass-rate / audit-finding-deltas
   expansion-revenue mechanic actually how compliance buyers calculate
   ROI, or is it operator-side projection only?
+
+---
+
+## §D — Hedges, open questions, falsification
+
+The operator acknowledges the following hedges and open questions
+upfront. Reviewers should consider these the *baseline known
+weaknesses* — additional weaknesses found in the audit are additive,
+not redundant.
+
+### D.1 — Acknowledged hedges
+
+- **Replication in our specific learner population is unproven.** The
+  cited effect sizes (e.g., Cepeda spacing 2×, Roediger-Karpicke
+  testing-effect 50%, Rohrer-Taylor interleaving 3×) are
+  meta-analytic averages from K-12 / undergraduate / lab-task
+  populations. Generalisation to adult professional learners in
+  vocational / certification / compliance domains is plausible but not
+  empirically established. The platform's quarterly Kirkpatrick L2
+  reporting is the in-house replication channel.
+
+- **The "synthesis gap" wedge has no published precedent at scale.**
+  No documented ed-tech product ships ~14 named mechanisms in concert.
+  The portfolio bet is that the synthesis produces a multiplicative
+  outcome where each individual mechanism produces additive effects.
+  This is plausible (the cohort-tier-vs-MOOC 14× lift evidences
+  multiplicativity) but unproven for our specific mechanism set.
+
+- **Section ($50M Series B; cohort + AI tutor) may be a stronger
+  comparable than the dossier acknowledges.** The dossier names
+  Section as "closest peer"; an LP-level audit may find Section's
+  trajectory more directly relevant than the dossier currently weights.
+  Reviewer's view solicited.
+
+- **Compliance-vertical pricing ($100k–1M ACV) is ambitious without
+  formal SOC 2.** Phase-1 budget reality is closer to $50k–$200k ACV
+  pre-SOC2 — the upper tier is contingent on year-2 SOC 2 / FedRAMP /
+  HIPAA-BAA depending on segment. Reviewers should treat the upper
+  pricing tier as conditional, not committed.
+
+- **Kirkpatrick L4 self-reporting is weak evidence.** Manager-survey
+  self-report on observed behaviour change (L3) and compliance
+  pass-rate (L4) is the platform's L3/L4 measurement plan. This is
+  industry-standard but is also the weakest empirical link in the
+  Kirkpatrick chain. Reviewers may dispute that the platform can
+  produce real L3/L4 evidence at all without the operator becoming a
+  data-licensing partner with the regulated tenant — which is a
+  business-model decision deferred to year-3+.
+
+- **The 3.5× compliance-violation-rate at < 70% completion correlation
+  is from one industry source.** KPI Depot 2026 is the cited source;
+  the figure is reasonable but is not a peer-reviewed effect size and
+  may not generalise across regulatory regimes. The dossier's
+  monetisation argument (compliance is the L4 expansion lever)
+  collapses if this correlation is not real for the buyer's
+  jurisdiction. Reviewers should flag if they have empirical data
+  contradicting it.
+
+- **Operator background is senior ABAP developer, not academic
+  cognitive psychologist or instructional designer.** The dossier's
+  research synthesis is operator's secondary-source synthesis, not
+  primary-source academic work. The audit doc's purpose is precisely
+  to catch where secondary-source synthesis has missed nuance.
+
+### D.2 — Open questions the operator solicits
+
+- Is `nextPick.subArea !== lastPick.subArea` (LM4) a *sufficient*
+  interleaving rule, or does the platform need a stronger rotation
+  constraint (≥ 3 distinct sub-areas in last 5 picks)?
+- Should the JOL slider (LM6) be 1–5 (Likert-style) or a continuous
+  0–100 confidence input? Reviewer's empirical preference.
+- Is per-SME blind-spot dashboard (SM8) a deliberate-practice channel
+  or merely analytics? If the latter, what additional surface would
+  make it the former?
+- Is the closed-taxonomy principle picker (SM5) too restrictive for
+  experimental / research-domain authoring?
+- Does the cohort surface (LM8) require a *live* synchronous
+  touchpoint (Zoom), or does asynchronous cohort messaging produce the
+  same SDT-relatedness lift?
+
+### D.3 — Falsification triggers (cross-ref dossier §6)
+
+The operator commits in advance to abandoning specific mechanics if
+their falsification trigger fires. Summary table:
+
+| Mechanic | Trigger | Action if triggered |
+|---|---|---|
+| LM1 spaced retrieval | D7 cohort lift < 12pp at 8 weeks | Rebuild scheduler; consider SM-2-with-ease-factor instead of expanding-interval |
+| LM2 retrieval gate | mock pass-rate < 8pp lift | Redesign gate — recall-write may be too gameable |
+| LM4 interleaving | transfer accuracy < 15pp lift | Strengthen rotation rule; test ≥ 3-distinct-subareas-in-5 |
+| LM6 calibration | \|Δ\| not converging at 60% of learners | Replace JOL slider with confidence-interval input |
+| LM7 streak push | CURR < 10pp lift | Cadence wrong, value-of-action too low, or both |
+| LM8 cohort | cohort vs solo < 20pp completion | Cohort design wrong — may need synchronous live touchpoint |
+| SM1 CTA intake | learner pass-rate < 20pp lift | 5-probe set is wrong, or critic enforcement is too lax |
+| SM2 backward design | gate-bypass > 20% at month 1 | Lock implementation broken or assessment-editor UX bad |
+| SM3 worked-example pair | faded compliance < 95% at month 3 | Mandatory-field gate bypassed or validation heuristic wrong |
+| SM4 novice-error probe | rejection-rate not declining | Loop not closing — feedback ignored or unreadable |
+| SM5 closed-taxonomy | drift > 5% same-principle different-strings | Taxonomy too narrow or autocomplete UX failing |
+| SM6 4C/ID gate | ≥ 5% lessons missing components at audit | Critic prompt too lax |
+| SM7 voice/camera | SME TTFV > 1h at deskless pilot | Capture modality or transcription quality wrong |
+| SM8 per-SME dashboard | per-SME rejection not flat-or-improving at 8w | Feedback seen but not internalised |
+
+If ≥ 4 mechanics trigger their abandonment criteria simultaneously,
+the platform's portfolio bet is failing and the operator should
+re-examine the synthesis-of-many thesis from scratch.
+
+---
+
+## §E — What we'd abandon if disproven
+
+Per-mechanic exit criteria — the operator commits in advance to
+specific abandonment moves if reviewer assessment + measured outcome
+data collectively disprove a mechanic. This is the falsificationist
+commitment.
+
+**Exit move 1 — single mechanic triggers falsification.** Mechanic is
+removed from the product surface; dossier and decks are updated to
+reflect the removal; the affected problem (L1–L8 / S1–S8) is either
+re-mitigated by a substitute mechanism or formally acknowledged as
+unmitigated.
+
+**Exit move 2 — cohort surface (LM8) does not produce 20pp completion
+lift.** The largest single bet in the portfolio. If LM8 fails, the
+platform's commercial case downgrades from "cohort-tier completion ≥
+60%" (which underwrites the B2B Enterprise pricing) to "self-paced
+LMS-tier completion 12–15%" (which collapses the pricing tier table).
+The exit move is to pivot from cohort-tier positioning to
+spaced-retrieval-tier positioning — anchored to Anki / SuperMemo
+precedent rather than Maven precedent.
+
+**Exit move 3 — CTA intake (SM1) does not produce 20pp learner-pass-
+rate lift.** The SME-side wedge collapses. Exit move is to abandon
+the SME-side scaffolding ambition and re-position as a learner-side-
+only product (closer to Section's positioning). The B2B Enterprise
+pricing tier downgrades to B2C-cohort-tier maximum.
+
+**Exit move 4 — calibration Δ does not converge for ≥ 60% of
+learners.** L2-Kirkpatrick claim of "we measure absorption, not
+completion" weakens. Exit move is to re-frame L2 around mock pass-rate
+trajectory (a less novel but more defensible metric); the
+calibration-Δ as a moat argument is dropped from investor decks.
+
+**Exit move 5 — ≥ 4 mechanics trigger abandonment simultaneously.**
+The synthesis-of-many thesis is failing as a portfolio bet. Exit move
+is a full re-examination of the wedge: either pick the 1–2 strongest
+mechanics and re-position as a specialist product (Anki + cohort, or
+testing-effect + cohort, etc.), or shut down. The operator commits to
+this re-examination within 90 days of the simultaneous-failure
+trigger firing.
+
+---
+
+## §F — Out-of-scope (don't waste reviewer time)
+
+Reviewers should *not* spend time on the following — they are either
+covered by other review channels or are not load-bearing claims in
+the dossier.
+
+- **Marketing-copy critique.** Headlines, slogans, deck design,
+  visual hierarchy. Audit channel: separate marketing review.
+- **Brand / typography / colour.** Out of scope.
+- **Engineering architecture.** Specific tech-stack choices
+  (Next.js / Tailwind / Postgres / Inngest / R2 / Anthropic API) are
+  audited via the codex review pipeline (cross-ref §C12 of the build
+  plan and the codex-review GitHub Action).
+- **Specific Anthropic API model choices** (Sonnet drafter / Opus
+  critic). Cost-curve assumption (§C20 above) is in scope; specific
+  model selection is not.
+- **Phase 1 P1–P6 sequencing detail.** Cross-ref `content-pack-
+  management-plan.md` §C10. The build plan is the canonical sequencing
+  document; reviewers should not re-derive the Phase 1 ordering.
+- **Marketing-site (Astro) implementation.** Out of scope.
+- **Specific data-model design** (PostgreSQL schema, RLS policies).
+  Cross-ref `content-pack-management-plan.md` §C6.
+- **Codex review pipeline configuration.** Cross-ref `CLAUDE.md`
+  § "External review" and `.github/workflows/codex-review.yml`.
+- **Specific commit-message convention.** The platform uses
+  conventional-commit-prefixed messages with named scopes; this is
+  not a load-bearing claim.
+
+---
+
+## §G — Review submission template
+
+After completing your role's audit, submit the following at the foot
+of this document or in a separate `audit-response-{role}-{date}.md`
+file in `plans/`. Operator commits to acknowledging within 7 days and
+acting on every "abandon" / "add-evidence" recommendation within 30
+days.
+
+```
+# Audit response — {role: psychology / learning / business-partner}
+
+## Reviewer credentials
+- Name (or pseudonym; published credentials sufficient):
+- Affiliation / role:
+- Relevant publications, citations, or industry positions:
+- Years of experience in the relevant domain:
+
+## Date
+- Audit completed:
+
+## Conflicts of interest disclosure
+- Commercial relationships with cited researchers / authors:
+- Commercial relationships with named industry comparables:
+- Equity / advisory positions in competing products:
+- Family / financial relationships affecting independence:
+- (Note any disclosed COI does not necessarily disqualify; transparency is the gate.)
+
+## Top 3 strengthen-claim recommendations (highest impact)
+1.
+2.
+3.
+
+## Top 3 abandon-claim recommendations (if any)
+1.
+2.
+3.
+
+## Open questions for operator follow-up
+1.
+2.
+3.
+
+## Optional 1-page narrative critique
+- (free-form; reviewer may attach a separate document if longer than 1 page)
+
+## Signature
+- Reviewer:                   Date:
+- (Reviewer signature signifies that the audit was conducted in good faith and that the COI disclosure above is complete and accurate.)
+```
+
+**Operator acknowledgement.** Operator commits to:
+1. Acknowledging receipt within 7 calendar days.
+2. Publishing the audit response (with reviewer permission and any
+   redactions reviewer requests) in `plans/` so future reviewers can
+   see prior audits.
+3. Acting on every "abandon" recommendation within 30 days — either
+   by abandoning, or by producing additional evidence and re-submitting
+   for a follow-up audit.
+4. Acting on every "add-evidence" recommendation within 30 days —
+   either by producing the evidence or by demoting the claim.
+5. Not retaliating, gatekeeping, or selectively-citing the audit
+   response. The operator's commitment is to the integrity of the
+   evidentiary basis, not to a positive review.
+
+---
+
+## Cross-doc backlinks
+
+This audit framework is referenced from:
+- [`research-and-strategy-dossier.md`](./research-and-strategy-dossier.md)
+  — §6 verification & falsifiability section names the audit doc as
+  the independent review channel.
+- [`content-pack-management-plan.md`](./content-pack-management-plan.md)
+  — §D intro names the audit doc as the structured external-review
+  framework for the dossier.
+- [`deck-collaborator.md`](./deck-collaborator.md) — coverage-
+  assertion section references the audit framework.
+
+Reciprocal backlinks added in commit 10 of the dossier-build sequence.
