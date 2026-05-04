@@ -642,6 +642,360 @@ Closed list. Total ~10 event types. **No** per-keystroke or per-millisecond timi
 | `report_content` | Learner reports a concept | `{ concept_id, reason }` |
 | `error` | Client-side captured error | `{ message_hash }` |
 
+### 3.8 — Section D extensions: cognitive-mechanics contracts (read before P3+)
+
+The strategy plan's [Section D](./content-pack-management-plan.md#section-d--learner-absorption--sme-elicitation-strategy) introduces eight learner-absorption mechanics (LM1–LM8) and eight SME-elicitation scaffolds (SM1–SM8), each mapped to peer-reviewed evidence and a concrete platform feature. This subsection adds the data contracts those features require. **Every type, table, and validator below is referenced by name in the P3, P4, P5, P8, P9, P10, P11 prompts.**
+
+#### 3.8.1 — F9–F12 cognitive failure modes (extends the F1–F8 taxonomy)
+
+| Code | Name | Looks like |
+|---|---|---|
+| **F9** | Fluency illusion | Re-reading or skimming feels like learning; high JOL, low actual recall. (Roediger & Karpicke 2006; Bjork & Bjork 2011) |
+| **F10** | Massed-practice trap | Same sub-area drilled back-to-back; transfer fails. (Rohrer & Taylor 2007) |
+| **F11** | Calibration drift | Predicted-vs-actual gap (\|JOL − score\|) widens over time; no metacognitive correction. (Dunlosky & Bjork; Kruger & Dunning 1999) |
+| **F12** | Cue-bias / positional learning | Learner picks correct answer from positional cue (e.g. always B) rather than principle reasoning. Validator-detectable; see §3.10 validator 24. |
+
+Validators that produce findings tagged F9–F12 are listed in §3.8.6. Findings continue to use the `Finding` shape from §3.3.
+
+#### 3.8.2 — Learner-side data contracts (LM1–LM8)
+
+```typescript
+// packages/shared/src/section-d-types.ts
+
+// LM1 — Spaced retrieval
+export interface SpacedReviewItem {
+  userId: string;
+  conceptId: string;
+  catalogVersionId: string;
+  dueAt: Date;
+  intervalDays: 1 | 3 | 7 | 14 | 30 | 60;  // expanding interval ladder
+  consecutiveMisses: number;                // ≥ 3 → leech rule kicks in (LM1)
+  isLeech: boolean;
+  lastReviewedAt: Date | null;
+  lastWasCorrect: boolean | null;
+}
+
+// LM2 — Mid-lesson retrieval gate
+export interface RetrievalGateResponse {
+  conceptId: string;
+  prompt: string;                           // 1-Q recall prompt shown before "next" unlocks
+  learnerWrote: string;
+  judgedCorrect: boolean;                   // self-judged or model-judged depending on tier
+  latencyMs: number;
+}
+
+// LM3 — Generation-effect (write-the-principle before reveal)
+export interface PrincipleWrite {
+  questionId: string;                       // conceptId + questionN
+  learnerWrote: string;
+  canonicalPrinciple: string;
+  similarityScore: number;                  // 0..1 fuzzy match against canonical
+}
+
+// LM5 — Worked-example fading (Dreyfus rung, expertise reversal)
+export type DreyfusRung = "novice" | "advanced-beginner" | "competent" | "proficient" | "expert";
+export interface DepthRung {
+  rung: "easy" | "conceptual" | "deeper" | "solo"; // "solo" disables hints (LM5)
+  available: boolean;                                // gated by mastery score
+  cutoverAt: { masteryScore: number };               // expertise reversal threshold
+}
+
+// LM6 — Calibration capture (JOL pre-answer; Δ surfaced)
+export interface JOLCapture {
+  questionId: string;
+  jolBefore: 1 | 2 | 3 | 4 | 5;             // 1 = "very unsure" → 5 = "certain"
+  actualCorrect: boolean;
+  delta: number;                             // |JOL_normalised - actual_score|
+  capturedAt: Date;
+}
+
+// LM7 — Streak with variable-ratio reinforcement
+export interface Streak {
+  userId: string;
+  currentDays: number;
+  longestDays: number;
+  lastActiveDay: string;                    // YYYY-MM-DD
+  freezesAvailable: number;                 // streak-freeze affordance
+  modalStudyTime: { hour: number; minute: number; tz: string }; // for push-notification anchoring
+  pushOptIn: boolean;
+}
+
+// LM8 — Cohort surface
+export interface CohortContext {
+  cohortId: string;
+  tenantId: string;
+  catalogId: string;
+  startDate: Date;
+  endDate: Date;
+  memberCount: number;
+  liveTouchpointSlot?: { weekday: number; hour: number; minute: number; tz: string };
+}
+export interface CohortMember {
+  cohortId: string;
+  userId: string;
+  role: "learner" | "facilitator";
+  joinedAt: Date;
+}
+```
+
+#### 3.8.3 — SME-side data contracts (SM1–SM8)
+
+```typescript
+// SM1 — CTA 5-probe drafter intake (rejected if any field empty)
+export interface DrafterIntake {
+  draftId: string;
+  noviceError: string;                      // What does a novice typically get wrong?
+  onePrinciple: string;                     // The single most important takeaway
+  workedExample: { worked: string; faded: string }; // SM3 — pair editor
+  boundaryCase: string;                     // Where does this stop being true?
+  nearestConfusable: string;                // What concept is most easily mistaken for this?
+  authoredBy: string;                       // SME user.id
+  authoredAt: Date;
+}
+
+// SM2 — Backward-design lock state
+export interface BackwardDesignState {
+  draftId: string;
+  assessmentAuthoredAt: Date | null;        // lesson editor disabled until non-null
+  passingTestExists: boolean;               // a quiz draft that the SME themselves can pass
+  lessonUnlockedAt: Date | null;
+}
+
+// SM4 — Expert blind-spot probe
+export interface BlindSpotProbe {
+  draftId: string;
+  noviceWouldGetWrong: string;              // free text, required at submit
+  flaggedByCritic: string[];                // critic adds to this list during review
+}
+
+// SM5 — Closed-taxonomy principle picker
+export interface PrincipleTag {
+  bSkillCode: string;                       // approved B-skill code (e.g. "B1.4")
+  text: string;                             // canonical text from taxonomy
+  // Free-typed principles unmapped to this taxonomy are rejected at submit
+}
+
+// SM6 — 4C/ID coverage gate (Phase-2 critic checks all four present)
+export interface FourCidCoverage {
+  learningTasks: boolean;                   // (a) authentic whole-task practice
+  supportiveInfo: boolean;                  // (b) background / theory
+  jitInfo: boolean;                         // (c) just-in-time procedural info
+  partTaskPractice: boolean;                // (d) drills for component skills
+}
+
+// SM8 — Per-SME blind-spot rolling signal
+export interface SmeBlindSpotSignal {
+  smeUserId: string;
+  windowDays: number;                       // rolling window (default 30)
+  draftsAuthored: number;
+  criticRejectionsByCategory: Record<
+    "expert_blind_spot" | "principle_unstated" | "no_worked_example" | "no_boundary_case" |
+    "missing_4cid_component" | "fcode_F9" | "fcode_F10" | "fcode_F11" | "fcode_F12",
+    number
+  >;
+  trend: "improving" | "flat" | "regressing";
+  lastUpdatedAt: Date;
+}
+```
+
+#### 3.8.4 — Critic output (Phase 2; consumed by P9 + P11)
+
+The Phase-2 Opus critic produces a structured object that drives both publish-gating (P9) and the per-SME blind-spot dashboard (P11). Schema mirrors Section D §D3:
+
+```typescript
+export interface CriticOutput {
+  confidence: number;                       // 0..1
+  findings: Finding[];                      // §3.3 shape
+  missingComponents: ("learning_tasks" | "supportive_info" | "jit_info" | "part_task_practice")[];
+  blindSpotFlags: (
+    | "expert_blind_spot" | "principle_unstated" | "no_worked_example"
+    | "no_boundary_case" | "no_nearest_confusable"
+  )[];
+  fcodeRisks: ("F1"|"F2"|"F3"|"F4"|"F5"|"F6"|"F7"|"F8"|"F9"|"F10"|"F11"|"F12")[];
+  suggestedProbes: string[];                // probe text the SME should answer before re-submit
+  answerJustifications: { questionN: number; cited: boolean; span?: string }[];
+}
+```
+
+**Refuse-to-publish gates** (Phase 2):
+- Any `answerJustifications[i].cited === false` → block (already covered by validator 23).
+- Any `missingComponents` non-empty → block (4C/ID gate).
+- Any `blindSpotFlags` non-empty AND `tenant_policy.two_eye_gate` is on → block until SME re-submits.
+
+#### 3.8.5 — Section D database tables (Drizzle additions)
+
+Phase-2 only. None of these are required for Phase-1 sign-off.
+
+```typescript
+// packages/db/src/section-d-schema.ts
+
+export const spacedReviewItem = pgTable("spaced_review_item", {
+  tenantId: uuid("tenant_id").notNull().references(() => tenant.id),
+  userId: uuid("user_id").notNull().references(() => user.id),
+  conceptId: text("concept_id").notNull(),
+  catalogVersionId: uuid("catalog_version_id").notNull().references(() => catalogVersion.id),
+  dueAt: timestamp("due_at").notNull(),
+  intervalDays: integer("interval_days").notNull().default(1),
+  consecutiveMisses: integer("consecutive_misses").notNull().default(0),
+  isLeech: boolean("is_leech").notNull().default(false),
+  lastReviewedAt: timestamp("last_reviewed_at"),
+  lastWasCorrect: boolean("last_was_correct"),
+}, t => ({ pk: primaryKey({ columns: [t.tenantId, t.userId, t.conceptId, t.catalogVersionId] }) }));
+
+export const calibrationEvent = pgTable("calibration_event", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tenantId: uuid("tenant_id").notNull().references(() => tenant.id),
+  userId: uuid("user_id").notNull().references(() => user.id),
+  conceptId: text("concept_id").notNull(),
+  questionN: integer("question_n").notNull(),
+  jolBefore: integer("jol_before").notNull(),       // 1..5
+  actualCorrect: boolean("actual_correct").notNull(),
+  delta: numeric("delta", { precision: 4, scale: 3 }).notNull(),
+  capturedAt: timestamp("captured_at").notNull().defaultNow(),
+});
+
+export const retrievalEvent = pgTable("retrieval_event", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tenantId: uuid("tenant_id").notNull().references(() => tenant.id),
+  userId: uuid("user_id").notNull().references(() => user.id),
+  conceptId: text("concept_id").notNull(),
+  prompt: text("prompt").notNull(),
+  learnerWrote: text("learner_wrote").notNull(),
+  judgedCorrect: boolean("judged_correct").notNull(),
+  latencyMs: integer("latency_ms").notNull(),
+  occurredAt: timestamp("occurred_at").notNull().defaultNow(),
+});
+
+export const streak = pgTable("streak", {
+  userId: uuid("user_id").primaryKey().references(() => user.id),
+  tenantId: uuid("tenant_id").notNull().references(() => tenant.id),
+  currentDays: integer("current_days").notNull().default(0),
+  longestDays: integer("longest_days").notNull().default(0),
+  lastActiveDay: text("last_active_day"),               // YYYY-MM-DD
+  freezesAvailable: integer("freezes_available").notNull().default(2),
+  modalStudyHour: integer("modal_study_hour"),          // 0..23, learned over time
+  modalStudyMinute: integer("modal_study_minute"),
+  modalStudyTz: text("modal_study_tz"),                 // IANA tz
+  pushOptIn: boolean("push_opt_in").notNull().default(false),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const cohort = pgTable("cohort", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tenantId: uuid("tenant_id").notNull().references(() => tenant.id),
+  catalogId: uuid("catalog_id").notNull().references(() => catalog.id),
+  slug: text("slug").notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  liveTouchpointSlotJson: jsonb("live_touchpoint_slot"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const cohortMember = pgTable("cohort_member", {
+  cohortId: uuid("cohort_id").notNull().references(() => cohort.id),
+  userId: uuid("user_id").notNull().references(() => user.id),
+  role: text("role").$type<"learner"|"facilitator">().notNull().default("learner"),
+  joinedAt: timestamp("joined_at").notNull().defaultNow(),
+}, t => ({ pk: primaryKey({ columns: [t.cohortId, t.userId] }) }));
+
+export const drafterIntake = pgTable("drafter_intake", {
+  draftId: uuid("draft_id").primaryKey().references(() => draft.id),
+  tenantId: uuid("tenant_id").notNull().references(() => tenant.id),
+  noviceError: text("novice_error").notNull(),
+  onePrinciple: text("one_principle").notNull(),
+  workedExample: text("worked_example").notNull(),
+  fadedVariant: text("faded_variant").notNull(),
+  boundaryCase: text("boundary_case").notNull(),
+  nearestConfusable: text("nearest_confusable").notNull(),
+  noviceWouldGetWrong: text("novice_would_get_wrong").notNull(),    // SM4 probe
+  authoredBy: uuid("authored_by").notNull().references(() => user.id),
+  authoredAt: timestamp("authored_at").notNull().defaultNow(),
+});
+
+export const smeBlindSpotSignal = pgTable("sme_blind_spot_signal", {
+  smeUserId: uuid("sme_user_id").primaryKey().references(() => user.id),
+  tenantId: uuid("tenant_id").notNull().references(() => tenant.id),
+  windowDays: integer("window_days").notNull().default(30),
+  draftsAuthored: integer("drafts_authored").notNull().default(0),
+  rejectionsJson: jsonb("rejections_json").$type<Record<string, number>>().notNull(),
+  trend: text("trend").$type<"improving"|"flat"|"regressing">().notNull().default("flat"),
+  lastUpdatedAt: timestamp("last_updated_at").notNull().defaultNow(),
+});
+```
+
+All Section D tables that are tenant-scoped follow the §3.5 RLS pattern. `streak` and `cohort_member` are dual-keyed; the RLS predicate matches on `tenant_id` even on join tables. Cohort-flow events (`cohort_join`, `cohort_complete`, `peer_compare_view`) reuse the existing `event` table.
+
+#### 3.8.6 — Validators 24–30 (Section D additions)
+
+Numbering continues from §3.3. Same `Finding` shape, same three call sites (local lint, server import, Phase-2 critic).
+
+| # | Validator | What it catches | F-code |
+|---|---|---|---|
+| 24 | `letterBiasV2Validator` | A catalog/section's correct-letter distribution exceeds 55% of any single letter (replaces stricter §3.3 #6 "all same"; tunable per tenant via `tenant_policy.rule_overrides`) | F12 |
+| 25 | `intakeRequiredValidator` | A draft's `drafter_intake` row has any of the 5 SM1 fields empty | — (SM1) |
+| 26 | `backwardDesignValidator` | Lesson body present but no quiz / no passing test exists for the draft | — (SM2) |
+| 27 | `workedExamplePairValidator` | `workedExample` present but `fadedVariant` missing, or faded variant has not removed at least one hint (length-delta heuristic + manual override flag) | — (SM3) |
+| 28 | `principleTagInTaxonomyValidator` | A question's `principle` is free text not mapped to the closed B-skill taxonomy in `packages/shared/src/principle-taxonomy.ts` | — (SM5) |
+| 29 | `fourCidCoverageValidator` | (Phase-2 critic) `CriticOutput.missingComponents` is non-empty | — (SM6) |
+| 30 | `expertBlindSpotProbeValidator` | `drafter_intake.noviceWouldGetWrong` is empty or < 30 chars | — (SM4) |
+
+The Phase-2 cycle reads:
+
+```
+draft → validators 1–22 → drafter intake check (24–30 client-side) →
+        Sonnet drafter (P8) → validators 1–22 → Opus critic (P9; emits CriticOutput) →
+        validators 23, 29 (justification + 4C/ID gates) → publish | queue review
+```
+
+#### 3.8.7 — Spaced-review interval ladder (LM1)
+
+Server-side scheduler in `apps/web/src/lib/spaced-review.ts`. Pure function; no I/O.
+
+```typescript
+export function nextInterval(prev: SpacedReviewItem, wasCorrect: boolean): { intervalDays: number; isLeech: boolean } {
+  if (!wasCorrect) {
+    const consecutiveMisses = prev.consecutiveMisses + 1;
+    const isLeech = consecutiveMisses >= 3;
+    return { intervalDays: 1, isLeech };           // reset to 1d on miss; flag as leech at 3+
+  }
+  const ladder = [1, 3, 7, 14, 30, 60];
+  const next = ladder[Math.min(ladder.indexOf(prev.intervalDays) + 1, ladder.length - 1)];
+  return { intervalDays: next, isLeech: prev.isLeech };
+}
+```
+
+Cron (P11) enqueues due items nightly at 03:00 UTC; SpacedReviewBanner (P3 extension) surfaces the 3 oldest due items on dashboard.
+
+#### 3.8.8 — Streak push cadence (LM7)
+
+Variable-ratio reinforcement schedule (Skinner / Eyal). `apps/web/src/lib/streak-push.ts`:
+
+- **Anchor** push at the user's modal study time ± 30 min jitter.
+- **Variable ratio**: send on day d with probability `p(d)`, where `p` follows a multi-armed bandit (Thompson sampling) optimising for return-visit-given-push within 24h.
+- **Floor**: send at most one push per day; never between 22:00–07:00 user-local.
+- **Email digest fallback** when push not granted.
+- **Streak-freeze**: 2 free freezes/month; auto-applied on a missed day if available.
+
+#### 3.8.9 — TTFV markers (Section D §D5)
+
+Two TTFV (time-to-first-value) acceptance criteria are added to Phase-1 Verification (Part 6.1) and Phase-2 Verification (Part 6.2):
+
+- **Learner TTFV ≤ 5 min.** Measured from `signup` event → first `quiz_submit` event with `score_pct ≥ passing`. Tracked via PostHog funnel.
+- **SME TTFV ≤ 1 hour.** Measured from `drafter_intake.authoredAt` → `catalog_version.publishedAt` for the draft. Aggregated per-SME, surfaced in `/admin/sme/[id]/`.
+
+#### 3.8.10 — Kirkpatrick L1–L4 measurement contracts (Section D §D4)
+
+The platform commits to four levels of measurement. Each level has a designated metric, a designated event source, and a target threshold:
+
+| Level | Metric | Event source(s) | Target |
+|---|---|---|---|
+| **L1** Reaction | NPS + CES post-section | `event` table `nps_response`, `ces_response` | NPS ≥ 40 (B2C), ≥ 50 (B2B) |
+| **L2** Learning | Mock pass-rate trajectory + calibration Δ | `quiz_submit`, `calibration_event` | \|Δ\| ≤ 0.5 |
+| **L3** Behaviour | D1/D7/D30 cohort retention; CURR; completion-rate; spaced-review clearance | `signup`, `lesson_view`, `quiz_submit`, `cohort_complete` | D7 ≥ 40% (cohort), D30 ≥ 35%, completion ≥ 60% |
+| **L4** Results | NRR, expansion revenue, gross margin | Stripe webhook → `subscription` table | NRR Y1 ≥ 110%, Y2 ≥ 120%, margin > 95% |
+
+Implementation of these dashboards is in P11 (post-publish quality signals + cohort aggregator). Required Phase-1 wiring: the four event types above (`nps_response`, `ces_response`, `cohort_complete` plus the existing `quiz_submit`) must already be emitted in P3/P5 even though the dashboards land later.
+
 ---
 
 ## Part 4 — Phase 1 (POC) implementation
