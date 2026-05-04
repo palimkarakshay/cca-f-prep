@@ -2081,6 +2081,72 @@ CONSTRAINTS:
 - [ ] Spot-check sampling lands ~5% of auto-published in queue.
 - [ ] B2B tenant cannot auto-publish even at confidence 0.99.
 
+#### P9 Section D extensions (CriticOutput shape, 4C/ID gate, F9–F12, blind-spot signal)
+
+**Add these sub-bullets to the P9 AI prompt** above:
+
+```
+ADDITIONAL OBJECTIVES (Section D — read §3.8.1, §3.8.4, §3.8.6 first):
+
+8. Opus critic emits a CriticOutput object per §3.8.4:
+   - confidence: 0..1
+   - findings: validator findings PLUS critic-only F9/F10/F11/F12 findings
+   - missingComponents: which of {learning_tasks, supportive_info, jit_info,
+     part_task_practice} the lesson lacks (4C/ID coverage gate — SM6)
+   - blindSpotFlags: {expert_blind_spot, principle_unstated,
+     no_worked_example, no_boundary_case, no_nearest_confusable}
+   - fcodeRisks: any of F1..F12 the critic detects
+   - suggestedProbes: text the SME should answer before re-submit
+   - answerJustifications: per-question { questionN, cited, span? }
+
+9. Refuse-to-publish gates wired in the router step (incremental on P9
+   base behaviour):
+   - Any answerJustifications.cited === false → block (validator 23 already)
+   - missingComponents non-empty → block (validator 29 — 4C/ID coverage gate)
+   - blindSpotFlags non-empty AND tenant_policy.two_eye_gate === true → block
+     until SME re-submits with addressed probes
+
+10. Critic prompt explicitly checks F9 (fluency illusion: lesson over-relies
+    on re-reading rather than retrieval), F10 (massed practice: same
+    sub-area repeated without interleaving — interacts with §3.8.7), F11
+    (calibration drift: principles drift from canonical taxonomy across
+    the section), F12 (positional cue: distractor lengths reveal the answer).
+    All four feed CriticOutput.fcodeRisks.
+
+11. After critic emits, increment sme_blind_spot_signal counters
+    (§3.8.5) for the SME who authored the draft. Categories tracked:
+    expert_blind_spot, principle_unstated, no_worked_example,
+    no_boundary_case, missing_4cid_component, fcode_F9, fcode_F10,
+    fcode_F11, fcode_F12.
+
+12. Calibration loop: rejected-draft reasons + suggestedProbes are written
+    to calibration_rule rows; cap kept at 8 most-recent + summarised
+    anti-pattern rules per tenant.
+
+13. Tests:
+    - Vitest with mocked Opus: critic returns CriticOutput with all fields
+      populated.
+    - Vitest: missingComponents=['learning_tasks'] → publish blocked.
+    - Vitest: blindSpotFlags=['expert_blind_spot'] under two_eye_gate → block.
+    - Vitest: F9-flagged draft increments sme_blind_spot_signal.fcode_F9.
+    - Vitest: 8-most-recent calibration_rule cap holds (9th insert prunes).
+
+CONSTRAINTS:
+- The critic prompt cites the F1–F12 taxonomy verbatim; do NOT paraphrase.
+- 4C/ID gate is OFF by default in B2C tenants (it is strict; B2C content
+  often legitimately omits part-task practice). Toggle via
+  tenant_policy.rule_overrides.flags.fourCidGate.
+- Cross-vendor critic remains a v2 escape hatch — not built here.
+```
+
+#### P9 Section D — Definition of Done (additions)
+
+- [ ] CriticOutput emitted with all six structured fields populated.
+- [ ] 4C/ID gate blocks publish when any component missing (B2B default on).
+- [ ] F9–F12 detection paths exercised by fixture-based tests.
+- [ ] sme_blind_spot_signal counters increment on critic findings.
+- [ ] Calibration_rule cap (≤ 8 recent) enforced.
+
 ---
 
 ### P10 — B2B controls: SME role + two-eye gate + per-tenant catalogs + SAML (~5 days)
