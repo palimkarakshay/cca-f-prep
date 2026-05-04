@@ -2499,6 +2499,50 @@ Phase 2 work does not start until **all** of these are true:
 
 If the engagement floor fails, do **not** spend on Phase 2 — the issue is product, not capacity. Iterate Phase 1 instead.
 
+### 6.5 — Section D acceptance: TTFV gates
+
+These two gates apply to both Phase 1 and Phase 2 builds. Failing either one means a Section D mechanic isn't actually shipping value yet — go back and tune.
+
+- [ ] **Learner TTFV ≤ 5 minutes.** PostHog funnel `signup → first quiz_submit with score_pct ≥ passPct` median ≤ 5 min on 30-day rolling window.
+- [ ] **SME TTFV ≤ 1 hour.** Median elapsed time from `drafter_intake.authoredAt` to `catalog_version.publishedAt` for the same draft, ≤ 60 min, measured on the last 10 published drafts per SME. Surfaced on `/admin/sme/[id]/`.
+
+If either median exceeds threshold, surface the offending step (intake form completion time? validator-fail retry count? critic queue wait?) in the operator's weekly business loop (§7.2) and prioritise the fix.
+
+### 6.6 — Section D acceptance: Kirkpatrick L1–L4 (Phase-2 gates)
+
+These thresholds anchor the four levels from §3.8.10. Each is checked in `/admin/measurement` (built in P11).
+
+| Level | Metric | Pass threshold | Fail action |
+|---|---|---|---|
+| **L1** Reaction | NPS post-section | B2C ≥ 40, B2B ≥ 50 | Survey the bottom-quartile responders; identify root cause |
+| **L2** Learning | \|calibration Δ\| median per cohort | ≤ 0.5 | Push the cohort into LM3 + LM6 drills (P3 generation effect + JOL) |
+| **L3** Behaviour | D7 retention (cohort) | ≥ 40% | Audit LM1 spaced-review banner engagement; tune push cadence (LM7) |
+| **L3** Behaviour | D30 retention (cohort) | ≥ 35% | Audit cohort surface (LM8) — is the live touchpoint slot active? |
+| **L3** Behaviour | Course completion (cohort) | ≥ 60% | Same as D30 — cohort cohesion is the lever |
+| **L4** Results | NRR | Y1 ≥ 110%, Y2 ≥ 120% | Re-examine pricing, expansion play; LM3/LM4/LM6 quality |
+
+If any L3 metric is below threshold for two consecutive cohorts, the operator must publish a postmortem at `plans/measurement-incidents/YYYY-MM-cohort-X.md` documenting:
+- Which mechanic (LM1–LM8) underperformed
+- What the data shows
+- What surface change is being shipped
+- The next-cohort's expected lift
+
+This is the "evidence-based product loop" the Section D thesis depends on. Skipping it makes the cited research invalidated by our own missing measurement, not by a real failure of the mechanic.
+
+### 6.7 — Section D acceptance: validator regression suite
+
+Maintain fixtures under `packages/shared/__fixtures__/section-d/` for each Section D validator (24–30):
+
+- `letter-bias-v2/known-bad-quiz.json` — 4 questions, all correct = B → validator 24 fires F12.
+- `intake-required/missing-novice-error.json` → validator 25 fires.
+- `backward-design/lesson-without-test.json` → validator 26 fires.
+- `worked-example-pair/identical-faded.json` → validator 27 fires.
+- `principle-taxonomy/free-typed-principle.json` → validator 28 fires.
+- `4cid-coverage/missing-jit-info.json` → validator 29 fires (Phase 2).
+- `blind-spot-probe/empty-novice-would.json` → validator 30 fires.
+
+Plus parallel "known-good" fixtures that must NOT fire each validator. Run as part of `pnpm test`. Adding a new fixture requires: name the F-code or scaffold-code (LM/SM), add the failing example, add the passing twin, run the suite.
+
 ---
 
 ## Part 7 — Operating playbooks (post-launch)
