@@ -326,6 +326,8 @@ Each item below ships behind a feature flag, in this order:
 | AI | none | Anthropic API (Sonnet drafter + Opus critic) + Inngest. |
 | Validators | shared lib already | Same lib reused inside critic + post-publish lint. |
 | Billing | none | Stripe; `tenant.plan` gated by webhook. |
+| Calibration capture | none (Phase-1 progress timestamps only) | JOL pre-answer + calibration Δ written to skills-matrix-equivalent server table; surfaced in dashboard stats panel (LM6). |
+| Spaced-review surface | schema only (`09-progress-tracker/spaced-review.md` is paper-only) | Server-side scheduler; dashboard banner; expanding-interval queue; leech rule (LM1). |
 
 Nothing in Phase 1 is thrown away.
 
@@ -421,6 +423,12 @@ Everything else (running validators, computing confidence, picking which drafts 
 #### Why this minimises human work
 
 At realistic commercial scale (50 generations/day per tenant, ~95% pass auto-publish thresholds), the human queue is ~2–3 drafts/day per tenant, ~1–2 minutes each given pre-computed findings and side-by-side diff. Net: **~10 minutes/day of SME time per tenant**.
+
+The human queue also exposes per-SME blind-spot dashboards aggregated
+from critic-feedback over time (cross-ref § D2 SM8 / § D3). Rejection
+reasons feed back as personalised authoring prompts, not just one-off
+corrections — closing the deliberate-practice feedback loop (Ericsson
+1993).
 
 ### C8. Risk register
 
@@ -520,6 +528,12 @@ At realistic commercial scale (50 generations/day per tenant, ~95% pass auto-pub
 20. Quality signal: simulate 30 attempts on a question with 20% correct rate → question paused for new sessions.
 21. Stripe upgrade → `tenant.plan` flips → quota lifted.
 22. Cross-tenant import (v2 commercial): pinned version doesn't drift when source publishes a new version.
+23. **Cohort retention curves** visible in operator dashboard: D1, D7, D30 plotted per-cohort; targets per § D4 (D7 ≥ 40%, D30 ≥ 35% on cohort tier).
+24. **Calibration-Δ trend** visible per-tenant: weekly snapshot stored; |Δ| trending toward 0.5 over 8-week window.
+25. **Leech-rule operation:** an item missed ≥ 3 times by a learner is auto-routed to error-log-equivalent table; demoted to mastery rung 1; "rewrite the concept" task surfaced.
+26. **Drafter intake gates the 5 CTA probes** (§ D2 SM1): publish blocked if any of (novice-error, principle, worked-example pair, boundary case, nearest confusable) is empty.
+27. **TTFV — learner ≤ 5 min** sign-up to first quiz pass measured on test cohort.
+28. **TTFV — SME ≤ 1 hour** CTA intake to publishable lesson measured on operator + first paying SME.
 
 ### C12. Appendix — Issues fixed from earlier plan rounds
 
@@ -550,6 +564,295 @@ This plan is the third pass. Earlier rounds had these issues; record them so the
 | 21 | "Postgres canonical with RLS" | Sound. | Kept. |
 | 22 | "GitHub repo per pack family" | Already dropped earlier | Stays dropped. |
 | 23 | "User suggestions with no moderation" | Spam vector | Length + closed-list filter at submit + rate limit; AI moderation in Phase 2. |
+
+---
+
+## Section D — Learner Absorption & SME-Elicitation Strategy
+
+This section is the load-bearing pedagogical and commercial thesis of the
+platform. It ties Phase-2 product surfaces to peer-reviewed cognitive-
+psychology and instructional-design research, so every retention or
+SME-effectiveness claim made in the decks is grounded in named evidence
+and a measurable benchmark delta.
+
+The methodology layer (`08-cheat-sheets/training-methodology.md`,
+`08-cheat-sheets/decision-trees.md`, `09-progress-tracker/spaced-review.md`,
+`09-progress-tracker/skills-matrix.md`, `06-failure-analysis/error-log.md`)
+defines the doctrine. This section translates the doctrine into Phase-2
+commitments, critic-prompt design, Kirkpatrick L1–L4 measurement, TTFV
+acceptance criteria, segment-specific wedges, mechanism rationale, and
+the business-case foundation.
+
+### D1. Learner-absorption mechanics for Phase 2
+
+Eight mechanics. Each tagged to research source, repo lever, and Phase-2
+ticket bucket. Codes (LM1–LM8) are referenced from
+`08-cheat-sheets/training-methodology.md` § "Learner-absorption mechanics"
+and from the deck slides.
+
+| Code | Mechanic | Cited evidence | Phase-2 repo lever | Ticket bucket |
+|---|---|---|---|---|
+| LM1 | Spaced retrieval (1/3/7/14/30d expanding interval; leech rule on 3+ misses) | Cepeda et al. 2008; Cepeda 2006 (254-study meta); Murre & Dros 2015 | Dashboard banner surfaces `09-progress-tracker/spaced-review.md` queue (or its server-side equivalent); `web/src/lib/spaced-review.ts` (new); `web/src/components/dashboard/SpacedReviewBanner.tsx` (new) | Phase 2 — review-scheduler |
+| LM2 | Mid-lesson retrieval gate (1-Q recall before "next" unlocks) | Roediger & Karpicke 2006; Karpicke & Blunt 2011 (*Science*) | `web/src/components/concept/LessonView.tsx` adds gated reveal; new `RetrievalGate` primitive | Phase 2 — lesson-runner |
+| LM3 | Generation effect (write-the-principle before reveal) | Slamecka & Graf 1978 | `web/src/components/quiz/QuizRunner.tsx` adds principle-write field before answer reveal | Phase 2 — quiz-runner |
+| LM4 | Interleaving recommender (≥ 2 sub-areas / session) | Rohrer & Taylor 2007 (63% shuffled vs 20% blocked) | `web/src/lib/recommendation.ts` adds interleaving constraint to next-pick | Phase 2 — recommender |
+| LM5 | Worked-example fading + expertise-reversal cutover at rung 3 | Sweller, van Merriënboer & Paas 2019; Kalyuga 2003 | Lesson-depth toggle gains a 4th rung "solo" that disables hints once mastery ≥ 3 | Phase 2 — depth-adapt |
+| LM6 | Calibration capture (JOL pre-answer; Δ to skills-matrix) | Dunlosky & Bjork; Kruger & Dunning 1999 | Quiz runner captures JOL pre-answer; calibration-Δ surfaces in dashboard stats panel | Phase 2 — calibration |
+| LM7 | Streak prompt with variable-ratio reinforcement | Eyal 2014 (Hook Model); Skinner; Duolingo (Mazal 2022): CURR +21%, DAU 4.5×, 10-day-streak threshold | Push-notification surface + email digest; bandit-optimised cadence | Phase 2 — re-engagement |
+| LM8 | Cohort surface (peer + accountability) | Maven W1→W2 96% vs MOOC 16%; altMBA 96% completion; Reich & Ruipérez-Valiente 2019 (*Science*) | Per-cohort routes; peer-comparison and group-leaderboard primitives | Phase 2 — cohort |
+
+**Composite expected outcome.** Each mechanic is independently effect-sized
+in peer-reviewed work. We make no claim of additive stacking, but:
+- D7 retention target ≥ 40% (vs mobile-app par 28%) — credibly hit by LM1 + LM7.
+- D30 retention target ≥ 35% (vs mobile-app par 14%) — requires LM1 + LM7 + LM8.
+- Course completion ≥ 60% (vs MOOC 3–10%) — primarily LM8, gated by LM1/LM2/LM3/LM4 quality.
+- |Calibration Δ| → 0.5 — primarily LM2 + LM3 + LM6.
+- Mock pass-rate trajectory positive at 95% confidence over 8-week window — composite.
+
+### D2. SME-elicitation scaffolding (drafter-side)
+
+Eight scaffolds. The premise: SMEs are not bad teachers — they have
+specific cognitive artefacts that don't transfer without specific
+elicitation tooling. Each scaffold fixes a known SME failure mode
+documented in `08-cheat-sheets/decision-trees.md` § 6 (CTA-style
+elicitation tree).
+
+| Code | Scaffold | What it fixes | Cited evidence |
+|---|---|---|---|
+| SM1 | CTA-style 5-probe intake (novice-error / one-principle / worked-example pair / boundary case / nearest confusable) | The 70% expert-decision omission in self-narration | Clark, Feldon, van Merriënboer, Yates & Early; Lee 2004: +46% post-training learning gain, Cohen's d ≈ 1.72; Tofel-Grehl & Feldon 2013 |
+| SM2 | Backward-design intake (write the assessment first, lesson second) | "Telling what I know" SME default | Wiggins & McTighe 1998 (*Understanding by Design*) |
+| SM3 | Worked-example pair editor (worked + faded variant, mandatory field) | SMEs ship principle-only or example-only | Sweller 1988 / 2019; Renkl |
+| SM4 | Expert-blind-spot probe ("what would a novice get wrong here?") | Curse of expertise; under-explained bridging steps | Nathan & Petrosino 2003; Hinds 1999 |
+| SM5 | Principle-tag picker (closed taxonomy; rejection if free-typed and unmapped) | Free-text principle drift; learners can't accumulate a stable schema | Knowles andragogy; Bloom revised |
+| SM6 | 4C/ID coverage gate (critic checks all four components present) | SMEs over-deliver supportive info, under-deliver tasks + part-task practice | van Merriënboer 1997 (4C/ID) |
+| SM7 | Voice-first / camera-first authoring + auto-draft | Tacit knowledge unrecoverable from text-from-blank | Polanyi 1966; CTA-for-skilled-trades |
+| SM8 | Per-SME blind-spot dashboard (critic-feedback aggregated, personalised authoring prompts) | Critic feedback is destination, not loop | Ericsson 1993 (deliberate-practice feedback channel) |
+
+**Composite expected outcome for SMEs.**
+- SME-to-publishable-lesson cycle time ≤ 1 hour (TTFV — see § D5).
+- ~46% larger learner-side learning gain on SME-authored content vs
+  unscaffolded baseline (Lee 2004 effect-size transferred).
+- Critic-rejection rate trends down month-over-month per-SME (SM4 + SM6 + SM8).
+- Bus-factor risk addressed for startup / SMB customers (SM7 captures
+  tacit knowledge before SME leaves).
+- Cultural fit unlocked in high-PDI / face-saving markets (SM4 framed as
+  *probe*, SM8 anonymised, SM5 closed-taxonomy removes free-typed
+  face-stake).
+
+### D3. Critic prompt design (Phase-2 Opus critic)
+
+The Phase-2 critic (Opus) is configured to check the 12 cognitive
+failure modes (F1–F12 from `06-failure-analysis/error-log.md`) plus
+4C/ID coverage (van Merriënboer 1997). Returns a structured object that
+SM8 surfaces back to the SME as a personalised blind-spot dashboard:
+
+```json
+{
+  "confidence": 0.0,
+  "missing_components": ["learning_tasks" | "supportive_info" | "jit_info" | "part_task_practice"],
+  "blind_spot_flags": ["expert_blind_spot" | "principle_unstated" | "no_worked_example" | "no_boundary_case" | ...],
+  "fcode_risks": ["F1" | "F2" | ... | "F12"],
+  "suggested_probes": ["..."]
+}
+```
+
+**Refuse-to-publish gate** (cross-ref § C7): no knowledge-file span
+justifies the marked answer ⇒ critic refuses to publish. Same gate
+covers F5 (fabricated rule) and F12 (cue-bias).
+
+### D4. Measurement plan — Kirkpatrick four levels
+
+Every retention / effectiveness claim made in the decks must be
+measurable against one of the four Kirkpatrick levels. No vanity
+metrics on the dashboards.
+
+| Level | What it measures | Our metric | Industry anchor |
+|---|---|---|---|
+| **L1 (reaction)** | Did learners like it? | NPS + CES post-section | NPS ≥ 40 (B2C), ≥ 50 (B2B) |
+| **L2 (learning)** | Did they learn it? | Mock pass-rate trajectory + calibration Δ from skills-matrix | Phase-D exit gate: |Δ| ≤ 0.5 |
+| **L3 (behaviour)** | Did they apply / return? | D1 / D7 / D30 cohort retention curves; CURR; course-completion rate; spaced-review surface engagement (target ≥ 60% same-session clearance) | D1 ≥ 55% (mobile par); D7 ≥ 28% par → target ≥ 40% (cohort); D30 ≥ 14% par → target ≥ 35% (cohort); completion ≥ 60% vs MOOC 3–10% (Reich 2019) |
+| **L4 (results)** | Did the business benefit? | NRR, expansion revenue, gross margin | NRR Y1 ≥ 110% (median+, SaaS Capital 2025); Y2 ≥ 120% (top-quartile); margin > 95% as AI cost scales sub-linearly |
+
+### D5. TTFV (time-to-first-value) commitments
+
+- **Learner TTFV ≤ 5 minutes** from sign-up to first quiz pass.
+  Anchors L1 + L3.
+- **SME TTFV ≤ 1 hour** from CTA intake to publishable lesson. The
+  entire elicitation pipeline (SM1 → SM2 → SM3 → SM4 → critic SM6 →
+  publish) runs inside the hour.
+
+These become Phase-2 acceptance criteria — additions to § C11
+(Verification).
+
+### D6. Segment-specific problem map (the wedge order)
+
+Every segment has a *named* retention or sharing problem with a *named*
+mechanism solving it. The plan does not pretend the mechanism set varies
+by segment — it does not. The *surface* varies; the engine does not.
+This is what makes the platform commercially seamless: the same
+$0-marginal-cost research-backed engine sells into eight segments
+without re-architecting.
+
+#### Learner-side segments
+
+| Vertical | Dominant retention failure mode | Anchor / source |
+|---|---|---|
+| Healthcare | High mandatory-completion (95–99% w/ deadlines) but low retention. Joint Commission / CME drives seat-time, not transfer. Deskless / shift-based. | Mordor — healthcare/life-sciences microlearning 15.22% CAGR. |
+| Financial services | Self-paced compliance 18–25%; live interactive 85–95%. Re-test fatigue on annual recurrence. < 70% completion ⇒ 3.5× violation rate. | KPI Depot 2026; ATD avg 72%. |
+| Tech / SaaS | Skill-obsolescence churn; learners abandon when content stales faster than the curriculum updates. | LinkedIn WLR 2025: 39% need reskilling by 2030. |
+| Manufacturing / industrial | Deskless / shift-based; tacit / haptic knowledge dominant; literacy + bandwidth variability. | TalentCards: ~2.7B deskless workers, 80%+ of global workforce. |
+| Retail / hospitality | Highest turnover; TTFV in days. Microlearning highest-adopting vertical (21.53% revenue share 2025). | Mordor; Absorb 2026 — microlearning completion +42% vs traditional. |
+| Government / public sector | Procurement-bound; WCAG/Section 508; multi-language; top-down mandates. | LinkedIn WLR 2025 — public-sector mobility gap. |
+| Professional services | Billable-hour conflict; nano-format only. | Industry consensus. |
+
+| Geography | Distinct retention constraint |
+|---|---|
+| North America / W. Europe / ANZ | Push-fatigue is the dominant constraint. |
+| India / SEA / China | Mobile-first; high credentialing value; lower mean session length. |
+| MENA / SSA / LATAM | Bandwidth + offline-tolerance critical; SMS / WhatsApp delivery beats native push in some markets. |
+| Japan / Korea | Face-saving cultures; peer-graded surfaces underperform unless anonymised. Long-term-orientation favours systematic spaced review. |
+
+| Hofstede axis | Effect on absorption |
+|---|---|
+| **High UAI** | E-learning usability frustration highest; learners seek fixed habits, low ambiguity (deterministic next-step prompts). |
+| **High PDI** | Heavy reliance on instructors and textbooks; leader-/manager-endorsed pathways unblock. |
+| **High Collectivism (low IDV)** | Cohort surface drives persistence; solo self-paced underperforms. |
+| **High LTO** | Spaced review beats short-burst gamification. |
+| Hall high-context | Worked examples + analogies > rule statements alone. |
+| Meyer feedback-direct vs indirect | Critic copy must adapt; direct cultures (NL, IL, DE) tolerate blunt rejection; indirect (JP, ID, CN) require softened framing. |
+
+| Dreyfus rung | Dominant abandonment mode | Intervention |
+|---|---|---|
+| Novice | Cognitive overload | Fully-worked examples (Sweller); high scaffolding |
+| Advanced beginner | Fluency illusion | Force generation-effect drill (Slamecka & Graf 1978) |
+| Competent | Plateau after first quiz pass | Surfaced spaced-review queue (LM1) |
+| Proficient | Expertise reversal | Faded worked examples; promote to interleaved transfer (LM4) |
+| Expert | Boredom; needs deliberate-practice channel | Far-transfer scenarios; cohort/peer review surface (LM8) |
+
+| Career stage | Motivation profile | Key lever |
+|---|---|---|
+| Early (0–3y) | Identity / credentialling | Streaks + badges (LM7); fragmented study time → nano-format |
+| Mid (3–10y) | Mastery / promotion | Cohort surface (LM8) — Maven W1→W2 96% retention |
+| Senior (10y+) | Teaching others / legacy | Best converted into SMEs |
+| Career-changer | Anxiety; high uncertainty-avoidance | Deterministic next-step prompts; fixed pathways |
+
+| Company size | Distinct retention problem | Implication |
+|---|---|---|
+| Solo / freelancer | No cohort; pure-B2C dynamics | LM7 carries 100% of return-visit load |
+| Startup (1–50) | No L&D; SMEs = founders (no time) | Async + minimal-touch + ≤ 5-min nano-sessions |
+| SMB (50–500) | "Completion-as-checkbox" culture | Manager-endorsed pathways + peer comparison drive engagement above the 12–15% self-paced floor |
+| Mid-market (500–5000) | Has SCORM/xAPI LMS; completion ≠ competence | xAPI emit hooks + L2 dashboards close the gap |
+| Enterprise (5000+) | Distributed SMEs / geos / languages; governance-heavy | Multi-language, audit-trail, version-pin, SSO |
+| Public sector | Procurement; WCAG/Section 508; multi-language | Enterprise + accessibility certification |
+
+#### SME-side segments
+
+| Vertical | SME knowledge-sharing problem | Anchor / source |
+|---|---|---|
+| Clinical / healthcare | Medico-legal liability; schedule-poor (10-min between cases) | Clark/Feldon CTA-in-healthcare research |
+| Financial services | Regulatory liability ⇒ "do not author" defaults | Industry consensus; FINRA / SEC review timelines |
+| Tech / SaaS | Prefers code / README over prose; rejects cameras; content stales weekly | LinkedIn WLR 2025 |
+| Manufacturing / industrial | Tacit / haptic — Polanyi's "we know more than we can tell"; voice-first or video-first authoring required | Polanyi 1966; CTA-for-skilled-trades |
+| Government / clearance | Clearance-bound; review cycles long | Industry consensus; GAO L&D reports |
+
+| Cultural axis | SME-side effect |
+|---|---|
+| High-PDI cultures (East Asia, LATAM, MENA, India) | Reluctant to expose uncertainty in public artefacts; leader-endorsement pathway required |
+| Face-saving cultures (Japan, Korea, parts of China) | Avoid "I don't know"; critic copy framed as suggestion not finding; anonymised peer-review |
+| Individualistic cultures (US, NL, UK, AU) | Knowledge as career currency; author-credit / citations / badges |
+| Collectivist cultures (China, India, LATAM) | Share within group; defer authority decisions upward; group-attribution surfaces |
+| Oral-tradition vs documentation cultures | Voice-to-text + auto-draft pipelines unblock the former |
+
+| Skill / experience level | SME problem | Mitigation |
+|---|---|---|
+| Junior-as-SME | More relatable, less authoritative | Pair with senior SME for blind-spot probe |
+| Mid-career SME | Best teachers per CTA literature | Default SME-grade for content authoring |
+| Senior SME | Worst novice-empathy without scaffold | SM4 + SM2 mandatory |
+
+| Company size | SME problem | Implication |
+|---|---|---|
+| Startup founder-as-SME | Knows everything, no time, won't author prose | Voice-to-camera + transcribe + auto-draft + founder approves diffs |
+| SMB single-SME bottleneck | Bus-factor 1; no redundancy | Explicit succession-of-knowledge tooling — CTA + recorded interview + auto-draft |
+| Mid-market SME pool | Committee authoring; slow consensus; LCD output | Per-SME draft + critic-mediated merge; conflict-surface UI |
+| Enterprise SME network | Distributed across geos / time-zones / languages; governance gates | Role-based publish, multi-language critic, audit trail |
+| Consultancies / service firms | SMEs are billable; authoring competes with revenue | ≤ 1-hour TTFV + nano-format |
+
+#### Cross-segment patterns (the wedge-order argument)
+
+1. **Deskless workforce convergence.** Manufacturing, retail/hospitality, healthcare-frontline, field-services all need: ≤ 3-min sessions, mobile-only, offline-capable, voice/visual over text. ~2.7B workers globally. Same product surface unlocks four verticals at once.
+2. **High-PDI / face-saving cultures need a leader-endorsement layer** before SME authoring will land. Manager-pathway-publish pattern unlocks SME participation in East Asia, LATAM, MENA, India.
+3. **Compliance-driven verticals (finance, healthcare, government) require an audit-trail / version-pin / role-based-publish stack** — different SME-approval shape than B2C. Same critic engine, different governance gates. < 70% completion ⇒ 3.5× compliance-violation rate (KPI Depot 2026) makes this an L4-Kirkpatrick monetisable outcome.
+4. **Single-SME-bottleneck markets (startup, SMB, founder-led)** need explicit succession-of-knowledge tooling — CTA + recorded interview + auto-draft + reviewer pairing. Killer feature for the small-end of the SME-side TAM.
+
+**Wedge order for go-to-market.**
+1. Deskless verticals + single-SME-bottleneck SMBs first (lowest tooling competition).
+2. Regulated enterprise second (highest ACV).
+3. B2C cert-prep continuing (CCA-F flagship).
+
+### D7. Why this works (mechanism walkthrough)
+
+This subsection pre-empts the question every B2B prospect, every
+investor, and every collaborator will ask: *why will any of this work?*
+The answer for each mechanism: cited effect size + why retention or
+sharing compounds + which Phase-2 component implements it. Same LM /
+SM codes as § D1 / § D2.
+
+**Learner-absorption — why retention compounds.** Each spaced-retrieval
+session re-encodes the trace at a longer interval; long-term retention
+grows as a function of *number of correctly-spaced retrievals*, not study
+time. Retrieval gates (LM2) eliminate the fluency illusion (Bjork &
+Bjork 2011) so calibration Δ closes toward zero. Generation (LM3) forces
+active encoding and surfaces gaps the learner would not have noticed.
+Interleaving (LM4) trains discrimination between concepts — what the
+exam actually tests. Worked-example fading with expertise-reversal
+cutover (LM5) avoids the LMS one-format-for-all failure: each Dreyfus
+rung gets the right intervention. Calibration capture (LM6) closes the
+"I felt I knew it" gap that drives F9 and F11. Streak prompts on
+variable-ratio reinforcement (LM7) supply the Hook-Model trigger phase
+without which the entire pipeline never fires. Cohort surface (LM8)
+activates SDT-relatedness (Ryan & Deci) and goal-gradient (Kivetz,
+Urminsky & Zheng 2006) simultaneously — the biggest single retention
+multiplier in ed-tech (Maven 14× retention vs Coursera/Udemy).
+
+**SME-elicitation — why sharing becomes seamless.** SMEs aren't bad
+teachers; they have specific cognitive artefacts that don't transfer
+without specific elicitation tooling. The CTA 5-probe intake (SM1)
+inverts the SME's natural narrate-from-expertise impulse, surfacing the
+70% of decisions otherwise omitted (Clark/Feldon — Lee 2004 +46%
+learning gain, d ≈ 1.72). Backward design (SM2) forces "what's the
+test?" before "what's the lesson?" (Wiggins & McTighe 1998), eliminating
+unmeasurable lessons. The worked-example pair editor (SM3) yokes
+Sweller's faded-example research to a mandatory authoring field. The
+expert-blind-spot probe (SM4) addresses Nathan & Petrosino 2003 directly.
+The principle-tag picker (SM5) eliminates free-text drift. The 4C/ID
+coverage gate (SM6) catches the SME's tendency to over-deliver
+supportive information (van Merriënboer 1997). Voice-first authoring
+(SM7) addresses Polanyi's tacit-knowledge constraint. The blind-spot
+dashboard (SM8) closes the deliberate-practice feedback loop (Ericsson
+1993) — without which the SME doesn't improve over time.
+
+**Why segmentation × mechanism = seamless.** The mechanism set is the
+same regardless of segment; the *surface* varies. One critic engine,
+one CTA-probe schema, one calibration-Δ column projected through
+different UI affordances per segment (deskless mobile, enterprise
+SCORM/xAPI, B2B audit-trail, B2C streak/cohort). That is what makes the
+platform *commercially* seamless, not just pedagogically sound.
+
+### D8. Business-case foundation
+
+Five-line thesis the four decks must communicate:
+
+1. **Self-paced corporate training completion is 12–15% on average; cohort-based is 75–96% (Maven, altMBA).** That is the prize we are competing for.
+2. **The mechanisms that produce cohort-grade retention are 50 years of cognitive-science evidence** (LM1–LM8) **operationalised as product surface** — not new IP, but an unowned synthesis.
+3. **The mechanisms that produce seamless SME sharing are CTA, backward design, expert-blind-spot probes, 4C/ID coverage gates, voice-first capture, and personalised blind-spot dashboards** (SM1–SM8) — all peer-reviewed, all tooled for the first time at the small-SME end of the market (the killer-feature gap).
+4. **The 80% deskless and 39% reskilling-by-2030 numbers** (TalentCards; LinkedIn WLR 2025) **define the TAM**; the segmentation table in § D6 defines the wedge order: deskless verticals + single-SME-bottleneck SMBs first, regulated enterprise second, B2C cert-prep continuing.
+5. **The proof is L1–L4 Kirkpatrick measurement built in from day one.** L2 calibration-Δ + L3 D7/D30 cohort curves + L4 NRR ≥ 110% Y1 / ≥ 120% Y2 (SaaS Capital 2025 top-quartile) make the claim falsifiable, which is what defensible B2B sales requires.
+
+**Per-deck anchors** (the deck files implement these as slides):
+- *Investor deck* — moat is the synthesis (LM1–LM8 + SM1–SM8 + Kirkpatrick L1–L4 measurement). Compares industry baselines (MOOC 3–10%, mobile-app D30 14%) to our targeted outcomes (cohort 60%+, mobile D30 35%+) using only published benchmarks.
+- *B2B prospect deck* — commitment is Kirkpatrick L1–L4 + ≤ 1-hour SME-to-publishable-lesson; risk reduction is audit-trail + role-based publish + WCAG/Section 508; segmentation is "we already know your segment's failure mode".
+- *Collaborator deck* — engineering thesis is one critic engine + one CTA-probe schema + one calibration-Δ column projected through segment-specific UI affordances. Mechanic-to-mechanism map is the wiring diagram.
+- *Overview deck* — non-technical narrative: learners come back because of evidence; SMEs ship because of scaffolding; segments converge on one engine.
 
 ---
 

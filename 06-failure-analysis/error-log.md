@@ -27,10 +27,37 @@ that does work for you next session.
 | F6 | **Closed-list miss** | Picked an option outside the protocol's actual options (WebSockets, gRPC for MCP, etc.). |
 | F7 | **Misread scenario** | Did not extract the constraint that disambiguated the answer. |
 | F8 | **Over-engineered** | Picked the elaborate option when the simplest correct answer was obvious. |
+| F9 | **Calibration miss (JOL > outcome)** | "Felt I knew it; got it wrong." High judgment-of-learning, low actual recall. |
+| F10 | **Transfer failure (near vs far)** | Knew the principle in the practice format; missed it in the scenario format. |
+| F11 | **Fluency illusion** | Re-read it and felt fluent; couldn't recall it cold. |
+| F12 | **Cue-bias / surface-feature bias** | Selected on a non-content cue (B-letter bias, option length, "all of the above" pattern). |
 
 When a code repeats across ≥3 misses, **promote it** to a rule on the
 [`08-cheat-sheets/decision-trees.md`](../08-cheat-sheets/decision-trees.md)
-"how I default" section, and wire it into the next mock exam's pre-flight.
+"how I default" section, append it to the calibration-Δ column in
+[`09-progress-tracker/skills-matrix.md`](../09-progress-tracker/skills-matrix.md),
+and wire it into the next mock exam's pre-flight.
+
+## Mechanism × code crosswalk
+
+Each failure mode has a known cognitive mechanism and a standard
+remediation. Use this crosswalk when promoting a code to
+`decision-trees.md` or when diagnosing a fresh miss.
+
+| Code | Cognitive mechanism | Research source | Standard remediation |
+|---|---|---|---|
+| F1 | Salience / availability heuristic | Tversky & Kahneman 1973 | Boring beats clever — pick the most boundary-respecting option. |
+| F2 | Lossy-summarisation default | Sweller cognitive-load (intrinsic vs extraneous) | Ask first whether *moving* with full fidelity solves the same problem. |
+| F3 | Procedural-knowledge gap | Anderson ACT-R | Re-derive the lifecycle in the margin before answering. |
+| F4 | Declarative-without-conditional knowledge | Anderson; Bloom revised (Apply ≠ Analyse) | Force a one-sentence "why this dominates the alternative" justification. |
+| F5 | Plausibility heuristic without source check | Kahneman fast-thinking | Treat numeric thresholds as distractors unless the source spec is named. |
+| F6 | Set-membership / closed-list error | — | Cross out non-canonical options on first read. |
+| F7 | Reading-for-gist failure | Kintsch construction-integration | Underline the disambiguating constraint before considering options. |
+| F8 | Confirmation / sunk-cost on first plausible elaborate answer | — | Default to the boring answer; ask what configuration / description change would solve. |
+| F9 | Judgment-of-learning miscalibration | Dunlosky & Bjork; Kruger & Dunning 1999 | Reset spaced-review schedule; force re-derivation under no-rereading rule. |
+| F10 | Encoding-specificity / transfer-appropriate-processing failure | Barnett & Ceci 2002; Tulving | Re-author the concept with a varied surface scenario; interleave on next session. |
+| F11 | Stability-vs-fluency illusion | Bjork & Bjork 2011 | Ban re-read; force a write-from-blank session before next attempt. |
+| F12 | Spurious cue-validity | — (closes `letter-bias-2026-05` as a committed code) | Rewrite the question's distractors to control surface features; do not re-show until rebalanced. |
 
 ---
 
@@ -96,7 +123,9 @@ When a code repeats across ≥3 misses, **promote it** to a rule on the
    the Prevention rules. They prime your defaults.
 3. **Promote repeating codes.** When the same F-code appears across ≥3
    misses, lift the pattern into
-   [`08-cheat-sheets/decision-trees.md`](../08-cheat-sheets/decision-trees.md)
+   [`08-cheat-sheets/decision-trees.md`](../08-cheat-sheets/decision-trees.md),
+   append it to the calibration-Δ column in
+   [`09-progress-tracker/skills-matrix.md`](../09-progress-tracker/skills-matrix.md),
    and add a pre-flight check to the next mock exam.
 4. **Archive solved entries.** When a Prevention rule has held across 3
    consecutive sessions on that sub-area, move the entry into a
