@@ -937,7 +937,302 @@ triggers that would tell us the synthesis bet is wrong.
 
 ## §4 — What we are planning (problem-by-problem walkthrough)
 
-*This section will be filled in commit 5.*
+This is the explicit accountability section. Every L1–L8 + S1–S8
+problem in §1 is walked through here with: **problem name** → **cited
+mitigation mechanism** → **built today** state → **planned** state
+(Phase 1 / Phase 2) → **specific file path / component** → **falsification
+metric** (when we'd say we're wrong). The matrix is canonical in
+[`content-pack-management-plan.md` §D0](./content-pack-management-plan.md);
+this section is the elaborated evidentiary basis.
+
+The numbering convention: §4.1–§4.8 are L1–L8 (learner side); §4.9–§4.16
+are S1–S8 (SME side); §4.17–§4.19 cover sequencing, verification, and
+TTFV.
+
+### Learner-side problems (L1–L8)
+
+**4.1 — L1 (knowledge decay without review).** *Problem:* untreated
+knowledge plateaus at ~25% retention by day 6 (§1.2; Murre & Dros 2015).
+*Mechanism:* spacing effect at expanding intervals; gap = 10–20% of
+retention horizon (Cepeda et al. 2008, *Psych Sci*; Cepeda 2006
+254-study meta). *Built today:* schema in
+`09-progress-tracker/spaced-review.md` defines the cadence and the
+leech rule on `main`; **no scheduler, no learner-facing surface, no
+queue enqueue**. *Planned (Phase 2):* `web/src/components/dashboard/
+SpacedReviewBanner.tsx` widget at top of `/[packId]/` dashboard
+surfacing 3 oldest due items with one-tap "Start review";
+expanding-interval scheduler in `web/src/lib/spaced-review.ts`;
+cron-driven nightly enqueue keyed to learner-localtime; +1d reset on
+miss; promote to next interval on pass; leech rule on 3+ misses
+demotes to skills-matrix rung 1. *Falsification:* if D7 cohort-
+retention curve does not lift ≥ 12pp over 8-week measurement window
+in a treatment-vs-control cohort, the mechanic is rebuilt or removed.
+
+**4.2 — L2 (streak no return-trigger).** *Problem:* daily intent
+decays without an external prompt (§1.4; Eyal Hook Model trigger
+phase missing). *Mechanism:* Hook Model trigger + variable-ratio
+reinforcement (Eyal 2014; Skinner; Mazal/Duolingo 2022 — CURR +21%,
+DAU 4.5×). *Built today:* `computeStreak()` in `web/src/lib/streak.ts`
+already returns `{ current, studiedToday, lastStudyDate }` from quiz/
+test/mock timestamps; **no notification, no email, no return-prompt
+surface**. *Planned (Phase 2):* (a) streak counter visible in
+`web/src/components/layout/Header.tsx`; (b) web-push notification
+opt-in on first quiz pass; bandit-optimised cadence anchored to user's
+modal study-time (variable-ratio rather than fixed-time); (c) email-
+digest fallback via Resend Pro for users who decline push; (d) streak-
+freeze affordance (Duolingo precedent — one missed day per N earned);
+(e) ≥ 3 ignored prompts → back-off rule to avoid prompt-fatigue
+extinction. *Falsification:* if CURR (current-user retention rate)
+not lifted ≥ 10pp over 8-week window vs control cohort with no
+notification, the cadence is wrong or the value-of-action is too low
+to justify the prompt.
+
+**4.3 — L3 (re-reading not retrieval).** *Problem:* lesson-depth
+toggle (Easy / Conceptual / Deeper) is re-reading-shaped; produces
+fluency illusion not durable learning (§1.2; Bjork & Bjork 2011;
+Roediger & Karpicke 2006 — ~50% delayed-recall lift from one
+retrieval episode). *Mechanism:* testing effect (retrieval as a
+learning event) + generation effect (Slamecka & Graf 1978 — ~30%
+retention lift). *Built today:* lesson-depth toggle and lesson body
+in `web/src/components/concept/LessonView.tsx` and `LessonBody.tsx`;
+**no retrieval gate; learner can re-read indefinitely without ever
+testing recall**. *Planned (Phase 2):* (a) `RetrievalGate` primitive
+in `LessonView.tsx` — body hidden until learner types a one-sentence
+recall of the principle; (b) `QuizRunner.tsx` adds a *principle-write*
+field before the answer reveal — generation-before-recognition rather
+than recognition-only; (c) Easy depth-toggle becomes opt-out, not
+default — desirable difficulty (Bjork) is the platform default.
+*Falsification:* if mock pass-rate does not lift ≥ 8pp on cohort
+using gate vs control cohort, the mechanic is broken or the gate is
+poorly designed (e.g., the recall sentence is too easily gamed).
+
+**4.4 — L4 (flat mocks vs scenario-anchored real exam shape).**
+*Problem:* current diagnostic-01 is flat 10-Q; real exam is 4
+scenarios × 15 Q with shared scenario context (CLAUDE.md §"Format
+details"). *Mechanism:* encoding-specificity / transfer-appropriate
+processing (Bjork; Barnett & Ceci 2002). *Built today:* one
+diagnostic mock in `07-mock-exams/diagnostic-01.md`; flat-shape
+mock runner in `web/src/components/quiz/MockExamPage.tsx`. *Planned
+(Phase 2):* `MockExamPage.tsx` restructured to scenario-anchored —
+4 scenarios × 15 Q with persisted scenario context across the block;
+transfer-format variety per scenario; flat mocks deprecated to a
+"warmup" tier. Authoring tooling (admin app) gains a scenario-block
+editor that enforces the shape. *Falsification:* if real-exam-shape
+mock pass-rate does not predict actual cert pass with r ≥ 0.6 across
+30+ test-takers, the shape is not the mechanism — encoding-
+specificity is overstated for this exam structure.
+
+**4.5 — L5 (no metacognitive calibration capture).** *Problem:*
+predict-then-test is described in `08-cheat-sheets/training-
+methodology.md` Step 5 but never instrumented; learners can't see the
+Dunning-Kruger gap close (§1.2; Dunlosky & Bjork; Kruger & Dunning
+1999). *Mechanism:* judgment-of-learning capture; calibration as a
+first-class metric. *Built today:* `09-progress-tracker/skills-matrix.md`
+has a `Gap` column (formalised on `main` as calibration Δ via the
+prior commit cluster); the methodology layer documents the doctrine.
+*Planned (Phase 2):* (a) JOL 1–5 slider in `QuizRunner.tsx` *before*
+the answer reveal — captures predicted competence; (b) calibration
+Δ = JOL − outcome stored in `skills-matrix` per attempt; (c)
+`StatsPanel.tsx` weekly trend chart; (d) |Δ| > 1 triggers a
+generation-effect drill at +1d (per `decision-trees.md` §"How I
+default"). *Falsification:* if |calibration Δ| does not converge
+toward 0.5 over 8-week window for ≥ 60% of active learners, the
+JOL-capture surface is not driving deliberate-practice feedback.
+
+**4.6 — L6 (letter-bias 76% B in concept quizzes).** *Problem:*
+`letter-bias-2026-05` tracked in CLAUDE.md as a quality regression;
+learners build a positional cue rather than principle reasoning
+(F12 in error-log doctrine). *Mechanism:* spurious cue-validity /
+confounded learning. *Built today:* F12 added to error-log
+taxonomy on `main`; tracking note in CLAUDE.md; **no automated
+validator; no admin-app gate**. *Planned (Phase 2):* pre-publish
+content-lint validator in `packages/shared/src/validators.ts`
+rejects MCQ sets with > 55% any single letter or with shorter-
+distractor patterns (cue-bias signature); admin app blocks
+publish on lint fail; existing 41-concept curriculum rebalanced via
+batch run before Phase 2 launch. *Falsification:* if post-shipping
+concept-quiz answer distribution is not uniform within ±5pp of 25%
+per option across the corpus, the validator is too lax or the
+authoring pipeline is bypassing it.
+
+**4.7 — L7 (interleaving documented but not enforced by the
+recommender).** *Problem:* methodology cites Rohrer & Taylor 2007
+but the recommender in `web/src/lib/recommendation.ts` does not
+enforce sub-area rotation; learners default to blocked practice
+which transfers ~30% worse (§1.2). *Mechanism:* interleaving
+(Rohrer & Taylor 2007 — 63% shuffled vs 20% blocked at 1-week
+delayed test). *Built today:* recommendation engine prioritises
+drill → section-test → continue → done; **no interleaving constraint**.
+*Planned (Phase 2):* constraint added to `recommendation.ts`:
+`nextPick.subArea !== lastPick.subArea`; rotation forced ≥ 2
+sub-areas per session; weekly-cohort calendar interleaves at
+day-boundary. *Falsification:* if transfer-question accuracy does
+not lift ≥ 15pp on cohort using interleaved vs control, the
+constraint is too loose or the sub-area granularity is wrong.
+
+**4.8 — L8 (no cohort/SDT relatedness surface).** *Problem:* SDT
+relatedness need unmet; the largest gap between MOOC 5% completion
+and cohort-based 96% (§1.1; §3.3). *Mechanism:* SDT (Ryan & Deci);
+Maven 96% W1→W2; Reich 2019 (14× cohort-vs-MOOC retention multiplier).
+*Built today:* nothing — no cohort routes, no peer surfaces. *Planned
+(Phase 2):* (a) per-cohort routes under `/[packId]/cohort/[cohortId]/`;
+(b) peer-comparison panel showing anonymised cohort progress
+distribution; (c) group-leaderboard primitive (variable-ratio social
+reinforcement); (d) weekly-cohort live touchpoint slot (Zoom or
+similar — out-of-app); (e) cohort-completion email series via
+Resend. *Falsification:* if cohort-tier completion does not exceed
+solo-tier completion by ≥ 20pp across the same content, the cohort
+mechanism is not transferring to our domain or our cohort design is
+wrong.
+
+### SME-side problems (S1–S8)
+
+**4.9 — S1 (CTA: SMEs omit ~70% of decisions in self-narration).**
+*Problem:* canonical CTA finding (Clark, Feldon et al.); CTA-built
+instruction +46% gain, d ≈ 1.72 vs expert-narrated (Lee 2004;
+Tofel-Grehl & Feldon 2013). *Mechanism:* structured CTA probe
+protocol substitutes the missing decisions. *Built today:* nothing —
+content authored by hand-editing `curriculum.js`. *Planned (Phase 2):*
+`DrafterIntake` TypeScript schema in `packages/shared/` with five
+required JSON fields: `novice_error`, `one_principle`, `worked_example`,
+`faded_variant`, `boundary_case`, `nearest_confusable`; admin app
+authoring flow at `/admin/draft/[slug]` blocks publish if any field
+is empty; tooltip per field with the named research rationale.
+*Falsification:* if SME-content learner-pass-rate does not exceed
+unscaffolded-baseline by ≥ 20pp at 90-day measurement, the
+scaffolding is too weak (probes worded poorly, fields ignored, or
+critic not enforcing).
+
+**4.10 — S2 ("telling what I know" SME default).** *Problem:*
+content-first authoring produces unmeasurable lessons (§1.3;
+Wiggins & McTighe 1998). *Mechanism:* backward design — assessment
+first, lesson second. *Built today:* nothing — quiz authoring is
+post-hoc to lesson authoring. *Planned (Phase 2):* admin app at
+`/admin/draft/[slug]` opens directly to *assessment intake* —
+`Write the test first` mode; lesson editor tab is locked until a
+passing assessment is authored and validated; assessment editor
+includes `principle` (closed-taxonomy picker — see SM5 / §4.13),
+`correct_answer`, `distractor_rationale[]`. *Falsification:* if
+≥ 20% of shipped lessons fail the "every lesson has a passing
+assessment" gate at one-month review, the lock is being bypassed or
+the assessment-editor UX is broken.
+
+**4.11 — S3 (no worked-example pair scaffold).** *Problem:* SMEs
+ship principle-only or example-only — never paired-then-faded —
+making worked-example fading unavailable (§1.3; §2.3; Sweller / Renkl).
+*Mechanism:* Sweller worked-example fading: worked → faded → solo.
+*Built today:* nothing — quiz schema captures correct/distractors but
+not worked/faded examples. *Planned (Phase 2):* worked-example pair
+editor in admin app — two side-by-side mandatory fields (worked +
+faded variant); critic refuse-to-publish if either is missing or if
+faded variant is identical to worked (must have ≥ 1 step / hint
+removed, validated heuristically by the critic prompt). *Falsification:*
+if faded-variant compliance drops below 95% at month-3 sampling, the
+mandatory-field gate is being bypassed or the validation heuristic is
+wrong.
+
+**4.12 — S4 (no expert-blind-spot probe at submission).** *Problem:*
+SMEs over-estimate novice prerequisites and under-explain bridging
+steps (§1.3; Nathan & Petrosino 2003; Hinds 1999). *Mechanism:*
+explicit "what would a novice get wrong here?" prompt at authoring
+time forces the cognitive flip. *Built today:* nothing. *Planned
+(Phase 2):* `novice_error: string` field required at submission
+(part of `DrafterIntake` schema, §4.9); critic prompt
+returns `blind_spot_flags: string[]` based on independent analysis of
+the lesson body; SME prompted to address each flag before re-submit;
+flags accumulate per-SME for the blind-spot dashboard (§4.16).
+*Falsification:* if critic-rejection-rate does not trend down
+month-over-month per-SME (i.e., SMEs are not learning to anticipate
+the blind-spots), the loop is not closing.
+
+**4.13 — S5 (free-typed principle drift across SMEs).** *Problem:*
+free-text principle fields produce schema drift; learners can't
+accumulate a stable mental model; Bloom-rung tagging breaks down
+(§1.3; Knowles andragogy schema-anchoring). *Mechanism:* closed-
+taxonomy enforcement. *Built today:* `principle` field exists in
+quiz schema as free-text. *Planned (Phase 2):* closed-taxonomy
+principle-picker in admin app — autocomplete from approved B-skill
+list (extends the existing 41-skill taxonomy); admin rejects
+free-typed principles unmapped to taxonomy; principle-tag indexed
+for cross-concept retrieval. New principles require taxonomy
+extension via admin-only path. *Falsification:* if cross-concept
+retrieval inconsistency (same principle tagged ≥ 2 different
+strings) > 5%, taxonomy is too narrow or autocomplete UX is failing.
+
+**4.14 — S6 (no 4C/ID coverage gate).** *Problem:* SMEs over-deliver
+supportive information (4C/ID component b) and under-deliver learning
+tasks (a), just-in-time information (c), and part-task practice (d)
+(§1.3; §2.3; van Merriënboer 1997). *Mechanism:* critic-prompt 4C/ID
+coverage gate. *Built today:* nothing. *Planned (Phase 2):* critic
+prompt schema returns
+`missing_components: ('learning_tasks' | 'supportive_info' |
+'jit_info' | 'part_task_practice')[]`; refuse-to-publish if any
+missing; admin app surfaces which component is missing with a hint
+to author. *Falsification:* if ≥ 5% of shipped lessons are missing
+≥ 1 of the four 4C/ID components at audit (post-month-3 sampling),
+the critic prompt is too lax or the coverage detection is wrong.
+
+**4.15 — S7 (tacit knowledge unrecoverable from text-from-blank).**
+*Problem:* shop-floor / clinical / field-services SMEs cannot author
+content via text editor — ~80% of operationally-relevant knowledge
+is tacit (§1.3; Polanyi 1966; CTA-for-skilled-trades; TalentCards:
+~2.7B deskless workers). *Mechanism:* voice-first / camera-first
+capture with auto-draft into structured intake. *Built today:*
+nothing. *Planned (Phase 2):* admin app supports SME recording 3-min
+audio (browser MediaRecorder) or video (camera); transcription via
+OpenAI Whisper or equivalent; auto-draft into the 5-probe `DrafterIntake`
+schema; SME edits draft, doesn't compose from blank; mobile-first
+capture for shop-floor SMEs (PWA installable). *Falsification:* if
+SME TTFV ≤ 1 hour is not achieved on tacit-knowledge-segment SMEs at
+pilot (10-SME pilot in deskless / clinical vertical), the capture
+modality is wrong or the transcription quality is too low.
+
+**4.16 — S8 (critic feedback is destination, not loop).** *Problem:*
+SMEs see one-off corrections per draft but no pattern across drafts;
+the deliberate-practice feedback channel for the SME themselves is
+absent (§1.3; §2.3; Ericsson 1993). *Mechanism:* per-SME blind-spot
+dashboard surfacing aggregated critic-feedback over time. *Built today:*
+nothing. *Planned (Phase 2):* per-SME dashboard at `/admin/sme/[id]/`
+showing (a) critic-rejection-rate trend over time; (b) most-frequent
+F-codes flagged (F1–F12); (c) most-frequent missing 4C/ID components;
+(d) personalised authoring prompts surfaced before next draft (e.g.,
+"You've omitted the boundary case in 4 of last 6 lessons — please
+double-check"). *Falsification:* if per-SME critic-rejection-rate is
+not flat or improving over 8-week window for active SMEs, the
+deliberate-practice loop is not closing — feedback is being seen but
+not internalised.
+
+### Sequencing, verification, TTFV
+
+**4.17 — Sequencing.** Phase 1 (POC) ships only LM1 banner (read-only
+queue surface — no scheduler) + LM6 JOL slider (capture-only — no
+trend visualisation) + admin lint validators (L6 / SM4 / SM6 /
+spoiler-leak). Phase 2 sequence by ROI:
+- **First wave (highest absorption ROI):** LM1 (full scheduler), LM2
+  (retrieval gate), LM6 (calibration trend visible).
+- **Second wave (highest SME-TTFV ROI):** SM1 (5-probe intake), SM2
+  (backward-design "test first"), SM4 (novice-error probe).
+- **Third wave (engagement):** LM7 (web-push + variable-cadence), LM8
+  (cohort routes + peer-comparison + leaderboard).
+- **Fourth wave (segment-specific):** SM7 (voice/camera authoring),
+  SM8 (per-SME blind-spot dashboard).
+
+Cross-ref `content-pack-management-plan.md` §C10 for Phase 1 P1–P6
+sequencing in detail.
+
+**4.18 — Verification.** Cross-ref `content-pack-management-plan.md`
+§C11 (Phase 1 verification) and §D4 (Kirkpatrick L1–L4 measurement
+plan). Each LM/SM has a falsifiable target named in §4.1–§4.16
+above. Quarterly published metrics: NPS / CES (L1); mock pass-rate +
+calibration Δ (L2); D1 / D7 / D30 cohort retention curves +
+course-completion rate (L3); NRR + compliance pass-rate (L4).
+8-week-trend flat-or-negative ⇒ remove-or-redesign.
+
+**4.19 — TTFV (time-to-first-value) commitments.** Cross-ref §D5 of
+the build plan. Learner: ≤ 5 minutes from sign-up to first quiz pass.
+SME: ≤ 1 hour from CTA intake to publishable lesson. These are
+Phase-2 acceptance criteria, not aspirational targets — falsified at
+pilot if not met.
 
 ---
 
