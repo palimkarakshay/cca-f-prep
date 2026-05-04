@@ -1,0 +1,231 @@
+# Content Pack Management Platform — B2B Prospect Brief
+
+> Slide-style deck for a 30-minute discovery call with a prospective B2B customer (HR / L&D / Compliance buyer). Buyer-language, not engineering-language. Slide breaks are marked by `---`.
+> Companion docs: [`./content-pack-management-plan.md`](./content-pack-management-plan.md), [`./deck-overview.md`](./deck-overview.md), [`./deck-investor.md`](./deck-investor.md), [`./deck-collaborator.md`](./deck-collaborator.md).
+
+---
+
+# Continuing Education, on Your Topics
+
+A learning platform where you control the catalog,
+your subject-matter expert approves every piece of content,
+and AI drafts the routine work so your team focuses on judgment.
+
+*For: [Prospect Company] • Function: [HR / L&D / Compliance / Engineering Onboarding]*
+
+---
+
+## The problem you have today
+
+| | Friction |
+|---|---|
+| **Off-the-shelf LMS** | Curated catalog rarely covers your team's actual topics; updates lag your business by 6–12 months |
+| **Build it in-house** | Cost: $200k+ and 6+ months for a content team that has to keep authoring forever |
+| **Raw AI tools** | Quality is uneven; no audit trail; legal won't let you ship un-reviewed AI content to staff |
+| **Status quo (PDFs + slides)** | No tracking, no quizzes, employees don't read it |
+
+---
+
+## What we offer
+
+A managed learning platform where:
+
+- **Your topics, drafted on demand** — your administrator types a topic, AI drafts a lesson + quiz from your knowledge files (PDFs, slides, runbooks).
+- **Your subject-matter expert reviews before publish** — every piece of content goes through your SME's queue. They approve, edit, or reject.
+- **Your employees learn at their own pace** — short lessons, 3-question quizzes, mobile-first.
+- **You see the data** — completion rates, weak spots, requested topics, quality signals.
+
+---
+
+## How it works (the loop)
+
+```
+You upload knowledge files (PDFs, slides, runbooks)
+         │
+         ▼
+Your admin types a topic ("Q4 SOX changes")
+         │
+         ▼
+AI drafts lesson + 3-question quiz
+         │
+         ▼
+Validators screen for known failure modes (23 of them)
+         │
+         ▼
+Stronger reviewer model audits the drafter
+         │
+         ▼
+Your SME reviews → approve / edit / reject
+         │
+         ▼
+Employees see the new lesson; progress tracked
+         │
+         ▼
+You see what they got wrong → next topic surfaces
+```
+
+End-to-end: typically 24 hours from topic request to live lesson.
+
+---
+
+## Where AI helps — and where it doesn't
+
+| Where AI helps | Where AI does NOT decide |
+|---|---|
+| Drafting initial copy from your knowledge file | Whether content is fit to publish (your SME decides) |
+| Suggesting quiz questions and distractors | Final wording on regulated content |
+| Catching duplicate topic requests from learners | Setting your company's policy or risk tolerance |
+| Surfacing topics employees ask about | Anything legal / HR / safety-sensitive |
+
+**Your SME is always the publish gate.** Auto-publish is opt-in per catalog and off by default.
+
+---
+
+## Quality controls
+
+This is the part most AI-content products skip. Ours:
+
+- **23 documented failure modes** screened automatically before any content reaches your SME (biased answer keys, fabricated facts, weak distractors, mid-quiz spoilers, etc.).
+- **Answer-justification audit** — for every quiz question, the model must point at the exact span of your knowledge file that justifies the marked answer. No span, no publish.
+- **Stronger model audits weaker model** — the reviewer model is more capable than the drafter, catching systematic blind spots.
+- **Pause-not-pull post-publish** — if a question performs unusually badly across many learners, it's hidden for new sessions only. Active quizzes finish as-shown. No mid-experience surprises for your staff.
+
+---
+
+## Security & compliance
+
+| | What we do |
+|---|---|
+| **Tenant isolation** | Postgres row-level security; every query carries your tenant context; verified by integration test |
+| **Audit log** | Every publish, edit, and rejection is logged with author, timestamp, and reason |
+| **Data export** | Self-serve CSV / JSON export of your tenant's content and learner progress |
+| **Soft delete** | Nothing is hard-deleted for 90 days; recoverable on request |
+| **AI provenance** | Every published piece records its drafter, reviewer, validator results, and SME-approval evidence |
+| **SOC2** | On the roadmap — formal audit triggered at 5 enterprise tenants. We can share our control matrix today. |
+| **GDPR** | Designed in (data-export, right-to-be-forgotten); EU hosting available |
+
+---
+
+## Single sign-on & integration
+
+- **Clerk Enterprise** — SAML, SCIM, OIDC. Your IT team configures once.
+- **Webhooks** — completion events to your HRIS / Workday / BambooHR.
+- **API** — read-only export endpoints for your data warehouse.
+
+---
+
+## Pilot offer
+
+A 60-day commercial pilot with mutually defined success criteria:
+
+| | What's included |
+|---|---|
+| **Seats** | Up to 50 employees |
+| **Catalogs** | Up to 3 catalogs of your choosing |
+| **AI generation** | 100 generations included; overage at cost |
+| **SME training** | 1-hour onboarding; ongoing Slack support |
+| **Pilot fee** | **$5,000**, 100% credit toward the first 12 months if you continue |
+| **Success criteria (suggested)** | ≥70% of seats complete ≥1 lesson; SME approval cycle < 48h; ≥1 internally requested topic delivered |
+
+**No data lock-in.** If you don't continue, you get a full export and we delete your tenant.
+
+---
+
+## Pricing after the pilot
+
+| Tier | Per learner per month | Notes |
+|---|---|---|
+| Standard | $5 | Public catalogs only, no custom |
+| Professional | $10 | Up to 5 custom catalogs, SME role, SSO |
+| Enterprise | $15+ | Unlimited custom, dedicated support, SAML, audit log export |
+
+Platform minimum: $100/mo (covers any tier under 20 seats).
+
+Custom catalogs (drafted from your knowledge files) are included in Pro and Enterprise.
+
+---
+
+## Timeline — LOI to live
+
+| Week | What happens |
+|---|---|
+| **W0** | Discovery call, scope catalogs, identify SME |
+| **W1** | LOI signed; provisioning + SSO config |
+| **W2** | Knowledge file ingestion; first 10 lessons drafted |
+| **W3** | SME review cycle; first cohort invited |
+| **W4** | Pilot live; weekly readout |
+| **W4–W12** | 60-day pilot runs; success criteria evaluated |
+| **W12** | Pilot review → continue / extend / part-ways |
+
+---
+
+## Comparison vs build-it-yourself
+
+| | DIY content team | Our platform |
+|---|---|---|
+| **Time to first lesson** | 4–8 weeks | 24–48 hours |
+| **Cost** | Salaries + tooling, $200k+/year | Subscription, $5–15/seat/mo |
+| **Maintenance** | Ongoing forever | Included |
+| **Quality control** | Per-author variance | Validators + reviewer + SME |
+| **Topics on demand** | Backlog management | Same-day draft |
+
+---
+
+## Comparison vs traditional LMS
+
+| | Cornerstone / Litmos | Our platform |
+|---|---|---|
+| **Catalog flexibility** | Their courses | Your topics |
+| **Time to publish a new topic** | Weeks (find a vendor course) | Hours |
+| **AI-drafted custom content** | No | Yes — with SME gate |
+| **Per-seat cost** | $10–25 | $5–15 |
+| **Implementation** | Months | Days |
+
+---
+
+## What we'd ask of you
+
+To run a successful pilot, we need:
+
+- **One named SME** with ~10 minutes/day for content review (we minimise this aggressively).
+- **Knowledge files** — your existing PDFs, slides, runbooks, policy docs. We'll ingest up to 25 MB during the pilot.
+- **A point person** to coordinate cohort communications.
+- **A weekly 30-minute readout** during the pilot.
+
+That's it. No code changes on your side. SSO is optional during the pilot.
+
+---
+
+## Frequently asked questions
+
+**"What if your AI gets something wrong?"**
+Two safety nets: deterministic validators catch documented failure modes pre-review, and your SME is the publish gate. Bad content cannot reach your staff without your SME approving it.
+
+**"What happens to our content if we leave?"**
+Self-serve export of all your content and learner progress. Tenant deletion within 30 days of request.
+
+**"Are our knowledge files used to train any AI models?"**
+**No.** We use Anthropic's API in zero-data-retention mode for enterprise tenants; your files are used only to draft content for your tenant.
+
+**"Can we run this air-gapped / on-prem?"**
+Not in v1. On-prem is on the 18-month roadmap if 3+ enterprise prospects request it.
+
+---
+
+## Next step
+
+A 30-minute scoping call to determine:
+
+1. Which 1–3 catalogs would matter most to your team?
+2. Who would be your SME?
+3. What does pilot success look like to you?
+
+If we agree it's worth a pilot, we send an LOI within 48 hours.
+
+**Contact:** [operator email] • [scheduling link]
+
+---
+
+## In one sentence
+
+> *Your topics, drafted by AI, reviewed by your expert, learned by your team — at one-tenth the cost of doing it yourself.*

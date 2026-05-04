@@ -1,0 +1,194 @@
+# Content Pack Management Platform — Investor / Advisor Brief
+
+> Slide-style brief for someone evaluating this as a venture-shaped business: angel investor, advisor, or experienced founder. Answers "is this a real business?", not "how does it work technically?". Slide breaks are marked by `---`.
+> Companion docs: [`./content-pack-management-plan.md`](./content-pack-management-plan.md), [`./deck-overview.md`](./deck-overview.md), [`./deck-b2b-prospect.md`](./deck-b2b-prospect.md), [`./deck-collaborator.md`](./deck-collaborator.md).
+
+---
+
+# Content Pack Management Platform
+
+A capital-efficient path to a vertical learning platform.
+Validated revenue intent **before** any AI cost is spent.
+
+*Stage: pre-launch • Operator: solo, hands-on • Built on existing CCA-F study repo*
+
+---
+
+## The wedge
+
+- AI-generated learning content is everywhere — and **most of it is bad enough to actively erode trust**.
+- Common failure modes are predictable: biased answer keys, fabricated facts, weak distractors, no source citation, mid-quiz spoilers.
+- Buyers don't want raw model output. They want a **quality story** wrapped around it.
+- Whoever ships the quality story first owns the category.
+
+---
+
+## Why now
+
+Three lines of evidence converge in 2026:
+
+1. **Model capability** — Claude 4.x and GPT-5.x finally generate lessons that pass deterministic quality checks > 80% of the time, not 30%. Two years ago this didn't work.
+2. **Buyer fatigue** — enterprises have run their first ChatGPT-as-LMS pilots. Most failed on quality / governance. They're now ready to pay for a managed solution.
+3. **Compliance friction** — AI-content provenance and human-in-the-loop are becoming explicit procurement requirements (EU AI Act, internal AI policies). A product that has these baked in beats one that retrofits them.
+
+---
+
+## The product, one paragraph
+
+A learning platform with B2C and B2B tiers, where AI drafts content from operator-supplied knowledge files, deterministic validators catch a documented set of failure modes, a stronger reviewer model audits the drafter, and **a human always approves before publish**. Buyers get curated catalogs and the option to request topics; the platform learns from those requests.
+
+---
+
+## Two markets, same product
+
+| | B2C | B2B |
+|---|---|---|
+| **Who** | Self-directed learners (cert candidates, hobbyists) | SMB and mid-market HR / L&D |
+| **Pricing** | $9/mo Pro on top of free tier | $5–15 per learner per month, $100/mo platform minimum |
+| **Why they pay** | Topic-on-demand, quizzes that aren't trash | SME-reviewed material, SSO, lower TCO than custom-build |
+| **CAC channel** | SEO + content marketing | Outbound + warm intros |
+
+---
+
+## Market size (rough)
+
+- **TAM:** global L&D spend ~$370B/year.
+- **SAM:** online certification + corporate compliance/onboarding ~$50B/year.
+- **SOM (5-year):** $50M–$500M slice of vertical-specific learning where off-the-shelf LMSs lose to topic-on-demand.
+
+We don't need to win the whole market. **A 0.05% share of SAM = $25M ARR.**
+
+---
+
+## Business model & unit economics
+
+- **Gross margin:** > 95% at modest scale (combined ~$34k MRR vs ~$600/mo infra + AI).
+- **AI cost line scales with generations, not learners** — the safety belt is per-tenant monthly token budgets, server-enforced.
+- **CAC payback:** B2C ~3 months at $9/mo and ~$25 CAC; B2B varies by deal size, target < 12 months.
+- **No data sales, no third-party advertising.** Revenue = subscriptions only.
+
+---
+
+## The capital-efficient strategy
+
+**The key strategic move: separate the validation phase from the AI-cost phase.**
+
+- **Phase 1 (POC, ~$0/mo):** AI authoring done by the operator's local Claude Code (paid by existing Max 20x subscription). Web platform is delivery + admin only. No Anthropic API spend.
+- **Phase 2 (Commercial, ~$450–1000/mo):** Turn on in-app AI generation **only after** Phase 1 has produced paying intent.
+
+This sidesteps the typical SaaS-AI failure mode: spending $50k+ on inference before knowing what people will pay.
+
+---
+
+## Phase 1 success metric — the gate to Phase 2
+
+**Paying intent, measured directly:**
+
+- **B2B target:** 3 signed Letters of Intent.
+- **B2C target:** 50 waitlist signups + 10 refundable Stripe pre-orders ($9 each).
+
+If Phase 1 doesn't hit these targets, Phase 2 doesn't get built. **Hard gate.**
+
+This is the single most important slide in the deck. The discipline of not building the expensive part until paying intent is signed lives or dies on this gate being respected.
+
+---
+
+## Cost curve
+
+| Phase | Monthly burn | Months to ROI |
+|---|---|---|
+| Phase 1 (POC) | ~$1 | N/A — no spend to recover |
+| Phase 2 launch | ~$450 | 1–2 paying B2B tenants |
+| Phase 2 at 100 tenants | ~$1000 | < 1 month at current pricing |
+
+The graph is essentially flat-zero, then a step to ~$500, then linear-with-revenue.
+
+---
+
+## Competitive landscape
+
+| Competitor | Their angle | Why we win |
+|---|---|---|
+| **Raw ChatGPT / Claude** | DIY, free | We package validators, HITL, audit trail, RLS — buyers want managed |
+| **Cornerstone, Litmos, Docebo** | Traditional LMS, curated catalog | We let buyers request topics on-demand; AI-drafted, expert-reviewed |
+| **Skilljar, Thinkific** | Author-and-publish platforms | Same gap as LMSs — content is bring-your-own |
+| **Hard-code-an-LMS-yourself startups** | Custom build per company | $200k+ and 6 months; we offer 4 weeks and a pilot fee |
+
+---
+
+## The moat
+
+Not the lessons. Not the AI model. **The quality loop.**
+
+- 23 documented AI-content failure modes (catalogued in our existing CCA-F study repo's `06-failure-analysis/error-log.md`).
+- F1–F8 cognitive failure-mode taxonomy already in production use.
+- Deterministic validators that run vendor-independent — works against any LLM.
+- Opus-critiques-Sonnet reviewer architecture catches systematic blind spots.
+- Pause-not-pull post-publish quality signals.
+
+These take months to invent and tune. We have them already.
+
+---
+
+## Founder fit
+
+- Senior developer (15+ years), structured-thinking-strong (ABAP background — schema and process discipline).
+- Building from a real artifact: a personal CCA-F study repo with mock exams, error-log analytics, and the failure-mode taxonomy that becomes the platform's moat.
+- Hands-on operator profile — comfortable doing all four of: write code, write content, write copy, talk to customers.
+- Day job is unrelated; this is a side bet, not a stake-everything-on-it situation. **Right shape for capital-efficient validation, wrong shape for "fund-the-team-of-12."**
+
+---
+
+## Roadmap to $100k MRR
+
+| Milestone | When | What's true |
+|---|---|---|
+| Phase 1 success-gate hit | Month 3 | 3 LOIs + 10 pre-orders |
+| First B2B tenant onboarded | Month 4 | $1k MRR |
+| 5 B2B tenants | Month 6 | $5–10k MRR |
+| 100 B2C Pro + 20 B2B | Month 12 | ~$25k MRR |
+| Mid-market deal closes | Month 18 | $15k+ MRR from one tenant |
+| **$100k MRR** | **Month 24–30** | Mix of ~50 B2B tenants and ~1k B2C Pro |
+
+This is intentionally conservative. The unit economics support faster growth if a B2B reseller channel emerges.
+
+---
+
+## Risks the investor should evaluate
+
+| Risk | Mitigation |
+|---|---|
+| **Founder bandwidth** — solo operator, side-bet shape | Phase 1 designed for ~18 days of build; Phase 2 staffs only after revenue exists |
+| **AI cost spirals at scale** | Per-tenant monthly token budget, server-enforced, with UI burn meter |
+| **Quality incident reaches a learner** | 23-failure-mode validator + Opus critic + post-publish signals + pause-not-pull |
+| **Enterprise won't accept AI content** | B2B default = human-required; auto-publish is opt-in only |
+| **Vendor dependency (Anthropic, Clerk, etc.)** | Data shapes are portable; cross-vendor critic is a v2 escape hatch |
+| **TAM is overstated** | Even 0.05% share of corporate compliance L&D = $25M ARR; we don't need a category-king outcome |
+
+---
+
+## What we're asking for
+
+**Not raising capital.** This deck is for advisors and warm intros, not investors yet.
+
+What helps right now:
+- **Honest critique** of the two-phase strategy and the Phase 1 success metric.
+- **B2B prospect intros** — anyone with HR / L&D buying authority at SMB / mid-market.
+- **Reality check on pricing** — does the $5–15/seat range hold for your network?
+- **Once Phase 1 hits the success gate**, intros to seed-stage SaaS investors who back capital-efficient founders.
+
+---
+
+## In one sentence
+
+> *We've designed a SaaS that proves people will pay for it before we spend a dollar on the expensive part — and we have a moat (the validator + HITL loop) that's already half-built in a personal repo.*
+
+---
+
+## Appendix — fast facts
+
+- **Status:** pre-launch; Phase 1 build in progress.
+- **Repo:** existing CCA-F study tooling at `/web/` (Next.js, Playwright, Vitest, content-pack runtime).
+- **Tech stack:** Next.js, Postgres (Neon), Cloudflare R2, Clerk, Drizzle, Tailwind v4. No exotic stack.
+- **First-customer ask:** $0 cash; 60-day pilot; success criteria mutually defined.
+- **Detailed plan:** [`./content-pack-management-plan.md`](./content-pack-management-plan.md).
