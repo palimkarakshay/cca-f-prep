@@ -644,3 +644,640 @@ Closed list. Total ~10 event types. **No** per-keystroke or per-millisecond timi
 
 ---
 
+## Part 4 — Phase 1 (POC) implementation
+
+Six phases, ~18 working days total. Each phase is one branch, one PR, codex-reviewed before merge.
+
+> **How each phase works:** Operator does the **Pre-tasks**, then pastes the verbatim **AI prompt** into a fresh Claude Code session in the repo. The AI completes the work, opens a PR, runs verification. Operator does the **Verification** clicks. When all DoD boxes are ticked, merge and start the next phase.
+
+### P1 — Monorepo, DB schema, auth, storage (~3 days)
+
+**Goal:** working monorepo with Drizzle schema migrated, Clerk auth gated routes, R2 read/write helper, and the RLS isolation test passing.
+
+#### P1 Pre-tasks (operator)
+
+- [ ] All Phase 1 services in `.env` (verified via `pnpm dlx envalid` or by visiting each service dashboard).
+- [ ] Branch protection on `main` requires PR + codex review.
+- [ ] Empty Vercel projects do **not** exist yet (P1's last step creates the app project).
+
+#### P1 AI prompt (paste into fresh Claude Code session)
+
+```
+You are building Phase 1 P1 of the Content Pack Management Platform.
+The full implementation guide is at plans/IMPLEMENTATION.md — read it
+end-to-end before starting; it is the source of truth for every choice.
+
+OBJECTIVES (in order):
+
+1. Initialize a pnpm workspace at the repo root with these packages:
+   - apps/web        (Next.js 16, App Router, TypeScript strict, Tailwind v4)
+   - packages/shared (curriculum types from §3.1, validators 1–22 from §3.3)
+   - packages/db     (Drizzle schema from §3.4, withTenant helper from §3.6,
+                      RLS policies from §3.5)
+   - packages/shared-ui (LessonView, QuizRunner, Button, Input — Base UI primitives,
+                         Tailwind v4, no heavy framework. shadcn-style colocated.)
+
+2. Set up Drizzle:
+   - drizzle.config.ts in packages/db
+   - npm scripts: db:generate (drizzle-kit generate), db:migrate (drizzle-kit migrate),
+     db:studio (drizzle-kit studio), db:reset (drop+recreate schema; refuse if
+     NODE_ENV === 'production')
+   - Generate the initial migration. Apply it to Neon. Commit the SQL.
+   - Add a SQL file under packages/db/migrations/_rls.sql containing the RLS
+     enable + policy statements for every tenant-scoped table. Apply it.
+
+3. Wire Clerk in apps/web:
+   - middleware.ts protecting (learner) and (admin) route groups
+   - /sign-in and /sign-up pages using Clerk components
+   - On first sign-in, upsert a row in the user table (clerk_id → user.id),
+     and if the Clerk session has an organization, ensure a tenant row exists
+     and a tenant_member row links the user to that tenant. If no org,
+     create a personal tenant for the user with a slug like `personal-<short-clerk-id>`.
+
+4. Implement the R2 client at apps/web/src/server/r2-client.ts:
+   - readObject(key): Buffer
+   - writeObject(key, body, contentType): void
+   - presignReadUrl(key, ttlSeconds): string (S3 v4 presign)
+   - Uses @aws-sdk/client-s3 + @aws-sdk/s3-request-presigner pointed at R2 endpoint
+
+5. Implement withTenant helper exactly as in §3.6 of the guide. Add a unit test
+   that asserts unset tenant context returns 0 rows from a seeded 2-tenant DB.
+
+6. Add a vitest integration test at packages/db/__tests__/rls.test.ts that:
+   - seeds two tenants A and B with one catalog each
+   - asserts withTenant(A, ...) returns only A's catalog
+   - asserts a raw query (no withTenant) returns 0 rows
+   - This test MUST pass; it is the gate of P1.
+
+7. Commit in small atomic commits, one concern per commit. Open a PR titled
+   "P1: monorepo, DB schema, Clerk, R2, RLS test". Wait for codex review.
+
+CONSTRAINTS:
+- TypeScript strict mode, no `any` without comment justification.
+- No Anthropic API calls anywhere in the codebase.
+- Follow §3.1 types verbatim — do not invent fields.
+- All tenant-scoped queries must go through withTenant; add an ESLint rule that
+  flags db.select().from(<tenant-scoped-table>) outside withTenant.
+- Tests must run via `pnpm test` and `pnpm test:e2e` from repo root.
+- Lighthouse / accessibility verification is in P3, not now.
+
+DELIVERABLES:
+- pnpm-workspace.yaml, packages/{shared,db,shared-ui}, apps/web
+- packages/db migrations + RLS SQL file applied
+- Vitest RLS isolation test passing
+- PR open with green CI
+
+When done, post a summary to the PR description listing every file created
+and every test added, plus the exact commands the operator runs to verify.
+```
+
+#### P1 Operator verification
+
+After AI says "done":
+
+1. **Pull the branch.** `git fetch && git checkout claude/p1-bootstrap`
+2. **Install + run:** `pnpm install && pnpm test` — must be all green.
+3. **Apply migrations to Neon:** `pnpm --filter db db:migrate` then `psql "$DATABASE_URL" -f packages/db/migrations/_rls.sql`. (AI should script this; verify the script ran without errors.)
+4. **Boot the dev server:** `pnpm --filter web dev`. Visit `localhost:3000/sign-up`, create a test account, confirm you land on a placeholder `/`.
+5. **Inspect Drizzle Studio:** `pnpm --filter db db:studio`. Confirm `tenant`, `user`, `tenant_member` rows exist for the test account.
+6. **Connect Vercel:** in Vercel dashboard, import the repo as a project; root directory `apps/web`. Add all `.env` values to Vercel. Deploy preview should succeed.
+
+#### P1 Definition of Done
+
+- [ ] PR merged to main after codex review passes.
+- [ ] RLS isolation test green in CI.
+- [ ] Migrations + RLS policies applied to Neon.
+- [ ] Test sign-up creates user + tenant + tenant_member rows.
+- [ ] Vercel preview deploy succeeds (no DNS yet).
+- [ ] All routes outside `(public)` return 401/redirect when unauthenticated.
+
+---
+
+### P2 — Astro marketing site + lead capture (~3 days)
+
+**Goal:** marketing site live at `www.<domain>`, with B2B LOI form, B2C waitlist, and Stripe pre-order Payment Link. Forms POST to `/api/leads` on the app subdomain.
+
+#### P2 Pre-tasks (operator)
+
+- [ ] In Stripe (test mode), create a product "CCA-F Pro Pre-order — $9 refundable" with a Payment Link. Save the URL to `STRIPE_PREORDER_PAYMENT_LINK`.
+- [ ] In Stripe, create a webhook endpoint pointing at `https://app.<domain>/api/stripe-webhook` (placeholder; we'll DNS in step 6 below). Save signing secret to `STRIPE_WEBHOOK_SECRET`.
+- [ ] In Resend, verify your sending domain (DNS records propagated).
+
+#### P2 AI prompt
+
+```
+You are building Phase 1 P2 of the Content Pack Management Platform.
+Read plans/IMPLEMENTATION.md §1, §2, §3, §4-P2 in full before starting.
+
+OBJECTIVES:
+
+1. Create apps/marketing as an Astro 5 project (separate workspace; will deploy
+   to Vercel as a separate project later).
+   - Pages: index.astro (home), b2b.astro, b2c.astro, pricing-preview.astro,
+     about.astro, blog/index.astro (stub).
+   - Use Tailwind v4 via @tailwindcss/vite. Share design tokens with apps/web
+     via packages/design-tokens (a tiny CSS-vars package).
+   - Mobile-first, accessibility AA, Lighthouse mobile ≥ 95.
+
+2. Build two forms on the marketing site:
+   - On /b2b: "Request a pilot" form with fields email, org_name, org_size,
+     use_case. POSTs to https://app.<domain>/api/leads with kind=b2b_pilot.
+   - On /b2c: "Get early access" waitlist with field email. POSTs to /api/leads
+     with kind=b2c_waitlist. Below it, a CTA "Reserve a Pro seat for $9
+     (refundable)" linking to STRIPE_PREORDER_PAYMENT_LINK.
+   - Both forms show a thank-you message inline on success and a friendly error
+     on failure. No spinners that block (use optimistic UI).
+
+3. In apps/web, add /api/leads (POST) that:
+   - Validates the body with Zod.
+   - Inserts into the `lead` table (kind, email, org_name, org_size, use_case,
+     source from `Origin` header).
+   - Sends a Resend email to RESEND_FROM_EMAIL with the lead details
+     (operator notification) and an auto-reply to the lead's email
+     (templated; markdown body).
+   - Rate-limited to 5 submissions per IP per hour (in-memory LRU; OK for POC).
+   - CORS allows the marketing-site origin (NEXT_PUBLIC_MARKETING_URL).
+
+4. In apps/web, add /api/stripe-webhook (POST) that:
+   - Verifies signature with STRIPE_WEBHOOK_SECRET.
+   - On `payment_intent.succeeded`, inserts a lead row with kind=b2c_preorder
+     and stripe_payment_intent_id set.
+   - Returns 200 with no body on success; 400 on bad signature.
+
+5. Add a /admin/leads page (admin-only) that lists leads grouped by kind, with
+   CSV export. Mobile-friendly table.
+
+6. Configure Vercel:
+   - Create a second Vercel project pointing at apps/marketing.
+   - Add CNAMEs in Cloudflare DNS: www → marketing project, app → web project.
+   - Verify both deploy and the production URLs respond.
+
+7. Tests:
+   - Vitest: /api/leads validates input, rate-limits, writes to DB, sends Resend.
+   - Vitest: /api/stripe-webhook signature verification + DB write.
+   - Playwright e2e: marketing-site forms submit and show thank-you.
+   - Lighthouse mobile ≥ 95 on each marketing page (use lhci CI action).
+
+8. Commit small, atomic. PR title "P2: Astro marketing + LOI/waitlist/preorder
+   capture". Codex review.
+
+CONSTRAINTS:
+- Marketing site is fully static at build time (no SSR). It must function
+  with JavaScript disabled — forms degrade gracefully to a mailto link.
+- No PII in PostHog events; use lead.id only.
+- Resend sender must be a verified domain (operator did this in pre-tasks).
+- Astro workspace must not depend on Clerk or Drizzle; it knows nothing about
+  the app's auth or DB.
+
+DELIVERABLES:
+- apps/marketing deployed at https://www.<domain>
+- /api/leads + /api/stripe-webhook live at https://app.<domain>
+- /admin/leads page renders a list of test leads
+- All tests green in CI
+```
+
+#### P2 Operator verification
+
+1. Visit `https://www.<domain>/b2b`. Submit the form with a test email. Confirm:
+   - Thank-you message appears inline.
+   - You receive an auto-reply email at the test address.
+   - You receive an operator notification at `RESEND_FROM_EMAIL`.
+2. Visit `https://www.<domain>/b2c`. Same waitlist test.
+3. Click "Reserve a Pro seat for $9". Stripe Payment Link opens; complete a test charge using `4242 4242 4242 4242`. Stripe dashboard shows the payment.
+4. In Stripe → Developers → Webhooks → recent deliveries, confirm a 200 from your `/api/stripe-webhook`.
+5. Visit `https://app.<domain>/admin/leads` (signed in as operator). All three test leads should appear: one B2B, one B2C waitlist, one pre-order.
+6. Run Lighthouse mobile against `https://www.<domain>`. Score ≥ 95.
+
+#### P2 Definition of Done
+
+- [ ] Both Vercel projects deploying on push to `main`.
+- [ ] DNS resolved: `www.<domain>` → marketing, `app.<domain>` → app.
+- [ ] All three test leads (B2B, B2C waitlist, B2C preorder) visible in `/admin/leads`.
+- [ ] Stripe webhook signature verification tested with a malformed signature → returns 400.
+- [ ] Lighthouse mobile ≥ 95 on every marketing page.
+- [ ] Operator received both notification emails and one auto-reply.
+
+---
+
+### P3 — Learner app: catalog, lesson, quiz, progress, search, suggest (~4 days)
+
+**Goal:** signed-in learner can browse catalogs, take a lesson + quiz, see progress, search across catalogs, submit a suggestion. Mobile Lighthouse ≥ 90.
+
+#### P3 Pre-tasks (operator)
+
+- [ ] Have one sample content pack ready (just JSON with one catalog, two concepts, two quizzes — paste from `plans/IMPLEMENTATION.md` §3.1 or use the cca-f-prep sample). Save it at `apps/web/seed/sample-pack.json`.
+
+#### P3 AI prompt
+
+```
+You are building Phase 1 P3 of the Content Pack Management Platform.
+Read plans/IMPLEMENTATION.md §1, §3 (curriculum types + validators), §4-P3
+in full before starting.
+
+OBJECTIVES:
+
+1. Seed the DB with the sample pack at apps/web/seed/sample-pack.json:
+   - Insert one catalog row + one catalog_version row.
+   - Upload the JSON to R2 at key `packs/<catalog-slug>/v1.json`.
+   - Set catalog.current_version_id.
+   - Idempotent (running twice does not create duplicates).
+   - Wire as `pnpm --filter web seed`.
+
+2. Build the learner pages under (learner) route group:
+   - /                       Catalog browse: grid of catalog cards
+   - /catalogs/[slug]        Catalog landing: blurb + section list + concept tiles
+   - /catalogs/[slug]/[code] Concept page: LessonView + QuizRunner
+   - /search?q=...           Postgres `tsvector` search across all accessible catalogs
+   - /me/progress            Personal progress overview
+
+3. Implement LessonView (in packages/shared-ui):
+   - Tabs for Easy / Conceptual / Deeper depth
+   - Renders paragraphs, keyPoints (bullets), examples (cards), pitfalls (warning bullets)
+   - The Easy/Deeper tabs disable if the lesson has no `simplified` / `deeper` block
+
+4. Implement QuizRunner (in packages/shared-ui):
+   - 3 questions, one at a time with a stepper
+   - Supports MCQ, TrueFalse, FillIn (per §3.1 types)
+   - On submit: shows correct/incorrect with `principle` line and per-option `explanations`
+   - Keyboard accessible (Tab through options, Enter to submit)
+   - Records progress via /api/progress on submit
+
+5. Implement progress sync:
+   - /api/progress (POST) inserts/updates a progress row keyed by (tenantId, userId, conceptId)
+   - Status: viewed (lesson opened) → quizzed (quiz started) → complete (quiz submitted with score)
+   - LocalStorage warm cache hydrates on page load; server is canonical
+
+6. Implement search:
+   - tsvector column on catalog_version with weights: title (A), concept titles (B), lesson paragraphs (C)
+   - GIN index on the tsvector column
+   - /api/search?q=… returns up to 20 hits, each with catalog title, concept title, snippet
+   - Search input on every page (cmd-K modal)
+
+7. Implement suggestion submit:
+   - "Suggest a topic" button on every concept page and at catalog level
+   - Modal with text area (max 500 chars)
+   - POSTs to /api/suggestions; rate-limited per tenant_policy.suggestionsPerUserPerDay
+   - Closed-list disallowed-tokens filter (load from packages/shared/src/disallowed.json)
+   - On success: optimistic UI shows "we heard you"
+
+8. Mobile-first design:
+   - Tailwind breakpoints sm 640, md 768, lg 1024
+   - Lighthouse mobile ≥ 90 on /, /catalogs/[slug], /catalogs/[slug]/[code]
+   - All interactive elements ≥ 44×44 px tap target
+
+9. Tests:
+   - Vitest unit: LessonView depth toggle, QuizRunner answer submit
+   - Playwright e2e: sign-up → browse → take quiz → see progress
+   - Vitest integration: /api/progress writes through withTenant
+   - Vitest integration: /api/search returns hits in expected weight order
+
+10. Commit small, atomic. PR "P3: learner app — catalogs, lessons, quizzes,
+    progress, search, suggestions". Codex review.
+
+CONSTRAINTS:
+- Every DB call inside /api/* handlers MUST go through withTenant (lint enforced).
+- No third-party UI libs beyond Base UI + Tailwind. No Material UI, no Chakra.
+- Keep `apps/web` bundle ≤ 220 kB gzipped on the learner home (perf budget).
+- Server components by default; client components only where interactivity demands.
+
+DELIVERABLES:
+- All learner routes functional with the sample pack
+- Lighthouse mobile ≥ 90
+- Tests green
+```
+
+#### P3 Operator verification
+
+1. Sign in as test learner. Land on `/`. The sample catalog tile shows up.
+2. Click into the catalog. Section + concept list renders.
+3. Click a concept. Lesson reads cleanly on mobile width (375 px). Toggle Easy/Deeper — content changes.
+4. Take the quiz. Submit. See the correctness indicator + principle line.
+5. Visit `/me/progress`. The completed concept shows.
+6. Cmd-K → search for a word from the lesson. Hit lands you on the right concept.
+7. Click "Suggest a topic", submit. See "we heard you". Confirm a row in the `suggestion` table.
+8. Run Lighthouse mobile against `/catalogs/[slug]`. ≥ 90.
+9. Disable JavaScript: confirm `/` still shows server-rendered catalog list (graceful degradation).
+
+#### P3 Definition of Done
+
+- [ ] Learner can complete the full happy path on mobile.
+- [ ] Progress row persists across sessions.
+- [ ] Suggestion submitted with a disallowed token (e.g. profanity from the closed list) is rejected with a friendly error.
+- [ ] Lighthouse mobile ≥ 90 on every learner page.
+- [ ] Bundle size budget met.
+- [ ] All tests green; codex review passed.
+
+---
+
+### P4 — Admin app: import draft, lint, suggestions, knowledge files, leads (~4 days)
+
+**Goal:** operator can paste a draft JSON into `/admin/catalogs/[id]/import`, see validator results, see a diff vs the current published version, publish or save as draft. Plus suggestions triage, knowledge file upload, and the leads dashboard from P2.
+
+#### P4 Pre-tasks (operator)
+
+- [ ] Promote your test account to `admin` role on the test tenant: in Drizzle Studio, set `tenant_member.role = 'admin'`.
+- [ ] Have one knowledge file ready (any PDF or markdown, ~1 MB) for upload testing.
+
+#### P4 AI prompt
+
+```
+You are building Phase 1 P4 of the Content Pack Management Platform.
+Read plans/IMPLEMENTATION.md §1, §3.3 (validators), §3.4 (schema), §4-P4.
+
+OBJECTIVES:
+
+1. Build the (admin) route group, all gated by `tenant_member.role = 'admin'`:
+   - /admin                 Dashboard (counts + funnel widgets)
+   - /admin/catalogs        List + create + archive
+   - /admin/catalogs/[id]   Detail: version history, current version, rollback
+   - /admin/catalogs/[id]/import   Import draft JSON
+   - /admin/catalogs/[id]/lint     Run all validators against current version
+   - /admin/suggestions     Triage queue: open / accepted / dismissed / linked
+   - /admin/knowledge       Upload + list knowledge files
+   - /admin/leads           Already exists from P2; add CSV export and filters
+   - /admin/settings        Tenant policy editor
+
+2. Implement the import flow at /admin/catalogs/[id]/import:
+   - Big text area for JSON paste, or "Upload .json" button.
+   - On submit, server validates with packages/shared validators 1–22 (NOT 23
+     — that's Phase 2). Returns a structured LintResult.
+   - UI shows findings grouped by severity. Errors block publish; warns are
+     shown but allow publish-anyway (logged with operator override).
+   - If valid: render a side-by-side diff (the `diff` package, JSON-aware) of
+     current published version vs the draft. Operator clicks "Publish" or
+     "Save draft for later".
+   - "Publish": writes new catalog_version row + uploads to R2 +
+     flips catalog.current_version_id + calls revalidateTag(`catalog:${id}`).
+   - "Save draft": writes a draft row with status=pending. Re-importing later
+     loads from the draft.
+
+3. Implement /admin/catalogs/[id]/lint:
+   - Loads the current published version, runs all validators, displays findings.
+   - Used to find latent bias (e.g. CCA-F pack's B-bias).
+   - Shows a heatmap of correct-letter distribution per quiz.
+
+4. Implement /admin/suggestions triage:
+   - Filterable list (status, catalog, age).
+   - Each row: text + author + count of similar suggestions (TF-IDF + Jaccard
+     similarity, see lib at packages/shared/src/dedup-tfidf.ts).
+   - Actions per row: Accept, Dismiss with reason, Link to existing.
+   - "Accept" copies the text to the clipboard formatted as a Claude Code prompt
+     "Draft a topic that addresses: <suggestion>" so operator can paste into
+     their local Claude Code session.
+
+5. Implement knowledge file upload at /admin/knowledge:
+   - Drag-drop or file picker. Accepted: .pdf, .md, .txt, .docx (≤ 10 MB).
+   - Server-side: validate MIME type, then upload to R2 at
+     `tenants/<tenant-id>/knowledge/<file-id>.<ext>`.
+   - For PDFs, extract text using `unpdf` (Mozilla pdf.js wrapper). DO NOT use
+     pdf-parse (unmaintained). Text extraction runs in a serverless function
+     with no DB access; quarantine the file on parse failure.
+   - For .docx, use `mammoth`.
+   - Store metadata in knowledge_file table; the extracted text is stored in
+     R2 at `tenants/<tenant-id>/knowledge/<file-id>.txt` for the operator's
+     Claude Code skill to read.
+
+6. Implement /admin/settings:
+   - Form bound to tenant_policy row (create on demand if missing).
+   - Editable: approval mode, suggestion rate limit, suggestion daily cap.
+   - Phase 2 fields (confidence_threshold, two_eye_gate, monthly_token_budget_usd)
+     are visible but disabled with the tooltip "available in Commercial phase".
+
+7. Tests:
+   - Vitest: importing a draft with a B-bias quiz returns a finding with fCode=F1.
+   - Vitest: importing a draft with all 4 options being paraphrases returns a
+     distractor-differentiation finding.
+   - Vitest: rollback flips current_version_id.
+   - Playwright e2e: operator pastes draft → sees diff → publishes → learner
+     sees new content on next request.
+
+8. Commit small, atomic. PR "P4: admin — import, lint, suggestions, knowledge,
+   leads, settings".
+
+CONSTRAINTS:
+- Admin pages are SSR/server components by default; only the import diff
+  viewer is client-side.
+- Every admin handler runs withTenant; the role check happens in middleware
+  before the handler runs.
+- Knowledge file upload limit: 10 MB POC, 25 MB at Phase 2.
+- The PDF parse function must be isolated (no DB import) and quarantine the
+  file on parse failure — quarantined files do not block the upload UI.
+
+DELIVERABLES:
+- Full admin app functional
+- Validator findings render with F-code badges
+- Diff viewer shows side-by-side JSON
+- Knowledge file upload + text extraction working
+- All tests green
+```
+
+#### P4 Operator verification
+
+1. Visit `/admin`. Dashboard shows lead counts from P2.
+2. Visit `/admin/catalogs`. Create a catalog "Test 2".
+3. Visit `/admin/catalogs/<id>/import`. Paste a draft JSON with a B-bias quiz (all 4 questions correct = B). Confirm validator finding appears with `F1` badge. Click "Publish" — should be **blocked**.
+4. Edit the JSON to mix correct letters; resubmit. Diff renders. Click "Publish".
+5. Visit the learner side, confirm the new concept is visible.
+6. Visit `/admin/catalogs/<id>` — version history shows v1 + v2. Click "Rollback to v1". Learner now sees v1.
+7. Submit a suggestion as the learner; visit `/admin/suggestions` as admin. Click "Accept" — clipboard contains the formatted Claude Code prompt.
+8. Visit `/admin/knowledge`. Upload a 1 MB PDF. Confirm metadata row + extracted text in R2.
+9. Visit `/admin/settings`. Change suggestions-per-day cap; submit a 11th suggestion as the learner — rejected.
+
+#### P4 Definition of Done
+
+- [ ] All 9 verification clicks pass.
+- [ ] B-bias detector blocks publish.
+- [ ] PDF text extraction works for at least one real-world PDF (operator's choice).
+- [ ] Rollback round-trip works (v1 → v2 → v1 → v2).
+- [ ] All tests green; codex review passed.
+
+---
+
+### P5 — Operator authoring loop (~2 days)
+
+**Goal:** operator can run `/draft-topic <suggestion>` inside Claude Code, get validated JSON, paste into `/admin/catalogs/[id]/import`, publish in ~10 minutes. Also: seed the existing `cca-f-prep` content into Postgres + R2 as the first real catalog.
+
+#### P5 Pre-tasks (operator)
+
+- [ ] Confirm Claude Code is authenticated locally (`claude --version`).
+
+#### P5 AI prompt
+
+```
+You are building Phase 1 P5 of the Content Pack Management Platform.
+Read plans/IMPLEMENTATION.md §1, §3 (validators + types), §4-P5.
+
+OBJECTIVES:
+
+1. Build a Claude Code repo-local skill at .claude/skills/draft-topic/
+   - SKILL.md with frontmatter: name=draft-topic, description, tools=Read,Write,Bash
+   - Skill takes one argument: a topic title or learner suggestion text
+   - It:
+     a) Loads the curriculum schema (packages/shared/src/curriculum-types.ts)
+     b) Loads the F1–F8 anti-patterns (from plans/IMPLEMENTATION.md §3.2)
+     c) Loads the closed-list whitelists (packages/shared/src/disallowed.json
+        and any per-pack whitelist file)
+     d) Loads any knowledge files in scope (passes path globs as args, defaults
+        to docs/knowledge/*.md; reads .pdf via unpdf; .docx via mammoth)
+     e) Drafts a Concept JSON: { id, code, title, lesson, quiz } following
+        §3.1 types exactly
+     f) Writes to drafts/<slug>.json
+     g) Runs `pnpm lint:draft drafts/<slug>.json` and reports the result
+     h) If lint fails, iterates up to 3 times with the validator findings
+        as feedback before stopping
+     i) Reports to the operator: "drafts/<slug>.json validated; paste into
+        /admin/catalogs/<id>/import"
+
+2. Build the local lint script at scripts/lint-draft.ts:
+   - Imports validators from packages/shared
+   - Loads the JSON file, runs all validators 1–22, prints findings
+   - Exit code 0 = pass, 1 = errors found
+   - Wire as `pnpm lint:draft <path>`
+   - Hook into pre-commit: any drafts/*.json in the commit must pass
+
+3. Build the seed-from-existing-packs script at scripts/seed-from-existing-packs.ts:
+   - Reads from a directory of existing content packs (point at the cca-f-prep
+     repo's web/content-packs/cca-f-prep/curriculum.ts as the test case)
+   - Transforms to the canonical Concept[] shape if needed
+   - Inserts catalog + catalog_version rows for each pack
+   - Uploads pack JSON to R2
+   - Idempotent (re-runs do not create duplicates)
+   - Wire as `pnpm seed:packs <path>`
+
+4. Document the operator workflow in plans/OPERATOR_RUNBOOK.md:
+   - "How to author a topic in 10 minutes"
+   - Step-by-step with copy-paste commands and screenshots placeholders
+   - Includes the Claude Code skill invocation form
+
+5. Tests:
+   - Vitest: lint-draft.ts on a known-good fixture exits 0
+   - Vitest: lint-draft.ts on a known-bad fixture (B-bias) exits 1 with the
+     expected finding
+   - Manual: operator runs the full loop end-to-end (covered in P6)
+
+6. Commit small, atomic. PR "P5: operator authoring loop + cca-f-prep seed".
+
+CONSTRAINTS:
+- The skill must not require any API keys (operator authors locally with Max 20x).
+- The skill writes only to drafts/ and never directly to the DB.
+- The seed script writes to the operator's tenant only (uses a CLI flag for
+  tenant slug; no global writes).
+
+DELIVERABLES:
+- .claude/skills/draft-topic/ with SKILL.md and any helper scripts
+- scripts/lint-draft.ts (CLI)
+- scripts/seed-from-existing-packs.ts (CLI)
+- plans/OPERATOR_RUNBOOK.md
+- Tests green
+```
+
+#### P5 Operator verification
+
+1. In a Claude Code session, run `/draft-topic "What is prompt caching"`. Drafts a JSON to `drafts/what-is-prompt-caching.json` and reports validators passed.
+2. Open the JSON. Confirm shape matches §3.1 types. Confirm 3 questions, mixed letter distribution, principles set.
+3. `pnpm lint:draft drafts/what-is-prompt-caching.json` — exit code 0.
+4. In `/admin/catalogs/<id>/import`, paste the JSON. Validators pass. Publish.
+5. Run `pnpm seed:packs <path-to-cca-f-prep>/web/content-packs/cca-f-prep`. Confirm catalog + version rows + R2 blobs created.
+6. Visit the learner side. The CCA-F catalog appears with all sections.
+
+#### P5 Definition of Done
+
+- [ ] Operator goes from "topic suggestion" to "published concept" in ≤ 10 minutes (timed).
+- [ ] CCA-F content seeded successfully (≥ 9 sections × ≥ 4 concepts each).
+- [ ] `/draft-topic` skill iterates on validator failures up to 3 times automatically.
+- [ ] All tests green; PR merged.
+
+---
+
+### P6 — Verification, hardening, accessibility (~2 days)
+
+**Goal:** end-to-end happy paths verified, RLS isolation re-tested with adversarial inputs, Lighthouse and accessibility passes documented, ready to drive marketing-side traffic for the success-metric gate.
+
+#### P6 Pre-tasks (operator)
+
+- [ ] Two domains verified in Resend (one for marketing replies, one for app notifications).
+- [ ] An LOI / NDA template ready (Word/PDF) for B2B outreach.
+
+#### P6 AI prompt
+
+```
+You are running P6 verification of the Content Pack Management Platform Phase 1.
+Read plans/IMPLEMENTATION.md §6 in full before starting.
+
+OBJECTIVES:
+
+1. Run the 12-step end-to-end test plan from §6.1 and document each step's
+   result in plans/VERIFICATION_LOG.md (pass/fail + timestamp + notes).
+
+2. Add an axe-core/playwright accessibility test that runs against:
+   - / (learner home), /catalogs/[slug], /catalogs/[slug]/[code],
+     /admin (dashboard), /admin/catalogs/[id]/import,
+     www.<domain>/, www.<domain>/b2b, www.<domain>/b2c
+   Must pass at WCAG 2.1 AA.
+
+3. Add Lighthouse CI assertions:
+   - Mobile performance ≥ 90 on every learner page
+   - Marketing site mobile performance ≥ 95
+   - First Contentful Paint ≤ 1.5s on 4G
+   - CLS < 0.1
+
+4. Add an adversarial RLS test:
+   - Simulate a malicious request that sets app.tenant_id to tenant B's id
+     while the Clerk-authenticated user is in tenant A. Assert the request
+     fails (middleware enforces user's tenant context, not request body).
+
+5. Add a load test (k6 script) at scripts/load-test.js:
+   - 50 concurrent learners doing the happy path for 2 minutes
+   - Assert p95 < 800ms, error rate < 1%
+
+6. Add Sentry monitors and a status page (simple /api/health → JSON with
+   DB ping, R2 ping, Clerk ping).
+
+7. Open a tracking issue for any deferred items and label them
+   `phase-2`. Specifically:
+   - In-app generation
+   - Critic stage
+   - Stripe subscription billing
+   - SME role
+   - Embedding-based dedup
+   - Quality signal aggregation cron
+
+8. Commit small, atomic. PR "P6: verification, accessibility, hardening".
+
+CONSTRAINTS:
+- VERIFICATION_LOG.md must be updated as you go, not at the end (so a
+  reviewer can see the timeline of checks).
+- If any check fails, STOP and surface to the operator before proceeding —
+  do not paper over a failure with retries.
+
+DELIVERABLES:
+- 12 of 12 verification steps green
+- Accessibility test passing on all 8 surfaces
+- Lighthouse CI green
+- k6 load test green
+- Adversarial RLS test green
+- /api/health endpoint deployed
+- Tracking issues opened for deferred items
+```
+
+#### P6 Operator verification
+
+1. Read `plans/VERIFICATION_LOG.md` — every step pass.
+2. Run `pnpm test:e2e` locally — green.
+3. Visit `https://app.<domain>/api/health` — JSON with all three pings green.
+4. Visit Lighthouse CI report — performance ≥ 90 on every learner page.
+5. Open the GitHub issues list — `phase-2` label has the deferred items.
+6. **Drive marketing-side traffic.** Operator now starts the success-metric gate:
+   share `www.<domain>` with the target B2B prospect list and B2C cohort.
+
+#### P6 Definition of Done
+
+- [ ] 12-step end-to-end log: 12/12 pass.
+- [ ] Accessibility test: 0 violations.
+- [ ] Lighthouse CI: green.
+- [ ] Load test: p95 < 800ms.
+- [ ] Adversarial RLS test: green.
+- [ ] Operator has begun outbound for the Phase 1 success metric.
+
+---
+
