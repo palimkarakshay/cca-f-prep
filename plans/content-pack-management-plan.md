@@ -908,7 +908,11 @@ Five-line thesis the four decks must communicate:
 
 ## Companion documents
 
-Audience-specific deck versions of this plan:
+End-to-end implementation runbook (the "how"):
+
+- [`./IMPLEMENTATION.md`](./IMPLEMENTATION.md) — self-contained build guide for an AI agent + operator: P1–P12 phases with verbatim AI prompts, operator pre-tasks, verification clicks, and Definition of Done checklists. Hand this to a fresh project to start building.
+
+Audience-specific deck versions of this strategy plan (the "why"):
 
 - [`./deck-overview.md`](./deck-overview.md) — general non-technical overview (default for most stakeholders).
 - [`./deck-investor.md`](./deck-investor.md) — investor / advisor brief: TAM, unit economics, capital-efficiency story, founder fit.
