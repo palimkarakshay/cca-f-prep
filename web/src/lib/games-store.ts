@@ -47,7 +47,13 @@ export function saveGamesProgressFor(
   next: GamesProgress
 ): void {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(storageKey, JSON.stringify(next));
+  try {
+    window.localStorage.setItem(storageKey, JSON.stringify(next));
+  } catch {
+    // Quota / private mode — silently drop, mirroring saveProgressFor.
+    // Without the catch, recordAttempt() throws into the React event
+    // handler and the result screen never renders.
+  }
 }
 
 export interface GamesStore {

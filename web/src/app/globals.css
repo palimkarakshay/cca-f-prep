@@ -163,7 +163,11 @@ samp {
   }
 }
 
-/* Skip link — visible on focus only. */
+/* Skip link — visible on focus only.
+   `min-width` / `min-height` keep axe's target-size (WCAG 2.5.8 / 2.2 AA)
+   from flagging the offscreen state on WebKit, which measures the link's
+   bounding rect even when it sits at left: -9999px. Chromium and Firefox
+   skip it; WebKit's axe-core target-size implementation does not. */
 .skip-link {
   position: absolute;
   left: -9999px;
@@ -174,6 +178,8 @@ samp {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   z-index: 100;
+  min-width: 24px;
+  min-height: 24px;
 }
 
 .skip-link:focus {

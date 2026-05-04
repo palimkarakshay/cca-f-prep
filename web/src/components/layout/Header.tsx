@@ -55,7 +55,10 @@ export function Header() {
   return (
     <header className="border-b border-(--border) mb-6">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 py-4">
-        <Link href={homeHref} className="flex flex-col gap-0.5 no-underline">
+        <Link
+          href={homeHref}
+          className="flex min-h-11 flex-col justify-center gap-0.5 no-underline"
+        >
           <span className="font-[family-name:var(--font-display)] text-base font-semibold text-(--ink)">
             {siteConfig.name}
           </span>

@@ -1,13 +1,8 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { getGamesStore } from "@/lib/games-store";
+import { useHydrated } from "@/hooks/useHydrated";
 import { usePackId } from "@/content/pack-hooks";
 import type { GameAttempt } from "@/lib/games-types";
 import type { MiniGameId } from "@/components/section/games-catalog";
@@ -15,7 +10,8 @@ import type { MiniGameId } from "@/components/section/games-catalog";
 /**
  * React hook over the per-pack games store. Mirrors useProgress(): the
  * URL packId picks the correct store instance, hydration is via
- * useSyncExternalStore, mutators are stable callback references.
+ * useSyncExternalStore (see hooks/useHydrated for why this isn't
+ * useState+useEffect), mutators are stable callback references.
  */
 export function useGamesStore() {
   const packId = usePackId();
@@ -26,10 +22,7 @@ export function useGamesStore() {
     store.get,
     store.getServerSnapshot
   );
-  // See useProgress.ts for the same fix — `typeof window` during
-  // render trips React #418 and unmounts the gated subtree.
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
+  const hydrated = useHydrated();
 
   const recordAttempt = useCallback(
     (gameId: MiniGameId, attempt: GameAttempt) => {
