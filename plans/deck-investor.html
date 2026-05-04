@@ -95,6 +95,10 @@ We don't need to win the whole market. **A 0.05% share of SAM = $25M ARR.**
 - **Gross margin:** > 95% at modest scale (combined ~$34k MRR vs ~$600/mo infra + AI).
 - **AI cost line scales with generations, not learners** — the safety belt is per-tenant monthly token budgets, server-enforced.
 - **CAC payback:** B2C ~3 months at $9/mo and ~$25 CAC; B2B varies by deal size, target < 12 months.
+- **NRR target:** Year 1 ≥ 110% (median+, SaaS Capital 2025 benchmark);
+  Year 2 ≥ 120% (top-quartile). The pedagogical moat (LM1–LM8) is also
+  the expansion-revenue moat — cohort outcomes drive seat-expansion and
+  multi-pack adoption.
 - **No data sales, no third-party advertising.** Revenue = subscriptions only.
 
 ---
@@ -151,12 +155,112 @@ The graph is essentially flat-zero, then a step to ~$500, then linear-with-reven
 Not the lessons. Not the AI model. **The quality loop.**
 
 - 23 documented AI-content failure modes (catalogued in our existing CCA-F study repo's `06-failure-analysis/error-log.md`).
-- F1–F8 cognitive failure-mode taxonomy already in production use.
+- F1–F12 cognitive failure-mode taxonomy already in production use (extended from F1–F8 to cover JOL miscalibration, transfer failure, fluency illusion, cue-bias).
 - Deterministic validators that run vendor-independent — works against any LLM.
 - Opus-critiques-Sonnet reviewer architecture catches systematic blind spots.
 - Pause-not-pull post-publish quality signals.
 
 These take months to invent and tune. We have them already.
+
+---
+
+## Pedagogical moat — research-backed retention
+
+The other moat: **50 years of cognitive-science evidence operationalised
+as product surface.** Not new IP — an unowned synthesis.
+
+- **Spacing** (Cepeda et al. 2008, *Psych Sci*; 254-study meta in Cepeda
+  2006): expanding-interval review → ~2× retention vs massed practice.
+- **Retrieval practice** (Roediger & Karpicke 2006, *Psych Sci*; Karpicke
+  & Blunt 2011, *Science*): self-testing → ~50% lift on delayed retention
+  vs re-reading.
+- **Interleaving** (Rohrer & Taylor 2007): shuffled vs blocked → 63%
+  vs 20% on transfer items at one-week delay (~3× lift).
+- **Generation effect** (Slamecka & Graf 1978): self-generated answers
+  retained ~30% better than read answers.
+- **Cohort** (Maven W1→W2 96% vs MOOC 16% — 14× retention multiplier;
+  Reich & Ruipérez-Valiente 2019, *Science*): peer + accountability is
+  the largest single retention multiplier in ed-tech.
+- **Streak / variable reward** (Eyal 2014; Skinner; Mazal 2022 on
+  Duolingo): CURR +21%, DAU 4.5× over 4 years.
+- **Worked-example fading + expertise-reversal cutover** (Sweller, van
+  Merriënboer & Paas 2019; Kalyuga 2003): the right scaffold per Dreyfus
+  rung; avoids the LMS one-format-for-all failure.
+- **Calibration** (Dunlosky & Bjork; Kruger & Dunning 1999): JOL pre-test
+  + Δ post-test → makes confidence trainable; mock pass-rate becomes
+  predictive of real-exam pass-rate.
+
+We don't just teach with AI. We teach with peer-reviewed evidence.
+
+---
+
+## Retention benchmarks — what we beat
+
+| Benchmark | Industry baseline | Our targeted outcome |
+|---|---|---|
+| MOOC completion | 3–10% (Reich & Ruipérez-Valiente 2019, *Science*) | Cohort tier ≥ 60% (vs Maven 96%, altMBA 96%) |
+| Self-paced corporate completion | 12–15% (KPI Depot 2026 / ATD 72% across mixed formats) | ≥ 60% on cohort tier; live-interactive parity 85–95% achievable |
+| Mobile ed-tech D30 retention | ~14% (a16z mobile retention guides) | ≥ 35% (cohort tier) |
+| Mobile ed-tech D7 retention | ~28% | ≥ 40% |
+| W1→W2 retention | MOOC 16% | Cohort 96% (Maven precedent) |
+| Calibration Δ (L2 Kirkpatrick) | not measured by competitors | |Δ| ≤ 0.5 trending |
+
+Every claim falsifiable; every benchmark named.
+
+---
+
+## Segmentation TAM — the wedge order
+
+The market isn't undifferentiated. It segments cleanly:
+
+- **2.7B deskless workers globally; 80%+ of total workforce** (TalentCards
+  / industry consensus). 90%+ want mobile-accessible training.
+- **Microlearning market $3.32B (2026) → $5.81B (2031), 11.83% CAGR**
+  (Mordor Intelligence). Retail leads at 21.53% revenue share 2025;
+  healthcare/life-sciences highest CAGR at 15.22%.
+- **39% of employees need reskilling by 2030; 49% of L&D pros report
+  exec concern about skill gaps** (LinkedIn Workplace Learning Report
+  2025).
+- **L&D AI top priority for 2nd consecutive year, 22.6% vote share**
+  (Donald Taylor L&D Global Sentiment Survey 2025; ~3000 voters,
+  ~100 countries).
+
+**Wedge order for go-to-market:**
+1. Deskless verticals + single-SME-bottleneck SMBs first — lowest tooling
+   competition; highest urgency on the SME side (bus-factor 1).
+2. Regulated enterprise second — highest ACV; <70% completion ⇒ 3.5×
+   compliance-violation rate makes calibration Δ a monetisable L4
+   outcome (KPI Depot 2026).
+3. B2C cert-prep continuing — CCA-F flagship; serves as the public
+   case study and attribution channel.
+
+---
+
+## Why this works (mechanism + measurement)
+
+**Eight learner-absorption mechanisms (LM1–LM8):**
+
+| Mechanism | Cited effect size |
+|---|---|
+| LM1 Spacing | 2× (Cepeda 2008) |
+| LM2 Retrieval | ~50% lift (Roediger & Karpicke 2006) |
+| LM3 Generation | +30% (Slamecka & Graf 1978) |
+| LM4 Interleaving | 3× transfer lift (Rohrer & Taylor 2007) |
+| LM5 Worked-example fading + expertise-reversal cutover | (Sweller 2019; Kalyuga 2003) |
+| LM6 Calibration capture | (Dunlosky & Bjork; Kruger & Dunning 1999) |
+| LM7 Streak / variable-reward | CURR +21%, DAU 4.5× (Mazal/Duolingo 2022) |
+| LM8 Cohort | 14× retention vs MOOC (Maven; Reich 2019, Science) |
+
+**Eight SME-elicitation scaffolds (SM1–SM8)** — CTA intake (+46%
+learning gain on resulting instruction, Cohen's d ≈ 1.72; Lee 2004 /
+Tofel-Grehl & Feldon 2013), backward-design (Wiggins & McTighe 1998),
+worked-example pair (Sweller; Renkl), expert-blind-spot probe (Nathan &
+Petrosino 2003), principle-tag picker, 4C/ID coverage gate (van
+Merriënboer 1997), voice-first capture (Polanyi 1966), per-SME blind-spot
+dashboard (Ericsson 1993 — deliberate-practice feedback channel).
+
+**Each claim falsifiable via L1–L4 Kirkpatrick measurement built in
+from day one. Not aspirational.**
 
 ---
 
@@ -179,6 +283,7 @@ These take months to invent and tune. We have them already.
 | 100 B2C Pro + 20 B2B | Month 12 | ~$25k MRR |
 | Mid-market deal closes | Month 18 | $15k+ MRR from one tenant |
 | **$100k MRR** | **Month 24–30** | Mix of ~50 B2B tenants and ~1k B2C Pro |
+| **L2-Kirkpatrick proof:** \|calibration Δ\| ≤ 0.5 on shipped cohorts | Month 12+ | The pedagogical claim becomes testable, not aspirational |
 
 This is intentionally conservative. The unit economics support faster growth if a B2B reseller channel emerges.
 

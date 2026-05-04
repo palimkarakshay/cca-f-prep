@@ -76,8 +76,9 @@ In the existing repo at `/home/user/cca-f-prep`:
 - `web/` — Next.js App Router skeleton, Tailwind v4, shadcn/ui, Playwright e2e, Vitest unit tests.
 - `web/content-packs/` — three live content packs including the actual CCA-F study material we drink-our-own-champagne with.
 - `web/src/content/curriculum-types.ts` — schema we extend.
-- `06-failure-analysis/error-log.md` — the F1–F8 taxonomy and 23 documented failure modes.
-- `08-cheat-sheets/` — decision trees and anti-patterns the validators encode.
+- `06-failure-analysis/error-log.md` — the F1–F12 cognitive failure-mode taxonomy and 23 documented failure modes (extended from F1–F8 in the methodology layer to cover JOL miscalibration, transfer failure, fluency illusion, and cue-bias / surface-feature bias). Each F-code has a mechanism crosswalk citing research source and standard remediation.
+- `08-cheat-sheets/` — decision trees and anti-patterns the validators encode (now includes learner re-engagement tree, SME content-elicitation tree, and segment-aware mechanism selection tree).
+- `09-progress-tracker/spaced-review.md` and `skills-matrix.md` — the calibration-Δ and JOL doctrine the LM6 surface implements.
 - Codex review pipeline (gpt-5.5 with multi-vendor fallback) on every PR.
 
 You are **not** starting from a blank Next.js project.
@@ -113,6 +114,11 @@ Each item ships behind a feature flag:
 8. **Calibration loop** — bounded few-shot (8) + anti-pattern rules.
 9. **Cross-tenant catalog import (v2)** — pinned versions, "update available" prompt.
 10. **Cost dashboards** — per-tenant token spend, alerts at 80% / 100%.
+11. **Calibration-Δ surface** — JOL pre-answer captured in quiz runner; Δ written to `progress` server table; trend visible in dashboard stats panel. Implements LM6 (Dunlosky & Bjork; Kruger & Dunning 1999).
+12. **SME blind-spot dashboard** — per-SME critic-feedback aggregated; personalised authoring prompts surfaced before next draft. Implements SM8 (Ericsson 1993 — deliberate-practice feedback channel).
+13. **Segment-affordance switchboard** — per-tenant `tenant_policy` config selects which UI surface variation is active (deskless mobile / compliance-enterprise / B2C cohort / founder-SMB / high-PDI). One critic engine, many surfaces (cross-ref content-pack-management-plan §D6).
+14. **xAPI emit hooks** — events posted to mid-market / enterprise tenants' SCORM/xAPI LMS for L2 / L3 Kirkpatrick reporting in their existing L&D dashboards.
+15. **WCAG 2.2 AA + Section 508 conformance** — public-sector / enterprise prerequisite; accessibility audit passed before Enterprise tier is sold.
 
 ---
 
@@ -167,6 +173,92 @@ export function lintDraft(draft: ConceptDraft): LintResult {
 ```
 
 Reused in three places: local lint script (operator's Claude Code loop), admin server-side import handler, and (Phase 2) the critic pipeline.
+
+---
+
+## Mechanics-to-mechanism map
+
+The retention claims aren't aspirational. Each product surface is wired
+to a peer-reviewed cognitive-psychology mechanism with a measurable
+outcome. The L-codes are referenced from
+[`./content-pack-management-plan.md`](./content-pack-management-plan.md)
+§ D1 / § D7.
+
+| Feature | Research source | Measured outcome |
+|---|---|---|
+| LM1 Spaced-review banner (expanding interval 1/3/7/14/30d) | Cepeda et al. 2008 (*Psych Sci*); Murre & Dros 2015 | D7 cohort-retention lift |
+| LM2 Mid-lesson retrieval gate | Roediger & Karpicke 2006; Karpicke & Blunt 2011 (*Science*) | Mock pass-rate lift; calibration-Δ closure |
+| LM3 Generation-before-reveal | Slamecka & Graf 1978 | Long-term retention +30% |
+| LM4 Interleaved recommender | Rohrer & Taylor 2007 | Transfer-question accuracy lift |
+| LM5 Worked-example fading + expertise-reversal cutover | Sweller, van Merriënboer & Paas 2019; Kalyuga 2003 | Per-rung intervention efficacy |
+| LM6 Calibration column | Dunlosky & Bjork; Kruger & Dunning 1999 | Calibration-Δ trend toward 0.5 |
+| LM7 Streak push (variable-ratio) | Eyal 2014; Skinner; Mazal 2022 (Duolingo) | CURR +21%, DAU 4.5× precedent |
+| LM8 Cohort surface | Maven W1→W2 96% vs MOOC 16%; Reich & Ruipérez-Valiente 2019 (*Science*) | Course-completion rate ≥ 60% target |
+
+SME side (SM1–SM8) is the same shape — see §D2 of the plan.
+
+---
+
+## Phase-2 elicitation tooling
+
+Drafter + critic + SME-facing UI implementing SM1–SM8:
+
+**Drafter prompt schema** — required JSON fields matching the 5-probe
+CTA tree from `08-cheat-sheets/decision-trees.md` § 6:
+
+```typescript
+type DrafterIntake = {
+  novice_error: string;          // (a) expert-blind-spot probe
+  one_principle: string;         // (b) backward-design — closed taxonomy
+  worked_example: string;        // (c) Sweller worked-example
+  faded_variant: string;         // (c) Sweller faded variant
+  boundary_case: string;         // (d) CTA boundary probe
+  nearest_confusable: string;    // (e) interleaving prep — Rohrer & Taylor
+};
+```
+
+**Critic prompt schema** (Opus on Sonnet drafts):
+
+```typescript
+type CriticOutput = {
+  confidence: number;                          // 0..1
+  missing_components: ('learning_tasks' | 'supportive_info' |
+                       'jit_info' | 'part_task_practice')[];   // 4C/ID
+  blind_spot_flags: string[];                  // SM4-style probes
+  fcode_risks: ('F1' | 'F2' | ... | 'F12')[]; // pre-publish failure-mode scan
+  suggested_probes: string[];                  // SM8 dashboard input
+};
+```
+
+**SME-facing UI affordances:**
+- Principle-picker (closed taxonomy; rejection if free-typed and
+  unmapped) — pre-empts F12 cue-bias and F4 rationale gap.
+- Worked-example pair editor (worked + faded variant required).
+- "What would a novice get wrong?" textarea (SM4).
+- Backward-design "write the test first" mode (SM2).
+- Per-SME blind-spot dashboard (SM8) showing aggregated critic
+  feedback over time + personalised authoring prompts.
+
+Each surface tagged to which F1–F12 codes it pre-empts in the source
+comments (audit trail for the codex review pipeline).
+
+---
+
+## Segment-aware UI/affordance map
+
+One critic engine + one CTA-probe schema + one calibration-Δ column,
+projected through segment-specific UI affordances. The mechanism set
+does not vary by segment — only the surface does.
+
+| Segment | UI/affordance variation | Phase-2 component (engineering wiring) |
+|---|---|---|
+| **Deskless mobile** (manufacturing / retail / hospitality / healthcare-frontline) | Voice-to-text capture; ≤ 3-min nano-format; offline cache; push at variable-ratio | `web/src/app/(learner)/deskless/` route group; `voice-capture.ts`; service worker for offline |
+| **Compliance enterprise** (finance / healthcare / government) | SCORM 2004 + xAPI emit; audit-trail; version-pin; role-based publish; WCAG 2.2 AA / Section 508 | Inngest `xapi-emit` workflow; Postgres `audit_log` + `version_pin` tables; Clerk SAML/SCIM; accessibility-conformance test gate |
+| **B2C cert-prep** | Streak + cohort + leaderboard + goal-gradient progress bar (Hook Model + SDT) | `web/src/components/streak/`; `web/src/app/(learner)/cohort/[id]/`; `web/src/components/dashboard/GoalGradient.tsx` |
+| **Founder / SMB single-SME** | Succession-of-knowledge wizard (interview-record → CTA-extract → auto-draft → reviewer-pair) | Inngest `interview-extract` workflow; R2 audio bucket; auto-draft model call |
+| **High-PDI / face-saving** | Leader-endorsement step gate before SME publish; anonymised peer review; critic copy framed as *probe* / *suggestion* | `tenant_policy.publish_gate = 'leader_endorse'`; copy-variant table for critic-output i18n |
+
+That's the wiring diagram. One engine, segment-specific projections.
 
 ---
 

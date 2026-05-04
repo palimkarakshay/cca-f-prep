@@ -122,6 +122,66 @@ This is the part most AI-content products skip. Ours:
 
 ---
 
+## Outcomes — measured, not promised
+
+Most learning vendors report seat-time. We report against the
+**Kirkpatrick four-level evaluation framework** every quarter:
+
+| Level | What it measures | Our metric |
+|---|---|---|
+| **L1 — Reaction** | Did learners value it? | NPS post-section; CES (effort score) |
+| **L2 — Learning** | Did they learn it? | Mock pass-rate trajectory; **calibration Δ** (how well learners' confidence matches outcomes — the metric that predicts real-job competence) |
+| **L3 — Behaviour** | Did they apply it? | Course-completion rate; D1 / D7 / D30 cohort retention curves; manager-survey self-report on observed behaviour change |
+| **L4 — Results** | Did the business benefit? | Compliance / certification pass-rate; for regulated tenants, audit-finding deltas |
+
+We report against all four every quarter — not vanity metrics. If we
+miss a stated target, you see it before we do. **Industry baseline for
+self-paced corporate completion: 12–15%** (KPI Depot 2026). Our cohort
+target: ≥ 60%.
+
+---
+
+## How we make your SMEs effective
+
+Subject-matter experts know their material. Most can't *teach* it
+without specific scaffolding — Cognitive Task Analysis research finds
+SMEs omit ~70% of decisions when self-narrating complex tasks (Clark,
+Feldon, van Merriënboer, Yates & Early). We close that gap:
+
+- **CTA intake script** — five required probes (novice-error /
+  one-principle / worked-example pair / boundary case / nearest
+  confusable). No SME-narration of expertise; SME answers structured
+  questions instead. *Lee 2004: +46% post-training learning gain on
+  CTA-built instruction vs expert-narrated, Cohen's d ≈ 1.72.*
+- **Backward-design template** — write the assessment first, then the
+  lesson. Eliminates unmeasurable lessons. *(Wiggins & McTighe 1998 —
+  Understanding by Design.)*
+- **Worked-example pair required** — mandatory field, not optional
+  enrichment. *(Sweller, van Merriënboer & Paas 2019.)*
+- **Expert-blind-spot prompt at submission** — "what would a novice get
+  wrong here?" *(Nathan & Petrosino 2003 — expert blind spot.)*
+- **≤ 1-hour SME-to-publishable-lesson commitment.** End-to-end intake
+  → critic → publishable. We hold ourselves to it.
+
+---
+
+## We already know your segment's failure mode
+
+| Your segment | What we already know about your retention / SME problem | What we ship |
+|---|---|---|
+| **Healthcare frontline / clinical SMEs** | Schedule-poor (10-min between cases); medico-legal liability shadows speech; CME drives seat-time, not transfer | Voice-first capture + critic-mediated review; Joint Commission / CME outcome reporting built in |
+| **Financial services / compliance** | Self-paced 18–25% baseline; <70% completion ⇒ 3.5× violation rate (KPI Depot 2026) | Audit-trail + role-based publish + L4-Kirkpatrick compliance reporting |
+| **Manufacturing / deskless** | Tacit / haptic knowledge (Polanyi 1966); ≤ 3-min mobile sessions, offline-capable. 90%+ frontline want mobile-first | Voice-to-text auto-draft for shop-floor SMEs; offline-tolerant mobile |
+| **Tech / SaaS** | Content stales weekly; SMEs prefer code / README over prose | Markdown-first authoring + code-block awareness in critic |
+| **Enterprise distributed-SME** | Multi-language, multi-geo; unclear authoring rights; governance gates | Role-based publish, multi-language critic, version-pin, audit-trail |
+| **Single-SME-bottleneck SMB** | Bus-factor 1; no redundancy when SME leaves | Explicit succession-of-knowledge tooling — CTA + recorded interview + auto-draft |
+| **High-PDI / face-saving cultures (Japan, Korea, India, MENA, LATAM)** | SMEs reluctant to expose uncertainty in public artefacts | Leader-endorsed pathway gate; critic copy framed as *probe* not *test*; anonymised peer-review surfaces |
+
+We don't sell you a generic LMS. We sell you a configuration of one
+engine to your segment's specific failure mode.
+
+---
+
 ## Security & compliance
 
 | | What we do |
@@ -155,7 +215,7 @@ A 60-day commercial pilot with mutually defined success criteria:
 | **AI generation** | 100 generations included; overage at cost |
 | **SME training** | 1-hour onboarding; ongoing Slack support |
 | **Pilot fee** | **$5,000**, 100% credit toward the first 12 months if you continue |
-| **Success criteria (suggested)** | ≥70% of seats complete ≥1 lesson; SME approval cycle < 48h; ≥1 internally requested topic delivered |
+| **Success criteria (suggested)** | ≥70% of seats complete ≥1 lesson; SME approval cycle < 48h; ≥1 internally requested topic delivered; **≥ 1 percentage-point calibration-Δ improvement on participating cohort by pilot end** (the L2-Kirkpatrick learning-outcome anchor) |
 
 **No data lock-in.** If you don't continue, you get a full export and we delete your tenant.
 
@@ -217,7 +277,7 @@ Custom catalogs (drafted from your knowledge files) are included in Pro and Ente
 
 To run a successful pilot, we need:
 
-- **One named SME** with ~10 minutes/day for content review (we minimise this aggressively).
+- **One named SME** with ~10 minutes/day for content review **using our 5-probe intake — no narrative writing required**. The intake structures the SME's expertise into novice-error / one-principle / worked-example pair / boundary case / nearest confusable. Each concept ships with a worked example AND a faded variant by default.
 - **Knowledge files** — your existing PDFs, slides, runbooks, policy docs. We'll ingest up to 25 MB during the pilot.
 - **A point person** to coordinate cohort communications.
 - **A weekly 30-minute readout** during the pilot.
