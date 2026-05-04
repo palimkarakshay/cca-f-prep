@@ -403,3 +403,82 @@ mitigation walkthrough). 18+ rows below.
   planned mitigation failed or the problem proved different?
 - Is the falsification trigger the right metric, or is it gameable
   / proxy-only?
+
+---
+
+## §C — Business-partner audit checklist
+
+**Reviewer scope:** dossier §3 (industry historical mitigation case
+studies) + §5 (commercial viability — TAM, comparables, pricing, unit
+economics, NRR, scalability, capital efficiency). 24 rows below
+covering the six commercial-viability sub-sections plus the industry
+case studies. Same scoring rubric (§3) and recommendations (§4).
+
+### C.1 — Industry-comparable sanity checks (dossier §3 + §5.2)
+
+| # | Claim | Reviewer question | Cited source | Score | Recommendation | Notes |
+|---|---|---|---|---|---|---|
+| C1 | **Duolingo CURR +21%, DAU 4.5× from streak design alone over 4 years.** | Is Mazal 2022 the right primary source? Is the lift attributable to streak iteration *alone* or to the broader product evolution? | Mazal 2022 (Duolingo eng blog) | | | |
+| C2 | **Maven W1→W2 96% retention; cohort-based 14× MOOC.** | Is the 96% figure from a published source or Wes Kao posts? Is it self-reported or third-party-verified? Self-selection bias on the cohort participants? | Maven internal data via Wes Kao published essays | | | |
+| C3 | **Coursera ~5% baseline completion.** | Is the 3.13% Reich & Ruipérez-Valiente figure (HarvardX/MITx) generalisable to Coursera at large? Coursera is a different vendor with different content; the figure may understate. | Reich & Ruipérez-Valiente 2019 *Science* | | | |
+| C4 | **Cornerstone OnDemand acquired Clearlake $5.2B 2021.** | Right valuation; is Cornerstone the right comparable for the platform's positioning, or is it too enterprise-LMS-coded? | Public M&A filings | | | |
+| C5 | **Section ($50M Series B 2022) — closest peer.** | Is Section actually the closest peer? Counter-candidate: Khan Academy + Duolingo for AI-tutored mastery; counter-candidate: Articulate AI for SME-side. Reviewer's view. | Crunchbase / Section press | | | |
+| C6 | **360Learning ($200M Series C 2021); 360Learning is most-likely-overlapping competitor on SME side.** | Is 360Learning shipping CTA-style intake or only text-editor authoring? Reviewer's empirical knowledge. | 360Learning published materials | | | |
+| C7 | **Synthesia ($1B+ valuation 2023) — generation, not elicitation.** | Is the generation-vs-elicitation distinction defensible? An LP could argue Synthesia is the precedent. | Industry coverage | | | |
+| C8 | **Top-quartile ed-tech ARR multiples 8–12×.** | Is SaaS Capital 2025 the right reference for our mixed B2B/B2C model, or should we anchor to consumer-recurring multiples (which are lower)? | SaaS Capital 2025 | | | |
+
+### C.2 — Market-sizing critique (dossier §5.1)
+
+| # | Claim | Reviewer question | Cited source | Score | Recommendation | Notes |
+|---|---|---|---|---|---|---|
+| C9 | **Global e-learning market $315B 2025.** | Is Mordor's $315B credible, or is it a vendor-blog inflation? IBISWorld and Statista give different numbers; reviewer's preferred source. | Mordor Intelligence 2025 *E-Learning Market Report* | | | |
+| C10 | **Corporate training market $399B 2025.** | Is Training Industry Inc.'s figure inclusive of in-person training, instructor salaries, and venue cost? If so, it's not a SAM for digital ed-tech. | Training Industry Inc. 2025 *Training Industry Report* | | | |
+| C11 | **Compliance training $14B sub-segment.** | What is the regulatory driver mix (FINRA / OSHA / GDPR / SOX / HIPAA)? Is the sub-segment growing or stagnant? | Industry consensus across LMS-vendor reports | | | |
+| C12 | **SOM target — 1k SMB tenants × $5k ACV = $5M ARR by Y3.** | Is this conversion rate (operator → 1k SMB tenants in 3 years) realistic given operator-time-only sales motion? | Internal projection | | | |
+| C13 | **SOM mid-path — 100 enterprise tenants × $50k ACV = $5M ARR Y4–5.** | Enterprise ACV is 100% gated on SOC2; is the year-2 SOC2 timeline realistic for an operator-funded business? | Internal projection | | | |
+
+### C.3 — Pricing-tier questions (dossier §5.3)
+
+| # | Claim | Reviewer question | Cited comparable | Score | Recommendation | Notes |
+|---|---|---|---|---|---|---|
+| C14 | **B2C standalone $9.99–19.99/mo.** | Is the price ~30% premium over Duolingo Plus ($7–13/mo) defensible by the full mechanism stack, or is it a barrier to acquisition? | Duolingo Plus, Brilliant, Quizlet Plus | | | |
+| C15 | **B2C cohort $99–299 / 6-week cohort.** | Is this priced *below* Maven ($300–3000) intentionally, and if so, what's the WTP justification? | Maven, altMBA | | | |
+| C16 | **B2B SMB $49/SME/mo + $5/learner/mo (min $99).** | Per-SME pricing is novel; do SMB buyers value it, or do they prefer per-learner only (Cornerstone-style)? | TalentLMS, Docebo, EdApp | | | |
+| C17 | **B2B Enterprise $50k–500k ACV.** | Is the $50k floor deliverable at our margin structure, or does it require feature-stripping? Is the $500k ceiling realistic without SOC2 / FedRAMP / HIPAA-BAA? | Cornerstone, Workday Learning, SuccessFactors | | | |
+| C18 | **B2B Compliance vertical $100k–1M ACV.** | The 3.5×-violation-rate cost-curve is the value-capture argument; is it actually how compliance buyers calculate? Or do they buy on regulatory mandate alone? | KPI Depot 2026; industry consensus | | | |
+
+### C.4 — Unit economics + NRR plausibility (dossier §5.4 + §5.5)
+
+| # | Claim | Reviewer question | Cited source | Score | Recommendation | Notes |
+|---|---|---|---|---|---|---|
+| C19 | **95%+ gross margin at Phase 2 scale.** | Is this consistent with the AI-cost line ($300/mo at 100 tenants / 50k generations)? At 1000 tenants, AI cost may scale more linearly — does margin compress to 80%? | Internal projection vs Anthropic API | | | |
+| C20 | **Prompt-caching 30–60% input-token cost reduction.** | Is 30–60% the right band, or is it more variable based on traffic pattern? At sporadic traffic, caching efficiency is closer to 0%. | Anthropic API + internal estimates | | | |
+| C21 | **NRR Y1 ≥ 110%, Y2 ≥ 120%.** | Is this achievable for a mixed B2B/B2C model, or do consumer-recurring (high churn) and B2B-Enterprise (high expansion) average to a lower number? | SaaS Capital 2025 | | | |
+| C22 | **LTV 24–36 months B2B SaaS norm.** | Is 24–36 months right for SMB-tier (where churn is higher), or does the platform need a different LTV assumption per tier? | Industry consensus | | | |
+
+### C.5 — Capital efficiency + scalability (dossier §5.6 + §5.7)
+
+| # | Claim | Reviewer question | Source | Score | Recommendation | Notes |
+|---|---|---|---|---|---|---|
+| C23 | **Phase 1 ~$0 incremental cost; Claude Max 20× $200/mo is operator sunk cost.** | Is this defensible in serious LP-level due diligence, or do LPs require fully-loaded cost (including operator-time at market rate)? | Internal | | | |
+| C24 | **Vercel ToS at scale is the bring-your-own-infra escape hatch.** | Is the bring-your-own-infra migration realistic at $X-MRR (when does it block growth)? Cloudflare Pages / Fly.io / self-host on AWS are real but costly migrations. | Internal projection vs Vercel ToS | | | |
+
+**Row-level question prompts (business partner).** For each:
+- Are the cited revenue / valuation figures current within 12 months?
+- Do the comparables' published metrics generalise to our positioning,
+  or are we comparing to companies in different categories?
+- Are the SaaS Capital benchmarks the right reference for our mixed
+  B2B/B2C model, or should we anchor to a more relevant comparable
+  set?
+- Is the SOM model (1k SMB tenants × $5k ACV = $5M ARR Y3) reflective
+  of realistic conversion rates given operator-time-only sales motion
+  in Phase 1?
+- Is the Phase 1 ~$0 incremental claim defensible (operator already
+  pays Claude Max 20× sunk cost — does this pencil out in serious
+  due-diligence) or is it an artefact of operator-funded calculation?
+- Is the Anthropic API cost-curve assumption (sub-linear with prompt
+  caching) right, or are we still optimistic about the caching
+  efficiency?
+- Is the L4-Kirkpatrick compliance-pass-rate / audit-finding-deltas
+  expansion-revenue mechanic actually how compliance buyers calculate
+  ROI, or is it operator-side projection only?
