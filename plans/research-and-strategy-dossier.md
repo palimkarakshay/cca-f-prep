@@ -362,7 +362,276 @@ falsification triggers.
 
 ## §2 — How to mitigate (named mechanisms)
 
-*This section will be filled in commit 3.*
+This section names the mitigation mechanisms — peer-reviewed cognitive,
+behavioural, and instructional-design findings — that the platform
+operationalises. Each mechanism is named with its canonical citation
+and its operational claim (what the effect *does*, in measurable terms),
+not summarised as motivational copy. §3 documents how the industry has
+historically deployed these mechanisms one-at-a-time; §4 maps each
+mechanism to a specific planned product surface in our build.
+
+### 2.1 Cognitive psychology of retention and absorption
+
+**Spacing effect.** Cepeda, Pashler, Vul, Wixted & Rohrer 2006
+(*Psychological Bulletin*) is the canonical 254-study meta-analysis;
+Cepeda et al. 2008 (*Psychological Science*) operationalises the
+finding into a usable rule: optimal inter-study gap is ≈ 10–20% of the
+desired retention interval. For a one-month retention target, ≈ 3–5
+day gaps; for a one-year target, ≈ 5%. Spaced practice beats massed
+practice by ≈ 2× across nearly every condition tested. Operational
+claim: schedule retrieval at expanding intervals (1d / 3d / 7d / 14d /
+30d) keyed to the desired retention horizon.
+
+**Testing effect / retrieval practice.** Roediger & Karpicke 2006
+(*Psychological Science*); Karpicke & Blunt 2011 (*Science*). The
+operational result is the ≈ 50% delayed-recall lift discussed in §1.2;
+the deeper finding is that retrieval is *itself* a learning event, not
+merely an assessment of prior learning. The implication for product
+design is that the platform's primary surface should be retrieval-
+shaped (gates, prompts, write-the-principle fields) rather than
+re-reading-shaped (depth toggles, summaries). Karpicke & Blunt 2011
+extends the comparison to concept-mapping (a more effortful encoding
+strategy) and finds retrieval still wins by a large margin —
+strengthening the case that elaboration is not a substitute for
+retrieval.
+
+**Generation effect.** Slamecka & Graf 1978 (*Journal of Experimental
+Psychology: Human Learning and Memory*) demonstrates the canonical
+asymmetry: self-generated answers are retained ≈ 30% better than read
+answers. The mechanism appears to be the additional encoding effort
+required to produce the answer rather than recognise it. Operational
+claim: where feasible, force the learner to *generate* (write, predict,
+state) before *receiving* (the canonical answer, the explanation, the
+principle).
+
+**Interleaving.** Rohrer & Taylor 2007 (3× transfer lift, §1.2) and
+the broader Rohrer 2012 review establish that rotating problem-types
+within a practice session beats blocking the same type for a long
+session. The mechanism is that discrimination (knowing *which*
+solution applies) is itself a skill that blocked practice does not
+exercise; interleaving forces the discrimination skill into every
+trial. Operational claim: the recommender constraint
+`nextPick.subArea !== lastPick.subArea` (or stronger rotation rule)
+materially improves transfer.
+
+**Desirable difficulties.** Bjork 1994 (the foundational chapter) and
+Bjork & Bjork 2011 (the modern restatement) name the umbrella concept:
+conditions that slow acquisition (spacing, interleaving, generation,
+varied context, contextual interference) accelerate long-term retention
+and transfer. The framework reconciles the apparent paradox that
+"easier" study patterns produce worse durable learning — the difficulty
+is the mechanism, not a side-effect to overcome. Operational claim: the
+platform's defaults should *embrace* difficulty (retrieval-first, JOL
+gate before reveal, interleaved recommender) rather than smooth it
+away.
+
+**Cognitive Load Theory + worked-example fading.** Sweller 1988
+(*Cognitive Science*, "Cognitive load during problem solving") is the
+canonical CLT paper; Sweller, van Merriënboer & Paas 2019 (*Educational
+Psychology Review*) is the modern restatement integrating 30+ years of
+follow-up evidence. Operationally, novices benefit most from
+fully-worked examples that minimise extraneous load and let working-
+memory focus on the schema being acquired; intermediate learners
+benefit from *faded* worked examples (with hints progressively
+removed); experts benefit from solo problem-solving. Operational
+claim: the lesson surface must adapt scaffolding to mastery level —
+fixed scaffolding hurts at both ends of the rung distribution.
+
+**Expertise-reversal effect.** Kalyuga 2003 (*Educational Psychology
+Review*) operationalises the upper boundary of CLT: scaffolding that
+helps novices *hurts* intermediate-and-above learners. The implication
+is that the worked-example fading must be triggered by mastery level,
+not chronological lesson position. The platform's mastery-rung
+indicator (already 0–4 in `progress-types.ts`) is the natural trigger.
+
+**Metacognitive calibration / judgment-of-learning (JOL).** Dunlosky &
+Bjork (multiple chapters in *Handbook of Metamemory*); Kruger & Dunning
+1999. Two operational claims: (1) JOL miscalibration is itself a
+named, measurable failure mode (low predictive validity of self-rated
+mastery vs measured pass-rate); (2) the gap closes when the platform
+captures pre-answer JOL (a 1–5 slider before quiz reveal) and
+visualises the calibration delta over time. The platform's approach
+is to make calibration Δ a first-class metric rather than a
+diagnostic afterthought.
+
+**Transfer (near vs far).** Barnett & Ceci 2002 (*Psychological
+Bulletin*, "When and where do we apply what we learn?") names the
+canonical taxonomy: transfer requires structural similarity in
+retrieval cues for near-transfer, and varied contextualised practice
+with explicit principles for far-transfer. Operational claim: the
+mock-exam shape should mirror the *real* exam shape (4 scenarios ×
+15 Q rather than flat 60-Q) because encoding-specificity dominates.
+
+**Andragogy.** Knowles 1973 (*The Adult Learner*) names the canonical
+six assumptions about adult learners: self-concept (autonomous);
+experience (anchor for new learning); readiness (problem-driven);
+orientation (immediate application); motivation (internal); need-to-
+know (rationale-first). Operational claim: the platform must surface
+the *why* before the *what* (rationale-first lesson structure), allow
+the learner to pick the path (autonomy), and anchor new content to
+prior schemas (B-skill / principle taxonomy).
+
+**Dual-coding.** Paivio 1971/1986 (*Imagery and Verbal Processes*;
+*Mental Representations: A Dual Coding Approach*); Mayer multimedia
+learning principles synthesise this into 12 design rules. Operational
+claim: verbal + visual encoding outperforms either alone — but only
+when the visual is *non-redundant* with the verbal (Mayer's redundancy
+principle is a frequent SME failure: SMEs duplicate text in slides,
+which raises extraneous load and worsens learning).
+
+### 2.2 Behavioural psychology of return-visit / habit formation
+
+**Hook Model.** Eyal 2014 (*Hooked: How to Build Habit-Forming
+Products*) names four phases: Trigger (external prompt or internal
+cue) → Action (the simplest behaviour in anticipation of reward) →
+Variable Reward (unpredictable payoff) → Investment (user contributes
+something that increases value of next loop). The under-leveraged
+phase in ed-tech is Investment — and it's the one that produces the
+largest retention lift in the published case studies (Duolingo's
+streak counter is a pure investment surface — the user has invested
+30 days of effort; abandoning is now a loss).
+
+**Fogg Behaviour Model.** Fogg 2009 (*Persuasive '09 conference*),
+B = MAP. The actionable rule for product design: when behaviour
+fails, raise *Ability* first (reduce friction: shorter session, one-
+tap resume, default-to-spaced-review-queue), and add a *Prompt* (push
+notification at a known-good time) before raising *Motivation* (which
+is genuinely hard to move via product surfaces and almost always
+needs lifestyle / identity-level intervention).
+
+**Self-Determination Theory (SDT).** Ryan & Deci 2000 (*American
+Psychologist*, "Self-determination theory and the facilitation of
+intrinsic motivation, social development, and well-being"); Ryan &
+Deci 2017 (*Self-determination theory*). The three innate
+psychological needs (autonomy / competence / relatedness) are the
+canonical motivation-design framework. Operational claim: solo
+learning surfaces address autonomy and competence but leave
+relatedness unmet; the cohort surface (per-cohort routes,
+peer-comparison, group leaderboard, live touchpoint) is the
+relatedness surface — and the cohort-based-course completion data
+(§1.1) is the empirical evidence that the lift is large.
+
+**Variable-ratio reinforcement.** Skinner (canonical operant-
+conditioning work). Variable-ratio schedules (reward delivered after
+an unpredictable number of responses) produce the most extinction-
+resistant behaviour. Operational claim: streak push notifications
+should fire on a variable cadence anchored to historical study time,
+not a fixed 7pm reminder; the latter extinguishes faster on missed
+days.
+
+**Streak design + loss aversion.** Kahneman & Tversky 1979
+(*Econometrica*, prospect theory). Losses loom ≈ 2× as large as
+equivalent gains. The streak-as-asset framing — "you have a 30-day
+streak that you will *lose* if you skip today" — is materially more
+motivating than the gain framing. The Duolingo published case
+(Mazal 2022) reports CURR +21%, DAU 4.5× from streak design alone.
+Counterweight: streak fatigue and quitting-on-missed-streak is a real
+risk; the streak-freeze affordance (Duolingo precedent) mitigates by
+allowing one missed day per N earned.
+
+**Goal-gradient + endowed progress.** Hull (canonical drive-reduction
+work); Kivetz, Urminsky & Zheng 2006 (*Journal of Marketing
+Research*, "The goal-gradient hypothesis resurrected"). Two
+operational claims: (1) effort accelerates as the goal approaches
+(goal-gradient); (2) pre-stamped progress (giving the learner credit
+for some progress before they start) lifts completion (endowed
+progress). The canonical Kivetz coffee-card experiment showed 34%
+faster completion when 2 of 12 stamps were pre-marked vs 0 of 10.
+Operational claim: course-completion progress bars should display
+fractional credit early to leverage endowed progress.
+
+**Cohort-commitment / parasocial accountability.** No single canonical
+academic citation; the empirical case is the cohort-based-course
+data (Maven, altMBA, HBS Online — see §3.3). The mechanism appears
+to be a combination of social identity (group belonging), parasocial
+commitment (the SME or instructor is a salient figure), and peer
+accountability (visible-to-others completion).
+
+### 2.3 Instructional design for SME effectiveness
+
+This sub-section is the most under-deployed in extant ed-tech.
+
+**Cognitive Task Analysis.** Clark, Feldon, van Merriënboer, Yates &
+Early — multiple chapters in the *Handbook of Research on Educational
+Communications and Technology* (3rd ed. 2008; 4th ed. 2013); Clark &
+Estes 1996 (*Educational Researcher*); Clark 2014 (*Educational
+Technology Research and Development*). The canonical CTA protocol
+involves structured probes (knowledge audit, simulation interview,
+critical-decision method) that surface the decision steps an SME
+omits in self-narration. Lee 2004 reports +46% post-training learning
+gain (Cohen's d ≈ 1.72) for CTA-built instruction vs expert-narrated;
+Tofel-Grehl & Feldon 2013 reviews 11 controlled studies and reports a
+similar effect-size band. Operational claim: the SME-side intake must
+implement a CTA-style protocol (5 required probes — see §4.9) rather
+than an open text field.
+
+**Four-Component Instructional Design (4C/ID).** van Merriënboer 1997
+(*Training Complex Cognitive Skills*); van Merriënboer & Kirschner
+2018 (*Ten Steps to Complex Learning*). The four components: (a)
+learning tasks (whole-task practice problems), (b) supportive
+information (the conceptual framework), (c) just-in-time information
+(the procedural facts surfaced when needed), (d) part-task practice
+(drill on specific sub-skills). The canonical SME failure mode is
+over-deliver (b), under-deliver (a), (c), (d). The platform's critic-
+prompt design (§4.14) explicitly checks all four are present and
+refuses to publish if any are missing.
+
+**Backward design / Understanding by Design.** Wiggins & McTighe
+1998/2005 (*Understanding by Design*). Three-stage design: (1)
+identify desired results (what should the learner be able to do?);
+(2) determine acceptable evidence (what assessment will demonstrate
+they can?); (3) plan learning experiences (the lesson). The order is
+the mechanism — content-first authoring produces unmeasurable lessons
+(§1.3). Operational claim: the SME-side authoring flow must lock the
+lesson editor until a passing assessment has been authored.
+
+**Worked-example fading.** Sweller (CLT lineage); Renkl 2014
+(*Educational Psychologist*, "Toward an instructionally oriented
+theory of example-based learning") synthesises the modern evidence.
+Pair every authored concept with: a fully-worked example (all steps
+shown, novice-friendly), a faded variant (one or more steps removed,
+intermediate-level), and a solo problem (worked → faded → solo across
+mastery rungs).
+
+**Andragogy applied to SME interview design.** Knowles 1973 framework
+adapted: SMEs themselves are adult learners of "how to teach"; their
+intake protocol must surface the *why* (here is the named cognitive-
+load gap that the worked-example pair closes) before the *what*
+(please type a worked example here). Operational claim: tooltips and
+inline rationale at every required field — not a content-only form.
+
+**Tacit knowledge capture.** Polanyi 1966; Nonaka & Takeuchi 1995
+(*The Knowledge-Creating Company*) — externalisation of tacit
+knowledge requires structured prompts and modality flexibility (voice,
+video, demonstration). Operational claim: the SME-side surface must
+support voice-first / camera-first capture with auto-draft into the
+structured intake — text-from-blank is unrecoverable for ~80% of the
+global workforce (TalentCards: ~2.7B deskless workers).
+
+**Deliberate practice and feedback specificity.** Ericsson 1993
+("The role of deliberate practice in the acquisition of expert
+performance"); Ericsson & Pool 2016 (*Peak*). Three requirements for
+deliberate practice: (a) specific, achievable goal; (b) immediate
+feedback; (c) full attention. The under-deployed feature in extant
+LMS-vendor SME pipelines is (b)+(c) over time — the SME never sees a
+*pattern* of their own omissions across 10+ drafts, only one-off
+critic findings per draft. The per-SME blind-spot dashboard (§4.16)
+is the deliberate-practice loop.
+
+**Question-led authoring.** Dirksen *Design for How People Learn*
+(2nd ed. 2016) makes the explicit recommendation: start authoring
+from "what should the learner be able to *do*?" not "what do I know?".
+This is a practitioner-level operationalisation of backward design;
+it shows up in our SM2 scaffold (§4.10).
+
+### Summary of §2
+
+The mitigation toolkit is well-established; what is novel is the
+*synthesis*. §3 documents that no extant industry product ships
+more than one or two of these mechanisms in concert; §4 walks each
+problem in §1 to its specific planned implementation; §6 names the
+falsification trigger for each. The bibliography in §7 collects all
+named sources for ease of independent verification.
 
 ---
 
