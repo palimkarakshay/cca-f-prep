@@ -17,7 +17,10 @@
 > Learning Report, Donald Taylor L&D Sentiment, public competitor pricing
 > pages).
 >
-> **Status.** In-progress — sections fill out incrementally with tiny commits.
+> **Status.** Complete. 18 sections + 2 appendices, ~1,200 lines.
+> Five subagents contributed parallel critiques (research dossier,
+> implementation, content-pack-management, expert-audit, collaborator deck)
+> plus one market-research pass.
 
 ---
 
