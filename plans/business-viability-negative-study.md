@@ -309,3 +309,109 @@ line**. Either someone runs the sales motion (then loaded labour cost is
 materially higher than zero) or no one does (then the pipeline doesn't
 fill).
 
+---
+
+## 5. Competitive landscape is misrepresented
+
+The investor deck's competitive table (`deck-investor.md:113–119`) names
+four competitor classes: raw ChatGPT/Claude, Cornerstone/Litmos/Docebo,
+Skilljar/Thinkific, and "DIY-LMS startups". That table is missing the
+companies that actually compete with this product, and misrepresents
+those it does name.
+
+### 5.1 The category just consolidated
+
+- **Workday acquired Sana Labs for $1.1B on 16 Sep 2025**, eleven months
+  after Sana raised $55M Series C at a $500M valuation. Sana ARR was
+  **$52.1M in 2024**.
+  ([Tracxn](https://tracxn.com/d/companies/sanalabs/__C7mWGl7WBpjTRaITkIfLsRLk2eLLXb9gl5RTRGYKYxA),
+  [TechFundingNews](https://techfundingnews.com/swedish-ai-tech-sana-raises-55m-at-500m-valuation-to-redefine-workplace-training-with-ai/))
+
+  **What this means.** The exit window for "best-of-breed AI-LMS" is
+  now suite-bundling, not standalone scale. The biggest, fastest-growing
+  AI-LMS pure-play in the market just got absorbed into a payroll/HR
+  suite. A solo founder cannot out-feature Workday-Sana, cannot
+  out-distribute it, and cannot match its $1.1B-valued integrations.
+
+- **Synthesia at $4B valuation, $200M Series E (Oct 2025)**, >$100M ARR,
+  used by 90%+ of the Fortune 100. Studio 3.0 launched real-time "Video
+  Agents" in Oct 2025.
+  ([TechCrunch](https://techcrunch.com/2026/01/26/synthesia-hits-4b-valuation-lets-employees-cash-in/),
+  [Synthesia](https://www.synthesia.io/post/series-e-200-million-4-billion-valuation-future-work))
+  The decks dismiss Synthesia as "generation, not elicitation"
+  (`research-and-strategy-dossier.md:884–892`) — a self-soothing
+  distinction with no evidence buyers care about it.
+
+- **Articulate AI Assistant** is bundled into Articulate 360
+  ($1,449–$1,749/user/yr). It generates outlines, quizzes, images, voice,
+  SFX. *"9× faster authoring."*
+  ([Articulate](https://www.articulate.com/blog/ai-assistant-is-here/),
+  [Maestro Learning](https://maestrolearning.com/blogs/articulate-rise-360-ai/))
+
+- **Kahoot! AI question generation** from $10/mo
+  ([SaaSworthy](https://www.saasworthy.com/product/kahoot/pricing)).
+- **360Learning** at $8/seat/mo
+  ([Disco comparison](https://www.disco.co/blog/top-12-lms-platforms-corporate-ld-2026)).
+
+The pitched B2C $9/mo tier is pinned **above** Kahoot AI, **at parity
+with** Duolingo Plus, **below** Brilliant ($14.99). The pitched B2B
+$5–15/seat range overlaps 360Learning ($8) and is well below
+Articulate Rise ($1,449/yr ≈ $120/user/mo) but Articulate already has
+buyer mindshare and a bundled creator tool.
+
+### 5.2 Cornerstone / Litmos pricing is not what the deck claims
+
+The deck claims Cornerstone/Litmos are $10–25/seat
+(`deck-b2b-prospect.md:302`). Actual published pricing:
+
+- Cornerstone: contract-only, but published deals run $6/seat/mo for
+  large rollouts.
+- Litmos: $4–12/seat/mo (mid-market tiers).
+
+The platform's own $5–15 range is **inside** the incumbents' band, not
+below it. The "we win on price" framing collapses.
+
+### 5.3 The hyperscaler threat is live, not hypothetical
+
+- **Anthropic Claude for Education** launched 2 Apr 2025 with
+  Northeastern (50k seats) as design partner; Teach For All partnership
+  covers 100k+ teachers in 63 countries
+  ([theaitrack.com](https://theaitrack.com/claude-for-education-anthropic-launch/),
+  [Anthropic](https://www.anthropic.com/news/anthropic-teach-for-all)).
+- **Claude Marketplace** launched March 2026 — enterprise procurement
+  channel for Claude-powered tools, **0% commission**. Partners include
+  Snowflake, Harvey, Replit
+  ([VentureBeat](https://venturebeat.com/technology/anthropic-launches-claude-marketplace-giving-enterprises-access-to-claude),
+  [SiliconANGLE](https://siliconangle.com/2026/03/06/anthropic-launches-claude-marketplace-third-party-cloud-services/)).
+  The platform can either join the marketplace (in which case Anthropic
+  owns the customer relationship) or stay outside (in which case the
+  marketplace partners get distribution it cannot match).
+- **NotebookLM Enterprise** GA in 2026 with VPC-SC, SOC2, ISO 27001, no
+  training on customer data, audio/video overviews **explicitly pitched
+  for "turning dry manuals into training modules"**, plus March 2026
+  Google Classroom integration
+  ([Google Workspace Updates](https://workspaceupdates.googleblog.com/2026/03/new-ways-to-customize-and-interact-with-your-content-in-NotebookLM.html),
+  [Baytech](https://www.baytechconsulting.com/blog/b2b-executive-guide-google-notebooklm)).
+  This is approximately the platform's product, free with Google
+  Workspace, with SOC2 and ISO 27001 already in hand.
+
+The decks do not name a single one of these as a competitor.
+
+### 5.4 The funding environment is hostile
+
+- **EdTech VC at $580M Q1 2026 — 10-year low**
+  ([HolonIQ](https://www.holoniq.com/notes/edtech-vc-collapse-at-580m-for-q1-not-even-an-ai-tailwind-could-hold-up-the-10-year-low)).
+- **K-12 edtech funding down 82% vs 2021 peak.** Total VC under $3B vs
+  $16.7B in 2021
+  ([Rest of World](https://restofworld.org/2026/edtech-funding-collapse-k12-startups-ai-workforce/)).
+- **Byju's** ($22B → collapse), **Edukoya** (shut 2025); 729+ startup
+  shutdowns YTD 2025 per Tracxn, 3,903 in 2024.
+- **EdTech Digest** explicitly warns: *"EdTech Startups in the Age of AI
+  Giants — risks now sit with anyone competing against OpenAI/Anthropic/
+  Google features."*
+  ([EdTech Digest](https://www.edtechdigest.com/2025/08/22/edtech-startups-in-the-age-of-ai-giants-where-the-risks-are-and-where-to-win/))
+
+Even **if** the unit economics worked and **if** the operator could
+clear SOC2 and **if** the product reached parity with incumbents,
+follow-on capital would not be available at any reasonable valuation.
+
