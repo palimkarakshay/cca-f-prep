@@ -28,20 +28,74 @@ For Phases A and B, the cadence is in the transition-plan.
 These names show up across the rest of the document. Reference, not
 ornament.
 
-- **Andragogy (Knowles)** — self-directed, problem-centered, anchored
+- **Andragogy (Knowles 1973)** — self-directed, problem-centered, anchored
   to existing engineering experience.
-- **Bloom (revised)** — Remember → Understand → Apply → Analyze →
-  Evaluate. The exam tests Analyze/Evaluate. Drill at one rung above
-  current rating; don't drill MCQs at Apply when you're still at
-  Understand on the underlying skill.
-- **Cognitive Load Theory (Sweller)** — *worked-example fading*:
-  fully-worked → partial → solo, three rungs.
-- **Desirable Difficulties (Bjork)** — *spaced retrieval* (1d, 3d,
-  7d, 14d), *interleaving* across domains, *generation* before reading.
-  Easy study feels productive and isn't.
-- **Deliberate Practice (Ericsson)** — every drill names a target
+- **Bloom (revised — Anderson & Krathwohl 2001)** — Remember → Understand →
+  Apply → Analyze → Evaluate. The exam tests Analyze/Evaluate. Drill at
+  one rung above current rating; don't drill MCQs at Apply when you're
+  still at Understand on the underlying skill.
+- **Cognitive Load Theory (Sweller, van Merriënboer & Paas 2019)** —
+  *worked-example fading*: fully-worked → partial → solo, three rungs.
+  Cutover to problem-solving once intermediate (expertise-reversal —
+  Kalyuga 2003).
+- **Desirable Difficulties (Bjork & Bjork 2011)** — *spaced retrieval*
+  (1d, 3d, 7d, 14d) per Cepeda et al. 2008, *interleaving* across domains
+  (Rohrer & Taylor 2007), *generation* before reading (Slamecka & Graf
+  1978). Easy study feels productive and isn't.
+- **Deliberate Practice (Ericsson 1993)** — every drill names a target
   B-skill, has a feedback channel (mock %, error-log, calibration gap),
   and forces revision.
+
+---
+
+## Learner-absorption mechanics (research → repo lever)
+
+These are the six evidence-based mechanics this methodology operationalises.
+Each maps a cited cognitive-psychology finding to the repo lever that
+implements it. When in doubt about which intervention to apply, route
+through this table.
+
+| # | Mechanic | Repo lever | Cited evidence |
+|---|---|---|---|
+| LM1 | **Spaced retrieval** (expanding interval 1/3/7/14/30d, leech rule on 3+ misses) | Surface `09-progress-tracker/spaced-review.md` queue as a dashboard banner; "no new sub-area until queue clear" rule (see Weekly structure). | Cepeda et al. 2008 (*Psych Sci*); Cepeda 2006 (254-study meta); Murre & Dros 2015 (Ebbinghaus replication). |
+| LM2 | **Retrieval > re-reading** (mid-lesson 1-Q recall before "next" unlocks) | Lesson-depth toggle is opt-out, not default; reveal gated on attempted recall. | Roediger & Karpicke 2006; Karpicke & Blunt 2011 (*Science*). |
+| LM3 | **Generation effect** (write-the-principle before reveal) | Predict-then-test (Step 5 below) becomes a typed field, not a mental note. | Slamecka & Graf 1978. |
+| LM4 | **Interleaving** (rotate ≥2 sub-areas per session) | Weekly-structure days 1–3 enforce interleaving; recommender prefers a *different* sub-area than the last one drilled. | Rohrer & Taylor 2007 (63% shuffled vs 20% blocked at 1-week delayed test). |
+| LM5 | **Worked-example fading + expertise-reversal cutover** | Phase model (A → B → C → D); rung-3 (Proficient) triggers cutover from worked to solo. | Sweller, van Merriënboer & Paas 2019; Kalyuga 2003. |
+| LM6 | **Calibration capture** (JOL pre-answer, Δ tracked in skills-matrix) | New "Calibration loop" section below; skills-matrix `Gap` column reused as calibration Δ. | Dunlosky & Bjork (handbook of metamemory); Kruger & Dunning 1999. |
+
+Cohort-side mechanics (LM7 streak/variable-reward and LM8 cohort/SDT-
+relatedness) live in the platform plan (`plans/content-pack-management-plan.md`
+§ D1) — they are product surfaces, not solo-study mechanics. They appear
+here only as a cross-reference: when a learner is part of a cohort, LM7/LM8
+amplify the LM1–LM6 effect sizes.
+
+---
+
+## Calibration loop (predict-then-test, instrumented)
+
+Step 5 below ("Predict-then-test") is the most exam-relevant feedback signal
+in this methodology. The instrumented form turns the prediction into a
+*captured metric* so calibration becomes trainable.
+
+For each predict-then-test cycle:
+
+1. Before reading the solution, write your **judgment-of-learning (JOL)**
+   on a 1–5 scale: how confident are you in your pick, on a forced choice
+   between *guess (1)* and *certain (5)*?
+2. Read the solution. Record the outcome: pass / fail.
+3. Compute **calibration Δ** = JOL_normalised − outcome_normalised, where
+   both are scaled to the 0–4 mastery axis used in
+   `09-progress-tracker/skills-matrix.md`. Write the value into the
+   `Gap` column of the matrix (which IS the calibration Δ — see
+   skills-matrix.md § "Calibration delta").
+4. Trigger the remediation rule from skills-matrix: |Δ| > 1 forces a
+   generation-effect drill (Slamecka & Graf 1978) at +1d, regardless of
+   pass/fail. Δ > 1 is the classic Dunning-Kruger zone (Kruger & Dunning
+   1999); Δ < −1 is an expertise-reversal candidate (Kalyuga 2003).
+
+The calibration Δ is what the exam *actually* tests when it tests
+"judgment". Closing it is the goal; pass-rate is the proxy.
 
 ---
 
@@ -244,7 +298,7 @@ Same systems, increasing depth over weeks.
 
 | Day | Focus |
 |---|---|
-| 0 (start) | Run any due items from `09-progress-tracker/spaced-review.md` (1–10 min). Update matrix. |
+| 0 (start) | Run any due items from `09-progress-tracker/spaced-review.md`. **Hard rule:** if the queue has ≥1 item due, no new sub-area until the queue is cleared. Spacing precedes acquisition (Bjork). Update matrix. |
 | 1–3 | New sub-areas: concept compression + challenge + solve + audit. **Interleave** — rotate 2 different sub-areas per day, don't single-track. |
 | 4 | Failure review: re-read open entries in `error-log.md`; promote patterns to `decision-trees.md`; rebuild one challenge from scratch. |
 | 5 | Full mock exam (60 questions, 120 min) + 4-phase audit. |
@@ -310,7 +364,15 @@ But:
 
 ---
 
-## Final gap (your tendency to watch out for)
+## Final gap (architect blind spot)
+
+Treat the over-engineering tendency below as a **calibration miscalibration
+symptom** — a JOL > outcome pattern (see § Calibration loop above and
+F9 in `06-failure-analysis/error-log.md`). The remediation is the same:
+generation-effect drill + force re-derivation under the boring-answer
+rule.
+
+
 
 Pattern observed: deep technical background → tendency to:
 

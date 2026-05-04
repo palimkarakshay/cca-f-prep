@@ -6,7 +6,65 @@
 Last full snapshot to `history.md`: _(none yet)_
 
 Legend: `–` = not yet rated. Evidence column links to a mock,
-challenge, or error-log entry. Gap = self − measured.
+challenge, or error-log entry. **Gap is the calibration Δ — see
+§ "Calibration delta" below.** Computed as `self − measured`, normalised
+to the 0–4 mastery axis. Not free-typed.
+
+---
+
+## Calibration delta — definition and remediation
+
+**Definition.** Calibration Δ = (avg self-rating, 0–4) − (measured
+pass-rate normalised to 0–4). The existing `Gap` column in every section
+table below IS the calibration Δ; the column heading is left as `Gap`
+for backward compatibility, but every reference downstream
+(`08-cheat-sheets/training-methodology.md`, `09-progress-tracker/spaced-review.md`,
+`06-failure-analysis/error-log.md`) calls it calibration Δ.
+
+**Why this matters.** Re-reading produces a *fluency illusion*:
+high judgment-of-learning, low actual recall (Bjork & Bjork 2011;
+Dunlosky & Bjork). The classic Dunning-Kruger result (Kruger & Dunning
+1999) is that low performers over-estimate competence; the
+expertise-reversal effect (Kalyuga 2003) is that high performers
+under-estimate it once they've internalised the schema. The exam tests
+*judgment*, which is calibration. Closing |Δ| is the goal; pass-rate is
+the proxy.
+
+**Remediation rules** (|Δ| > 1 triggers; |Δ| ≤ 0.5 is the Phase-D exit
+gate per `training-methodology.md`):
+
+- **Δ > 1 (over-confident, classic Dunning-Kruger zone)** — force a
+  generation-effect drill (Slamecka & Graf 1978): blank-page recall
+  + one-sentence principle naming; repeat at +1d via spaced-review
+  queue. F-codes typically firing: F9 (calibration miss),
+  F11 (fluency illusion). The calibration miss alone — independent
+  of pass/fail — triggers this remediation.
+- **Δ < −1 (under-confident, expertise-reversal candidate)** — promote
+  to next Bloom rung and run mock at higher difficulty (Kalyuga 2003);
+  remove worked-example scaffolding; switch to far-transfer items
+  (Barnett & Ceci 2002). Continued under-confidence at the higher rung
+  signals the SME-pipeline candidate (consider promoting this learner
+  into a content-author seat per `08-cheat-sheets/training-methodology.md`
+  § "L-Experience").
+
+**Phase-D exit gate.** All sub-areas measured ≥ 3 with `|Avg gap| ≤ 0.5`
+(see Architect summary at the bottom). This is a bidirectional gate —
+both Δ > 0.5 (over-confident) and Δ < −0.5 (under-confident) block exit.
+
+---
+
+## Snapshot rule for `history.md`
+
+Every weekly snapshot (per `training-methodology.md` § Weekly structure
+day 7) writes the full skills-matrix to `history.md`, **including the
+calibration-Δ column**. The point is to track whether deliberate practice
+(Ericsson 1993) is closing the gap over time. A flat or widening
+calibration-Δ trend is itself a diagnostic signal: the learner is
+practising recall but not calibrating against outcomes — which means the
+predict-then-test step (`training-methodology.md` Step 5 / Calibration
+loop) is being skipped or rushed.
+
+
 
 ---
 
