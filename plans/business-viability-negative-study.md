@@ -494,3 +494,107 @@ The platform is therefore in the position of:
 
 The "pedagogical moat" is decorative, not load-bearing.
 
+---
+
+## 7. Solo-operator bandwidth is the binding constraint
+
+The dossier prices CAC at zero by valuing operator time at zero
+(`:1391`). The implementation plan books "30 min/day authoring" and
+"2 hours/week business loop" (`IMPLEMENTATION.md:2552, :2564`) at the
+"100 tenants, 10k MAU" steady state.
+
+Bottoms-up estimate of **actual** operator load at that scale:
+
+| Workstream | Hours/week | Note |
+|---|---|---|
+| Support tickets | 10–20 | 3–5% MAU × 10k = 300–500 tickets/mo at 5 min triage = ~10 hr/wk minimum; longer for pilots |
+| Content authoring backlog | 15–25 | 100 tenants × ~2–3 drafts/day = 200–300 SME-approval reviews; the plan's "10 min/day per tenant" alone implies 16+ hr/day across 100 tenants |
+| Sales & demos | 8–12 | 60–120 day cycles, multiple pilots in flight |
+| Customer success / onboarding | 5–8 | SSO debug, SCIM, knowledge-file ingestion handholding |
+| Engineering / on-call | 10–15 | Vercel / Neon / Clerk / Anthropic incident response, security patching, billing webhook breakage |
+| Content marketing & SEO | 4–6 | The B2C wedge is "SEO + content marketing" (`deck-investor.md:50`) — that's a job |
+| Codex review / quality loop | 2–4 | Pause-not-pull triage, F-code analysis |
+| **Total** | **54–90** | Single human, no rotation, no PTO |
+
+**This is incompatible with "side bet"** (`deck-investor.md:273`). Either
+the side-bet shape is a lie to the investor, or the 100-tenant scenario
+is unreachable. Both cannot be true.
+
+There is no on-call rotation, no second-line escalation, no DR runbook,
+no runbook for outages of any of: Vercel, Neon, Clerk, Anthropic, R2,
+Inngest, Stripe, Resend, Sentry. **The single-point-of-human-failure is
+the operator** for both the engineering and the customer-success roles.
+
+The plan implicitly admits this (`IMPLEMENTATION.md:2582`) — "Triage
+within 24h" — single human, no rotation. A single 48h flu means SLA
+breach across every tenant simultaneously.
+
+### 7.1 The succession problem
+
+The B2B value prop pitches "single-SME-bottleneck SMBs need succession-
+of-knowledge tooling — bus-factor 1" (`deck-overview.md:226–228`). The
+operator is selling bus-factor mitigation while running a bus-factor-1
+business. A buyer who reads both decks sees the contradiction.
+
+### 7.2 The collaborator deck makes the bandwidth crisis worse
+
+The collaborator deck offers "either a co-founder shape (equity-heavy,
+unpaid until revenue) or a first-hire shape (cash + small equity once
+Phase 1 hits the gate)" (`deck-collaborator.md:347`). No equity %,
+no vesting, no cliff, no cash number, no gate definition. The implicit
+ask is: "work 18 days unpaid on terms negotiated *after* you've sunk
+the time."
+
+That is the textbook bait-and-switch shape that experienced engineers
+have learned to decline. So the labour shortage is not solvable by
+adding a collaborator either; nobody senior accepts these terms in 2026.
+
+---
+
+## 8. The 18-day Phase 1 is a fantasy timeline
+
+Phase 1 promises (`deck-overview.md:286–296`):
+
+| Phase | Days | Deliverable |
+|---|---|---|
+| P1 | ~3 | Monorepo + DB + auth + storage wired |
+| P2 | ~3 | Astro marketing site + LOI / waitlist / pre-order capture |
+| P3 | ~4 | Learner app: catalog, lesson, quiz, progress, search |
+| P4 | ~4 | Admin app: import, lint, suggestions, leads, knowledge files |
+| P5 | ~2 | Operator authoring loop |
+| P6 | ~2 | Verification: end-to-end + RLS + Lighthouse |
+
+Reality check, line by line, against `IMPLEMENTATION.md`:
+
+- **P1 (3 days).** Multi-tenant Postgres + Drizzle schema + Clerk
+  org/user/tenant onboarding + R2 client + RLS policies on every
+  tenant-scoped table + RLS isolation test + ESLint custom rule that
+  flags un-wrapped tenant queries. **Multi-tenant RLS correctness alone
+  is a 1–2 week engagement when done properly; testing it adversarially
+  is its own week.**
+- **P3 (4 days).** Server-component learner app + MCQ/TF/FillIn quiz
+  runner + tsvector search + mobile Lighthouse ≥ 90 + bundle ≤ 220kB
+  gzipped (`IMPLEMENTATION.md:1294`) + accessibility AA + Section D
+  extensions (RetrievalGate, PrincipleWrite with Levenshtein similarity,
+  JOL slider with calibration delta, mastery-gated 4th depth rung,
+  calibration sparkline). **Three weeks of UI work, not four days.**
+- **P4 (4 days).** Catalog CRUD + version history with rollback + JSON
+  paste import with side-by-side diff viewer + lint heatmap + suggestion
+  triage with TF-IDF dedup + knowledge upload with PDF/DOCX text
+  extraction + tenant policy editor + backward-design lock + worked/
+  faded pair editor + principle-taxonomy autocomplete + SM8 blind-spot
+  dashboard. **Two months of work.**
+- **P6 (2 days).** axe-core sweep + Lighthouse CI + k6 load test +
+  adversarial RLS test + status page + Sentry monitors. **WCAG 2.1 AA
+  compliance across 8 surfaces takes weeks of remediation, not 2 days.**
+
+**Realistic Phase 1: 3–5 months for a full-time senior solo dev.** And
+the operator is on a side-bet schedule.
+
+The implementation plan also assumes a "sample pack already exists"
+(`IMPLEMENTATION.md:1222`) — but per `CLAUDE.md`'s own coherency log,
+the operator has been auto-generating CCA-F study content with a
+**~76% B-bias** (own diagnostic letter-balance regression). The
+authoring discipline that's pitched as the moat does not yet hold for
+the operator's own study material.
+
