@@ -46,5 +46,41 @@
 
 ## 1. Executive verdict
 
-(to be filled)
+**This is not a venture business. It is a side-project disguised as one.**
+
+Read in isolation, each deck is competent. Read together, the contradictions
+are unhealable:
+
+- The pitch claims AI-content is bad and the wedge is *quality*. The product
+  fix is also AI-content. The differentiator is a layer of validators and a
+  human reviewer — both of which are catch-up commodities, not moats.
+- The unit-economics claim 95% gross margin and 110–120% NRR. Both omit the
+  largest costs in real ed-tech (CAC, sales labour, content review labour,
+  support, churn) and use top-quartile benchmarks as targets without an
+  evidence basis.
+- The capital-efficient framing is structurally honest, *and* it indicts the
+  rest of the deck. If the operator truly believes Phase 1 might fail the
+  gate, the investor deck shouldn't claim a path to $100k MRR by Month
+  24–30. Pick one.
+- The plan attacks 7+ segments simultaneously (B2C cert prep, deskless
+  workers, financial compliance, healthcare, manufacturing, SaaS engineering
+  onboarding, single-SME-bottleneck SMBs, high-PDI cultures). One solo
+  operator can serve at most one segment well in Year 1.
+- The Phase 1 timeline (~18 working days) is approximately one-fifth of what
+  the actual scope requires for a multi-tenant SaaS with B2C learner app,
+  B2B admin, marketing site, content authoring loop, validators, and
+  operational hygiene. This is not a debate about velocity; it's a
+  category error.
+- The pilot pricing ($5,000 fee fully credited toward 12 months) is
+  *upside-down* for the entry tier: a 50-seat × $5/mo customer pays $3,000
+  in Year 1, of which $5,000 is already credited. The operator pays the
+  customer to be a customer.
+- Mid-market enterprise will not buy AI-generated training content from a
+  solo founder without SOC2. The plan defers SOC2 until "5 enterprise
+  tenants" — a chicken-and-egg that means *zero enterprise tenants forever*.
+
+**Recommendation up front.** Kill the commercial framing. Keep the CCA-F
+prep repo as a personal study tool. If the AI-content quality discipline
+is genuinely interesting, ship it as an open-source library or a Claude
+Skill — not as a SaaS. The salvage path is in §17.
 
