@@ -13,13 +13,21 @@ import { getGamesStore } from "@/lib/games-store";
  *      different reference between the SSR render and the first client
  *      render → React 19 hydration warnings + edge-case re-mounts.
  *
- *   2. The hook bodies used `useState(false) +
- *      useEffect(() => setHydrated(true), [])`, which trips
- *      `react-hooks/set-state-in-effect`. CI failed in 25 s on PR #20
- *      because lint died before tests ran; the merge happened anyway.
+ *   2. Every consumer hook re-implemented `useState(false) +
+ *      useEffect(() => setHydrated(true), [])`. That pattern is the
+ *      one React's hydration docs recommend, but eslint-plugin-
+ *      react-hooks v6+ flags it as `react-hooks/set-state-in-effect`,
+ *      and CI dies on lint before tests run (PR #20 merged with red
+ *      CI for exactly this reason). Fix: centralise the pattern in
+ *      `useHydrated` with one narrow `eslint-disable`, route every
+ *      consumer through it, never repeat the pattern inline again.
  *
  * If you reintroduce either, this test fails before review.
  */
+
+// `useHydrated.ts` is the single sanctioned home for the pattern; every
+// other hook must NOT re-introduce it.
+const HYDRATION_HOOK_FILENAME = "useHydrated.ts";
 
 describe("hydration contract", () => {
   it("progress-store getServerSnapshot is referentially stable", () => {
@@ -36,19 +44,22 @@ describe("hydration contract", () => {
     expect(a).toBe(b);
   });
 
-  it("hooks do not call setState inside a useEffect body", () => {
+  it("only useHydrated.ts may setState inside a useEffect body", () => {
     // Walk hooks/ and grep for the anti-pattern. A naive substring check
-    // is enough — any restoration of the lint-failing shape will flag.
+    // is enough — any consumer that restores the lint-failing shape
+    // will flag. useHydrated.ts itself is allowed because that's the
+    // central place we deliberately keep the pattern (with a narrow
+    // eslint-disable) so consumers don't repeat it.
     const hooksDir = path.resolve(__dirname, "..", "hooks");
     const files = readdirSync(hooksDir)
       .filter((f) => f.endsWith(".ts") || f.endsWith(".tsx"))
+      .filter((f) => f !== HYDRATION_HOOK_FILENAME)
       .map((f) => path.join(hooksDir, f))
       .filter((p) => statSync(p).isFile());
     expect(files.length).toBeGreaterThan(0);
     for (const f of files) {
       const src = readFileSync(f, "utf8");
-      // Strip line comments so the explainer comments inside
-      // useHydrated.ts and elsewhere don't false-positive.
+      // Strip line comments so explainer prose doesn't false-positive.
       const code = src
         .split("\n")
         .filter((l) => !l.trimStart().startsWith("//") && !l.trimStart().startsWith("*"))
@@ -56,7 +67,7 @@ describe("hydration contract", () => {
       const banned = /useEffect\(\s*\(\s*\)\s*=>\s*set[A-Z]\w*\s*\(\s*true\s*\)/;
       expect(
         banned.test(code),
-        `${path.basename(f)} re-introduced useEffect(() => setX(true), []) — use useHydrated() instead.`
+        `${path.basename(f)} re-introduced useEffect(() => setX(true), []) — call useHydrated() instead.`
       ).toBe(false);
     }
   });
