@@ -1608,6 +1608,14 @@ Single consolidated bibliography. Grouped by domain. Every citation in
 - **Sweller, J., van Merriënboer, J. J. G., & Paas, F.** (2019).
   *Cognitive architecture and instructional design: 20 year update.*
   Educational Psychology Review, 31, 261–292.
+- **Rohrer, D.** (2012). *Interleaving helps students distinguish among
+  similar concepts.* Educational Psychology Review, 24(3), 355–367.
+  (Adult-learner replication of the interleaving effect; cited in
+  dossier §2.1 and `expert-review-audit.md`.)
+- **Tversky, A., & Kahneman, D.** (1973). *Availability: A heuristic
+  for judging frequency and probability.* Cognitive Psychology, 5(2),
+  207–232. (Cited in `06-failure-analysis/error-log.md` as the
+  cognitive-bias background for distractor-lure F1.)
 
 ### Behavioural psychology
 
@@ -1689,11 +1697,64 @@ Single consolidated bibliography. Grouped by domain. Every citation in
 - **Wozniak, P.** (1990). *Optimization of repetition spacing in the
   practice of learning.* SuperMemo SM-2 algorithm. (Self-published;
   the canonical reference.)
-- **Wes Kao.** Maven internal data via published essays and posts.
+- **Wes Kao / Maven** (cohort-based course platform; vendor data).
+  W1→W2 96% retention claim. Treat as directional vendor data; verify
+  before contractual quoting. Cited in plan §D0 (L8), §D8 and decks.
+- **altMBA / Akimbo** (Seth Godin's cohort program; vendor data).
+  96% completion claim. Same vendor-data caveat. Cited separately from
+  Maven in plan §D0 (L8); decks: overview, b2b-prospect, investor.
+- **LinkedIn (2025).** *Workplace Learning Report 2025* (LinkedIn WLR).
+  Source of "39% need reskilling by 2030" + segment-level workforce
+  mobility data. Cited in plan §D6; decks: investor.
+- **Joint Commission / CME industry data.** Healthcare compliance
+  completion patterns (mandatory ≈ 95–99% under deadline; transfer
+  poor). Cited in plan §D6; deck-b2b-prospect.
 - **Bloom, B. S.** (1984). *The 2 sigma problem: The search for methods
   of group instruction as effective as one-to-one tutoring.*
   Educational Researcher, 13(6), 4–16. (The 1984 follow-up; the
   citation in the body uses the 1968 origin.)
+
+### Training-program evaluation
+
+- **Kirkpatrick, D. L.** (1959). *Techniques for evaluating training
+  programs.* Journal of the American Society of Training Directors,
+  13(11–12). (Original 4-part series — origin of L1 Reaction / L2
+  Learning / L3 Behaviour / L4 Results framework used as the platform
+  measurement plan in plan §D4 and IMPLEMENTATION §3.8.10 + §6.6.)
+- **Kirkpatrick, D. L., & Kirkpatrick, J. D.** (2006). *Evaluating
+  Training Programs* (3rd ed.). Berrett-Koehler. (Modern reference
+  treatment of the four-level model.)
+
+### Cultural & cross-cultural
+
+- **Hall, E. T.** (1976). *Beyond Culture.* Anchor Press / Doubleday.
+  (Source of high-context vs low-context distinction used in plan §D6
+  for SME-elicitation framing per region.)
+- **Meyer, E.** (2014). *The Culture Map: Breaking Through the Invisible
+  Boundaries of Global Business.* PublicAffairs. (Source of the
+  direct-vs-indirect-feedback axis used to tune critic copy by region;
+  cited in plan §D6.)
+- **Anderson, L. W., & Krathwohl, D. R.** (Eds.) (2001). *A Taxonomy
+  for Learning, Teaching, and Assessing: A Revision of Bloom's
+  Taxonomy of Educational Objectives.* Allyn & Bacon. (Basis for the
+  `Bloom` enum in IMPLEMENTATION §3.1 and the closed B-skill principle
+  taxonomy SM5; cited in `08-cheat-sheets/training-methodology.md`.)
+
+### Technical standards & accessibility
+
+- **ADL Initiative** (2009). *Sharable Content Object Reference Model
+  (SCORM) 2004 4th Edition.* Advanced Distributed Learning. (Cited in
+  plan §D6 + deck-collaborator + 08-cheat-sheets/decision-trees.md as
+  the legacy LMS interchange standard mid-market tenants require.)
+- **ADL Initiative** (2013). *Experience API (xAPI / Tin Can API)
+  Specification.* (Cited as the modern L3-Behaviour data emission
+  standard; see plan §D6.)
+- **W3C** (2018). *Web Content Accessibility Guidelines (WCAG) 2.1.*
+  W3C Recommendation. (Anchors the public-sector / accessibility
+  commitment in plan §D6 + IMPLEMENTATION §6 + deck-collaborator.)
+- **U.S. Section 508 of the Rehabilitation Act** (29 U.S.C. § 794d).
+  (Cited alongside WCAG 2.1 for U.S. public-sector procurement
+  requirements.)
 
 ### Market / financial
 
