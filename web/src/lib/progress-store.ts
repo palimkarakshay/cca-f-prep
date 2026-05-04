@@ -28,6 +28,12 @@ export interface ProgressStore {
 function createStore(packId: string): ProgressStore {
   const storageKey = `${packId}:progress:v1`;
   let current: Progress | null = null;
+  // React 19 requires getServerSnapshot to return a referentially stable
+  // value across calls; a fresh newProgress() per call trips React #418
+  // (hydration mismatch) and the gated subtree never remounts — quizzes,
+  // mock-exam runner, and section-test stay on "Loading…", and the
+  // section-page tab panels never hydrate.
+  const serverSnapshot: Progress = newProgress();
   const listeners = new Set<() => void>();
   let storageWired = false;
 
@@ -52,7 +58,7 @@ function createStore(packId: string): ProgressStore {
 
   return {
     get: () => ensure(),
-    getServerSnapshot: () => newProgress(),
+    getServerSnapshot: () => serverSnapshot,
     subscribe: (cb) => {
       wireStorageOnce();
       listeners.add(cb);

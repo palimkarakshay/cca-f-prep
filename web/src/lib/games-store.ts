@@ -69,6 +69,10 @@ export interface GamesStore {
 function createStore(packId: string): GamesStore {
   const storageKey = gamesStorageKey(packId);
   let current: GamesProgress | null = null;
+  // React 19 requires getServerSnapshot to return a referentially stable
+  // value across calls. See progress-store.ts for the symptom (#418
+  // hydration mismatch unmounting the gated subtree).
+  const serverSnapshot: GamesProgress = newGamesProgress();
   const listeners = new Set<() => void>();
   let storageWired = false;
 
@@ -102,7 +106,7 @@ function createStore(packId: string): GamesStore {
 
   return {
     get: () => ensure(),
-    getServerSnapshot: () => newGamesProgress(),
+    getServerSnapshot: () => serverSnapshot,
     subscribe: (cb) => {
       wireStorageOnce();
       listeners.add(cb);

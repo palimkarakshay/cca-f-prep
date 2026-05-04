@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
+import { getProgressStore } from "../lib/progress-store";
+import { getGamesStore } from "../lib/games-store";
 
 /**
  * Regression coverage for the lint footgun PR #20 left behind on
@@ -20,11 +22,14 @@ import path from "node:path";
  * If you reintroduce the inline pattern in any consumer, this test
  * fails before review.
  *
- * Earlier draft of this file also asserted `getServerSnapshot`
- * returned a referentially stable value across calls (a real React-19
- * contract). It was removed when caching the snapshot at store-
- * creation time correlated with an unexplained e2e regression we
- * couldn't reproduce without a browser. Tracked as a follow-up.
+ * Also asserts the React-19 useSyncExternalStore contract: server
+ * snapshots must be referentially stable across calls. A fresh
+ * newProgress() per call trips React #418, which silently unmounts
+ * gated subtrees on the client (quiz / mock / section-test all stuck
+ * on "Loading…", and section-page tab panels never hydrate). PR #21
+ * removed an earlier version of this assertion citing an unexplained
+ * e2e regression — re-added because the contract violation was the
+ * actual root cause and shipped to prod.
  */
 
 // `useHydrated.ts` is the single sanctioned home for the pattern; every
@@ -58,5 +63,19 @@ describe("hydration contract", () => {
         `${path.basename(f)} re-introduced useEffect(() => setX(true), []) — call useHydrated() instead.`
       ).toBe(false);
     }
+  });
+
+  it("progress store getServerSnapshot is referentially stable", () => {
+    const store = getProgressStore("hydration-contract-test-progress");
+    const a = store.getServerSnapshot();
+    const b = store.getServerSnapshot();
+    expect(a).toBe(b);
+  });
+
+  it("games store getServerSnapshot is referentially stable", () => {
+    const store = getGamesStore("hydration-contract-test-games");
+    const a = store.getServerSnapshot();
+    const b = store.getServerSnapshot();
+    expect(a).toBe(b);
   });
 });
