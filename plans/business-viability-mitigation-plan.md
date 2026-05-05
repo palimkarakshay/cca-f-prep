@@ -923,6 +923,78 @@ enough to rank against incumbents (Tutorials Dojo: 18k; ExamPro:
 9k) on broad queries; budget to rank only on **long-tail** queries
 in Year 1.
 
+### 16.11 Legal & compliance posture (added 2026-05-05, iter-04)
+
+**Entity.** Wyoming or Delaware LLC, single-member, formed by Day
+30 of project start. ~$300 setup + $50/yr registered agent. The
+liability shield is the highest-leverage legal protection.
+
+**Insurance.** General liability + cyber + E&O bundle: target
+$200/mo total ($2,400/yr). Buy at the moment first paying user
+exists, not before launch.
+
+**NDA / exam-content discipline (iter-04 N29).**
+1. All practice questions are derived from publicly published
+   Microsoft Learn AI-103 Skills Measured documentation and Azure
+   AI Foundry official documentation.
+2. Question authoring **completes before the operator takes
+   AI-103**. The operator does NOT update questions after the
+   exam attempt. Validator pipeline records
+   `derived_from_public_doc_url` for every question; missing
+   field rejects the question.
+3. No marketing language: *"exam dump," "real questions," "100%
+   pass rate," "exact exam questions," "memorize these and pass."*
+4. Marketing language: *"objective-aligned practice questions,"
+   "covers Microsoft Learn skills measured," "spaced-repetition
+   of cognitive concepts."*
+
+**Trademark / branding (iter-04 N30, N35).**
+- Domain name: brand-first (e.g., "calibrant.io"). Do **not**
+  include "ai103," "azure," "microsoft," or any specific exam
+  code in the domain.
+- Marketing copy uses **nominative fair use only**.
+- Logos / badges: never reproduce Microsoft, AWS, or GCP
+  certification badges. Operator's own visual identity exclusively.
+- Founder identity: brand-first, not founder-first. Operator's
+  personal name is not on the public marketing site. Day-job
+  remains separate (no LinkedIn cross-link).
+
+**EU AI Act compliance posture (iter-04 N31).**
+- Transparency banner on every lesson and quiz page: *"Generated
+  with AI-assisted authoring + validator suite. Spot an error?
+  Email support@; we refund unconditionally on verified errors."*
+- Public model card at `/model-card` describing LLMs used,
+  training data assumptions, validator pipeline, known
+  limitations.
+- Provenance ledger in DB: every lesson row tracks
+  `generated_by_model`, `generated_at`, `validator_pass_log`.
+- Calibration-Δ + retake mode framed as **"study aid," not
+  "exam-readiness assessment."** Product does not predict the
+  user's exam outcome.
+- **Geo-fence EU customers entirely until conformity assessment
+  is feasible** (i.e., not in Y1 or Y2). Cookie banner +
+  IP-based blocker at signup. EU users see a "we're not yet
+  available in your region" page. Revisit at $5k MRR.
+
+**GDPR / CCPA / privacy (iter-04 N34).**
+- Privacy policy: template-adapted, reviewed by attorney annually
+  (~$500/yr).
+- Public DSAR endpoint at `/privacy/dsar` with Notion-backed form.
+- Pre-signed DPAs from Stripe, Clerk, Anthropic, Vercel, Neon,
+  PostHog stored in `legal/dpa/`. Confirmed in §17b quarterly
+  audit.
+- Cookie consent banner (Cookiebot free / Klaro) for residual
+  non-EU traffic.
+- Data-breach playbook at `plans/runbooks/data-breach.md`.
+
+**Open-source license posture (iter-04 N33).**
+- Validator suite ships under **Apache 2.0**.
+- `TRAINING_DATA.md` describes exactly what tuned the validators
+  (operator's own notes; no scraped third-party content).
+- `THIRD_PARTY_NOTICES.md` lists all dependencies and licenses.
+- Disclaimer: *"This library does not include any exam content.
+  It validates user-submitted MCQ format only."*
+
 ### 16.10 Operator certification commitment (added 2026-05-05, iter-03 N26)
 
 The operator commits to **passing AI-103 within 90 days of project
@@ -980,7 +1052,10 @@ guess; iteration 01 N4):
 | Domain email (Fastmail / Workspace) | $6 |
 | LLC / sole-prop registration amortised | $0–25 |
 | Compliance / chargeback overhead (added iter-02 N17) | $50 |
-| **Subtotal Y1** | **$137–222 (API path)** / **$307–392 (Max path)** |
+| Insurance bundle (general liability + cyber + E&O; iter-04 N32) | $200 |
+| LLC + registered agent amortised (iter-04 N32) | $0–25 |
+| Privacy policy / attorney review amortised (iter-04 N34) | $42 ($500/yr ÷ 12) |
+| **Subtotal Y1** | **$337–522 (API path)** / **$549–642 (Max path)** |
 
 The earlier "$50/mo" framing was indefensible.
 
