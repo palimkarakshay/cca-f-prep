@@ -201,3 +201,46 @@ gate — don't merge `codex-blockers` without addressing findings.
     its current shape until the mitigation-plan rewrites are
     applied. Decks are kept on disk as record of what was
     considered and rejected, not as live pitching artefacts.
+
+- 2026-05-04 (later) — **v2 scaled-down plan synthesised.** Follow-up
+  to the hostile review: combined the negative findings + mitigations
+  back into the v1 documents and produced a canonical v2 plan that
+  keeps a B2B case alive at deliberately scaled-down size.
+  - **New canonical doc:** `plans/v2-scaled-b2b-plan.md` — 13
+    sections covering scaled ICP (tech-cert prep + small eng
+    teams 5–50, non-regulated), pricing (B2C $15, B2B $20–25/seat,
+    $300/$750 platform minimums, $10k non-refundable pilot),
+    6-surface architecture (single-tenant in v1; RLS migration in
+    week 7), 8–12 week part-time Phase 1, revenue-gated Phase 2,
+    honest unit economics (60–75% gross margin, 95–105% blended
+    NRR), revised risk register, stop-signals, and an explicit
+    crosswalk of v1 → v2 changes per document.
+  - **Implementation guide updated:** `plans/IMPLEMENTATION.md`
+    now leads with a "v2 — Scaled-down build guide" section
+    defining the week-by-week plan, cut scope (no admin app, no
+    SAML/SCIM, no custom-catalog drafting in v1), server-side
+    per-tenant token-budget circuit breaker, and a discipline
+    list of what NOT to build in v1.
+  - **Content-pack management plan updated:** prepended a
+    v1-vs-v2 crosswalk table + buyer-language summary + v2
+    anchor reading order so a fresh build session reads v2 first.
+  - **Decks annotated inline:** `deck-overview.md`,
+    `deck-investor.md`, `deck-b2b-prospect.md`,
+    `deck-collaborator.md` now carry inline "v2 review note"
+    callouts at the most-affected claims (TAM/SOM, gross margin,
+    NRR, pilot pricing, security posture, recruiting ask, 18-day
+    timeline, Maven 96%, etc.) — not whole-body rewrites.
+  - **Dossier annotated:** `research-and-strategy-dossier.md`
+    inline review notes at §5.1 SOM, §5.4 unit economics + CAC,
+    §5.5 NRR. Citation walk in §§1–4 retained as design rationale.
+  - **Audit doc has executed findings:** `expert-review-audit.md`
+    appended §H "Executed audit (2026-05-04)" with H1.1–H4.4
+    actual scored findings (severity + mitigation reference).
+    The v1 §§A–G empty rubric remains as the framework a future
+    paid reviewer can populate.
+  - **Net effect.** v1 docs are preserved as historical record;
+    v2 is canonical wherever they conflict. Anyone reading the
+    materials encounters v2 first (in the new canonical doc and
+    in `IMPLEMENTATION.md` / `content-pack-management-plan.md`
+    headers) and inline review notes at the specific v1 claims
+    that the audit struck.

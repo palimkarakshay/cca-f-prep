@@ -13,6 +13,86 @@
 
 ---
 
+## v2 — Scaled-down build plan (use this; v1 sections below are reference)
+
+> Defined by `./v2-scaled-b2b-plan.md` and `./IMPLEMENTATION.md` v2
+> section. The body of this document (Sections A–E) reflects v1's
+> scope; v2 below supersedes it.
+
+### v2 in one paragraph
+
+A learning-content product for one segment — **adults studying for
+tech/cloud/AI certifications while employed**, plus **engineering
+teams of 5–50 buying that product as a team upgrade**. One catalog
+at launch (CCA-F Foundations from this repo). Six user-facing
+routes. Single-tenant data model in v1; multi-tenant migration in
+week 7 when the first B2B pilot signs. **No** mid-market enterprise,
+**no** regulated verticals, **no** SOC2 commitment, **no** custom-
+catalog drafting in v1. Phase 1 ships in 8–12 weeks part-time. MRR
+ceiling Year 1: ~$10–15k.
+
+### v2 vs v1 — at-a-glance
+
+| Dimension | v1 (this doc, body below) | v2 (canonical) |
+|---|---|---|
+| Scope | Multi-tenant SaaS, B2C + B2B + 6 verticals | Single product, 1 segment, B2C + small-eng-team B2B |
+| Surfaces | 15+ user-facing | 6 user-facing |
+| Phase 1 timeline | 18 working days | 8–12 weeks part-time |
+| Free-tier infra | Vercel Hobby ($0) | Vercel Pro ($20/mo from day 1) |
+| AI cost at scale | $300/mo claim | $400–2k/mo realistic at 10× lower scale |
+| B2C price | $9/mo Pro | $15/mo Pro, $129/yr |
+| B2B price | $5–15/seat | $20–25/seat, $300/mo platform min |
+| Pilot | $5,000 fully credited | $10,000 non-credited |
+| Validators | "23 documented failure modes as moat" | Quality floor; open-source library |
+| SOC2 | "5 enterprise tenants pipeline → audit" | Not in v1; ICP filter excludes buyers requiring it |
+| Multi-tenancy | RLS day 1 | Single-tenant v1; RLS migration at ≥ 3 paying B2B tenants |
+| Operator hours/wk | "30 min/day authoring" | 12–20 hr/wk total target |
+| MRR target M12 | $25k+ | $10–15k |
+| Anchor doc | `./IMPLEMENTATION.md` Parts 0–6 | `./v2-scaled-b2b-plan.md` + `./IMPLEMENTATION.md` v2 section |
+
+### v2 buyer-language summary
+
+For B2B buyers (engineering managers, VP Eng at SaaS / AI / cloud /
+dev-tools companies, 5–50 engineers):
+
+> *"We give your engineering team practice quizzes that actually
+> work — for AWS, GCP, Anthropic Practitioner, and CCA-F. Spaced
+> review, calibration, and weekly progress digests. Quality
+> validators ensure every quiz question cites the source span. We
+> don't have SOC2; if your procurement requires it, we're not the
+> right vendor for you in 2026. We do offer a 60-day pilot at
+> $10,000."*
+
+For B2C buyers (individual cert candidates):
+
+> *"$15/mo, cancel anytime, 30-day money-back. Spaced review built
+> on Cepeda 2008. Calibration delta on every attempt. Free tier
+> with 3 lessons."*
+
+### v2 success metrics
+
+- **Month 6**: ≥ $1,000 MRR (combined). If not, stop-signal fires.
+- **Month 12**: ≥ $3,000 MRR (combined) and ≥ 1 paying B2B tenant.
+  Otherwise reassess.
+- **Year 2**: $15–30k MRR ceiling. Phase 2 features fire when
+  `v2-scaled-b2b-plan.md` §7 gates hit.
+
+### v2 anchor reading order for a fresh build session
+
+1. `./v2-scaled-b2b-plan.md` — the canonical plan.
+2. `./IMPLEMENTATION.md` v2 section — the build guide.
+3. `./business-viability-mitigation-plan.md` — per-problem
+   mitigations and stop-signals.
+4. `./business-viability-negative-study.md` — the audit findings.
+5. `./business-viability-research-notes.md` — the underlying
+   evidence.
+
+Only after those five — for context, not for build instructions —
+read this document's Sections A–E (v1) and the v1 body of
+`./IMPLEMENTATION.md`. **Where v1 and v2 conflict, v2 wins.**
+
+---
+
 ## Section A — Executive summary (plain English)
 
 ### What we are building
