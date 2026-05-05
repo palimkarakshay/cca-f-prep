@@ -832,6 +832,112 @@ resources, SOC2, or 60-hour weeks.
 - The "two-phase, de-risk-the-AI-cost-first" *discipline* (good; just
   not at the scope the original plan defined).
 
+---
+
+## 17. Stop-signals — when to kill the project anyway
+
+Mitigations only work if you're willing to stop when they fail. The
+following are explicit kill triggers; they are not "consider pivoting"
+triggers.
+
+| Trigger | What to do |
+|---|---|
+| MRR < $1,000 by Month 6 (B2C path) | Stop. Migrate to open-source library + consulting (§17 of negative study). |
+| 3 paid pilots fail their pre-defined success criteria (B2B path) | Stop the B2B motion. Refund nothing (pilots are paid; criteria failed for product, not pricing). |
+| AI cost line exceeds 30% of MRR for two consecutive months | You under-priced or your unit economics broke. Raise prices or stop. |
+| Vercel / Anthropic / Clerk TOS-relevant policy change | Migration runbook activates. If migration > 2 weeks, stop — vendor risk has crystallised. |
+| Operator hours / week > 30 for two consecutive months on a side-bet schedule | Stop. The side-bet shape failed. Either go full-time (decide consciously) or shut down. |
+| Day-job income or partner relationship at risk | Stop immediately. The operator's life outside this project is the actual capital. |
+| External reviewer (paid, signed, dated) recommends "do not continue" | Don't continue. You paid for the answer; honor it. |
+| 12 months elapsed and no segment has produced ≥ 100 paying users | Segment fit is wrong. Stop or pivot — but most likely stop. |
+| First quality incident reaches a learner with a documented harm | Stop new generation, fix, audit, **and** publicly document. If you can't recover trust within 30 days, stop. |
+
+**The single most important stop-signal:** *the operator's spouse,
+family, or therapist asks if this is still healthy*. Treat that as a
+P0. Most micro-SaaS founders who burn out report having dismissed
+this signal multiple times.
+
+---
+
+## 18. This-week action list (do these in order)
+
+The list below is what an operator who accepts the mitigation plan
+does in the first 7 days. Each item is a single hour or less unless
+noted; the whole list is a weekend.
+
+1. **Read the negative study + this mitigation plan end-to-end** in
+   one sitting. Mark the parts you disagree with.
+
+2. **Decide which mitigation track you accept.** The choice is
+   essentially: §16 safe-path micro-SaaS, or §17.2 open-source
+   library + consulting (from the negative study). Anything else is
+   the original plan with extra steps.
+
+3. **Open a `decisions.md` in the repo** and record the chosen track
+   in writing, dated and signed. Future-you needs to be able to find
+   this when current-you is tempted to escalate scope.
+
+4. **Update the existing decks** to match the chosen track. The fast
+   way: add a "Status" banner at the top of each deck file —
+   *"This deck reflects an earlier scope. Current scope: see
+   `business-viability-mitigation-plan.md` §16. Numbers below are
+   superseded."* Don't rewrite the decks yet; they're useful as a
+   record of what you considered and rejected.
+
+5. **Strike the borrowed effect-size citations.** Specifically remove
+   "Maven 96%", "altMBA 96%", "14× retention multiplier",
+   "Duolingo CURR +21%, DAU 4.5×" from any deck or doc. **30
+   minutes** of find-and-replace.
+
+6. **Publish the validator suite as a Claude Skill or npm package
+   stub.** Even an empty repo with a README that lists the 23
+   intended failure modes establishes the open-source posture. Claim
+   the namespace.
+
+7. **Pre-register one outcome metric** in a public doc: e.g., "By
+   Month 6, 50 paying B2C users at $10/mo, with D7 ≥ 30%."
+   Pre-registration is free credibility.
+
+8. **Cancel the Vercel Hobby plan or upgrade to Pro.** Decide. $20/mo
+   or self-host. Don't continue with Hobby for any commercial
+   surface.
+
+9. **Pay $500–1,000 for an external reviewer** against the rubric in
+   `expert-review-audit.md`. Or post the negative study + this
+   mitigation plan to /r/SaaS / Hacker News for free critique.
+
+10. **Schedule the 6-month and 12-month review dates** as calendar
+    events. At each, re-read this doc, evaluate against §17 stop-
+    signals, and decide explicitly: continue, pivot, or stop.
+
+If items 1–10 take more than a weekend, the operator is already too
+busy for the original plan. That itself is a signal.
+
+---
+
+## Appendix — what the safe plan does NOT promise
+
+To keep the operator anchored and resistant to scope creep, here is
+the explicit list of things the safe plan does not promise:
+
+- $25M ARR.
+- $100k MRR by Month 24.
+- 95% gross margin.
+- 110%/120% NRR.
+- 3 signed B2B LOIs in Year 1.
+- Mid-market enterprise deals.
+- SOC2 Type 2 in Year 1.
+- A "category-king" outcome.
+- Venture funding.
+- A team of 12.
+- 7 vertical wedges in parallel.
+- Anthropic acquisition.
+- Outcome equivalence with Maven, altMBA, Duolingo, Cornerstone.
+
+What it *does* promise: a sustainable side project with the
+optionality of becoming larger if the data warrants. That's enough.
+
+
 
 
 
