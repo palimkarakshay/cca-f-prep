@@ -818,14 +818,23 @@ to end.
 ### 16.1 What you build
 
 A B2C cert-prep web app for *one* technical certification.
-**Default catalog (post iteration-02 N16): Azure AI-103 (Azure AI App and Agent Developer Associate; AI-102 retires June 30, 2026 per iter-03 N22 — never use AI-102 as default)** —
-mid-volume (~2k monthly searches), low SEO saturation, transferable
-from the operator's AI/Anthropic background. Second-choice: GCP Pro
-AI Engineer. **CCA-F is a free secondary catalog** used as SEO
-top-of-funnel and for the operator's own studying — not the paid
-revenue catalog (its 12–18 month peak window is too narrow). One
-paid catalog at launch; consider second catalog only when the first
-crosses 50 paying users.
+
+**Default catalog (revised iter-08 N54):**
+1. **CCA-Architect or CCA-Developer (Anthropic) catalog** if those
+   certs launch within the operator's build window
+   (≤ 2026-08-01). Operator has credible "I built this *while*
+   studying" story.
+2. **Azure AI-103 with explicit anti-first-mover positioning** —
+   "we came late but better: calibration-Δ, real spaced repetition,
+   retake mode." (AI-102 retires June 30, 2026 per iter-03 N22 —
+   never use AI-102.)
+
+Default switches to **(1)** if Anthropic CCA-Developer launches
+before 2026-08-01; otherwise **(2)**. Decision recorded in
+`decisions.md` D-004.
+
+**CCA-F remains a free secondary catalog** for SEO top-of-funnel
+and the operator's own studying.
 
 Static content where possible; Postgres + Clerk + Stripe only where
 actually needed.
@@ -837,14 +846,16 @@ actually needed.
   Calibration-Δ + spaced-review + retake mode are the
   differentiation; without them, launch isn't viable (iteration
   02 N21).
-- **Hosting (revised iter-05 N36):** Default = **Cloudflare Pages
-  + Workers** (free, commercial-permissible). Alternative:
-  **Render Professional $19/mo** which bundles PostgreSQL.
-  **Vercel Pro is not the recommended default** as of the
-  September 2025 pricing restructure — bandwidth at $0.40/GB,
-  image-opt overage on Pro tier easily pushes monthly cost to
-  $30–80/mo. Vercel Pro remains an option only if the operator
-  prefers the DX and accepts the cost variance.
+- **Hosting (revised iter-08 N55, ranked by operator-time-cost):**
+  1. **Render Professional ($19/mo)** — Postgres bundled, Node
+     standard, lowest ops complexity. **Default for §16.**
+  2. **Vercel Pro ($20–80/mo realistic at Y1 traffic)** — best
+     DX, accept cost variance from the September 2025 pricing
+     restructure (bandwidth at $0.40/GB, image-opt overage).
+  3. **Cloudflare Pages + Workers (free, commercial-OK)** —
+     cheapest cash but highest learning curve and edge-runtime
+     constraints. Choose only if operator is already familiar
+     with Cloudflare.
 - **Auth:** Clerk free tier (single user pool, no orgs).
 - **DB:** Neon free tier, or even SQLite + Litestream if hosted on a
   VPS.
@@ -1085,6 +1096,33 @@ hr/wk, that's 28–41 weeks (6–10 months) before first paying user.
 ~340–490 hours. Operator must accept that even the "safe" plan is
 a 6–10 month runway, not 8 weeks.
 
+### 16.16 Exit / wind-down options (added 2026-05-05, iter-08 N57)
+
+Three pre-defined paths the operator can act on deliberately rather
+than reactively when relevant.
+
+**Acquihire / acquisition (best case).** At $1–10k MRR a buyer may
+offer 12–36× MRR (per Indie Hackers / MicroAcquire 2025 data —
+$100k–$300k acquisition at the §16 Y2-best-case shape). Required
+documentation if a credible offer arrives:
+- Stripe revenue export, last 18 months.
+- Customer list (anonymised).
+- Churn analysis.
+- Content authoring pipeline + validators (already open-source per
+  §16.11).
+- DPA agreements.
+Operator should already have these from §17b cadence.
+
+**Passive conversion (long-tail).** Reduce content-update cadence
+to quarterly. Operator hours drop to 2–4 hr/wk. Revenue plateau at
+conversion-time level. Acceptable if operator has met success-
+definition (1) (financial) and wants out.
+
+**Wind-down (kill).** 90-day notice to all subscribers. 6-month
+static catalog access. Refund any annual subscribers pro-rata.
+Open-source the catalog content under CC BY-NC-SA. Retire branded
+domain (305 redirect to a short post explaining wind-down).
+
 ### 16.15 Founder fit proof (added 2026-05-05, iter-06 N45)
 
 Before launch, operator must demonstrate mastery of the methods
@@ -1147,19 +1185,35 @@ No outbound either.
 - All of the above are Year 2+ features, conditional on Year 1 paying
   revenue.
 
-### 16.5 The realistic numbers
+### 16.5 The realistic numbers (revised iter-08 N56)
 
 | Metric | Year 1 | Year 2 |
 |---|---|---|
-| Paying users | 50–200 | 200–800 |
-| MRR | $500–2,000 | $2,000–8,000 |
-| Operator hours / week | 10–15 (side bet) | 15–25 (still side bet) |
-| Cost basis | **$130–320/mo** (Y1) | **$300–600/mo** (Y2) |
-| Net to operator (median) | **$0–4k after costs + SE tax** | **$5–15k** |
-| Net to operator (bottom-quartile) | **−$1–3k** (operator subsidises) | $0–3k |
+| Paying users (net of churn) | 30–150 | 150–600 |
+| MRR (Y1: floor 0 first 9 months) | $0–500 (M1–M9), $500–2,000 (M10–12) | $2,000–8,000 |
+| Operator hours / week | 12 (sustainability cap, §11.8) | 12 |
+| Cost basis | $332–552/mo | $400–800/mo |
+| Y1 revenue total | $2,000–8,000 | $24,000–96,000 |
+| Y1 cost total | $4,000–6,600 | $4,800–9,600 |
+| Y1 net before labour | -$4,600 to +$1,400 | $14,400–86,400 |
+| Y1 implicit labour cost (12 hr × $50/hr × 52) | $31,200 | $31,200 |
+| **Y1 net after labour** | **-$36,000 to -$30,000** | **-$17,000 to +$55,000** |
 
-**Cost-basis breakdown** (line-by-line, replacing the earlier $50/mo
-guess; iteration 01 N4):
+**Year 1 is a labour-loss-funded learning project.** Net to
+operator's bank account in Year 1 is small to mildly negative.
+
+The case for proceeding rests entirely on:
+1. Learning is intrinsically valuable (operator now understands
+   cog-sci applied to learning, has shipped a SaaS, built an
+   open-source library).
+2. Year-2 optionality — Y2 net after labour could be +$55k in
+   best case.
+
+If neither motivates, §16 is the wrong shape; consider §17.2 of
+the negative study (consulting day rates) — same hours, ~6×
+income, no product risk.
+
+**Cost-basis breakdown** (line-by-line; current after all iterations):
 
 | Line | Y1 monthly |
 |---|---|
