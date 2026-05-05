@@ -44,4 +44,35 @@
 
 ## 1. Triage
 
-(filled next commit)
+Each of the 14 problems falls into one of three categories.
+
+| | Tactical fix | Structural fix | No safe mitigation — kill |
+|---|---|---|---|
+| **What it means** | Single-decision change to a slide, a price, a config, or a vendor | Re-shaping the plan: cut scope, cut segment, change what you sell | Cannot be fixed within the original plan; the only safe move is to remove that part of the plan |
+| | | | |
+| P1  TAM math | ✓ rewrite slide bottoms-up | | |
+| P2  AI cost | ✓ re-cost + caps | | |
+| P3  Hyperscaler competition | | ✓ pivot to partner-of / measurement-only | |
+| P4  Validator moat | | ✓ stop selling validators as IP | |
+| P5  Citation gap (Maven 96%) | ✓ strike the citations | | |
+| P6  18-day Phase 1 | | ✓ scope cut to one surface, 8–12 weeks | |
+| P7  Free-tier TOS | ✓ pay $20/mo or self-host VPS | | |
+| P8  SOC2 chicken-and-egg | | ✓ exit the regulated-vertical pitch | |
+| P9  Pilot pricing | ✓ raise + remove credit | | |
+| P10 Operator bandwidth | | ✓ cap tenant count + drop B2B or B2C | |
+| P11 Vendor concentration | ✓ provider abstraction at LLM layer | | |
+| P12 Segment sprawl | | ✓ pick one, drop six | |
+| P13 Audit theatre | ✓ pay an external reviewer | | |
+| P14 Lab→app leap | | ✓ measure your own outcomes; stop borrowing effect sizes | |
+| | | | |
+| **Existential — kill these parts** | | | The mid-market enterprise pitch (until SOC2 + headcount); the "8 segments, one engine" framing; the venture-shaped roadmap to $100k MRR by Month 24 |
+
+**Reading the triage.** Five problems are tactical (cheap to fix in a few
+days). Seven are structural (require shrinking the plan). Three are
+non-mitigable within the venture frame; they're listed in the bottom row
+as parts of the plan that must be **removed**, not improved.
+
+The mitigation strategy in each per-problem section below assumes you
+accept this triage. If you don't, the negative study's §18 final
+recommendation stands: don't build it as a SaaS at all.
+
