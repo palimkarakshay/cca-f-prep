@@ -76,3 +76,144 @@ The mitigation strategy in each per-problem section below assumes you
 accept this triage. If you don't, the negative study's §18 final
 recommendation stands: don't build it as a SaaS at all.
 
+---
+
+## 2. P1 mitigation — TAM / SAM / SOM math
+
+**Problem (recap).** Decks claim "$370B TAM, $50B SAM, 0.05% = $25M ARR"
+without any bottoms-up funnel logic. Dossier asserts 1,000 SMB tenants
+in 36 months ≈ one new tenant per workday for three years.
+
+**What to do — kill the top-down framing entirely:**
+
+1. **Delete the TAM/SAM/SOM slide from `deck-investor.md`.** Replace with
+   a single bottoms-up table:
+
+   | Source | Named accounts you could plausibly contact in 30 days | Realistic close rate at 12 months | Year-1 revenue |
+   |---|---|---|---|
+   | Personal network (warm intros) | List names, not categories | 15–25% | $? |
+   | LinkedIn outbound (cold) | List job titles + ICPs | 1–3% | $? |
+   | Inbound (SEO + content) | 0 until SEO compounds | 0 in Y1 | $0 |
+
+2. **Fill the table with real names.** If the warm-intro column has fewer
+   than 15 named contacts, the GTM is not viable as a venture.
+
+3. **Replace SOM share-of-market language** with "X paying customers ×
+   $Y ACV = $Z ARR" — never with a percentage of someone else's TAM.
+
+4. **Drop the "0.05% of SAM = $25M ARR" line entirely.** It is a
+   conversation-ender for any due-diligence-capable reader.
+
+**Why this is safe.** Bottoms-up math forces you to count actual people
+in actual companies. If the count is too small, you learn that *now*,
+before spending build effort. The mitigation costs you the most exciting
+slide and gives you decision-grade information instead.
+
+**Watch out for the false comfort.** Bottoms-up that produces 60+ named
+SMB-L&D-buyer contacts is unusual unless you've worked in L&D
+previously. If you've never sold to L&D buyers and don't know any, the
+honest bottoms-up number is 2–5, and the venture conclusion is "no."
+
+---
+
+## 3. P2 mitigation — AI cost mis-pricing
+
+**Problem (recap).** Plan claims $300/mo AI at 100 tenants × 50k
+generations. Realistic figure is $5–10k/mo (25–30× higher).
+
+**What to do — re-cost + impose hard caps:**
+
+1. **Re-do the math.** Build a spreadsheet with one row per pipeline
+   call (drafter, critic, embeddings, voice transcription, suggestion
+   dedup) and explicit token estimates. Use **list prices**, not the
+   prompt-cached optimistic case. Show the fully-loaded cost per
+   generation, then multiply.
+
+2. **Establish the breakeven price per generation.** If draft+critique
+   for one lesson costs $0.20 in raw tokens, you must charge ≥ $1
+   amortised across the lesson's lifetime to clear AI cost + infra +
+   support + a margin. That sets a floor on per-generation pricing.
+
+3. **Generate-once-publish-many.** A lesson should be generated **once
+   per tenant** and amortised across every learner. Never regenerate
+   per learner. The schema must enforce this — `lesson_version` is the
+   billable unit, not `lesson_view`.
+
+4. **Hard cap monthly generations per tenant.** Server-enforced ceiling
+   (e.g., 200 generations/mo on the entry tier; overage = $2/generation
+   cash, not "soft warning"). Burn-meter is a UI feature; circuit-
+   breaker is a backend feature.
+
+5. **Switch the drafter to Haiku 4.5** for the cheapest tier. Haiku at
+   roughly 1/12 of Sonnet output cost makes the entry tier viable.
+   Use Sonnet only on tiers where the price supports it.
+
+6. **Drop Opus from the critic role on routine drafts.** Use Sonnet as
+   critic on Haiku drafts. Reserve Opus for ≤ 5% sampled spot-checks
+   (the routing pattern that's already in the plan but never costed).
+
+7. **Pass-through pricing for high-volume tenants.** Charge per
+   generation above the cap, not per seat. This protects margin against
+   power users.
+
+**Updated honest margin.** With caps + Haiku/Sonnet routing + amortised
+generation, gross margin lands at **55–70%**, not 95%. That is **fine**
+— most ed-tech SaaS lives in that band. Stop claiming 95%.
+
+**What you cannot mitigate.** The headline "$450–1000/mo Phase 2"
+budget is gone. Real Phase 2 budget at the pitched scale is
+**$3,000–6,000/mo**. Re-state explicitly in every deck.
+
+---
+
+## 4. P3 mitigation — Hyperscaler / suite-vendor competition
+
+**Problem (recap).** Workday-Sana, Synthesia, Articulate AI, NotebookLM
+Enterprise (free with Workspace), Claude Marketplace — the category is
+already won at the layer the plan targets.
+
+**What to do — stop selling at the layer the hyperscalers own:**
+
+There are three credible mitigations. Pick exactly one; do not stack
+them, because the operator bandwidth in §11 doesn't support multiple.
+
+**Mitigation A — Become an Anthropic partner, not an Anthropic
+competitor.**
+- Apply to **Claude Marketplace** as a vertical solution. Anthropic
+  charges 0% commission to selected partners and provides distribution
+  through their enterprise relationships.
+- Reframe the product as "Claude for L&D, vertical-tuned" rather than
+  "an AI-LMS." You buy distribution; Anthropic owns the customer.
+- Risk: Anthropic deprioritises L&D as a vertical, or admits another
+  partner ahead of you.
+
+**Mitigation B — Sell only the measurement / Kirkpatrick layer to
+existing LMS deployments.**
+- The negative study's §17.3 observation: the actually defensible piece
+  is calibration-Δ + L1–L4 reporting + CTA-style SME elicitation.
+- Productise as a **Chrome extension** that overlays on Articulate /
+  Litmos / Cornerstone authoring views, plus a measurement dashboard
+  that reads outcomes from any LMS via xAPI/SCORM webhooks.
+- You are no longer competing with the LMS. You are an upgrade to it.
+- Risk: smaller TAM. Plausible-best-case ARR ≈ $1–3M, not $100M.
+
+**Mitigation C — Pick a vertical the hyperscalers can't economically
+serve.**
+- Highly-regulated professional CE: medical CME with state-board
+  specifics, AICPA CPE, FAA pilot recurrent training, FINRA Series 7
+  refreshers.
+- Each vertical has compliance details Google and Anthropic won't
+  encode. The validator suite becomes domain-specific, which is a real
+  moat in that vertical.
+- Cost: you must hire or partner with a domain expert in that vertical.
+  It is no longer a side bet.
+- Risk: you don't know any of those verticals from inside, and
+  "AI-content-quality" is a much smaller wedge against "this is what
+  the state board accepts as CE credit."
+
+**What you cannot mitigate.** The horizontal "AI-LMS for everyone"
+pitch is dead. Workday-Sana, NotebookLM, Articulate AI already occupy
+that surface. The first slide that pitches the product as a horizontal
+LMS replacement should be deleted.
+
+
