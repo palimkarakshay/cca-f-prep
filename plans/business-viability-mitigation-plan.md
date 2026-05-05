@@ -579,6 +579,16 @@ Removing the venture-shaped growth target removes the bandwidth crisis.
 5. **Quarterly "do you still want to do this?" check.** Three
    consecutive "no" answers triggers §17 stop.
 
+**Implementation (iter-07 N53):**
+1. Pre-schedule one calendar week per quarter as "review-free."
+   Mark in spouse's / reviewer's calendar.
+2. Use the operator-unavailable runbook
+   (`plans/runbooks/operator-unavailable.md`) for the week.
+3. The §17b reviewer call *before* the review-free week confirms
+   the operator is on track to take it.
+4. Skipping a review-free week without a documented reason (in
+   `decisions.md`) counts as a stop signal.
+
 ### 11.7 Opportunity-cost honest accounting (added 2026-05-05, iteration 01 N11)
 
 **Operator labour cost.**
@@ -1008,6 +1018,30 @@ exists, not before launch.
   non-EU traffic.
 - Data-breach playbook at `plans/runbooks/data-breach.md`.
 
+**Tax / VAT compliance (iter-07 N49, N51).**
+- **Geo-fence non-US, non-Canada traffic** at signup (extends
+  iter-04 EU geo-fence to all non-NA jurisdictions until tax
+  compliance capacity exists).
+- **Stripe Tax enabled from day 1** (~$5–15/mo at Y1 scale).
+- **Home-state registration done before first sale** if SaaS-
+  taxing state.
+- **Quarterly nexus review** in §17b reviewer call.
+- **Y2 escape valve:** at MRR >$5k, hire fractional bookkeeper /
+  tax accountant ($300–800/mo).
+- **Privacy policy template scope:** GDPR, UK GDPR, CCPA/CPRA,
+  Virginia VCDPA, Colorado CPA, Connecticut CTDPA, Utah UCPA,
+  Texas TDPSA, plus residual "all other US state laws" section.
+  Reviewed annually.
+
+**Accessibility (iter-07 N50).**
+- WCAG-conformant component library at build time (Radix UI /
+  shadcn/ui).
+- axe-core in CI scanning every PR.
+- One-time audit before launch ($0–500 free-tools / $1k–3k
+  auditor) + 10–15 operator hours of remediation.
+- Public accessibility statement at `/accessibility`.
+- Quarterly axe-core regression run in §17b reviewer call.
+
 **Open-source license posture (iter-04 N33).**
 - Validator suite ships under **Apache 2.0**.
 - `TRAINING_DATA.md` describes exactly what tuned the validators
@@ -1135,6 +1169,7 @@ guess; iteration 01 N4):
 | Clerk free tier | $0 |
 | Cloudflare DNS / domain | $1 |
 | Cloudflare R2 backup storage (iter-05 N38) | $5 |
+| Stripe Tax (iter-07 N49) | $10 |
 | Resend / SES (free until ~1k MAU) | $0 |
 | Sentry free tier | $0 |
 | BetterStack uptime monitor | $25 |
@@ -1144,8 +1179,8 @@ guess; iteration 01 N4):
 | Insurance bundle (general liability + cyber + E&O; iter-04 N32) | $200 |
 | LLC + registered agent amortised (iter-04 N32) | $0–25 |
 | Privacy policy / attorney review amortised (iter-04 N34) | $42 ($500/yr ÷ 12) |
-| **Subtotal Y1** | **$322–542 (API path)** / **$534–662 (Max path)** |
-| (iter-05 hosting + R2 deltas applied; range widened) | |
+| **Subtotal Y1** | **$332–552 (API path)** / **$544–672 (Max path)** |
+| (iter-05 hosting + R2 + iter-07 Stripe Tax applied) | |
 
 The earlier "$50/mo" framing was indefensible.
 
