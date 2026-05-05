@@ -1157,12 +1157,14 @@ ship.
 
 ### 16.10 Operator certification commitment (added 2026-05-05, iter-03 N26)
 
-The operator commits to **passing AI-103 within 90 days of project
-start** as a precondition for charging for the catalog. Exam attempt
-cost: $165 + ~30 hours focused study. If not passed by Month 3,
-catalog must be **repositioned as "study-along-with-me" content**
-rather than "passing-rate-promised" content, until certification is
-earned.
+The operator commits to **passing the chosen catalog's
+certification within 90 days of project start** as precondition
+for charging. Per §16.1 catalog logic: AI-103 OR Anthropic
+CCA-Developer (whichever is the launch catalog). Exam attempt
+cost: $165 (AI-103) / $99 (Anthropic, if launched) + ~30 hours
+focused study. If not passed by Month 3, catalog must be
+**repositioned as "study-along-with-me" content** rather than
+"passing-rate-promised" content, until certification is earned.
 
 ---
 
@@ -1217,7 +1219,7 @@ income, no product risk.
 
 | Line | Y1 monthly |
 |---|---|
-| Hosting (Cloudflare free / Render $19 / Vercel Pro $20–80; iter-05 N36) | $0–35 |
+| Hosting (Render $19 default / Cloudflare free / Vercel Pro $20–80; iter-08 N55 reorder) | $0–35 |
 | Anthropic API direct OR Max 20x | $30–80 (API) / $200 (Max) |
 | Stripe transaction fees (~3%) | $5–15 |
 | Clerk free tier | $0 |
@@ -1230,7 +1232,7 @@ income, no product risk.
 | Domain email (Fastmail / Workspace) | $6 |
 | LLC / sole-prop registration amortised | $0–25 |
 | Compliance / chargeback overhead (added iter-02 N17) | $50 |
-| Insurance bundle (general liability + cyber + E&O; iter-04 N32) | $200 |
+| Insurance bundle (iter-04 N32; itemised iter-09 T-09.1) | $200 (GL ~$50, cyber ~$50, E&O ~$100) |
 | LLC + registered agent amortised (iter-04 N32) | $0–25 |
 | Privacy policy / attorney review amortised (iter-04 N34) | $42 ($500/yr ÷ 12) |
 | **Subtotal Y1** | **$332–552 (API path)** / **$544–672 (Max path)** |
