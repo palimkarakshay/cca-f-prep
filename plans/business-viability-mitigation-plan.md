@@ -442,5 +442,286 @@ becomes smaller but coherent.
 tenants in Year 3 are gone. ARR ceiling for the realistic plan is
 ~$300k–$1M, not $5M+. Re-state explicitly.
 
+---
+
+## 10. P9 mitigation — Pilot pricing inversion
+
+**Problem (recap).** $5,000 pilot fee fully credited toward 12 months.
+At entry-tier 50 seats × $5/mo = $3,000/yr. The credit exceeds Year-1
+revenue. The platform pays the customer to be a customer.
+
+**What to do — restructure the pilot so it can't lose:**
+
+1. **Raise the pilot fee to $10–25k for ≤ 50 seats** depending on the
+   custom-catalog scope. **Zero credit.** The pilot fee compensates
+   for operator setup labour; it is not refundable.
+
+2. **Drop the $5/seat entry tier.** Set pricing minimum at **$15/seat
+   /mo** with a 25-seat platform minimum = **$375/mo floor**. This
+   protects the per-tenant economics against the one customer who
+   would otherwise be loss-making.
+
+3. **Continuation = a new annual contract at list price**, not a
+   credit applied to past spend. Pilots and subscriptions are
+   separate motions.
+
+4. **Cap pilot count at 2 concurrent.** Each pilot consumes ~50 hours
+   of operator labour over 60 days. Three concurrent pilots is full-
+   time. Two concurrent leaves room for everything else.
+
+5. **Define pilot success in writing** before kickoff. Three numeric
+   criteria, signed by the buyer at LOI. If criteria are met, the
+   buyer commits to a 12-month renewal at list price; if not, both
+   parties walk. No "extend the pilot" branch.
+
+6. **Refund policy is symmetrical.** "If you cancel within 30 days for
+   any reason, we refund 50%." Don't offer a 100% refund — you
+   actually delivered work.
+
+**Why this is safe.** Loss-making pilots compound. Two free pilots ×
+50 hours each = 100 hours of operator time gone in Q1 with zero net
+revenue. Paid pilots either fund the operator or filter out the
+buyers who weren't going to convert anyway.
+
+**Watch out.** Some prospects will balk at $10–25k. That's fine. The
+prospects who balk at a $10k pilot fee are not going to renew at
+$50k+ ACV; you're learning that early.
+
+---
+
+## 11. P10 mitigation — Solo-operator bandwidth
+
+**Problem (recap).** Plan books 30 min/day operator labour at "100
+tenants, 10k MAU"; realistic load is 54–90 hr/wk. The operator is
+single point of failure for engineering AND customer success AND sales.
+
+**What to do — cap growth so bandwidth stays sane:**
+
+1. **Hard cap: 10 paying B2B tenants until Year 2.** Quality > growth.
+   Decline new B2B prospects past the cap with a waitlist; use the
+   waitlist as social proof.
+
+2. **Choose B2C *or* B2B for Year 1, not both.** They are different
+   full-time jobs. Recommended pick: **B2C cert-prep for tech
+   certifications** (CCA-F, AWS, GCP), where the operator IS the
+   target user and product-market fit is testable on themselves.
+
+3. **Hire one part-time L1 support contractor at $5,000 MRR.** ~10
+   hours/week, $1.5–2k/mo. Primary ticket triage and content QA spot-
+   checks. Frees ~10 hr/wk of operator time for the higher-leverage
+   surface (sales, content, eng).
+
+4. **Build a real on-call story before any B2B contract.** At
+   minimum: a status page, a paged alert (BetterStack or similar,
+   $25/mo), and a 30-day rolling SLA log. "Solo founder, 24h
+   triage" is fine for B2C; not for B2B.
+
+5. **Keep the day job.** The negative study and the investor deck
+   both implicitly admit this is a "side bet" for this exact reason.
+   Burn-rate to zero is the safety net. Quit only when MRR ≥ 60% of
+   day-job take-home for two consecutive quarters.
+
+6. **Set a "sabbatical-or-stop" gate.** If MRR hits $10k by Month 12,
+   take 4 weeks of unpaid leave to do focused sales. If MRR hasn't
+   hit $3k by Month 12, stop the project entirely.
+
+**Why this is safe.** Capping growth at 10 tenants × $1k MRR average
+= $10k MRR ceiling for Year 1 is *fine*. It's better than zero.
+Removing the venture-shaped growth target removes the bandwidth crisis.
+
+**What you cannot mitigate.** The "Roadmap to $100k MRR by Month
+24–30" line in `deck-investor.md:286` is gone. Realistic Year-2 MRR
+ceiling at this shape is **$15–30k**, not $100k. Re-state.
+
+---
+
+## 12. P11 mitigation — Vendor concentration
+
+**Problem (recap).** Single Anthropic dependency for both drafter and
+critic; six free-tier vendors stacked; "OpenRouter as v2 escape
+hatch" is unbuilt; "data shapes are portable" is meaningless at the
+operational level.
+
+**What to do — build provider abstraction at the LLM layer from day 1:**
+
+1. **Use the OpenAI-compatible API shape via OpenRouter from day 1**
+   instead of Anthropic SDK direct. OpenRouter routes to Anthropic by
+   default; switching the route is a config change, not a rewrite.
+
+2. **Encode prompt templates in a vendor-neutral format.** Avoid
+   Anthropic-specific features (XML-tagged tool use, prompt caching
+   shape) in core paths until measured to be load-bearing. Where you
+   do use them, isolate the vendor-specific code in one file.
+
+3. **Pre-write a one-page migration runbook for each critical
+   vendor.** Clerk → Auth0, Neon → Supabase / RDS, Vercel →
+   Cloudflare, Anthropic → OpenAI. Each runbook lists steps, time
+   estimate, blast radius. Store at `plans/runbooks/`. Don't *do*
+   the migrations; just *plan* them. A runbook turns a "weeks of
+   improvisation under outage pressure" into a "3-day execution plan
+   we already wrote."
+
+4. **Drop one vendor per quarter** until you're down to 4–5 max
+   substrates. Drop priorities (in order): Inngest (use Postgres +
+   pg_cron), Resend (use AWS SES), PostHog (use Plausible or even
+   server-side logs for early stages), Sentry (use server-side logs +
+   Cloudflare Logpush in early stages).
+
+5. **Hard circuit-breaker on AI cost.** Server-enforced per-tenant
+   monthly budget that **stops generation** when exceeded — not just
+   warns the UI. This requires a transactional check before each API
+   call. ~1 day of work; saves a runaway invoice.
+
+6. **Document the Anthropic-specific risks in every deck.** Pricing,
+   model deprecation, TOS shifts, first-party-product overlap. Don't
+   hide them.
+
+**Why this is safe.** Provider abstraction is cheap when done early
+and expensive when done late. The runbooks shift outage response from
+hours to a known plan.
+
+**Watch out.** Don't *over*-abstract. A thin wrapper that's the same
+shape as the OpenAI SDK is enough; don't build your own provider-
+agnostic prompt DSL. That is yak-shaving.
+
+---
+
+## 13. P12 mitigation — Multi-segment GTM sprawl
+
+**Problem (recap).** Decks pitch 7+ segments simultaneously. One
+operator can serve at most one segment well in Year 1.
+
+**What to do — pick one and delete the others from the pitch:**
+
+1. **Pick the segment where the operator is the user.** B2C cert-prep
+   for tech certifications (CCA-F, AWS, GCP, Anthropic Practitioner).
+   The operator is studying for one of these, ships content for it,
+   reaches first customers via the same study communities the
+   operator is in, and has a credible "I built this for myself" story.
+
+2. **Delete from every deck:**
+   - Deskless workers (manufacturing, retail, healthcare frontline,
+     field-services).
+   - Financial-services compliance.
+   - Healthcare clinical SMEs.
+   - Manufacturing / shop-floor.
+   - SaaS engineering onboarding.
+   - Single-SME-bottleneck SMBs.
+   - High-PDI / face-saving cultures.
+
+3. **Replace with a single ICP slide.** "Adults studying for a tech
+   certification while employed full-time. Pain: practice quizzes
+   are bad and don't space-test. Willingness-to-pay: $10–20/mo for
+   the duration of certification prep (3–6 months)."
+
+4. **One catalog at launch — the operator's own CCA-F prep repo.**
+   Add a second catalog only after the first crosses 50 paying users.
+   Add a third only after the second crosses 100.
+
+5. **Marketing motion is community-first, not outbound.** Reddit
+   /r/AnthropicAI, /r/AWSCertifications, Hacker News Show HN, dev.to
+   write-ups. Free, on-brand, and the operator can do it on
+   weekends.
+
+**Why this is safe.** One segment with the operator as power-user is
+the only configuration where the bandwidth math works. Every other
+segment requires domain expertise the operator doesn't have.
+
+**What you cannot mitigate.** The "8 segments, one engine" framing in
+`deck-overview.md:215–229` is gone. Re-write the slide as a sentence:
+*"One catalog, one segment, one engine — for the operator's exam
+peers."*
+
+---
+
+## 14. P13 mitigation — Comfort-blanket "expert review"
+
+**Problem (recap).** `expert-review-audit.md` is a template for a
+hypothetical future audit; every Score / Recommendation / Notes
+column is empty; the "harsh critic" is the operator self-reviewing.
+
+**What to do — get a real adversarial review:**
+
+1. **Pay for an external review.** Two credible options:
+   - A SaaS-fractional-CFO or angel investor: $500–1,000 for a
+     2-hour review against the rubric.
+   - An L&D-buyer-side acquaintance (former HR/L&D leader): $0–500
+     for an hour of buyer-side critique.
+
+2. **Post the plan publicly** on /r/SaaS, /r/Entrepreneur,
+   IndieHackers, or Hacker News. Real strangers find real holes.
+   Free; downside is exposing the plan publicly (which is fine —
+   nobody is going to steal the plan; the plan is the constraint).
+
+3. **Run a "kill the plan" workshop.** Set a one-hour timer; write the
+   strongest single argument for stopping the project; then write
+   the strongest counter; then a deciding argument. If the kill case
+   wins on the merits, stop.
+
+4. **Replace `expert-review-audit.md`** with a *recorded* audit:
+   reviewer names, signed comments, dated. If you can't get any
+   reviewer to sign, treat the empty rubric as *evidence the plan
+   isn't real enough yet*.
+
+5. **Set a 30-day deadline for the audit.** If no signed external
+   review exists by then, consider that itself a signal.
+
+**Why this is safe.** External eyes find what self-review can't. Even
+$500 of paid review pays back many times over against a $25k SOC2
+mistake or a wrong-segment go-to-market.
+
+**Watch out.** Don't audit-shop. One critical reviewer is more
+valuable than three friendly ones.
+
+---
+
+## 15. P14 mitigation — Pedagogical-research → product-feature leap
+
+**Problem (recap).** Lab studies measure forced participation; the
+product serves voluntary subscribers who skip the spaced-review banner.
+Compliance with the intervention is the entire question, hand-waved.
+
+**What to do — measure your own outcomes and stop borrowing:**
+
+1. **Pre-register one measurable outcome.** Before launch, commit
+   publicly to a specific number you intend to hit: e.g., "≥30% D7
+   retention on free-trial signups, measured at N=200." Pre-
+   registration is the credibility move; it costs nothing.
+
+2. **Ship the simplest version of every cognitive-science feature
+   first.** A spaced-review banner is fine; a calibration-Δ trend
+   sparkline is fine. Don't ship the full LM1–LM8 stack at launch.
+   Compliance with the simplest version is the leading indicator.
+
+3. **Measure compliance, not just outcomes.** "X% of users opened the
+   spaced-review banner within 24h" is the variable you actually
+   control. The downstream retention number is what falls out.
+
+4. **A/B test with treatment-vs-control.** The dossier promises this
+   (`:968, :988, :1007`); the negative study notes N is too small.
+   At your realistic N, A/B is impossible early. Ship without claims;
+   measure for 6 months; only then test.
+
+5. **Stop citing transferred effect sizes.** Replace
+   *"~2× retention vs massed practice (Cepeda 2008)"* with *"We
+   schedule reviews on an expanding interval informed by Cepeda
+   2008. Whether this produces a measurable lift in our context is
+   pending data."*
+
+6. **Be willing to find that some of these mechanisms don't transfer.**
+   The intellectual-honesty win is not "we copied 50 years of
+   research"; it is "we measured what transferred and discarded what
+   didn't."
+
+**Why this is safe.** Methodologically honest framing is less
+exciting and more durable. Investors and serious buyers prefer it.
+Casual buyers don't notice either way.
+
+**Watch out.** This makes the decks less impressive. You will feel a
+strong pull to put the effect sizes back in. Resist it. The first
+buyer who Googles "Maven 96%" and finds it's altMBA's W1→W2 number,
+not a completion number, becomes a permanent-no.
+
+
 
 
