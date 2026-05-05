@@ -861,6 +861,9 @@ actually needed.
   Calibration-Δ + spaced-review + retake mode are the
   differentiation; without them, launch isn't viable (iteration
   02 N21).
+  **Launch (v1):** `/dashboard` ships calibration-Δ trend only.
+  **v1.1** (Month 4–5 post-launch) adds spaced-review controls and
+  retake mode UI. (iter-06 N43 cut + iter-11 T-11.1.)
 - **Hosting (revised iter-08 N55, ranked by operator-time-cost):**
   1. **Render Professional ($19/mo)** — Postgres bundled, Node
      standard, lowest ops complexity. **Default for §16.**
@@ -1133,6 +1136,12 @@ to quarterly. Operator hours drop to 2–4 hr/wk. Revenue plateau at
 conversion-time level. Acceptable if operator has met success-
 definition (1) (financial) and wants out.
 
+**Lifetime-deal (Y2 only, iter-11 T-11.2).** AppSumo / Lemon Squeezy
+lifetime-deal listing — typical $39–79 for 6× lifetime-LTV with
+capped redemptions (e.g., 1,000 codes). One-time cash injection
+~$30–60k; useful as a Y2 runway-extension option if MRR is on track
+but cash-flow timing matters. Not a Y1 motion (needs case studies).
+
 **Wind-down (kill).** 90-day notice to all subscribers. 6-month
 static catalog access. Refund any annual subscribers pro-rata.
 Open-source the catalog content under CC BY-NC-SA. Retire branded
@@ -1154,6 +1163,32 @@ today (i.e., **by 2026-11-05**), **stop the project**. The product
 requires founder cognitive-science mastery to be defensible;
 mastery is provable; if it can't be proved, the project shouldn't
 ship.
+
+### 16.17 Pre-launch security checklist (added 2026-05-05, iter-12)
+
+**2FA on every account** (T-12.1):
+- Clerk, Stripe, Anthropic, GitHub, domain registrar, hosting
+  (Render / Vercel / Cloudflare), Neon, personal email, brand
+  social accounts.
+- One-time setup, ~30 minutes total.
+
+**Supply-chain hardening** (T-12.2):
+- `pnpm audit` in CI on every PR; failures block merge.
+- Dependabot PRs reviewed weekly; major-version bumps need
+  manual review.
+- Lockfile pinning: no caret (`^`) in dependencies; exact versions
+  (`pnpm install --save-exact`).
+- Quarterly `npm-audit-resolver` review in §17b.
+
+**Secret rotation** (T-12.3):
+- Quarterly rotation of ANTHROPIC_API_KEY, STRIPE_API_KEY,
+  CLERK_SECRET_KEY at minimum, in §17b. Vercel / Render env-var
+  versioning supports zero-downtime rotation.
+
+**Domain registrar** (T-12.4):
+- Porkbun or Cloudflare Registrar. Transfer-locked, 2FA on,
+  contact info masked, auto-renew enabled with backup payment
+  method.
 
 ### 16.13 Cost circuit-breaker (added 2026-05-05, iter-05 N42)
 
@@ -1362,6 +1397,13 @@ biased against quitting; self-monitoring fails predictably.
    call. If a trigger has been hit and not actioned, the reviewer's
    only assignment is to ask "why are you not stopping?" until a
    number-based answer exists.
+
+**Pre-commitment device (iter-13 T-13.1).**
+Operator pre-commits $500 to a charity-of-anti-choice (StickK-
+style) on project start. If the operator fails to take a kill-
+trigger action within 14 days of the trigger firing as recorded
+by the reviewer, the $500 releases. Expected cost: $0; the
+behavioural cost of the *threat* of release is the point.
 
 **Quarterly checklist additions (iter-10 T-10.1, T-10.2):**
 - Link-rot scan: automated check (`lychee` or similar) that all

@@ -14,3 +14,6 @@ One-line summary per iteration. New iterations append at the bottom.
 | 08 | 2026-05-05 | Final structural attack (competitive response / category) | 3 (N54 first-mover erodes during 6-10mo build, N56 financial framing too soft, N58 no consolidated v2 doc) + 2 tactical (N55 Cloudflare ops complexity, N57 exit / wind-down) | 0 |
 | 09 | 2026-05-05 | Streak validation pass 1 | **0 structural** + 4 tactical (T-09.1 insurance breakdown, T-09.2 cert scope, T-09.3 archive remaining venture-shape docs, T-09.4 hosting line) | **1/5** |
 | 10 | 2026-05-05 | Streak validation pass 2 (adversarial-customer angle) | **1 structural** (N59 day-job employment-agreement risk) + 3 tactical (T-10.1 link-rot scan, T-10.2 content-freshness audit, T-10.3 personal support inbox) | **0/5 RESET** |
+| 11 | 2026-05-05 | Streak validation (failed-cert-prep-PM angle) | 0 structural + 2 tactical (T-11.1 dashboard scope at v1, T-11.2 lifetime-deal Y2 cash motion) | **1/5** |
+| 12 | 2026-05-05 | Streak validation (SRE / supply-chain angle) | 0 structural + 4 tactical (T-12.1 2FA, T-12.2 supply-chain, T-12.3 secret rotation, T-12.4 registrar) | **2/5** |
+| 13 | 2026-05-05 | Streak validation (behavioural-econ angle) | 0 structural + 2 tactical (T-13.1 StickK $500 device, T-13.2 weekly motivation log) | **3/5** |

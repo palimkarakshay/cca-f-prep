@@ -124,3 +124,15 @@ days, the project stops per §17.
 | Date | Trigger | Reviewer | Operator response | Outcome |
 |---|---|---|---|---|
 | *(none yet)* | | | | |
+
+---
+
+## Weekly motivation log (iter-13 T-13.2)
+
+Each Sunday, operator records: *"would I do this again knowing what I now know?"* 1–10.
+Three consecutive weekly ratings <5 triggers a §17 stop-review
+(mandatory reviewer call, not auto-stop).
+
+| Week | Score | Note |
+|---|---|---|
+| *(starts at project commit)* | | |
