@@ -862,8 +862,10 @@ actually needed.
   differentiation; without them, launch isn't viable (iteration
   02 N21).
   **Launch (v1):** `/dashboard` ships calibration-Δ trend only.
-  **v1.1** (Month 4–5 post-launch) adds spaced-review controls and
-  retake mode UI. (iter-06 N43 cut + iter-11 T-11.1.)
+  **v1.1** (Month 4–5 post-launch) adds spaced-review controls,
+  retake mode UI, and **subscription pause** (iter-14 T-14.3 —
+  reduces involuntary churn ~15%). (iter-06 N43 cut + iter-11
+  T-11.1.)
 - **Hosting (revised iter-08 N55, ranked by operator-time-cost):**
   1. **Render Professional ($19/mo)** — Postgres bundled, Node
      standard, lowest ops complexity. **Default for §16.**
@@ -921,6 +923,14 @@ non-negotiable launch features (re-instated from §16.4 defer list):
 
 No B2B. No SSO. No SAML. No SCIM. No SOC2 commitment. No custom
 catalogs.
+
+**Friend-and-family policy** (iter-14 T-14.1). Friends pay at list
+price with the same refund policy as everyone else. No comp
+accounts.
+
+**Pre-renewal reminders** (iter-14 T-14.4). Stripe Subscription
+Reminder emails enabled at 7-day and 1-day before renewal for
+annual subscribers. Required in California; defensible everywhere.
 
 ### 16.3 Who you sell to
 
@@ -1285,8 +1295,13 @@ income, no product risk.
 | Insurance bundle (iter-04 N32; itemised iter-09 T-09.1) | $200 (GL ~$50, cyber ~$50, E&O ~$100) |
 | LLC + registered agent amortised (iter-04 N32) | $0–25 |
 | Privacy policy / attorney review amortised (iter-04 N34) | $42 ($500/yr ÷ 12) |
-| **Subtotal Y1** | **$332–552 (API path)** / **$544–672 (Max path)** |
-| (iter-05 hosting + R2 + iter-07 Stripe Tax applied) | |
+| **Subtotal Y1** | **$374–552 (API path)** / **$544–672 (Max path)** |
+| (iter-15 T-15.1 math correction; iter-05 + iter-07 deltas applied) | |
+
+*Note (iter-15 T-15.2): the insurance line ($200/mo) starts at
+first paying user (~Month 9 per §16.3 timing). Y1 effective
+insurance amortised across 12 months is ~$50/mo. Y2 onward is the
+full $200/mo.*
 
 The earlier "$50/mo" framing was indefensible.
 
@@ -1351,6 +1366,7 @@ triggers.
 | Month 12: MRR < $500 OR organic search < 500 unique monthly | Stop. Migrate to §17.2. |
 | Month 18: MRR < $2,000 | Stop. Migrate to §17.2. |
 | **AI-103 demand-failure** (iter-03 N28): by Month 6 search volume <200/mo | Pivot catalog to backup (CompTIA Security+, AWS DVA-C02, CCA-Developer if live) within 30 days OR stop. |
+| **Catalog-retirement announced** (iter-15 T-15.3) | Within 30 days, decide on next catalog OR plan wind-down per §16.16. |
 | 3 paid pilots fail their pre-defined success criteria (B2B path) | Stop the B2B motion. Refund nothing (pilots are paid; criteria failed for product, not pricing). |
 | AI cost line exceeds 30% of MRR for two consecutive months | You under-priced or your unit economics broke. Raise prices or stop. |
 | Vercel / Anthropic / Clerk TOS-relevant policy change | Migration runbook activates. If migration > 2 weeks, stop — vendor risk has crystallised. |
@@ -1382,9 +1398,13 @@ biased against quitting; self-monitoring fails predictably.
 2. **Calendar invites are owned by the reviewer**, not the operator.
    Cadence: Month 3, 6, 9, 12 from project start. Operator cannot
    decline more than one without triggering an automatic stop-review.
-3. **Live MRR + cost dashboard.** Stripe webhook → public-read
-   Notion / Sheets / a custom 50-line page. Anyone with the URL
-   sees current MRR, cost basis, AI-cost-as-%-of-MRR, and
+3. **Live MRR + cost dashboard (iter-14 T-14.2).** Default Y1: a
+   custom 30–50 line Next.js / Astro page that reads Stripe via
+   webhook into a Postgres `daily_metrics` table. Public read URL,
+   refreshes daily. Y2 (if MRR > $5k): switch to Baremetrics
+   ($50/mo) for plug-and-play.
+   Anyone with the URL sees current MRR, cost basis,
+   AI-cost-as-%-of-MRR, and
    **three paying-user numbers tracked separately** (iter-02 N15):
    total signups (vanity, do not optimise on this); 30-day-retained
    paying users (the real number); trailing-30-day churned paying

@@ -52,5 +52,7 @@ review.
 
 - `ledger.md` — one-line summary per iteration.
 - `iter-NN-critique.md` / `iter-NN-mitigations.md` — per-iteration pair.
-- `final-business-plan-v2.md` — the consolidated post-iteration plan
-  (created only after the 5-pass streak is achieved).
+- `final-business-plan-v2.md` — **the consolidated post-iteration
+  plan, created 2026-05-05 after iter-15 streak 5/5 ✓.** This is the
+  canonical answer to "what is the current plan?" — read this
+  first.

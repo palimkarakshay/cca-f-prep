@@ -17,3 +17,5 @@ One-line summary per iteration. New iterations append at the bottom.
 | 11 | 2026-05-05 | Streak validation (failed-cert-prep-PM angle) | 0 structural + 2 tactical (T-11.1 dashboard scope at v1, T-11.2 lifetime-deal Y2 cash motion) | **1/5** |
 | 12 | 2026-05-05 | Streak validation (SRE / supply-chain angle) | 0 structural + 4 tactical (T-12.1 2FA, T-12.2 supply-chain, T-12.3 secret rotation, T-12.4 registrar) | **2/5** |
 | 13 | 2026-05-05 | Streak validation (behavioural-econ angle) | 0 structural + 2 tactical (T-13.1 StickK $500 device, T-13.2 weekly motivation log) | **3/5** |
+| 14 | 2026-05-05 | Streak validation (cert-prep-veteran angle) | 0 structural + 4 tactical (T-14.1 friend-and-family, T-14.2 dashboard tool, T-14.3 sub-pause v1.1, T-14.4 pre-renewal reminder) | **4/5** |
+| 15 | 2026-05-05 | Streak validation (CPA + 3-exit-founder + ops-director panel) | 0 structural + 3 tactical (T-15.1 cost-basis math, T-15.2 insurance amortisation, T-15.3 catalog-retirement trigger) | **5/5 ✓ COMPLETE** |
