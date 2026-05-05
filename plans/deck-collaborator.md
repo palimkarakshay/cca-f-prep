@@ -113,6 +113,20 @@ You are **not** starting from a blank Next.js project.
 
 Tickets, file paths, and acceptance criteria are in [`./content-pack-management-plan.md`](./content-pack-management-plan.md) §C9–C11.
 
+> **v2 review note.** 18 days mis-scoped by ~5×. v2 plan:
+> - **8–12 weeks part-time** (week-by-week in
+>   `./IMPLEMENTATION.md` v2 section).
+> - 6 surfaces total (drop the standalone Astro marketing project;
+>   use a `/` route in the Next.js app).
+> - **Drop the admin app entirely in v1**; operator authors offline
+>   via Claude Code on Max 20× and commits JSON.
+> - **Single-tenant data model in v1**; RLS migration deferred
+>   until ≥ 3 paying B2B tenants. RLS-only-isolation as primary
+>   tenant boundary on serverless Postgres is fragile (one missed
+>   `withTenant()` = catastrophic leak); v2 buys time before that
+>   discipline is load-bearing.
+> See `./v2-scaled-b2b-plan.md` §5–§6.
+
 ---
 
 ## What you'd build in Phase 2
@@ -369,6 +383,20 @@ These are documented in §C12 of the plan as "what we deliberately did not do."
 - Someone who wants to use this as their first AI/LLM project (we need pattern-recognition, not learning-on-the-job here).
 - Someone who needs a salary in month 1 — Phase 1 has no revenue and no fundraising.
 - Someone who wants to add another framework / language / orchestration layer to the stack.
+
+> **v2 review note — recruiting paused.** The "either co-founder
+> (equity-heavy, unpaid until revenue) or first-hire (cash + small
+> equity once Phase 1 hits the gate)" framing has no equity %, no
+> vesting, no cliff, no cash floor, no IP-assignment terms — and a
+> senior engineer reading this carefully should decline (per
+> hostile-review verdict, `./business-viability-research-notes.md`
+> §4). v2 explicitly **does not hire a collaborator in v1**.
+> Phase 1 is a solo 8–12 week build. A first hire is reconsidered
+> only if v2 success-gates fire (`./v2-scaled-b2b-plan.md` §7) AND
+> the first $1k MRR sustains for 8 weeks. At that point the offer
+> shape is rewritten with concrete numbers (cash + equity %,
+> 4-yr vest, 1-yr cliff, IP assignment, exit clauses) before any
+> recruiting outreach. See mitigation §11.
 
 ---
 
