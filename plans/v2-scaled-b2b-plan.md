@@ -372,4 +372,136 @@ time CAC.
 **Honest LTV:CAC**: targeted 3:1 once paid acquisition turns on;
 in v1 it is N/A because there is no paid acquisition.
 
+---
+
+## 9. Vendor strategy — provider abstraction from day 1
+
+**Per mitigation plan §12.** Build the LLM-call layer through a
+vendor-neutral interface from day 1. Don't yak-shave a custom DSL;
+use OpenRouter or a thin OpenAI-shape wrapper.
+
+**Concrete v2 commitments:**
+
+1. **All AI calls go through `lib/ai/router.ts`** — a single file,
+   one function `generate({ system, user, model })`. Default route:
+   Anthropic via OpenRouter. No Anthropic SDK calls outside this
+   file.
+2. **No prompt caching keys, no XML tool-use, no Anthropic-specific
+   features in core paths in v1.** When introduced (Phase 2), they
+   are isolated to a `lib/ai/anthropic-features.ts` module that has
+   a graceful fallback.
+3. **Prompt templates are markdown** in `prompts/` directory; never
+   inline strings.
+4. **Migration runbooks** at `plans/runbooks/`:
+   - `runbook-vercel-to-cloudflare.md`
+   - `runbook-clerk-to-betterauth.md`
+   - `runbook-neon-to-supabase.md`
+   - `runbook-anthropic-to-openai.md`
+   - `runbook-stripe-to-paddle.md`
+   Each: one page, three sections (trigger / steps / blast radius +
+   ETA). Don't *do* the migrations; just *plan* them.
+5. **Hard server-side cost circuit breaker.** Per-tenant token
+   ledger; reaching the cap **stops generation**, doesn't just warn.
+   ~1 day of work; saves a runaway invoice.
+6. **Cap the vendor count at 6.** Vercel, Clerk, Neon, R2, Stripe,
+   OpenRouter. Add only when revenue demands.
+
+---
+
+## 10. Risk register (revised)
+
+| Risk | Likelihood | Impact | Mitigation in v2 |
+|---|---|---|---|
+| AI cost spikes 3× overnight | M | M | Hard server-side per-tenant cap; Haiku-default; OpenRouter switch route |
+| Anthropic deprecates a model | M | L | Vendor abstraction; OpenRouter fallback to OpenAI |
+| Vercel TOS / pricing change | L | M | Already on Pro; runbook for Cloudflare migration |
+| Quality incident reaches a learner | M | H | Validators + 5% sampled critic + post-publish "pause-not-pull" + open-source library for community review |
+| Operator hits >30 hr/wk for 2 months | M | H | Cap pilots at 2; cap B2B tenants at 10; stop-signal triggers |
+| First B2B prospect demands SOC2 | H | M | Walk away politely; document as "not in v1"; ICP filter |
+| Day-job conflict | M | H | Side-bet shape preserved; never quit day job until MRR ≥ 60% take-home for 2 quarters |
+| Hyperscaler ships a free competitor for cert-prep | L | H | Differentiate on community + niche-cert depth; if they ship and dominate, exit gracefully |
+| Validator suite goes obsolete with model upgrade | H | L | Already open-sourced as commodity tooling; not the moat |
+| 76% B-bias regression repeats | M | L | Pre-publish validator with letter-distribution check (already coded as F1); CI-fail if violated |
+
+---
+
+## 11. Stop-signals (carried over from mitigation plan §17)
+
+These are non-negotiable kill triggers, not "consider pivoting"
+triggers.
+
+| Trigger | Action |
+|---|---|
+| MRR < $1,000 by Month 6 | Stop. Migrate to open-source library + consulting. |
+| 3 B2B pilots fail their pre-defined success criteria | Stop the B2B motion. |
+| AI cost > 30% of MRR for 2 consecutive months | Raise prices or stop. |
+| Vercel / Anthropic / Clerk policy change requires > 2 weeks migration | Stop. Vendor risk crystallised. |
+| Operator > 30 hr/wk for 2 consecutive months on side-bet schedule | Stop or quit day job consciously. |
+| Day-job income or partner relationship at risk | Stop immediately. |
+| External reviewer (paid, signed, dated) recommends "do not continue" | Don't continue. |
+| 12 months elapsed and < 100 paying users | Segment fit wrong. Stop. |
+| Quality incident with documented harm reaches a learner | Stop new generation; fix; audit; publicly document. |
+
+---
+
+## 12. What v2 explicitly does NOT promise
+
+(Carried over from mitigation plan appendix; bind operator against
+scope creep.)
+
+- $25M ARR.
+- $100k MRR by Month 24.
+- 95% gross margin.
+- 110%/120% NRR.
+- 3 signed B2B LOIs in Year 1 (target is **1 signed pilot**).
+- Mid-market enterprise deals.
+- SOC2 Type 2 in Year 1.
+- A "category-king" outcome.
+- Venture funding.
+- A team of 12.
+- 7 vertical wedges.
+- Anthropic acquisition.
+- Outcome equivalence with Maven, altMBA, Duolingo, Cornerstone.
+
+What it *does* promise: a sustainable side project that **makes a
+B2B case viable at small scale** while preserving the operator's
+day-job income, family time, and reputation. Optionality to grow
+later if the data warrants.
+
+---
+
+## 13. Crosswalk — v1 → v2 changes by document
+
+For each v1 doc, the headline changes:
+
+| Doc | v1 claim | v2 status |
+|---|---|---|
+| `deck-overview.md` §"Two markets, one product" | $9 B2C + $5–15 B2B | **Updated**: $15 B2C + $20–25 B2B with $300/mo platform minimum |
+| `deck-overview.md` §"Phase 1 cost — essentially free" | ~$1/mo | **Updated**: ~$20/mo (Vercel Pro from day 1) |
+| `deck-overview.md` §"Phase 2 cost" | $450–1000/mo | **Updated**: $400–2,000/mo at v2 scale (10× lower scale than v1) |
+| `deck-overview.md` §"Pricing math at modest scale" | 95% gross margin | **Updated**: 60–75% honest gross margin |
+| `deck-overview.md` §"Why learners come back" | Maven 96% + Duolingo CURR | **Struck**; replaced with methodologically honest framing |
+| `deck-overview.md` §"Eight segments, one engine" | 7+ segments | **Reduced to 1 segment** (tech-cert prep for adults; B2B = small eng teams) |
+| `deck-overview.md` §"Phase 1 timeline — ~18 working days" | 18 days | **Updated to 8–12 weeks part-time** |
+| `deck-investor.md` §"Market size (rough)" | $370B TAM, 0.05% = $25M ARR | **Struck**; replaced with bottoms-up named-account count |
+| `deck-investor.md` §"Business model & unit economics" | 95% margin, 110%/120% NRR | **Struck**; replaced with honest 60–75% / 95–105% |
+| `deck-investor.md` §"Roadmap to $100k MRR" | Month 24–30 | **Struck**; v2 targets ~$10–15k MRR by Month 12 |
+| `deck-investor.md` §"What we're asking for" | "Not raising capital." | **Unchanged**; v2 is explicitly bootstrapped |
+| `deck-b2b-prospect.md` §"Pricing after the pilot" | $5/$10/$15 tiers | **Updated**: $20/$25, drop $5 tier, $300/$750 platform min |
+| `deck-b2b-prospect.md` §"Pilot offer" | $5,000 fully credited | **Updated**: $10,000, no credit |
+| `deck-b2b-prospect.md` §"Security & compliance" | SOC2 at 5 enterprise tenants | **Updated**: SOC2 not in v1; ICP filter excludes buyers requiring it |
+| `deck-b2b-prospect.md` §"How we make your SMEs effective" | Custom-catalog AI drafting from buyer's files | **Deferred to Phase 2** |
+| `deck-collaborator.md` §"Phase 1 build (~18 days)" | 18 days | **Updated**: 8–12 weeks |
+| `deck-collaborator.md` §"What we're asking for" | Co-founder shape, vague terms | **Updated**: explicit "no collaborator hire in v1" |
+| `IMPLEMENTATION.md` Part 1–6 | 18-day Phase 1 | **Superseded**; see §6 above + `IMPLEMENTATION.md` v2 section |
+| `content-pack-management-plan.md` §C9–C11 | Same 18-day breakdown | **Superseded**; see §6 above |
+| `research-and-strategy-dossier.md` §5.1 TAM | $20–40B SAM, 0.05% = $25M ARR | **Struck** as quantitative claim; kept as qualitative framing |
+| `research-and-strategy-dossier.md` §5.4 unit economics | 95%, 110/120%, $0 CAC | **Struck**; replaced with v2 §8 numbers |
+| `research-and-strategy-dossier.md` §5.7 Phase-1 budget | 18 days operator-time | **Struck**; replaced with v2 §6 |
+| `expert-review-audit.md` whole doc | Empty rubric | **Replaced** by negative study + this document; legacy doc archived |
+
+The v1 docs remain on disk as a record of v1 thinking. **Where v1
+and v2 conflict, v2 wins.**
+
+
 
