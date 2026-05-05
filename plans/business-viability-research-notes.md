@@ -559,3 +559,193 @@ risk explicitly.**
 
 *"A senior engineer reading this carefully should decline."*
 
+---
+
+## 5. Subagent E — 2026 market & competitor research
+
+**Verdict (subagent E verbatim).** *"Avoid. The category is
+consolidating into hyperscaler-owned suites and well-funded
+incumbents while unit economics for solo-founder entrants are worse
+than the public narrative implies."*
+
+### E.1 The category just consolidated — and Anthropic / Google are inside
+
+The single most important data point of 2025–2026:
+
+- **Workday acquired Sana Labs for $1.1B on 16 Sep 2025**, just 11
+  months after Sana's $55M Series C at a $500M valuation. Sana was
+  the AI-LMS poster child ($52.1M ARR in 2024). Absorbed into a
+  payroll/HR suite.
+  ([Tracxn](https://tracxn.com/d/companies/sanalabs/__C7mWGl7WBpjTRaITkIfLsRLk2eLLXb9gl5RTRGYKYxA),
+  [TechFundingNews](https://techfundingnews.com/swedish-ai-tech-sana-raises-55m-at-500m-valuation-to-redefine-workplace-training-with-ai/))
+
+  **The exit window for "best-of-breed AI-LMS" is now suite-bundling,
+  not standalone scale.**
+
+- **Synthesia at $4B valuation, $200M Series E (Oct 2025)**, >$100M
+  ARR, used by 90%+ of the Fortune 100. Studio 3.0 launched real-
+  time *"Video Agents"* in Oct 2025.
+  ([TechCrunch](https://techcrunch.com/2026/01/26/synthesia-hits-4b-valuation-lets-employees-cash-in/),
+  [Synthesia announcement](https://www.synthesia.io/post/series-e-200-million-4-billion-valuation-future-work))
+
+- **Articulate AI Assistant** is bundled directly into Articulate 360
+  ($1,449–$1,749/user/yr): course-outline generation, quiz
+  generation, image generation, voice/SFX, *"9× faster authoring."*
+  ([Articulate](https://www.articulate.com/blog/ai-assistant-is-here/),
+  [Maestro review](https://maestrolearning.com/blogs/articulate-rise-360-ai/))
+
+- **Kahoot! AI** ships AI question generation from $10/mo
+  ([SaaSworthy](https://www.saasworthy.com/product/kahoot/pricing)).
+
+- **360Learning** at $8/seat/mo
+  ([Disco comparison](https://www.disco.co/blog/top-12-lms-platforms-corporate-ld-2026)).
+
+  *Anything a solo founder ships at $9/mo is pinned between these.*
+
+### E.2 Hyperscaler threat — live, not hypothetical
+
+- **Anthropic Claude for Education** launched 2 Apr 2025;
+  Northeastern (50k seats) is design partner
+  ([theaitrack.com](https://theaitrack.com/claude-for-education-anthropic-launch/)).
+  Teach For All partnership covers 100k+ teachers in 63 countries
+  ([Anthropic](https://www.anthropic.com/news/anthropic-teach-for-all)).
+- **Claude Marketplace** launched Mar 2026 — enterprise procurement
+  channel for Claude-powered tools, **0% commission**, partners
+  include Snowflake, Harvey, Replit
+  ([VentureBeat](https://venturebeat.com/technology/anthropic-launches-claude-marketplace-giving-enterprises-access-to-claude),
+  [SiliconANGLE](https://siliconangle.com/2026/03/06/anthropic-launches-claude-marketplace-third-party-cloud-services/)).
+- **NotebookLM Enterprise** GA in 2026 with VPC-SC, SOC2, ISO 27001,
+  no training on customer data, audio/video overviews **explicitly
+  pitched** for *"turning dry manuals into training modules"*, Mar
+  2026 Google Classroom integration
+  ([Google Workspace Updates](https://workspaceupdates.googleblog.com/2026/03/new-ways-to-customize-and-interact-with-your-content-in-NotebookLM.html),
+  [Baytech](https://www.baytechconsulting.com/blog/b2b-executive-guide-google-notebooklm)).
+- *"OpenAI, Google, Microsoft, and Anthropic are rolling out
+  integrated learning solutions"* — ChatGPT Study Mode, Gemini in
+  Classroom, Claude Learning Mode
+  ([Rest of World](https://restofworld.org/2026/edtech-funding-collapse-k12-startups-ai-workforce/)).
+
+### E.3 Unit economics — the bear case is the base case
+
+- **SMB NRR is not 110–120%.** SaaS Capital / Pavilion 2025 data:
+  SMB segments cluster at **90–105% NRR**, market median compressed
+  to **101%**, ACV $25–50k median is 102%
+  ([Pavilion 2025 Benchmarks](https://www.joinpavilion.com/resource/b2b-saas-performance-benchmarks)).
+- **SMB churn is 8.2× higher than enterprise.** Edtech specifically
+  trades below 5× revenue precisely because of *"higher CAC, limited
+  pricing power, and inconsistent retention"*
+  ([Finro Q4 2025 EdTech multiples](https://www.finrofca.com/news/edtech-multiples-q4-2025)).
+- **B2C cert-prep at $9/mo is structurally brutal.** B2C subscription
+  retention runs ~72% vs 90% B2B; edtech case studies cite churn so
+  severe that improving from 15% to 50% retention is a published win
+  ([loyalty.cx](https://loyalty.cx/edtech-churn-rate/),
+  [Focus Digital](https://focus-digital.co/average-customer-retention-rate-by-industry/)).
+  At $9/mo with 8% monthly churn, LTV ~$112; against any realistic
+  paid CAC, the LTV:CAC math doesn't pencil.
+- **Mid-market sales cycle is a solo-founder killer.** Mid-market
+  B2B SaaS sales cycles are **60–120 days, lengthened 22% since 2022**
+  ([Optifai](https://optif.ai/learn/questions/sales-cycle-length-benchmark/),
+  [Growthspree](https://www.growthspreeofficial.com/blogs/b2b-saas-sales-cycle-length-benchmarks-2026-by-acv-vertical)).
+  Mid-market wins close at ~30–39% of opportunities; solo enterprise
+  close rate 25–31%
+  ([Digital Bloom](https://thedigitalbloom.com/learn/pipeline-performance-benchmarks-2025/)).
+- **Solo-founder time-to-meaningful-revenue runs 2–3 years**, with
+  ~70% of micro-SaaS founders earning under $1k MRR and median
+  profitable micro-SaaS at $4.2k MRR
+  ([Freemius State of Micro-SaaS 2025](https://freemius.com/blog/state-of-micro-saas-2025/)).
+- **SOC2 is now table stakes** for mid-market L&D — *"SOC 2, HIPAA,
+  FedRAMP requirements are increasingly standard even outside
+  regulated industries"* (Optifai).
+
+### E.4 The "Maven 96% completion" framing is misleading
+
+The 96% number is **altMBA's** completion rate (Wes Kao's pre-Maven
+Seth Godin program), reported in HBR — not Maven platform-wide.
+**Maven's own Series A press release cites *"more than 75%"*
+completion**
+([PR Newswire](https://www.prnewswire.com/news-releases/maven-raises-20-million-in-series-a-funding-led-by-andreessen-horowitz-301295905.html)).
+The 96% figure on Maven's LinkedIn refers specifically to **week-1-
+to-week-2 retention**, not course completion.
+
+Maven has raised ~$25–30M total, has just **63 employees per
+PitchBook**, and **Wes Kao is listed as former co-founder**
+([PitchBook profile](https://pitchbook.com/profiles/company/453344-95)).
+Seats sell at $1k–$10k+ for live cohorts. **Comparing $9/mo
+asynchronous SaaS completion economics to a $2k+ live-cohort
+instructor-led program is apples-to-oranges**; the completion
+premium comes from instructor pressure and sunk-cost commitment, not
+the platform.
+
+### E.5 TAM / market-size citations don't survive scrutiny
+
+Mordor's *"$3.32B → $5.81B at 11.83% CAGR"* figure is real
+([Mordor Intelligence](https://www.mordorintelligence.com/industry-reports/microlearning-market))
+— but the spread between vendors is the tell:
+
+| Source | 2024–25 TAM | 2030–34 TAM | CAGR |
+|---|---|---|---|
+| Mordor | $3.32B (2026) | $5.81B (2031) | 11.83% |
+| Mordor (older) | $2.62B (2024) | $4.87B (2029) | 13.13% |
+| Fortune Business Insights | $3.1B (2025) | $9.63B (2034) | 13.43% |
+| Verified Market Reports | $3.76B (2024) | $12.73B (2033) | 15.2% |
+
+Each report defines scope differently. **Treat any single TAM
+figure as marketing.**
+
+The **2.7B deskless-workers** statistic traces to a **2018**
+Deskless Workforce report, recycled by TalentCards / eduMe / etc.
+([eduMe blog](https://www.edume.com/blog/deskless-workforce-training)).
+Eight years old, reused as "current."
+
+The LinkedIn 39% reskilling number is **WEF 2025 Future of Jobs by-
+2030 projection**, not a current customer-pain reading
+([LinkedIn 2025 WLR PDF](https://learning.linkedin.com/content/dam/me/learning/en-us/images/lls-workplace-learning-report/2025/full-page/pdfs/LinkedIn-Workplace-Learning-Report-2025.pdf)).
+
+### E.6 The funeral roll — edtech is in a multi-year contraction
+
+- **EdTech VC at $580M Q1 — a 10-year low**, *"even AI tailwind
+  couldn't hold it up"*
+  ([HolonIQ](https://www.holoniq.com/notes/edtech-vc-collapse-at-580m-for-q1-not-even-an-ai-tailwind-could-hold-up-the-10-year-low)).
+- K-12 edtech funding **down 82%** vs 2021 peak; total VC under $3B
+  vs $16.7B in 2021
+  ([Rest of World](https://restofworld.org/2026/edtech-funding-collapse-k12-startups-ai-workforce/)).
+- **Byju's** ($22B → collapse), **Edukoya** (shut 2025), 729+
+  startup shutdowns YTD 2025 per Tracxn, 3,903 in 2024
+  ([YourStory](https://yourstory.com/2025/12/year-in-review-what-took-down-2025s-biggest-startups),
+  [TechCrunch](https://techcrunch.com/2025/01/26/2025-will-likely-be-another-brutal-year-of-failed-startups-data-suggests/)).
+- EdTech Digest explicitly warns: *"EdTech Startups in the Age of AI
+  Giants — risks now sit with anyone competing against OpenAI/
+  Anthropic/Google features"*
+  ([EdTechDigest](https://www.edtechdigest.com/2025/08/22/edtech-startups-in-the-age-of-ai-giants-where-the-risks-are-and-where-to-win/)).
+
+### E.7 What a solo founder is actually betting against
+
+- Pricing floor: **$8/seat/mo** (360Learning), **$10/mo** (Kahoot!
+  AI), **free** (NotebookLM with Workspace).
+- Authoring tooling: **Articulate Rise + AI Assistant** for the SMB
+  tier; **Synthesia** for video.
+- Distribution: **Claude Marketplace** with 0% commission for
+  Anthropic-aligned vendors.
+- Capital: Synthesia $200M, Sana exit $1.1B, NEA/GV/a16z all in.
+
+A solo founder needs (a) a 60–120 day sales cycle they cannot
+personally staff, (b) SOC2 to clear procurement, (c) feature parity
+against incumbents that ship monthly AI updates, (d) marketing
+budget against players with 9-figure ARR. **Realistic time-to-
+meaningful-revenue: 2–3 years. Realistic NRR: 95–105%, not 110–120%.
+Realistic monthly B2C churn at $9/mo: 5–10%.**
+
+### E.8 Hard quotes (subagent E shortlist)
+
+- *"Workday acquired Sana for $1.1B on 16 Sep 2025"* — Tracxn
+- *"SMB churn is 8.2× higher than enterprise"* — Pavilion 2025
+- *"Sales cycles have lengthened 22% since 2022"* — Optifai
+- *"70% of micro-SaaS makers earn under $1,000 MRR"* — Freemius 2025
+- *"EdTech VC at $580M Q1 — 10-year low"* — HolonIQ
+- Maven's *own* press release cites *"more than 75% completion"* —
+  not 96%
+- NotebookLM Enterprise is *"VPC-SC compliant, no training on
+  customer data, GA 2026"* — Baytech / Google
+
+**The bear case is not a stretch — it is the modal outcome.**
+
