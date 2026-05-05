@@ -469,3 +469,93 @@ pushed out of scope in §F. The decks' rosy claims (95% margin, $25M
 ARR, 18-day Phase 1) survive untouched because the audit framework,
 by design, never reaches them."*
 
+---
+
+## 4. Subagent D — collaborator-deck critique
+
+**Source.** `deck-collaborator.md` (~25KB).
+
+### D.1 The ask is cynically vague
+
+L347: *"Either a co-founder shape (equity-heavy, unpaid until
+revenue) or a first-hire shape (cash + small equity once Phase 1
+hits the gate)."* No equity %, no vesting, no cliff, no cash number,
+no gate definition.
+
+L355: *"Someone who needs a salary in month 1 — Phase 1 has no
+revenue and no fundraising."* Translation: **work 18 days unpaid, on
+terms negotiated after you've sunk the time.** Textbook bait-and-
+switch shape that burns senior engineers. No founder agreement, no
+IP assignment terms, no exit clauses mentioned anywhere.
+
+### D.2 Complexity concealment is egregious
+
+L311: *"No exotic stack. No gRPC, no Protobuf, no Kubernetes, no DIY
+auth."* Then the deck inventories: multi-tenant Postgres+RLS, Clerk
+Organizations, Inngest pipelines, Stripe webhooks, R2 storage, SSE
+streaming, embedding dedup, SCORM/xAPI emit, SAML/SCIM, WCAG 2.2 AA,
+Section 508, audit logs, version pinning, SOC2-deferred-but-designed-
+in, voice capture, service workers, cron jobs, codex review pipeline,
+Drizzle migrations, Playwright e2e. **L88 still claims 18 days.**
+
+The "not exotic" framing is misdirection — exotic-vs-standard isn't
+the axis; **surface area** is, and this thing has the surface area
+of three startups.
+
+### D.3 Cross-deck honesty gaps
+
+- The investor/B2B decks confidently assert 23 validators as moat.
+  Here at L168 the code stub literally says *"// 17 more..."* — the
+  validators **don't exist yet**.
+- L325: *"No cross-vendor critic — Opus-on-Sonnet at v1"* directly
+  contradicts the moat claim of *"vendor-independent"* (L27, L142).
+- L324: *"No SOC2"* — yet B2B deck pitches enterprise tenants.
+- L322: *"Stripe Payment Link only"* — yet investor deck implies the
+  $450–1000/mo Phase 2 economics with full billing.
+
+**The collaborator gets the truthful version; investors and buyers
+do not.**
+
+### D.4 18 days is fantasy
+
+P1–P6 (L92–L97) sums 3+3+4+4+2+2 = **18 working days**. P4 alone —
+*"Admin app: import draft, server-side validators, version diff,
+lint mode, suggestions queue, knowledge file upload, leads
+dashboard"* — is 6–8 weeks for a senior alone. RLS isolation
+testing on serverless Postgres (L39) is a multi-week hardening
+exercise on its own. Phase 2 list (L107–L122) contains 15 numbered
+features, several of which (SCIM/SAML, xAPI, WCAG 2.2 AA conformance)
+are quarter-long programs.
+
+**One or two collaborators ship maybe 30–40% of Phase 1 in 18 days
+— without Phase 2.**
+
+### D.5 Architecture choices that will bite
+
+- **RLS as primary tenant isolation on Neon HTTP driver** (L29,
+  L39) — one missed `withTenant()` call = catastrophic data leak.
+  RLS is defense-in-depth, not primary boundary.
+- **Free-tier vendor lock-in** (L298–L308): seven free tiers. Any
+  one tightening pricing or limits cascades.
+- **Single-region implied** — no DR, no multi-region, no RPO/RTO
+  discussion. Enterprise B2B will reject.
+- **Validators-as-moat** (L27, L146) — Anthropic ships better self-
+  critique every 3 months. The "F1–F12 taxonomy" is study notes,
+  not IP. **Zero defensibility.**
+
+### D.6 Vendor risk whitewashed
+
+L305: *"Anthropic Claude (Sonnet drafter, Opus critic)"* is the
+entire AI substrate. **Blast radius if Anthropic deprecates a
+model, raises prices 3×, or changes ToS on training-data use:
+product unavailable.** The deck's only hedge (L141, L325) is
+*"OpenRouter as v2 escape hatch"* — i.e., unbuilt. L40's *"$10k/day
+burn"* admission is real but mitigation is a UI meter, not a hard
+circuit-breaker. Clerk lock-in is equally severe — auth migrations
+are quarter-long projects. **The deck does not name a single vendor
+risk explicitly.**
+
+### D.7 Verdict (subagent D verbatim)
+
+*"A senior engineer reading this carefully should decline."*
+
