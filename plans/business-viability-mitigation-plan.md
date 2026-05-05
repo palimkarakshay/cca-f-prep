@@ -794,7 +794,7 @@ to end.
 ### 16.1 What you build
 
 A B2C cert-prep web app for *one* technical certification.
-**Default catalog (post iteration-02 N16): Azure AI-102** —
+**Default catalog (post iteration-02 N16): Azure AI-103 (Azure AI App and Agent Developer Associate; AI-102 retires June 30, 2026 per iter-03 N22 — never use AI-102 as default)** —
 mid-volume (~2k monthly searches), low SEO saturation, transferable
 from the operator's AI/Anthropic background. Second-choice: GCP Pro
 AI Engineer. **CCA-F is a free secondary catalog** used as SEO
@@ -891,11 +891,48 @@ the exam, and CCA-F is too new to bet a catalog on.)
    and 0–2 paying users per post. (Iteration 01 N2 — Reddit/HN
    alone has produced zero profitable cert-prep B2C SaaS in the
    modern era; SEO + YouTube is the proven motion.)
-4. **Realistic timing.** First paid user from organic at **Month
-   4–6** at the earliest, more likely Month **9–12**.
-5. **Kill signal.** If by Month 12 organic search traffic <1,000
-   unique monthly visitors, the SEO motion failed; stop and migrate
-   to consulting day-rates per §17.2 of the negative study.
+4. **Realistic timing (revised iter-03 N23).** First paid user from
+   organic at **Month 9–14** at earliest; more likely **Month
+   12–18**. Topical authority (the leading 2026 SEO signal) requires
+   ~50 pieces of content (lessons + supporting articles) before
+   consistent rankings — ~30 weeks at operator velocity. Plan: do
+   not expect MRR > $200 before Month 9; do not expect MRR > $500
+   before Month 12; do not expect MRR > $2,000 before Month 18.
+5. **YouTube — deferred to Year 2 (iter-03 N25).** Cold-start
+   economics in 2026 do not support a part-time YouTube channel
+   with <2 videos/week. Reactivate only after Y1 paid-user count
+   ≥ 100. Lesson companion videos for embedding stay in scope.
+6. **Kill signal.** Per the new §17 table; superseded the
+   "Month-12 < 1k visitors" rule.
+
+### 16.3.5 Backlink motion (added 2026-05-05, iter-03 N24)
+
+1. **1 guest post per month** on a relevant blog (operator network,
+   Substacks of cloud/AI dev friends, dev.to, Hashnode). Y1 target:
+   12 backlinks.
+2. **2 linkable assets per quarter:** e.g. "complete passing-rate
+   analysis of AI-103," "free 6-week AI-103 study plan PDF," a
+   public open-source validator library that L&D devs reference.
+   Y1 target: 5–15 organic backlinks.
+3. **Lesson companion videos** on YouTube (embedded into lesson
+   pages, no standalone channel building); cross-share on
+   Twitter/Mastodon.
+
+**Realistic Year-1 backlink count: 30–60 referring domains.** Not
+enough to rank against incumbents (Tutorials Dojo: 18k; ExamPro:
+9k) on broad queries; budget to rank only on **long-tail** queries
+in Year 1.
+
+### 16.10 Operator certification commitment (added 2026-05-05, iter-03 N26)
+
+The operator commits to **passing AI-103 within 90 days of project
+start** as a precondition for charging for the catalog. Exam attempt
+cost: $165 + ~30 hours focused study. If not passed by Month 3,
+catalog must be **repositioned as "study-along-with-me" content**
+rather than "passing-rate-promised" content, until certification is
+earned.
+
+---
 
 **No paid acquisition is planned in Year 1 or Year 2** at the
 projected price (iter-02 N18). At blended LTV ~$90, the only
@@ -1001,7 +1038,13 @@ triggers.
 
 | Trigger | What to do |
 |---|---|
-| MRR < $1,000 by Month 6 (B2C path) | Stop. Migrate to open-source library + consulting (§17 of negative study). |
+| **B2C kill-signal table** (revised iter-03 N27) | |
+| Month 3: AI-103 not attempted | Either pass within 30 days OR reposition catalog as "study-along-with-me" |
+| Month 6: no first paying user (MRR < $19) OR organic SE volume < 200/mo for AI-103 | Stop. Migrate to §17.2 of negative study. |
+| Month 9: MRR < $200 | Stop or radically simplify. |
+| Month 12: MRR < $500 OR organic search < 500 unique monthly | Stop. Migrate to §17.2. |
+| Month 18: MRR < $2,000 | Stop. Migrate to §17.2. |
+| **AI-103 demand-failure** (iter-03 N28): by Month 6 search volume <200/mo | Pivot catalog to backup (CompTIA Security+, AWS DVA-C02, CCA-Developer if live) within 30 days OR stop. |
 | 3 paid pilots fail their pre-defined success criteria (B2B path) | Stop the B2B motion. Refund nothing (pilots are paid; criteria failed for product, not pricing). |
 | AI cost line exceeds 30% of MRR for two consecutive months | You under-priced or your unit economics broke. Raise prices or stop. |
 | Vercel / Anthropic / Clerk TOS-relevant policy change | Migration runbook activates. If migration > 2 weeks, stop — vendor risk has crystallised. |
