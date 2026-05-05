@@ -175,3 +175,194 @@ Year 2 (lines 1288, 1470) and pricing CAC at $0 (line 1391). **Three
 independent claims that cannot all be true.** Pick any two and the
 third collapses.
 
+---
+
+## 2. Subagent B — implementation + content-pack-management critique
+
+**Sources.** `IMPLEMENTATION.md` (~132KB) and
+`content-pack-management-plan.md` (~76KB).
+
+### B.1 The 18-day Phase 1 timeline is fiction
+
+Per `IMPLEMENTATION.md` lines 1003 and 491–499, six sub-phases
+compress a multi-tenant SaaS into 18 working days.
+
+- **P1 ("~3 days"):** monorepo + Drizzle schema + Clerk org/user/
+  tenant onboarding + R2 client + RLS policies on every tenant-
+  scoped table + RLS isolation test + ESLint custom rule that flags
+  un-wrapped tenant queries + Vercel project setup. **Multi-tenant
+  RLS correctness alone is a 1–2 week engagement when done properly;
+  testing it adversarially is its own week.**
+- **P3 ("~4 days"):** server-component learner app, MCQ/TF/FillIn
+  quiz runner, tsvector search with weighted indexes, mobile
+  Lighthouse ≥90 with bundle ≤220kB gzipped (line 1294),
+  accessibility AA, **plus** Section D extensions (lines 1324–1378):
+  RetrievalGate, PrincipleWrite with Levenshtein similarity, JOL
+  slider with calibration delta, mastery-gated 4th depth rung,
+  calibration sparkline. **3 weeks of UI work, not 4 days.**
+- **P4 ("~4 days"):** an entire admin app — catalog CRUD, version
+  history with rollback, JSON paste import with side-by-side diff
+  viewer, lint heatmap, suggestion triage with TF-IDF dedup,
+  knowledge upload with PDF/DOCX text extraction (`unpdf` +
+  `mammoth`), tenant policy editor, **plus** Section D scaffolds
+  10–14 (lines 1518–1576). **Two months of work.**
+- **P5 ("~2 days"):** Claude Code skill + lint script + a seed
+  script that imports `cca-f-prep` to Postgres+R2 (the skill is
+  supposed to iterate on validator failures up to 3 times, line
+  1619). The CLAUDE.md proves the operator hasn't even authored the
+  cca-f-prep content fully (38 concepts auto-generated with B-bias).
+- **P6 ("~2 days"):** axe-core sweep, Lighthouse CI, k6 load test,
+  adversarial RLS test, status page, Sentry monitors. **WCAG 2.1 AA
+  compliance across 8 surfaces (line 1753) takes weeks of
+  remediation, not 2 days.**
+
+**Realistic Phase 1: 3–5 months for one person.**
+
+### B.2 Hidden ongoing operator labour at "100 tenants, 10k MAU"
+
+The plan says **30 min/day authoring** (line 2552) and **2 hours/week
+business loop** (line 2564).
+
+- Support tickets: ~3–5% of MAU/month opens a ticket. 10k MAU =
+  300–500 tickets/month, ~15–25/business-day. At 5 min triage each =
+  **2 hours/day**.
+- Content authoring backlog: line 2557 says *"wait ~3 minutes for the
+  skill to draft + auto-validate."* But B2B tenants are human-
+  required (line 2057); 100 tenants × ~2–3 drafts/day = **200–300
+  drafts** the operator must approve (line 425 hand-waves "10 min/
+  day per tenant" — that's 16+ hours/day across 100 tenants).
+- SSO debugging (Clerk Enterprise SAML), SCIM provisioning failures,
+  billing disputes, Resend domain reputation, R2 quota alerts,
+  security patching across pnpm workspace + Astro + Next.js +
+  Drizzle migrations.
+- On-call: line 2582 *"Triage within 24h"* — single human, no
+  rotation. Single point of human failure.
+
+**Realistic load: 60–80 hours/week minimum**, before sales work.
+
+### B.3 Free-tier limits the plan handwaves
+
+- **Vercel Hobby ToS forbids commercial use.** Plan acknowledges
+  this (line 95, line 174, line 2691) but designs the business to
+  launch *on* Hobby and *"flip to Pro at first paying customer."*
+  That means Phase 1 traffic from B2B prospects — being demoed for
+  purchase — *is already a ToS breach* the moment you charge anyone.
+  C12 row 3 (line 546) admits Hobby was wrong "indefinitely" but
+  still uses it day-1.
+- **Neon free 0.5 GB** (line 137). 10k MAU × event/progress/
+  calibration_event/retrieval_event/spaced_review_item rows = blow
+  through 0.5 GB inside weeks.
+- **Clerk free 10k MAU.** Line 138 says *"Free 10k MAU"* but C12 row
+  17 (line 560) admits Clerk Organizations has a ~100 free org cap.
+  100 B2B tenants = at the cap on day one of Phase 2.
+- **PostHog free 1M events/month.** Line 559: *"Per-keystroke events
+  blow this fast."* Phase 2 adds calibration_event, retrieval_event,
+  cohort events, spaced_review_enqueued, push outcomes, NPS/CES
+  surveys.
+- **Sentry 5k events.** A single bad release at 10k MAU exhausts
+  this in minutes.
+- **Resend 3k emails.** Cohort-completion email cron (line 2353)
+  sends to every cohort member 7 days post-end. 100 tenants × 50
+  learners = 5k emails in one cron run.
+
+### B.4 Architectural fragility
+
+- Single Vercel region, no multi-region failover.
+- Single Neon instance, no read replicas, no PITR strategy named.
+- Single R2 bucket; no cross-region replication.
+- No incident response on-call rotation; the 7.3 playbook (line
+  2572) is one human.
+- No DR plan. *"Migration off vendors"* (line 2606) lists 5–10 day
+  ETAs to leave Clerk/Inngest/Anthropic/Vercel/R2 — *none pre-built*.
+- No status page beyond `/api/health` (line 1771).
+- Anthropic is single-vendor for both drafter (Sonnet) and critic
+  (Opus) — line 2073 explicitly defers cross-vendor critic to "v2
+  escape hatch."
+
+### B.5 Phase 2 cost estimate — actual math
+
+Plan claims **~$200 Sonnet + ~$100 Opus = $300/mo for AI** at "100
+tenants × 10k MAU × 50k generations/mo" (lines 93–94).
+
+| Line | Tokens × rate | Monthly cost |
+|---|---|---|
+| Sonnet input  | 50k × 2k tok × $3/MTok | $300 |
+| Sonnet output | 50k × 3k tok × $15/MTok | $2,250 |
+| Opus input (with knowledge-file context) | 50k × 5k × $15/MTok | $3,750 |
+| Opus output | 50k × 1k × $75/MTok | $3,750 |
+| **Sub-total** | | **$10,050/mo** |
+| With 50% optimistic prompt caching | | ~$5–6k/mo |
+| With realistic 0–30% caching at sporadic traffic | | **~$8–10k/mo** |
+
+**The "gross margin > 95%" claim (line 65) is fantasy.**
+
+### B.6 "Phase 1 carries over without rewrites" claim
+
+False. Concrete forced rewrites:
+
+- Vercel Hobby → Pro: project re-import, env migration, build budget
+  changes.
+- Neon free → Scale: connection pooling changes (HTTP driver vs
+  pooled), reads on replicas, query plans differ.
+- Clerk free → Pro+Enterprise: org model fundamentally changes;
+  existing personal-tenant rows (line 1049) don't map cleanly to
+  enterprise SAML/SCIM.
+- Adding Inngest where Phase 1 had no queue means refactoring every
+  draft path to be event-driven.
+- Adding pgvector + HNSW indexes (line 2315) requires rebuilding all
+  dedup paths.
+- token_usage, subscription, calibration_rule, embedding tables —
+  all introduce new RLS surfaces requiring re-audit of every query.
+
+### B.7 Quality-validator coverage gaps
+
+- **F1 letter-bias validator** (line 414) is the *operator's own
+  miss*. CLAUDE.md admits 76% B-bias in their own auto-generated
+  quizzes. The detector runs three places (line 407) and still
+  didn't fire.
+- F5 *"fabricatedRuleDetector"* detects phrasing patterns ("exceeds
+  N tools", line 418). LLMs trivially route around regex by
+  paraphrasing.
+- F12 *"cue-bias"* via distractor-length heuristic (line 656) — a
+  model that varies distractor lengths randomly bypasses it.
+- F23 *"answer-justification audit"* (line 431) only works if the
+  critic agrees the span is sufficient — confidence-in-the-critic,
+  not deterministic.
+
+### B.8 Multi-tenant data security: SOC2 / HIPAA
+
+- Plan relies on Postgres RLS as the *only* isolation (line
+  599–606). Risk register row 2 (line 437) calls this "L probability,
+  H impact." That's optimistic.
+- One bug in any of dozens of `withTenant`-wrapped handlers leaks
+  all tenants. Line 626 enforces via lint rule — lint rules don't
+  survive aggressive refactor.
+- Neon HTTP driver fresh-connection-per-request (line 619) costs
+  latency and blows the database connection budget at scale.
+- SOC2 Type II requires audit logs the plan never specifies (no
+  append-only ledger, no immutable storage).
+- HIPAA: Clerk free tier doesn't sign BAAs. Resend doesn't sign BAAs
+  on free. Anthropic API has BAA gates.
+
+### B.9 User-facing surfaces — too many for one person
+
+Counted: B2C learner web + B2B admin web + Astro marketing site +
+SME review queue (P10) + observability dashboard `/admin/measurement`
++ billing portal (P7) + `/admin/sso, /admin/quality, /admin/cohorts,
+/admin/sme/[id], /admin/generate, /admin/review, /admin/leads,
+/admin/knowledge, /admin/settings` + `/api/*` (11 endpoints, line
+8.2). **15+ distinct UI surfaces** plus a public-facing API.
+
+Industry rule of thumb: a competent solo founder maintains **3–4
+surfaces** before quality cliffs. Side-project: **2**.
+
+### B.10 Bottom line (subagent B verbatim)
+
+*"The plan substitutes AI-prompt-as-spec for actual scoping. Phase 1
+is at minimum a 4-month build, Phase 2 economics undercount AI by
+~10×, 'free-tier' is a ToS breach the moment money changes hands,
+and the operator load at promised scale exceeds 60h/week before
+sales. Either the scope shrinks 80% or the timeline grows 5×. The
+plan does neither, so it will fail at first contact with a paying
+customer."*
+
