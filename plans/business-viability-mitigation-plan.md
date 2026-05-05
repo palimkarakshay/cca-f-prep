@@ -565,6 +565,20 @@ single point of failure for engineering AND customer success AND sales.
 = $10k MRR ceiling for Year 1 is *fine*. It's better than zero.
 Removing the venture-shaped growth target removes the bandwidth crisis.
 
+### 11.8 Sustainability gates (added 2026-05-05, iter-06 N44)
+
+1. **Hard maximum: 12 hr/wk on the side bet.** No "crunch
+   weekends." Crunch weekends compound and break the plan.
+2. **AI-103 study and the side bet share the 12 hr/wk** for the
+   first 90 days. After that, only the side bet.
+3. **CCA-F study stays separate** — it's the operator's primary
+   goal and is not subject to the 12 hr/wk cap.
+4. **One review-free week per quarter.** Operator's spouse /
+   reviewer can veto the project for one week if it's eating
+   the relationship.
+5. **Quarterly "do you still want to do this?" check.** Three
+   consecutive "no" answers triggers §17 stop.
+
 ### 11.7 Opportunity-cost honest accounting (added 2026-05-05, iteration 01 N11)
 
 **Operator labour cost.**
@@ -1013,6 +1027,46 @@ exists, not before launch.
 3. Per-swap runbook at `plans/runbooks/model-deprecation.md`.
    Estimate per swap: 4–8 operator hours. Anthropic gives ≥60-day
    notice, comfortably within evening-hour budget.
+
+### 16.14 Cumulative-load reality check (added 2026-05-05, iter-06 N43)
+
+The cumulative launch-blocking checklist accreted across iterations
+to 610–760 hours pre-cut. Iter-06 cut it to ~340–490 hours. At 12
+hr/wk, that's 28–41 weeks (6–10 months) before first paying user.
+
+**Cuts applied:**
+- 30 SEO lessons → **12 lessons** at launch; topical authority Y2.
+- 25 supporting articles → **6 articles**.
+- 12 guest posts/yr → **4 guest posts/yr**.
+- 8 linkable assets → **2 linkable assets**.
+- 3 cog-sci features at launch → **calibration-Δ only**;
+  spaced-review and retake mode shift to v1.1 (Month 4–5
+  after launch).
+- Validator regression suite **25 pairs at launch** (full 50–100
+  at v1.1).
+- Public model card at **launch + 30 days** (provenance ledger
+  in DB stays at launch — legal requirement).
+
+**Remaining launch-blocking work** at the post-iter-06 shape:
+~340–490 hours. Operator must accept that even the "safe" plan is
+a 6–10 month runway, not 8 weeks.
+
+### 16.15 Founder fit proof (added 2026-05-05, iter-06 N45)
+
+Before launch, operator must demonstrate mastery of the methods
+the product teaches:
+
+1. **Pass CCA-F at 800/1000+** (not just 720). The methods the
+   product sells must produce a >720 score for the founder first.
+2. **Pass AI-103 first attempt** (already in §16.10).
+3. **Document the operator's own calibration-Δ trajectory** as
+   they study; publish as a blog post.
+
+If the operator can't pass CCA-F at 800+ within 6 months from
+today (i.e., **by 2026-11-05**), **stop the project**. The product
+requires founder cognitive-science mastery to be defensible;
+mastery is provable; if it can't be proved, the project shouldn't
+ship.
 
 ### 16.13 Cost circuit-breaker (added 2026-05-05, iter-05 N42)
 
