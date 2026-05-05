@@ -18,6 +18,132 @@
 
 ---
 
+## v2 — Scaled-down build guide (use this; v1 below is reference)
+
+> Defined by `./v2-scaled-b2b-plan.md`. The body of this document
+> (Parts 0–6) reflects v1's 18-day scope, which the hostile review
+> mis-scoped by ~5×. Build from this v2 section, *not* from Parts
+> 0–6, until v2 success-gates fire (`v2-scaled-b2b-plan.md` §7).
+
+### v2.1 — What you're building (scope as of 2026-05-04)
+
+- **6 user-facing surfaces** total (down from 15+ in v1):
+  `/`, `/sign-in`, `/sign-up`, `/dashboard`, `/study/[slug]`,
+  `/account`, plus `/team` for B2B owners.
+- **Single-tenant data model in v1.** No `tenant_id` column, no RLS
+  policies, no Postgres row-level security audit. Multi-tenancy
+  added in week 7–8 as a single migration when the first B2B pilot
+  signs.
+- **One catalog at launch** — the operator's CCA-F Foundations
+  content from `/home/user/cca-f-prep/00-academy-basics/`. No
+  custom-catalog drafting. No knowledge-file uploads.
+- **No admin app.** Operator authors content offline via Claude
+  Code skill on Max 20× and commits JSON. Web app reads JSON; never
+  generates at runtime in v1.
+- **No SME review queue, no SAML, no SCIM, no audit-log ledger,
+  no SCORM/xAPI export, no embedding dedup, no cohort routes, no
+  voice/camera authoring** in v1.
+
+### v2.2 — Architecture (scaled)
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  Next.js (Vercel Pro $20/mo) — single project            │
+│   Routes: / /sign-in /sign-up /dashboard                 │
+│           /study/[slug] /account /team                   │
+│   Auth: Clerk (free tier; orgs enabled at week 7)        │
+│   AI calls: lib/ai/router.ts → OpenRouter → Haiku 4.5    │
+└──────────────────────────────────────────────────────────┘
+               │                   │
+               ▼                   ▼
+       ┌────────────┐        ┌──────────────┐
+       │ Postgres   │        │ Cloudflare R2│
+       │ (Neon free)│        │ free tier    │
+       │ no RLS yet │        │ catalog JSON │
+       └────────────┘        └──────────────┘
+```
+
+Three Postgres tables initially: `user`, `progress`, `attempt`. Add
+`team` and `team_membership` at week 7. Add `tenant_id` to existing
+tables in the same migration. RLS policies added when paying B2B
+tenant count ≥ 3.
+
+### v2.3 — Build phases (8–12 weeks part-time)
+
+| Week | Deliverable | Acceptance |
+|---|---|---|
+| 1–2 | Foundations: Vercel Pro, Next.js + Tailwind, Clerk auth, Drizzle schema, Stripe checkout, R2 client, GitHub repo | `pnpm dev` boots; sign-in works; Stripe Checkout completes; static catalog JSON loads |
+| 3–4 | Learner experience: `/dashboard` + `/study/[slug]` + spaced-review (1/3/7/14/30d) + JOL slider + streak + email digest at modal study time | Operator (the first user) studies one full lesson + quiz; spaced-review banner fires next day |
+| 5–6 | Authoring loop + quality: code the 17 stub validators, open-source as `npm:cca-content-quality`, Claude Code skill `/.claude/skills/draft-topic`, lint script `pnpm lint:content` | All 23 F-codes pass on the seed catalog; one topic drafts end-to-end via the skill |
+| 7–8 | Team mode: Clerk Organizations enabled, `team` table, invite flow, `/team` route, seat-based Stripe pricing, weekly digest cron | Operator invites self as second account, both members appear in `/team`, weekly digest delivers |
+| 9–10 | Polish + verification: mobile Lighthouse ≥ 90 on all 6 routes, axe-core AA pass, BetterStack status page, Sentry alerts, marketing one-pager | All routes Lighthouse ≥ 90 and AA-clean; status page green; marketing page live |
+| 11–12 | Launch + first cohort: Show HN / Reddit / dev.to launch, first 5 free signups onboarded manually, watch metrics, fix obvious issues | First paying B2C user, or stop |
+
+**If anything is unshipped by end of week 12: stop and re-plan.**
+Do not extend without a written reason and a new gate.
+
+### v2.4 — Per-tenant cost discipline (server-side, day 1)
+
+Even though v1 of v2 has no in-app generation, build the
+per-tenant token budget table and middleware now. Adding a
+generation feature in Phase 2 should not require schema changes.
+
+```sql
+create table token_budget (
+  tenant_id uuid primary key references tenant(id),
+  monthly_cap_usd numeric(10,2) not null default 25.00,
+  current_month_spend_usd numeric(10,2) not null default 0,
+  reset_at timestamptz not null
+);
+```
+
+Every AI call writes the projected cost via OpenRouter's response
+metadata. **Reaching the cap returns HTTP 402, not a warning.**
+
+### v2.5 — What NOT to build in v1 of v2 (the discipline list)
+
+If you find yourself building any of these in Phase 1, stop:
+
+- Multi-tenant RLS hardening (defer until ≥ 3 paying B2B tenants).
+- Admin app of any kind (operator authors via Claude Code locally).
+- SAML / SCIM / Clerk Enterprise.
+- Custom-catalog drafting.
+- Knowledge-file upload.
+- Inngest / event-driven generation queue.
+- Opus critic in the customer-visible path (≤ 5% sampled, Phase 2).
+- pgvector / embedding dedup.
+- Cohort routes / leaderboards.
+- Voice or camera authoring for buyers.
+- WCAG 2.2 AA (target 2.1 AA in v1; 2.2 is Phase 2).
+- SCORM / xAPI export.
+- HIPAA / SOC2 audit ledger (Phase 2+, when revenue justifies).
+
+### v2.6 — Ongoing operator hours (target)
+
+| Activity | hr/wk |
+|---|---|
+| Engineering (Phase 1) | 8–12 |
+| Content authoring | 2–4 |
+| Sales / community / support | 2–4 |
+| **Total target** | **12–20 hr/wk** |
+
+If sustained > 25 hr/wk for 8 weeks, stop-signal fires
+(`v2-scaled-b2b-plan.md` §11).
+
+### v2.7 — How v2 maps to existing repo content
+
+- Use `web/` as the Next.js workspace (already scaffolded).
+- Seed catalog from `/home/user/cca-f-prep/00-academy-basics/` and
+  `01-agentic-architecture/` … `05-context-reliability/notes.md`.
+- F-code taxonomy from `06-failure-analysis/error-log.md` becomes
+  the basis of `npm:cca-content-quality`.
+- Mock exams from `07-mock-exams/` become the "premium catalog"
+  unlocked by paid tier.
+- `08-cheat-sheets/decision-trees.md` becomes the structure of the
+  spaced-review prompts.
+
+---
+
 ## Table of contents
 
 - **Part 0 — How to use this document** (the two-actor model: AI + operator)

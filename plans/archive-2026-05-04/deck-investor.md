@@ -70,6 +70,14 @@ A learning platform with B2C and B2B tiers, where AI drafts content from operato
 
 We don't need to win the whole market. **A 0.05% share of SAM = $25M ARR.**
 
+> **v2 review note — slide STRUCK.** Top-down "0.05% of $50B = $25M
+> ARR" is the canonical *if-we-just-get-1%-of-China* fallacy with no
+> funnel logic, win-rate, sales cycle, or churn. v2 replaces with
+> bottoms-up: count named accounts in operator's network the
+> operator could plausibly contact in 12 months. If < 15, the
+> venture conclusion is "no". v2 plan-case Year-1 outcome is
+> ~$3k MRR (`./v2-scaled-b2b-plan.md` §8). See mitigation §2.
+
 ---
 
 ## Business model & unit economics
@@ -82,6 +90,21 @@ We don't need to win the whole market. **A 0.05% share of SAM = $25M ARR.**
   the expansion-revenue moat — cohort outcomes drive seat-expansion and
   multi-pack adoption.
 - **No data sales, no third-party advertising.** Revenue = subscriptions only.
+
+> **v2 review note — every line corrected.**
+> - **Gross margin 95% is fantasy.** AI line was undercounted by
+>   ~25–30×; operator labour priced at zero. v2 honest gross margin
+>   at v2 scale: **60–75%**.
+> - **CAC ~$25, B2C 3-month payback** has no source. Realistic CAC
+>   for paid acquisition in cert-prep is $40–80; v2 runs $0 paid
+>   acquisition in Year 1 (community-led only).
+> - **NRR 110%/120%** contradicts the lead segment ($9 B2C → 70–90%
+>   NRR; SMB cluster 90–105% per Pavilion 2025). v2 honest NRR
+>   targets: B2C 80–95%, B2B 100–115%, blended ~95–105%.
+> - **"Pedagogical moat is also the expansion-revenue moat"** — the
+>   pedagogical citations are unowned synthesis (the deck admits
+>   this in the next section); they are not a moat at any layer.
+> See `./v2-scaled-b2b-plan.md` §8 + mitigation §3.
 
 ---
 
@@ -299,6 +322,17 @@ efficiency case.
 | **L2-Kirkpatrick proof:** \|calibration Δ\| ≤ 0.5 on shipped cohorts | Month 12+ | The pedagogical claim becomes testable, not aspirational |
 
 This is intentionally conservative. The unit economics support faster growth if a B2B reseller channel emerges.
+
+> **v2 review note — roadmap STRUCK.** $100k MRR by Month 24–30 is
+> incompatible with a side-bet operator and zero outside capital
+> (Freemius 2025: median profitable micro-SaaS is $4.2k MRR; 70%
+> earn under $1k MRR). "Mid-market deal closes Month 18" assumes
+> SOC2 in hand; SOC2 is not in v1. v2 honest milestones (target,
+> not promise):
+> - Month 6: ≥ $1k MRR (combined). Otherwise stop-signal fires.
+> - Month 12: ≥ $3k MRR + ≥ 1 paying B2B tenant. Reassess.
+> - Month 24: $15–30k MRR ceiling.
+> See `./v2-scaled-b2b-plan.md` §8 and §11.
 
 ---
 

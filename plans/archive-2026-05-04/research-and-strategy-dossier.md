@@ -1301,6 +1301,16 @@ certification + cohort-based professional development.
 The conservative path is achievable on the Phase-2 cost structure
 (§5.4); the mid path requires SOC2 (deferred to year-2 per §B4 risk 5).
 
+> **v2 review note.** All three SOM paths are arithmetic, not
+> strategy. **Conservative = ~1 new SMB tenant per workday for 3
+> years straight** for a solo operator with no SDR — implausible.
+> **Mid path** books enterprise revenue while deferring SOC2 to
+> year 2, which is chicken-and-egg (mid-market won't sign without
+> SOC2 in hand). v2 replaces this with bottoms-up Year-1 outcome
+> at v2 scale: ≤ 10 paying B2B tenants Year 1, ~$10–15k MRR
+> ceiling, $300k+ ARR by Y3 *if everything goes right* — not $5M.
+> See `./v2-scaled-b2b-plan.md` §1 + §8.
+
 ### 5.2 Industry comparables
 
 **Public ed-tech comparables (with revenue / valuation / multiple).**
@@ -1376,6 +1386,14 @@ at 100 tenants ≈ $5–10/mo all-in.
 **Gross margin.** 95%+ at Phase-2 scale (typical SaaS). The AI cost
 is the only material variable input; everything else is sub-linear.
 
+> **v2 review note.** AI line undercounted by ~25–30×. Real Sonnet
+> drafter + Opus critic at 50k generations/mo = $5–10k/mo before
+> caching, ~$5–6k/mo with optimistic 50% caching. Operator labour
+> priced at zero. **v2 honest gross margin: 60–75% at v2 scale**
+> (Haiku drafter + 5%-sampled Sonnet critic + ≤ 10 paying B2B
+> tenants Year 1). See `./business-viability-research-notes.md`
+> §B.5 + `./v2-scaled-b2b-plan.md` §8.
+
 **Prompt-caching efficiency.** Anthropic's prompt-caching feature
 reduces input-token cost by 30–60% at sustained traffic (verified
 empirically; cross-ref `content-pack-management-plan.md` §C12 risk-
@@ -1404,6 +1422,14 @@ month — well within the $5k–500k ACV range.
 - The capital-efficient bet is that B2B LOIs (§B6) come from operator
   outbound + warm intros; CAC is operator-time-only in Phase 1.
 
+> **v2 review note.** "CAC is operator-time-only" prices the binding
+> resource at zero. v2 prices operator time at $75/hr loaded; at
+> 12–20 hr/wk that's $3.6–6k/mo ongoing CAC + ops cost, which
+> dwarfs every infra line on the spec. v2 explicitly does NOT
+> claim 6–12 month payback — it tracks cumulative operator hours
+> per signed pilot and stops accepting pilots if hours/closed-pilot
+> exceeds 50. See mitigation §4.
+
 ### 5.5 NRR (Net Revenue Retention) targets
 
 NRR = (starting ARR + expansion + reactivation – churn – contraction)
@@ -1422,6 +1448,17 @@ The expansion-revenue mechanic is named in §1.1: organisations with
 < 70% completion suffer 3.5× compliance-violation rate (KPI Depot
 2026). When the platform demonstrably lifts completion, the tenant's
 incident-cost reduction is the value-capture surface.
+
+> **v2 review note.** SMB segments cluster at 90–105% NRR per
+> Pavilion 2025; B2C consumer subscriptions sit at 70–90% NRR
+> because there's nothing to expand into. v2 honest NRR targets:
+> B2C 80–95%, B2B 100–115%, blended ~95–105%. **The 110/120/130%
+> ladder is borrowed from top-quartile B2B-only SaaS** and does
+> not transfer to a $15/mo B2C-led product. The 3.5× compliance-
+> violation correlation also comes from one industry source (KPI
+> Depot 2026 — flagged by the audit framework itself at L538–541
+> as "may not generalise"). See `./v2-scaled-b2b-plan.md` §8 +
+> `./business-viability-research-notes.md` §A.4.
 
 ### 5.6 Scalability
 
