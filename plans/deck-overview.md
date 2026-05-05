@@ -52,6 +52,14 @@ AI drafts the content; deterministic validators catch known failure modes; a str
 | **Pricing intuition** | $9/mo Pro (free tier with 5 catalogs) | $5–15 per learner per month, $100/mo platform minimum |
 | **Why they buy** | Quizzes that aren't trash; ability to request topics | Curated, expert-reviewed material; SSO; usage reporting |
 
+> **v2 review note.** Both rows updated. B2C → **$15/mo or $129/yr**.
+> B2B → **$20–25/seat with $300/mo platform minimum**; the $5/seat
+> entry tier was loss-making against operator labour. ICP narrowed
+> from "SMB and mid-market HR / L&D" to **engineering teams 5–50 at
+> SaaS / AI / cloud companies** — the buyer is the eng manager, not
+> HR. Mid-market enterprise dropped from v1 (no SOC2). See
+> `./v2-scaled-b2b-plan.md` §2–§3.
+
 ---
 
 ## The two-phase strategy
@@ -98,6 +106,15 @@ If Phase 1 doesn't hit these, we don't spend on Phase 2. Hard gate.
 | Domain | registrar | ~$1/mo |
 | **Total incremental** | | **~$1/mo** |
 
+> **v2 review note.** Vercel Hobby's TOS forbids commercial use; the
+> moment a Stripe pre-order completes on a Hobby project the plan is
+> in breach. v2 budgets **Vercel Pro $20/mo from day 1** — total
+> incremental Phase 1 cost ~$25/mo (Pro + domain + BetterStack later).
+> Other free tiers retained until usage thresholds approach (Neon
+> 250 MB → Scale; Clerk free orgs → Pro at 25 active orgs; Resend
+> 3k → AWS SES; PostHog 1M events sampled). See
+> `./business-viability-mitigation-plan.md` §8.
+
 ---
 
 ## Phase 2 cost — at 100 tenants, 10k MAU, 50k generations/mo
@@ -115,6 +132,21 @@ If Phase 1 doesn't hit these, we don't spend on Phase 2. Hard gate.
 
 AI is the dominant line. Hard cap = per-tenant monthly token budget with UI burn meter.
 
+> **v2 review note.** AI line undercounted by ~25–30×. With Sonnet
+> drafter at $3/$15 MTok and Opus critic at $15/$75 MTok across 50k
+> generations/mo (5k context, 1k output for critic), real cost is
+> **~$10k/mo before caching, ~$5–10k/mo after**. v2 reframes:
+> - Scale target ~10× lower (≤ 10 paying B2B tenants Year 1, not 100).
+> - **Haiku 4.5 drafter** (≈ 1/12 of Sonnet output cost).
+> - **Sampled Sonnet critic** at ≤ 5% of generations (not Opus on
+>   every draft).
+> - Generate-once-publish-many; never regenerate per learner.
+> - **Server-enforced** per-tenant cap (HTTP 402 at limit), not just
+>   a UI meter.
+> Realistic v2 Phase 2 AI line: **$80–400/mo** at v2 scale; **gross
+> margin 60–75%, not 95%**. See `./v2-scaled-b2b-plan.md` §8;
+> evidence in `./business-viability-research-notes.md` §B.5.
+
 ---
 
 ## Pricing math at modest scale
@@ -125,6 +157,15 @@ AI is the dominant line. Hard cap = per-tenant monthly token budget with UI burn
 - ⇒ **gross margin > 95%** at this scale.
 
 The AI cost line scales with **generations**, not learners. As long as we don't regenerate per learner, margins stay healthy.
+
+> **v2 review note.** v2 honest pricing math at v2 scale (Year-1
+> "plan" outcome — see `./v2-scaled-b2b-plan.md` §8):
+> - 150 B2C × $15 = $2.25k MRR
+> - 3 B2B tenants × 12 seats × $22 = $0.79k MRR
+> - Combined ≈ **$3.0k MRR**, vs $50–100/mo infra + $80–150/mo AI
+> - ⇒ **gross margin 60–75%** (honest), not 95%.
+> The 1k-B2C-learner / 50-B2B-tenant scenario is **not a v1 target**
+> in v2; that level requires capital, headcount, or both.
 
 ---
 
@@ -161,6 +202,23 @@ research:
 
 These aren't engagement gimmicks. Each is a measured intervention with
 an effect size we can hold ourselves to.
+
+> **v2 review note — citations corrected.**
+> - The "Maven 96%" / "altMBA 96%" / "14× retention multiplier" /
+>   "Duolingo CURR +21% / DAU 4.5×" effect sizes are borrowed from
+>   $2k+ live cohort programs, $300+/cohort instructor-led
+>   experiences, or staffed-retention-team consumer apps. They do
+>   **not** transfer to a $15/mo asynchronous SaaS. **Maven's own
+>   press release cites "more than 75% completion", not 96%; the
+>   96% figure is altMBA's W1→W2 retention.**
+> - v2 keeps the *design rationale* citations (Cepeda 2008, Roediger
+>   & Karpicke 2006, Slamecka & Graf 1978) but **removes the
+>   transferred-effect-size promises**. Replacement framing: *"We
+>   schedule reviews on an expanding interval informed by Cepeda
+>   2008. Whether this produces a measurable lift in our context
+>   is pending data; we measure ourselves and report quarterly."*
+> See `./business-viability-research-notes.md` §E.4 + mitigation
+> plan §6 + §15.
 
 ---
 
@@ -223,6 +281,14 @@ falsification triggers, and commercial viability.
 ## Eight segments, one engine
 
 The mechanism set is the same regardless of segment. The *surface* varies.
+
+> **v2 review note.** Multi-segment GTM dropped. v2 focuses on **one
+> segment**: adults studying for tech/cloud/AI certifications +
+> small engineering teams (5–50) buying that product as a team
+> upgrade. Deskless workers, financial-services compliance,
+> healthcare clinical, manufacturing, high-PDI cultures, and
+> single-SME-bottleneck SMBs are out of scope for v1. See
+> `./v2-scaled-b2b-plan.md` §2.
 
 - **80% of the global workforce is deskless** (~2.7B workers — TalentCards).
   The same nano-format unlocks manufacturing, retail, healthcare-frontline,
@@ -303,6 +369,16 @@ Nothing from Phase 1 is thrown away.
 | P4 | ~4 | Admin app: import, lint, suggestions, leads, knowledge files |
 | P5 | ~2 | Operator authoring loop (Claude Code skill + validators) |
 | P6 | ~2 | Verification: end-to-end + RLS + Lighthouse |
+
+> **v2 review note.** 18 days mis-scoped by ~5×. Realistic Phase 1
+> is **8–12 weeks part-time** with cut scope:
+> - 6 surfaces (not 15+); P4's admin app is **deferred** entirely;
+>   operator authors content offline via Claude Code on Max 20×.
+> - Single-tenant data model; multi-tenant migration in week 7 when
+>   first B2B pilot signs.
+> - No Astro marketing site as a separate project — one-pager `/`
+>   route inside the Next.js app.
+> See `./IMPLEMENTATION.md` v2 section for the week-by-week plan.
 
 ---
 
