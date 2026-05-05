@@ -366,3 +366,106 @@ sales. Either the scope shrinks 80% or the timeline grows 5×. The
 plan does neither, so it will fail at first contact with a paying
 customer."*
 
+---
+
+## 3. Subagent C — expert-review-audit critique
+
+**Source.** `expert-review-audit.md` (744 lines, 49KB).
+
+### C.1 Provenance — this is not an external audit, it is a template
+
+The document is not a completed audit — it is a *framework for a
+hypothetical future audit that has never been performed*.
+
+- Lines 258–470: every Score, Recommendation, and Notes column is
+  empty (`| | | |`).
+- L66–68: "Three distinct reviewer profiles" — described in the
+  abstract; no names, no signatures.
+- L675–714: §G "Review submission template" — blank Mad-Libs with
+  empty signature lines.
+- L8–10: operator *"uses the result to strengthen, hedge, or abandon"*
+  — future tense.
+
+**This is operator self-review costumed as adversarial review.**
+
+### C.2 What the audit catches (and immediately defers)
+
+- L519–523: SOC2 admitted as gating: *"Compliance-vertical pricing
+  ($100k–1M ACV) is **ambitious without formal SOC 2**. Phase-1 budget
+  reality is closer to $50k–$200k ACV pre-SOC2."* Acknowledged then
+  re-classified as "conditional, not committed."
+- L454–455 (C19): margin compression at scale flagged: *"At 1000
+  tenants, AI cost may scale more linearly — does margin compress to
+  80%?"* Posed as a question; no answer.
+- L437 (C12): *"Is this conversion rate (operator → 1k SMB tenants in
+  3 years) realistic given operator-time-only sales motion?"*
+  Question, not finding.
+- L463 (C23): *"Is this defensible in serious LP-level due diligence,
+  or do LPs require fully-loaded cost (including operator-time at
+  market rate)?"* — admits the $0 incremental claim is not LP-
+  defensible.
+
+### C.3 What it misses entirely
+
+- TAM/SAM/SOM math is never stress-tested. L434–438 lists the figures
+  but only asks reviewers whether sources are credible. No critique
+  of the $25M ARR @ 0.05% market-share narrative.
+- The 18-day Phase 1 timeline is not in the audit at all. §F (L637)
+  declares *"Phase 1 P1–P6 sequencing detail"* out of scope (L653),
+  deflecting it to `content-pack-management-plan.md`.
+- 95% gross-margin contradiction is touched at C19 (L454) but never
+  reconciled with prompt-caching uncertainty at C20 (L455): *"At
+  sporadic traffic, caching efficiency is closer to 0%."* If caching
+  is 0% and AI scales linearly, the 95% claim is dead — the audit
+  puts these on adjacent rows and never connects them.
+- Competitive landscape hand-waved. C5 (L425) asks whether Section is
+  the closest peer; C6 (L426) asks if 360Learning ships CTA. These
+  are reviewer questions, not findings. Synthesia at $1B (C7, L427)
+  is dismissed via the *"generation-vs-elicitation distinction"* —
+  the audit itself notes *"An LP could argue Synthesia is the
+  precedent"* and provides no rebuttal.
+- No mention of B2C $9/mo CAC, churn, or payback — entirely missing
+  despite C14 (L444) flagging Duolingo Plus pricing parity.
+
+### C.4 Self-serving framing (the comfort blanket)
+
+- L57–60: pre-emptive *"The audit is not a rubber-stamp"* rhetorical
+  inoculation.
+- L495–547 §D *"Acknowledged hedges"*: operator pre-confesses minor
+  sins to look thorough. L543–547: *"Operator background is senior
+  ABAP developer, not academic cognitive psychologist"* — a charm-
+  offensive disclosure that costs nothing.
+- L593–633 §E *"What we'd abandon if disproven"*: exits are **always
+  to a smaller version of the same business**, never *"shut down
+  because TAM is wrong."* Exit move 5 (L627–633) admits possible
+  shutdown only if ≥ 4 of 14 mechanics fail simultaneously — a
+  deliberately implausible bar.
+- L637–663 §F *"Out-of-scope"*: deflects engineering, sequencing,
+  data-model, marketing-copy, and Phase-1 ordering to other docs.
+  Anything financially load-bearing is bounced.
+
+### C.5 Findings logged but not addressed
+
+- L501–511 admits the synthesis-of-14-mechanisms thesis *"has no
+  published precedent at scale"* — then immediately rationalises it
+  as *"plausible."*
+- L527–532 admits Kirkpatrick L4 self-report is *"the weakest
+  empirical link"* and defers the fix to *"year-3+."*
+- L538–541 admits the 3.5× compliance correlation (the **entire
+  monetisation argument**) *"is from one industry source"* and *"may
+  not generalise"* — recommendation: *"Reviewers should flag."* No
+  reviewer exists to flag.
+
+### C.6 Verdict (subagent C verbatim)
+
+*"The audit is **a procedural shield, not a critique**. It performs
+the rituals of adversarial review (scoring rubric, COI disclosure,
+signed submissions, 30-day commitments) without ever generating a
+single binding finding. Every existential weakness — SOC2 gate,
+margin scaling, competitive moat, founder bandwidth, TAM math, $0-
+cost fiction — is either deflected to 'reviewer's view' (questions
+for an absent reviewer), dropped to §D as a pre-confessed hedge, or
+pushed out of scope in §F. The decks' rosy claims (95% margin, $25M
+ARR, 18-day Phase 1) survive untouched because the audit framework,
+by design, never reaches them."*
+
