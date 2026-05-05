@@ -165,3 +165,39 @@ gate — don't merge `codex-blockers` without addressing findings.
     follow-up commit rebalances the worst-offender concept quizzes
     (those with all-B answers) so users practise reasoning rather
     than learning a positional bias. Tracked as `letter-bias-2026-05`.
+
+- 2026-05-04 — **AI-LMS business-plan hostile review.** Triggered by
+  the operator asking for a "harsh critic" pass on
+  `plans/{deck-overview, deck-investor, deck-b2b-prospect,
+  deck-collaborator, content-pack-management-plan, IMPLEMENTATION,
+  expert-review-audit, research-and-strategy-dossier}.md`. Five
+  parallel subagent critiques + one 2026 market-research pass produced
+  three new docs in `plans/`:
+  - `business-viability-negative-study.md` (18 sections + 2
+    appendices, ~1,200 lines): per-domain hostile findings (TAM
+    fallacy, AI-cost off by 25–30×, Maven 96% misattribution,
+    18-day-Phase-1 fantasy, free-tier ToS breach, SOC2 chicken-
+    and-egg, pilot-pricing inversion, hyperscaler commoditisation
+    via Workday-Sana $1.1B, Synthesia $4B, NotebookLM Enterprise
+    GA, Anthropic Claude Marketplace).
+  - `business-viability-mitigation-plan.md` (18 sections +
+    appendix, ~950 lines): per-problem mitigations classified
+    tactical/structural/unmitigable; §16 minimum-viable safe path
+    (B2C cert-prep micro-SaaS for one segment, $10/mo, ≤5 routes,
+    $500–2k MRR Year-1 ceiling, 10–15 hr/wk operator load); §17
+    explicit stop-signals; §18 one-weekend action list; explicit
+    anti-promise list (no $25M ARR, no 95% margin, no NRR 110%, no
+    SOC2 in Year 1).
+  - `business-viability-research-notes.md` (raw subagent findings
+    preserved as evidence of record, with line citations into the
+    operator's own decks).
+  - **Cross-link banners added** to all eight pre-existing plan
+    docs (`deck-*.md`, `content-pack-management-plan.md`,
+    `IMPLEMENTATION.md`, `expert-review-audit.md`,
+    `research-and-strategy-dossier.md`) so any future read picks
+    up the superseded-status disclosure.
+  - **Watch-list.** Operator should not send the B2B prospect deck,
+    recruit on the collaborator deck, or pitch the investor deck in
+    its current shape until the mitigation-plan rewrites are
+    applied. Decks are kept on disk as record of what was
+    considered and rejected, not as live pitching artefacts.

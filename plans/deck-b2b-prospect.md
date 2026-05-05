@@ -1,5 +1,19 @@
 # Content Pack Management Platform — B2B Prospect Brief
 
+> **2026-05-04 status banner.** **Do not send this deck to any B2B
+> prospect in its current shape.** Hostile review
+> (`./business-viability-negative-study.md`) concluded mid-market
+> enterprise without SOC2 is a structural no-sale, and the pilot fee
+> ($5,000 fully credited) is upside-down vs entry-tier year-1 revenue
+> ($3,000 at 50 seats × $5/mo). Mitigation plan
+> (`./business-viability-mitigation-plan.md`) §10 prescribes raising
+> the pilot fee to $10–25k with no credit; §9 exits the regulated-
+> vertical pitch until SOC2 is real. Maven 96% / altMBA / "14×
+> retention" citations need to be struck (`research-notes` §E.4).
+> Treat this deck as a record of a considered-and-rejected motion
+> until the operator chooses to revive B2B with the safe-shape pricing
+> and SOC2 in hand.
+
 > Slide-style deck for a 30-minute discovery call with a prospective B2B customer (HR / L&D / Compliance buyer). Buyer-language, not engineering-language. Slide breaks are marked by `---`.
 > Companion docs: [`./content-pack-management-plan.md`](./content-pack-management-plan.md), [`./deck-overview.md`](./deck-overview.md), [`./deck-investor.md`](./deck-investor.md), [`./deck-collaborator.md`](./deck-collaborator.md).
 

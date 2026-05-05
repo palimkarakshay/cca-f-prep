@@ -1,5 +1,17 @@
 # Content Pack Management Platform — Investor / Advisor Brief
 
+> **2026-05-04 status banner.** This deck reflects an earlier scope. A
+> hostile review (`./business-viability-negative-study.md`) concluded
+> the venture-shaped framing does not survive scrutiny across nine
+> independently fatal problems; the safe-path plan
+> (`./business-viability-mitigation-plan.md` §16) re-shapes this to a
+> profitable side-project micro-SaaS rather than a venture. **Specific
+> claims superseded:** $370B TAM / 0.05% = $25M ARR; gross margin >95%
+> (real ~55–70%); NRR 110–120% Year 1 (SMB realistic 90–105%); CAC ~$25
+> at 3-month payback; $100k MRR by Month 24–30; "Maven 96% / altMBA
+> 96% / 14× retention multiplier / Duolingo CURR +21%". Strike or
+> rewrite before any external use.
+
 > Slide-style brief for someone evaluating this as a venture-shaped business: angel investor, advisor, or experienced founder. Answers "is this a real business?", not "how does it work technically?". Slide breaks are marked by `---`.
 > Companion docs: [`./content-pack-management-plan.md`](./content-pack-management-plan.md), [`./deck-overview.md`](./deck-overview.md), [`./deck-b2b-prospect.md`](./deck-b2b-prospect.md), [`./deck-collaborator.md`](./deck-collaborator.md).
 

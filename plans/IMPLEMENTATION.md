@@ -1,5 +1,19 @@
 # Content Pack Management Platform — End-to-End Implementation Guide
 
+> **2026-05-04 status banner.** **This runbook describes a 18-day
+> Phase-1 build that the hostile review identified as a 3–5 month build
+> mis-scoped by ~5×** (`./business-viability-research-notes.md` §2,
+> §B.1–B.10). Specific items challenged: free-tier ToS breach (Vercel
+> Hobby for commercial use), AI cost line undercounted by 25–30×
+> ($300/mo claim vs $5–10k/mo realistic), 15+ user-facing surfaces for
+> a solo dev (industry max ~3–4), Phase 1 → Phase 2 carries-over claim
+> false in 6 specific ways, RLS-as-only-isolation security posture
+> insufficient for SOC2/HIPAA, validators 74% imaginary at time of
+> writing. Mitigation plan §7 prescribes scope cut to a single B2C
+> learner web app (4 routes); §8 prescribes Vercel Pro from day one or
+> self-host. Treat this as v1 plan superseded by the safe-shape
+> version in `./business-viability-mitigation-plan.md` §16.
+
 > **Source-of-truth runbook.** Hand this document to a fresh project (or a fresh Claude Code session) and it should contain everything needed to build the platform from zero to a paying customer. If anything below is ambiguous, raise it — do not silently improvise.
 
 ---
