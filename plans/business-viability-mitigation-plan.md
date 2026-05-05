@@ -813,7 +813,14 @@ actually needed.
   Calibration-Δ + spaced-review + retake mode are the
   differentiation; without them, launch isn't viable (iteration
   02 N21).
-- **Hosting:** Vercel Pro at $20/mo, or Cloudflare Pages free.
+- **Hosting (revised iter-05 N36):** Default = **Cloudflare Pages
+  + Workers** (free, commercial-permissible). Alternative:
+  **Render Professional $19/mo** which bundles PostgreSQL.
+  **Vercel Pro is not the recommended default** as of the
+  September 2025 pricing restructure — bandwidth at $0.40/GB,
+  image-opt overage on Pro tier easily pushes monthly cost to
+  $30–80/mo. Vercel Pro remains an option only if the operator
+  prefers the DX and accepts the cost variance.
 - **Auth:** Clerk free tier (single user pool, no orgs).
 - **DB:** Neon free tier, or even SQLite + Litestream if hosted on a
   VPS.
@@ -995,6 +1002,33 @@ exists, not before launch.
 - Disclaimer: *"This library does not include any exam content.
   It validates user-submitted MCQ format only."*
 
+### 16.12 Model migration discipline (added 2026-05-05, iter-05 N37)
+
+1. **Pin exact model versions** in API calls
+   (`claude-sonnet-4-6-20251015`, `claude-haiku-4-5-20251001`).
+   Avoid auto-upgrading aliases.
+2. **Validator regression suite** at `tests/validators/` —
+   50–100 prompt + expected-output pairs. Runs on every model
+   swap; failures block rollout.
+3. Per-swap runbook at `plans/runbooks/model-deprecation.md`.
+   Estimate per swap: 4–8 operator hours. Anthropic gives ≥60-day
+   notice, comfortably within evening-hour budget.
+
+### 16.13 Cost circuit-breaker (added 2026-05-05, iter-05 N42)
+
+1. **Per-tenant daily AI spend cap.** Postgres `daily_spend_log`
+   tracks Anthropic API cost per tenant per day. LLM-call wrapper
+   checks cap before each request; rejects if cap hit.
+2. **Global daily AI spend cap.** $10/day default, raised
+   deliberately as MRR grows.
+3. **Cost-spike alert.** When global daily spend > 2× rolling
+   7-day average, page the operator (Resend transactional email).
+4. **Implementation cost.** ~6 hours one-time. Saves a potential
+   runaway-loop $1k+ invoice.
+5. **Operator action on alert.** Pause LLM-call wrapper via
+   feature flag; investigate; resume only after root cause
+   identified.
+
 ### 16.10 Operator certification commitment (added 2026-05-05, iter-03 N26)
 
 The operator commits to **passing AI-103 within 90 days of project
@@ -1041,11 +1075,12 @@ guess; iteration 01 N4):
 
 | Line | Y1 monthly |
 |---|---|
-| Vercel Pro (commercial-licensed) | $20 |
+| Hosting (Cloudflare free / Render $19 / Vercel Pro $20–80; iter-05 N36) | $0–35 |
 | Anthropic API direct OR Max 20x | $30–80 (API) / $200 (Max) |
 | Stripe transaction fees (~3%) | $5–15 |
 | Clerk free tier | $0 |
 | Cloudflare DNS / domain | $1 |
+| Cloudflare R2 backup storage (iter-05 N38) | $5 |
 | Resend / SES (free until ~1k MAU) | $0 |
 | Sentry free tier | $0 |
 | BetterStack uptime monitor | $25 |
@@ -1055,7 +1090,8 @@ guess; iteration 01 N4):
 | Insurance bundle (general liability + cyber + E&O; iter-04 N32) | $200 |
 | LLC + registered agent amortised (iter-04 N32) | $0–25 |
 | Privacy policy / attorney review amortised (iter-04 N34) | $42 ($500/yr ÷ 12) |
-| **Subtotal Y1** | **$337–522 (API path)** / **$549–642 (Max path)** |
+| **Subtotal Y1** | **$322–542 (API path)** / **$534–662 (Max path)** |
+| (iter-05 hosting + R2 deltas applied; range widened) | |
 
 The earlier "$50/mo" framing was indefensible.
 
