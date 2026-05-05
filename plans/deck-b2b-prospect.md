@@ -239,6 +239,23 @@ engine to your segment's specific failure mode.
 | **SOC2** | On the roadmap — formal audit triggered at 5 enterprise tenants. We can share our control matrix today. |
 | **GDPR** | Designed in (data-export, right-to-be-forgotten); EU hosting available |
 
+> **v2 review note — security posture honest.** The "SOC2 triggered
+> at 5 enterprise tenants" framing was chicken-and-egg:
+> mid-market enterprise won't sign without SOC2, so the trigger
+> never fires. v2 is honest:
+> - **No SOC2 in v1.** If your procurement requires SOC2 / SAML /
+>   SCIM, we are not the right vendor in 2026; we'll know in the
+>   first call and we'll say so. SOC2 Type 1 starts at $5k+ MRR
+>   sustained; Type 2 follows in 6+ months.
+> - **No multi-tenant RLS in v1 of v2.** Single-tenant data model
+>   until ≥ 3 paying B2B tenants; multi-tenant migration in week
+>   7 of build, RLS hardening when revenue justifies the audit.
+> - GDPR / data-export remain v1 commitments.
+> - **AI provenance** records remain a v1 commitment but the
+>   provenance is logged in Postgres rows, not an immutable
+>   append-only ledger (that's Phase 2).
+> See `./v2-scaled-b2b-plan.md` §5 + mitigation §9.
+
 ---
 
 ## Single sign-on & integration
@@ -264,6 +281,22 @@ A 60-day commercial pilot with mutually defined success criteria:
 
 **No data lock-in.** If you don't continue, you get a full export and we delete your tenant.
 
+> **v2 pilot offer — REPLACES table above.**
+>
+> | | What's included |
+> |---|---|
+> | **Seats** | Up to 25 (Starter) or 50 (Pro) |
+> | **Catalogs** | Public catalogs (CCA-F + AWS/GCP/Anthropic certs at launch) |
+> | **AI generation** | None at v1 (operator-authored content; private catalogs are Phase 2) |
+> | **Onboarding** | 1-hour kick-off; weekly 30-min readout |
+> | **Pilot fee** | **$10,000**, **non-refundable, no credit toward subscription** |
+> | **Success criteria (your numeric definition signed at LOI)** | three metrics, mutually agreed before kickoff; if hit → 12-month renewal at list; if missed → both walk |
+> | **Concurrent pilots** | Operator runs at most 2 in parallel; expect ~30-day waitlist if both slots are full |
+>
+> The $5,000-with-credit shape was upside-down (credit > Year-1
+> revenue at entry tier). v2 pilots fund operator labour and filter
+> for buyers who actually convert. See mitigation §10.
+
 ---
 
 ## Pricing after the pilot
@@ -277,6 +310,22 @@ A 60-day commercial pilot with mutually defined success criteria:
 Platform minimum: $100/mo (covers any tier under 20 seats).
 
 Custom catalogs (drafted from your knowledge files) are included in Pro and Enterprise.
+
+> **v2 pricing — REPLACES table above.**
+>
+> | Tier | Per seat per month | Notes |
+> |---|---|---|
+> | **Team Starter** | **$20** | Public catalogs only; basic team admin; weekly digest |
+> | **Team Pro** | **$25** | + 1 private catalog drafted from your knowledge file (Phase 2 only) |
+> | Enterprise | **not sold in v1** | SOC2 / SAML / SCIM are not in v1; if you require them, we are not the right vendor in 2026 |
+>
+> **Platform minimum:** **$300/mo** (Starter, ≥ 5 seats),
+> **$750/mo** (Pro, ≥ 5 seats).
+>
+> Custom-catalog drafting is **deferred to Phase 2** (gated on $3k+
+> sustained MRR; see `./v2-scaled-b2b-plan.md` §7). The $5 entry
+> tier is dropped — at operator-time CAC priced at market rate,
+> $5/seat is loss-making. See mitigation plan §10.
 
 ---
 
