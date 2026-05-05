@@ -793,13 +793,26 @@ to end.
 
 ### 16.1 What you build
 
-A B2C cert-prep web app for *one* technical certification (start with
-the operator's own — CCA-F). One catalog. Static content where
-possible; Postgres + Clerk + Stripe only where actually needed.
+A B2C cert-prep web app for *one* technical certification.
+**Default catalog (post iteration-02 N16): Azure AI-102** —
+mid-volume (~2k monthly searches), low SEO saturation, transferable
+from the operator's AI/Anthropic background. Second-choice: GCP Pro
+AI Engineer. **CCA-F is a free secondary catalog** used as SEO
+top-of-funnel and for the operator's own studying — not the paid
+revenue catalog (its 12–18 month peak window is too narrow). One
+paid catalog at launch; consider second catalog only when the first
+crosses 50 paying users.
 
-- **Surface:** four routes — `/` (lander), `/study/[slug]` (lesson +
-  quiz), `/dashboard` (progress + spaced-review banner), `/account`
-  (Stripe portal).
+Static content where possible; Postgres + Clerk + Stripe only where
+actually needed.
+
+- **Surface:** five routes — `/` (lander + sample lesson),
+  `/study/[slug]` (lesson + quiz with calibration-Δ),
+  `/dashboard` (progress + spaced-review with exam-date target),
+  `/retake` (failed-exam recovery flow), `/account` (Stripe portal).
+  Calibration-Δ + spaced-review + retake mode are the
+  differentiation; without them, launch isn't viable (iteration
+  02 N21).
 - **Hosting:** Vercel Pro at $20/mo, or Cloudflare Pages free.
 - **Auth:** Clerk free tier (single user pool, no orgs).
 - **DB:** Neon free tier, or even SQLite + Litestream if hosted on a
@@ -810,11 +823,44 @@ possible; Postgres + Clerk + Stripe only where actually needed.
 - **Payments:** Stripe Checkout — $10/mo or $79/yr. No tiers.
 - **Telemetry:** PostHog free, server-side events only, sampled.
 
-### 16.2 What you sell
+### 16.2 What you sell (revised 2026-05-05, iteration 02)
 
-A **single product, one price**: $10/mo or $79/yr. Free tier with
-3 lessons. No B2B. No SSO. No SAML. No SCIM. No SOC2 commitment. No
-custom catalogs.
+Three SKUs, no free tier:
+
+| SKU | Price | What it gates |
+|---|---|---|
+| **Single-exam pack** (default) | **$29 one-time** | Lifetime access to that exam's catalog |
+| **All-access subscription** (after ≥3 packs published) | **$19/mo** | All current and future exam packs |
+| **All-access annual** | **$149/yr** | Same as monthly; ~35% savings |
+
+**No free tier.** Public sample is *one* sample lesson per exam pack,
+readable on the marketing site, with a quiz preview but the full
+question bank gated. Marketing surface, not a free tier.
+
+**Refund policy.** 30-day money-back, no questions asked. Builds
+trust, lowers chargeback rate, signals confidence.
+
+**Why these prices.** AWS Skill Builder is $29/mo (the upper anchor);
+Tutorials Dojo's subscription tier sits at $14.99–24.99/mo and their
+one-time exam packs at $15–25 (the empirical category norm). The
+$10/mo / $79/yr in the earlier draft was below LTV-required floor
+(iteration 02 N12, N13: at $10/mo blended LTV ≈ $55 vs CAC of
+$96–144 from organic SEO labour — 5–7× over budget).
+
+**The cognitive-science differentiation must ship in v1**, otherwise
+the product cannot defend $19/mo against Anki + free YouTube. Three
+non-negotiable launch features (re-instated from §16.4 defer list):
+
+1. **Calibration-Δ tracker.** After each quiz, show predicted vs
+   actual score; over time, plot the calibration curve.
+2. **Expanding-interval spaced review tied to user-set exam date.**
+   Default schedule keys off the user's exam date so review pressure
+   scales accordingly.
+3. **Retake mode.** Separate flow for users who failed an exam once;
+   focuses on weakest topics from their first attempt.
+
+No B2B. No SSO. No SAML. No SCIM. No SOC2 commitment. No custom
+catalogs.
 
 ### 16.3 Who you sell to
 
@@ -851,8 +897,14 @@ the exam, and CCA-F is too new to bet a catalog on.)
    unique monthly visitors, the SEO motion failed; stop and migrate
    to consulting day-rates per §17.2 of the negative study.
 
-No outbound. No paid acquisition until LTV:CAC > 3:1 is measured
-(i.e., not in Year 1).
+**No paid acquisition is planned in Year 1 or Year 2** at the
+projected price (iter-02 N18). At blended LTV ~$90, the only
+sustainable CAC is <$30, which no paid channel currently achieves
+in cert-prep B2C. This is a *deliberate constraint*, not a
+deferred decision; do not "experiment with $200 of Google Ads" — it
+will produce zero signal at that budget.
+
+No outbound either.
 
 ### 16.4 What you don't build (yet)
 
@@ -890,7 +942,8 @@ guess; iteration 01 N4):
 | BetterStack uptime monitor | $25 |
 | Domain email (Fastmail / Workspace) | $6 |
 | LLC / sole-prop registration amortised | $0–25 |
-| **Subtotal Y1** | **$87–172 (API path)** / **$257–342 (Max path)** |
+| Compliance / chargeback overhead (added iter-02 N17) | $50 |
+| **Subtotal Y1** | **$137–222 (API path)** / **$307–392 (Max path)** |
 
 The earlier "$50/mo" framing was indefensible.
 
@@ -982,8 +1035,11 @@ biased against quitting; self-monitoring fails predictably.
    decline more than one without triggering an automatic stop-review.
 3. **Live MRR + cost dashboard.** Stripe webhook → public-read
    Notion / Sheets / a custom 50-line page. Anyone with the URL
-   sees current MRR, cost basis, AI-cost-as-%-of-MRR, paying-user
-   count. Updates daily. Cost: $0.
+   sees current MRR, cost basis, AI-cost-as-%-of-MRR, and
+   **three paying-user numbers tracked separately** (iter-02 N15):
+   total signups (vanity, do not optimise on this); 30-day-retained
+   paying users (the real number); trailing-30-day churned paying
+   users (lagging health). Updates daily. Cost: $0.
 4. **Trigger response policy.** When a §17 trigger is hit, the
    operator commits in writing to the action *during the call*,
    not after. Trigger response is signed and dated to a
