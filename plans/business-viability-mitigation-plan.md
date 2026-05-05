@@ -722,6 +722,117 @@ strong pull to put the effect sizes back in. Resist it. The first
 buyer who Googles "Maven 96%" and finds it's altMBA's W1→W2 number,
 not a completion number, becomes a permanent-no.
 
+---
+
+## 16. The minimum viable safe path (re-shaped plan)
+
+If you accept every mitigation above, the plan that survives is
+recognisably different from the original. Here is the safe shape, end
+to end.
+
+### 16.1 What you build
+
+A B2C cert-prep web app for *one* technical certification (start with
+the operator's own — CCA-F). One catalog. Static content where
+possible; Postgres + Clerk + Stripe only where actually needed.
+
+- **Surface:** four routes — `/` (lander), `/study/[slug]` (lesson +
+  quiz), `/dashboard` (progress + spaced-review banner), `/account`
+  (Stripe portal).
+- **Hosting:** Vercel Pro at $20/mo, or Cloudflare Pages free.
+- **Auth:** Clerk free tier (single user pool, no orgs).
+- **DB:** Neon free tier, or even SQLite + Litestream if hosted on a
+  VPS.
+- **AI:** Haiku 4.5 for content drafts; operator runs them locally via
+  Claude Code (Max 20x covers it). The web app stores and serves; it
+  does not generate at runtime in v1.
+- **Payments:** Stripe Checkout — $10/mo or $79/yr. No tiers.
+- **Telemetry:** PostHog free, server-side events only, sampled.
+
+### 16.2 What you sell
+
+A **single product, one price**: $10/mo or $79/yr. Free tier with
+3 lessons. No B2B. No SSO. No SAML. No SCIM. No SOC2 commitment. No
+custom catalogs.
+
+### 16.3 Who you sell to
+
+Adults studying for a technical certification. Reach them through:
+- Reddit posts in /r/AnthropicAI, /r/AWSCertifications,
+  /r/cscareerquestions
+- Hacker News Show HN
+- One blog post per week on the operator's domain or dev.to
+- Word of mouth in study communities the operator already participates
+  in
+
+No outbound. No paid acquisition until LTV:CAC > 3:1 is measured (i.e.,
+not in Year 1).
+
+### 16.4 What you don't build (yet)
+
+- B2B admin app, SME review queue, multi-tenant RLS, custom catalogs,
+  cohort routes, peer-comparison, leaderboard, voice authoring,
+  worked-example fading, JOL slider trend lines, SCORM/xAPI export,
+  Inngest pipelines, embedding dedup, Opus critic, advanced
+  observability dashboards.
+- All of the above are Year 2+ features, conditional on Year 1 paying
+  revenue.
+
+### 16.5 The realistic numbers
+
+| Metric | Year 1 | Year 2 |
+|---|---|---|
+| Paying users | 50–200 | 200–800 |
+| MRR | $500–2,000 | $2,000–8,000 |
+| Operator hours / week | 10–15 (side bet) | 15–25 (still side bet) |
+| Cost basis | $50/mo | $200/mo |
+| Net to operator | small but positive | meaningful |
+
+This is a **lifestyle micro-SaaS**, not a venture. It compounds. It is
+defensible against hyperscalers because they don't care about cert-
+prep niches at this scale. It is operable solo without burnout.
+
+### 16.6 What you communicate to advisors / investors
+
+The original investor deck targets the wrong audience. The safe shape
+doesn't need investors. **Stop pitching investors.** If asked:
+*"It's a cert-prep app. I'm running it as a profitable side project.
+Not raising."*
+
+If a strategic ever appears later — e.g., Anthropic, looking to bolt-
+on cert-prep content for the Claude Marketplace — the conversation is
+about acquisition or partnership, not Series A.
+
+### 16.7 The "real product" decision tree
+
+```
+Build the safe-shape micro-SaaS for 6 months.
+├── If MRR ≥ $3k by Month 6:
+│     Continue. Add a second catalog. Reassess at Month 12.
+├── If MRR ≥ $10k by Month 12:
+│     Take 4 weeks unpaid leave. Run focused sales.
+│     Re-evaluate B2B *small-SMB* (no SOC2 needed) only then.
+├── If MRR < $1k by Month 6:
+│     Stop. Migrate to §17.2 in the negative study (open-source
+│     library + consulting day rates).
+└── Otherwise:
+      Continue at the current shape; don't escalate scope.
+```
+
+Each branch is concrete; none of them require hyperscaler-class
+resources, SOC2, or 60-hour weeks.
+
+### 16.8 Where the original plan still has value
+
+- The CCA-F study repo content (genuinely useful).
+- The validator suite as an open-source contribution (reputation
+  asset).
+- The cognitive-science integration as a methodology document — fine
+  to publish as a blog series; not fine to sell as IP.
+- The "two-phase, de-risk-the-AI-cost-first" *discipline* (good; just
+  not at the scope the original plan defined).
+
+
 
 
 
