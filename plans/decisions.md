@@ -69,6 +69,20 @@
 
 ---
 
+## D-006 — Day-job employment-agreement compatibility
+
+- **Date.** *(operator to fill in by 2026-05-19)*
+- **Signer.** Operator
+- **Decision.** Side-bet is/is not compatible with day-job
+  employment agreement.
+- **Evidence.** Employment-agreement section reference / clauses
+  reviewed.
+- **Disclosure status.** Filed with employer / not required.
+- **Action if incompatible.** Stop the §16 plan; consider §17.2
+  of negative study (consulting with explicit disclosure).
+
+---
+
 ## D-005 — Hosting choice
 
 - **Date.** *(operator to fill in)*

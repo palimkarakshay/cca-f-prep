@@ -565,6 +565,21 @@ single point of failure for engineering AND customer success AND sales.
 = $10k MRR ceiling for Year 1 is *fine*. It's better than zero.
 Removing the venture-shaped growth target removes the bandwidth crisis.
 
+### 11.9 Day-job employment-agreement compatibility (added 2026-05-05, iter-10 N59)
+
+Operator commits to:
+1. **Read employment agreement** for moonlighting / IP / non-
+   compete clauses before D-002 in `decisions.md`.
+2. **File required disclosures** with employer if moonlighting
+   review is required.
+3. **All side-bet work on personal hardware in personal hours.**
+4. **Side-bet IP registered to operator personally**, separate
+   from any day-job systems.
+5. **If employment agreement is incompatible** (broad non-compete,
+   broad IP assignment), the §16 plan is the wrong fit — consider
+   §17.2 of negative study (consulting day rates with disclosure
+   to employer).
+
 ### 11.8 Sustainability gates (added 2026-05-05, iter-06 N44)
 
 1. **Hard maximum: 12 hr/wk on the side bet.** No "crunch
@@ -1229,7 +1244,7 @@ income, no product risk.
 | Resend / SES (free until ~1k MAU) | $0 |
 | Sentry free tier | $0 |
 | BetterStack uptime monitor | $25 |
-| Domain email (Fastmail / Workspace) | $6 |
+| Domain email (Fastmail / Workspace **personal account, not day-job**; iter-10 T-10.3) | $6 |
 | LLC / sole-prop registration amortised | $0–25 |
 | Compliance / chargeback overhead (added iter-02 N17) | $50 |
 | Insurance bundle (iter-04 N32; itemised iter-09 T-09.1) | $200 (GL ~$50, cyber ~$50, E&O ~$100) |
@@ -1347,6 +1362,19 @@ biased against quitting; self-monitoring fails predictably.
    call. If a trigger has been hit and not actioned, the reviewer's
    only assignment is to ask "why are you not stopping?" until a
    number-based answer exists.
+
+**Quarterly checklist additions (iter-10 T-10.1, T-10.2):**
+- Link-rot scan: automated check (`lychee` or similar) that all
+  `derived_from_public_doc_url` links in the catalog resolve.
+  Failures → operator fixes citations within 30 days.
+- Content-freshness audit: diff current chosen-catalog Skills
+  Measured outline against last-known-good. New objectives →
+  schedule lessons; retired objectives → archive lessons.
+- Stripe chargeback ratio review (per
+  `runbooks/stripe-account-review.md`).
+- Insurance policy renewal status.
+- Tax nexus status across all US states (per §16.11 tax block).
+- axe-core regression run (accessibility).
 
 ---
 
