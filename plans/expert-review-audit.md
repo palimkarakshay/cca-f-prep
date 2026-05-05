@@ -753,4 +753,91 @@ This audit framework is referenced from:
 - [`deck-collaborator.md`](./deck-collaborator.md) — coverage-
   assertion section references the audit framework.
 
+---
+
+## §H — Executed audit (2026-05-04)
+
+The framework above (§§A–G) was a template. This section records the
+**actual** hostile-review findings that were generated when the
+framework was finally executed. Reviewer: not a paid external domain
+expert — five LLM subagents reading the materials in parallel + one
+market-research subagent + the operator's Claude Code session as
+integrator. Mitigation §14 prescribes that a real paid external
+review remains a follow-up; the audit below is the strongest
+substitute the operator could generate from inside the room.
+
+**Provenance.** Findings condensed in
+`./business-viability-negative-study.md`; raw line-cited ammunition
+preserved in `./business-viability-research-notes.md`. Mitigations
+in `./business-viability-mitigation-plan.md`. Resulting v2 plan in
+`./v2-scaled-b2b-plan.md`.
+
+### §H.1 — Findings against §A (psychology specialist rubric)
+
+| ID | Finding | Severity | Mitigation |
+|---|---|---|---|
+| H1.1 | "Maven 96% W1→W2" attributed to Maven; actually altMBA's number. Maven's own PR cites "more than 75%" completion. | High | Mitigation §6 |
+| H1.2 | Cepeda 2008 / Roediger & Karpicke 2006 effect sizes from forced-participation lab studies, transferred to voluntary $15/mo subscribers without compliance-with-intervention measurement plan. | High | Mitigation §15 |
+| H1.3 | "14× retention multiplier" applied to $9/mo SaaS context. Maven sells $1k–$10k+ live cohorts; multiplier comes from price signal + instructor pressure, not platform shape. | High | Mitigation §6 |
+| H1.4 | "Duolingo CURR +21%, DAU 4.5×" attributes a staffed-retention-team A/B-test outcome to a solo-operator's mobile-push design. | Medium | Mitigation §15 |
+| H1.5 | Falsification triggers (dossier §6) require N too small to fire at v2 scale. Falsificationist in form, not in practice. | Medium | Mitigation §15 |
+
+### §H.2 — Findings against §B (learning specialist rubric)
+
+| ID | Finding | Severity | Mitigation |
+|---|---|---|---|
+| H2.1 | "≥ 60% completion vs MOOC 3–10%" target asserted with no pilot data. | Medium | Mitigation §15 |
+| H2.2 | Lee 2004 +46% CTA gain (d≈1.72) cited without acknowledging the platform's CTA implementation is not the Lee-2004 protocol. | Medium | Cite as design rationale; do not promise the effect size |
+| H2.3 | The synthesis-of-14-mechanisms thesis admits at audit §D that it has "no published precedent at scale" — yet expansion-revenue economics depend on it working. | High | Mitigation §6 + §8 |
+| H2.4 | 3.5× compliance-violation correlation (KPI Depot 2026) is the entire monetisation argument for regulated verticals; one industry source. | High | Mitigation §9 |
+
+### §H.3 — Findings against §C (business-partner rubric)
+
+| ID | Finding | Severity | Mitigation |
+|---|---|---|---|
+| H3.1 | "$370B TAM, 0.05% = $25M ARR" is the *if-we-just-get-1%-of-China* fallacy. | High | Mitigation §2 |
+| H3.2 | "1,000 SMB tenants × $5k ACV" SOM = ~1 new tenant per workday for 3 years for a solo operator. | High | v2 §8 |
+| H3.3 | Founder labour priced at zero makes 95% gross margin tautological. | High | v2 §8 |
+| H3.4 | AI cost ($300/mo at 100 tenants × 50k generations) undercounted by ~25–30×. Real $5–10k/mo. | Critical | v2 §5 + IMPLEMENTATION v2.4 |
+| H3.5 | NRR 110%/120% borrowed from top-quartile B2B SaaS; lead segment $9/mo B2C → 70–90% NRR realistic. | High | v2 §8 |
+| H3.6 | "Pilot fee $5,000 fully credited" exceeds Year-1 revenue at entry tier ($3,000 at 50 seats × $5/mo). | Critical | v2 §3 — $10k non-refundable, no credit |
+| H3.7 | SOC2 deferred to "5 enterprise tenants pipeline" while booking enterprise revenue from Year 1 — chicken-and-egg. | Critical | v2 §10 + mitigation §9 |
+| H3.8 | Vendor portability claimed; Clerk / Neon / Vercel migrations are 6–12 week projects each. | Medium | v2 §9 |
+| H3.9 | "23 documented validators as moat"; only ~6 coded; F1 letter-bias detector failed on operator's own content (76% B-bias). | High | v2 §10 + mitigation §5 |
+| H3.10 | 18-day Phase 1 mis-scoped by ~5×. Real build is 8–12 weeks part-time at v2 scope. | Critical | IMPLEMENTATION v2.3 |
+| H3.11 | Vercel Hobby TOS forbids commercial use; first Stripe pre-order = breach. | High | Mitigation §8 |
+| H3.12 | 7+ segments attacked simultaneously by one solo operator. | Critical | v2 §2 |
+
+### §H.4 — Cross-cutting findings (the existential ones)
+
+| ID | Finding | Severity |
+|---|---|---|
+| H4.1 | Hyperscaler / suite-vendor consolidation: Workday-Sana $1.1B, Synthesia $4B, NotebookLM Enterprise GA + free with Workspace, Claude Marketplace 0% commission. Horizontal "AI-LMS for everyone" wedge is gone. | Existential — informs v2 §1 |
+| H4.2 | Three claims that cannot all be true: (a) enterprise revenue Year 3, (b) SOC2 deferred Year 2, (c) CAC $0. Pick any two; the third collapses. | Existential — v2 picks (b) and (c); drops (a) |
+| H4.3 | "AI content is bad → fix with AI" — same critic-LLM-judging-LLM architecture the deck attacks Synthesia for. | Structural — v2 §10 + mitigation §5 |
+| H4.4 | The audit framework (§§A–G above) was empty at the moment v1 decks were finalised. The "harsh critic" was operator self-review. | Existential — fixed by this §H |
+
+### §H.5 — Verdict and salvage
+
+`./business-viability-negative-study.md` §18: **don't build the v1
+SaaS as pitched.** Mitigation §17 lists salvage paths (open-source
+library, narrowed CTA tooling, methodology consulting, lumivara-site
+cross-pollination).
+
+**v2 takes a different salvage path:** keep a small B2B case alive
+at deliberately scaled-down size, run as a profitable side project,
+preserve optionality to grow if Year-1 data warrants. v2's ambition
+is bounded by the audit findings; v1's was not.
+
+### §H.6 — Why §§A–G remain
+
+§§A–G describe the kind of audit that should be performed by an
+external reviewer, ideally before significant build effort. They
+remain in this document as (a) a record of the framework the
+operator constructed and then self-audited inside the room rather
+than externally, and (b) the rubric a future paid reviewer can
+populate when the operator acts on mitigation §14. **Until that
+paid review happens, treat §H above as the operative finding set,
+not §§A–G.**
+
 Reciprocal backlinks added in commit 10 of the dossier-build sequence.
