@@ -216,4 +216,231 @@ pitch is dead. Workday-Sana, NotebookLM, Articulate AI already occupy
 that surface. The first slide that pitches the product as a horizontal
 LMS replacement should be deleted.
 
+---
+
+## 5. P4 mitigation — Validator "moat" decay
+
+**Problem (recap).** 23 documented failure modes pitched as moat; only
+~6 actually coded; the F1 letter-bias detector failed on the operator's
+own content. LLMs route around static checks at every release.
+
+**What to do — stop selling validators as the moat:**
+
+1. **Code the missing 17 validators before any pitching.** It is
+   indefensible to claim a moat that exists in commented stubs. Either
+   ship the work or strike the claim.
+
+2. **Reframe validators as a *quality floor*, not a *moat*.** Floors
+   are necessary; moats are differentiating. The decks consistently
+   conflate the two.
+
+3. **Open-source the validator suite as a Claude Skill.** The negative
+   study §17.2 case stands — the suite's commercial value is low and
+   decaying, but its reputation value is high and compounding. Ship it
+   as `mcq-quality-checks` on npm or as a Claude Skill on the
+   Marketplace. The operator becomes the named author of a public
+   library every L&D team eventually finds.
+
+4. **Build the actual moat at the *measurement* layer, not the
+   validator layer.** Per-tenant Kirkpatrick L1–L4 dashboards with
+   calibration-Δ trend lines and a credible methodology document take
+   far longer for a competitor to copy than a regex set.
+
+5. **Replace "23 failure modes" language across all decks with "open-
+   source quality library used by N developers"** — once it ships and
+   N > 0.
+
+**What you cannot mitigate.** The "validator suite as IP" framing is
+gone. Anyone who reads the collaborator deck and counts the
+`// 17 more...` stubs sees through it. Treat it as commodity tooling.
+
+---
+
+## 6. P5 mitigation — Maven / lab-to-app citation gap
+
+**Problem (recap).** "Maven 96%" is altMBA's number, not Maven's
+(Maven's own press release: "more than 75%"). The decks borrow
+effect sizes from forced-participation lab studies and apply them to
+voluntary $9/mo subscribers.
+
+**What to do — strike the borrowed-effect-size claims:**
+
+1. **Remove these strings from every deck:**
+   - "Maven W1→W2 retention 96% vs MOOC 16%"
+   - "altMBA 96% completion"
+   - "14× retention multiplier"
+   - "Duolingo CURR +21%, DAU 4.5×"
+   - "Cohort tier ≥ 60% completion vs MOOC 3–10%"
+   - Any other lift figure attributed to a competitor's product.
+
+2. **Replace with this honest line.** *"Cognitive-science research
+   suggests these mechanisms — spacing, retrieval, interleaving,
+   cohort accountability — increase retention. We will measure our own
+   cohort's outcomes once shipped and report against the Kirkpatrick
+   framework. Until then, our claim is methodological, not
+   quantitative."*
+
+3. **Cite the lab studies as design rationale** (Cepeda 2008, Roediger
+   & Karpicke 2006), but never as a quantitative outcome promise.
+
+4. **Add a measurement plan.** State the minimum N you would need to
+   reach 80% statistical power on a 10-percentage-point completion
+   lift (rough order: 200+ in each arm). Until you have that N, every
+   pilot's results are anecdote, not evidence.
+
+5. **Pre-register your hypotheses** in a public document before the
+   first pilot starts. This is the credibility move; it costs nothing
+   and inoculates against post-hoc cherry-picking.
+
+**Why this is safe.** Methodologically honest framing wins serious
+buyers and serious investors. Borrowed effect sizes from
+$2k+ live cohorts collapse the moment the buyer asks for a citation.
+
+**Watch out.** Removing the lift numbers makes the decks less
+exciting. That is the correct outcome. If you need exciting numbers
+to close, you do not have a closeable plan.
+
+---
+
+## 7. P6 mitigation — 18-day Phase 1 timeline
+
+**Problem (recap).** 18-day Phase 1 promises a multi-tenant SaaS with
+B2C learner app, B2B admin, marketing site, content authoring loop,
+validators, and ops hygiene. Realistic build is 3–5 months full-time
+or 9–18 months part-time.
+
+**What to do — radically narrow Phase 1:**
+
+1. **Cut Phase 1 to a single surface.** A B2C learner web app for the
+   operator's own CCA-F study repo. No admin app. No marketing site
+   beyond a one-page lander. No B2B controls. No SME review queue.
+   No multi-tenancy.
+
+2. **Use Astro + a static content pack** if possible — defer Postgres
+   until you have a paying user. Most B2C cert-prep at <100 users
+   runs fine on JSON files in object storage.
+
+3. **Keep Clerk + Stripe Payment Links** for the gate; everything else
+   is a static site. Total Phase 1 surface area: 4–5 routes.
+
+4. **Time-box at 8 weeks of evening / weekend hours** (= ~80–100
+   hours). If anything is unshipped at week 8, stop and re-plan.
+
+5. **Defer multi-tenancy until at least 5 paying users.** If you've
+   never charged anyone for this product, you have no way to know
+   whether the multi-tenant version is worth building.
+
+6. **Defer Phase 2 entirely until Phase 1 has $1,000 of paying
+   revenue.** No exceptions, no "this customer wants enterprise
+   features."
+
+**Why this is safe.** A B2C cert-prep app with the operator as the
+first user is achievable in 8 weeks part-time. It generates real
+signal (do users pay? do they complete? do they refer others?) at a
+small fraction of the original scope.
+
+**Watch out.** This kills the B2B story for Year 1. The decks must be
+rewritten to admit "Year 1 = B2C only; B2B starts when there is
+operator capacity, which depends on Year-1 revenue covering at least
+half the operator's day-job income loss."
+
+**The implementation plan needs a corresponding rewrite.** The
+existing `IMPLEMENTATION.md` documents a multi-tenant SaaS in 18 days.
+Either rewrite it to match the narrowed scope or archive it as
+"original v1 plan, superseded by mitigation."
+
+---
+
+## 8. P7 mitigation — Free-tier TOS violation
+
+**Problem (recap).** Vercel Hobby's TOS forbids commercial use. The
+plan launches on Hobby and "flips to Pro at first paying customer" —
+which is itself the TOS-breaching event.
+
+**What to do — pay $20/mo from day one, or self-host:**
+
+Three credible options, in order of preference:
+
+1. **Vercel Pro from day one — $20/mo.** Phase 1 cost goes from $1/mo
+   to $20/mo. The "essentially free" framing dies, but the plan was
+   already fooling itself with that framing. Done.
+
+2. **Self-host on a single VPS — $5–10/mo.** Hetzner / DigitalOcean +
+   Coolify or Dokku. Brings Postgres, app, and storage onto one
+   $5–10/mo machine. Less elegant; entirely TOS-clean. Adds ~4 hours
+   of one-time setup.
+
+3. **Cloudflare Pages + Workers — free, commercial-OK.** Cloudflare's
+   free tier permits commercial use. Trade-off: edge runtime is more
+   restrictive than Vercel's; some Next.js features need rework.
+
+**For each non-Vercel-Pro free tier the plan uses:**
+
+- **Neon free**: capped at 0.5 GB; upgrade to Scale ($19/mo) when you
+  cross 250 MB or 100 paying users, whichever comes first.
+- **Clerk free**: org cap is the limiting factor. Plan to move to
+  Clerk Pro ($25/mo + per-user) when you cross 25 active orgs.
+- **Resend free**: 3k emails/mo. Move to a paid plan or AWS SES
+  ($0.10/1k) before any cohort cron fires.
+- **PostHog free**: throttle event volume early (sample at 10% in dev,
+  100% in prod with tight allowlist of events) to stretch the 1M
+  ceiling.
+
+**Why this is safe.** $20/mo Vercel Pro removes the existential TOS
+risk and adds line-of-sight to the eventual Phase 2 cost. The plan's
+"$1/mo" claim was always a fiction; this just makes it a $20/mo
+truth.
+
+**Watch out.** Don't migrate vendors mid-stream. Each migration is a
+weekend; ten cumulative migrations is a quarter. Pick the stack and
+stay.
+
+---
+
+## 9. P8 mitigation — SOC2 chicken-and-egg
+
+**Problem (recap).** Enterprise won't sign without SOC2; the plan
+defers SOC2 to "5 enterprise tenants pipeline" — therefore zero
+enterprise tenants forever.
+
+**What to do — exit the regulated-vertical pitch until SOC2 is real:**
+
+1. **Drop the entire enterprise / regulated-vertical motion from the
+   pitch for Year 1.** Healthcare, financial-services compliance,
+   government — none of them buy from one-person teams without SOC2.
+   Stop pitching them.
+
+2. **Restrict B2B to companies <50 employees and non-regulated.** Tech
+   startups, marketing agencies, e-commerce SMBs. They sign without
+   SOC2. They also pay less ($5–10/seat range), but at the operator's
+   capacity that is the right ceiling anyway.
+
+3. **If you still want to do enterprise eventually, start a SOC2 Type 1
+   engagement at the moment you cross $5,000 MRR.**
+   - Vanta or Drata: ~$12k/yr.
+   - Auditor: $15–20k for Type 1, $30–40k for Type 2.
+   - Type 1 takes ~3 months from controls implementation to report.
+   - Type 2 needs an additional 3–12 month observation window.
+   - **Total cost from "decide" to "Type 2 in hand": $50k+ and 9–15
+     months.** Budget it before you pitch enterprise.
+
+4. **Be transparent with prospects.** "We're SOC2-Type-1-in-progress,
+   target report Q3" is a legitimate posture for some buyers; "we'll
+   get SOC2 if you sign" is not. Don't conflate them.
+
+5. **Sub-processor BAAs.** When you do start SOC2, audit your
+   sub-processors (Clerk, Resend, Anthropic, Vercel, Neon, R2). Each
+   needs a signed BAA / DPA at the right tier. None of the free tiers
+   sign these. Cost: subscription upgrades on each — typically
+   $200–500/mo combined.
+
+**Why this is safe.** Walking away from the regulated-vertical pitch
+removes a forcing function (SOC2) you cannot satisfy. The plan
+becomes smaller but coherent.
+
+**What you cannot mitigate.** The dossier's "$50k–$1M ACV" enterprise
+tenants in Year 3 are gone. ARR ceiling for the realistic plan is
+~$300k–$1M, not $5M+. Re-state explicitly.
+
+
 
