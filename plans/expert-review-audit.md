@@ -1,5 +1,16 @@
 # Expert-Review Audit Framework
 
+> **2026-05-04 status banner.** This framework was never executed by an
+> external reviewer — every Score / Recommendation / Notes column at
+> lines 258–470 is empty. The hostile review classified this audit as a
+> *procedural shield, not a critique*
+> (`./business-viability-research-notes.md` §3). The
+> business-viability-negative-study delivered the actual adversarial
+> findings the framework was designed to elicit; the mitigation plan
+> §14 (`./business-viability-mitigation-plan.md`) prescribes paying a
+> real external reviewer or posting publicly for critique. **Do not
+> treat this template as a completed audit.**
+
 > **Purpose.** Structured critical-review template for an external
 > domain expert to audit [`research-and-strategy-dossier.md`](./research-and-strategy-dossier.md)
 > against (a) the cited evidence, (b) what the platform has built today,

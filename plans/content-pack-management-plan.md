@@ -1,5 +1,14 @@
 # Content Pack Management Platform — Build Plan
 
+> **2026-05-04 status banner.** Same scope challenges as the
+> implementation guide — see banner in `./IMPLEMENTATION.md` and
+> evidence in `./business-viability-research-notes.md` §2. The
+> business-shape-defining claims (multi-segment GTM, 95% margin, NRR
+> 110–120%, $5/seat-pilot-with-credit, B2B mid-market without SOC2)
+> are challenged and re-shaped in the safe-path plan
+> (`./business-viability-mitigation-plan.md` §16). Treat this as v1
+> superseded; do not hand it off to a fresh build session as-is.
+
 > **One file. Three audiences.** Section A is for anyone (5-minute read). Section B is for a business owner / advisor who never wants to see code. Section C is the technical hand-off — a senior architect (or capable AI) should be able to pick this up and start building from it without further context.
 
 ---

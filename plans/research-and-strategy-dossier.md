@@ -1,5 +1,19 @@
 # Research & Strategy Dossier — Learner Absorption, Cohort Retention, and SME Knowledge-Sharing
 
+> **2026-05-04 status banner.** Sections 5.1 (TAM/SAM/SOM), 5.4 (unit
+> economics), 5.5 (NRR targets), 5.6 (vendor portability), 5.7
+> (Phase-1 budget), and 6 (falsification triggers) are challenged in
+> the hostile review (`./business-viability-negative-study.md`) and
+> the underlying ammunition (`./business-viability-research-notes.md`
+> §1). The numerical claims most affected: $20–40B SAM (no bottoms-up
+> derivation), CAC priced at zero (operator labour omitted), NRR
+> 110%/120% (real SMB 90–105%), Phase-1 18-day timeline (real 3–5
+> months), $300/mo AI cost at 100 tenants × 50k generations (real
+> $5–10k/mo). The cognitive-science citation walk (§§1–4) remains
+> useful as design rationale; the *quantitative outcome promises*
+> derived from those citations need to be re-stated as
+> methodological-not-quantitative per mitigation plan §6 + §15.
+
 > **Purpose.** Single hand-overable evidentiary basis for the planned
 > learning platform. Translates 50+ years of cognitive-psychology,
 > behavioural-economics, and instructional-design research into a problem
