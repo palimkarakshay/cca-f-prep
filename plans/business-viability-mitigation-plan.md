@@ -177,18 +177,30 @@ already won at the layer the plan targets.
 There are three credible mitigations. Pick exactly one; do not stack
 them, because the operator bandwidth in §11 doesn't support multiple.
 
-**Mitigation A — Become an Anthropic partner, not an Anthropic
-competitor.**
-- Apply to **Claude Marketplace** as a vertical solution. Anthropic
-  charges 0% commission to selected partners and provides distribution
-  through their enterprise relationships.
-- Reframe the product as "Claude for L&D, vertical-tuned" rather than
-  "an AI-LMS." You buy distribution; Anthropic owns the customer.
-- Risk: Anthropic deprioritises L&D as a vertical, or admits another
-  partner ahead of you.
+**Mitigation A — DELETED 2026-05-05 (iteration 01 N3).** Claude
+Marketplace launched March 2026 with 6 named partners (GitLab,
+Snowflake, Harvey, Replit, Lovable, Rogo) — all post-Series-B with
+named-customer references and production SLAs. The Claude Partner
+Network ($100M training fund) is open membership but does not
+produce distribution; only Marketplace listing does, and Marketplace
+listing is curated against criteria the operator cannot satisfy
+(enterprise-grade ops, SOC2, named references). This option is
+unavailable to the operator profile and was struck.
+
+**Mitigation A2 (default if B/C fail their gates) — fall back to §16
+micro-SaaS and accept that the venture frame is dead.** This is
+explicitly the safest path; the negative study's §18 final
+recommendation stands and the iterative review only sharpens it.
 
 **Mitigation B — Sell only the measurement / Kirkpatrick layer to
 existing LMS deployments.**
+
+**Gate (added 2026-05-05).** Operator must identify a single named
+L&D buyer (real person, real company, willing to install) **before
+any code is written** for the extension. If no name in 14 days,
+default to §16.
+
+
 - The negative study's §17.3 observation: the actually defensible piece
   is calibration-Δ + L1–L4 reporting + CTA-style SME elicitation.
 - Productise as a **Chrome extension** that overlays on Articulate /
@@ -199,6 +211,14 @@ existing LMS deployments.**
 
 **Mitigation C — Pick a vertical the hyperscalers can't economically
 serve.**
+
+**Gate (added 2026-05-05).** Operator must have a named domain
+expert willing to co-found / advise on paid terms **before scoping
+the vertical**. Without an inside-the-vertical contact, the operator
+is selling into the same buyers the hyperscalers serve, just slower.
+If no contact in 30 days, default to §16.
+
+
 - Highly-regulated professional CE: medical CME with state-board
   specifics, AICPA CPE, FAA pilot recurrent training, FINRA Series 7
   refreshers.
@@ -226,9 +246,14 @@ own content. LLMs route around static checks at every release.
 
 **What to do — stop selling validators as the moat:**
 
-1. **Code the missing 17 validators before any pitching.** It is
-   indefensible to claim a moat that exists in commented stubs. Either
-   ship the work or strike the claim.
+1. **Step 0 (added 2026-05-05, iteration 01 N9): code OR delete the
+   missing 17 validators *before* any external promotion.** The
+   public README of the open-source library must match what's
+   actually shipped. The reputation downside of a public library
+   that visibly under-delivers exceeds the reputation upside of
+   having shipped one. Estimated effort to code 17 missing
+   validators: 30–60 operator-hours, mostly LLM-prompt-template
+   work. Budget before committing to open-source.
 
 2. **Reframe validators as a *quality floor*, not a *moat*.** Floors
    are necessary; moats are differentiating. The decks consistently
@@ -323,8 +348,15 @@ or 9–18 months part-time.
 3. **Keep Clerk + Stripe Payment Links** for the gate; everything else
    is a static site. Total Phase 1 surface area: 4–5 routes.
 
-4. **Time-box at 8 weeks of evening / weekend hours** (= ~80–100
-   hours). If anything is unshipped at week 8, stop and re-plan.
+4. **Time-box at 16 weeks (4 months) of evening / weekend hours**
+   (8–12 hr/wk = ~150 hours). If anything is unshipped at week 8,
+   **simplify scope** (cut features, not date) and re-plan;
+   if anything is unshipped at week 16, stop and follow §17. The
+   earlier draft of this doc said 8 weeks; iteration-01 hostile
+   review (`plans/iterations/iter-01-critique.md` N1) showed median
+   solo part-time time-to-first-paying-user is 6–11 months across
+   indie-hacker cohort data — 8 weeks is a P95 outcome only when
+   the builder has shipped a similar product before.
 
 5. **Defer multi-tenancy until at least 5 paying users.** If you've
    never charged anyone for this product, you have no way to know
@@ -452,9 +484,13 @@ revenue. The platform pays the customer to be a customer.
 
 **What to do — restructure the pilot so it can't lose:**
 
-1. **Raise the pilot fee to $10–25k for ≤ 50 seats** depending on the
-   custom-catalog scope. **Zero credit.** The pilot fee compensates
-   for operator setup labour; it is not refundable.
+1. **Raise the pilot fee to $7.5k default for stock-catalog scope,
+   $15–25k for custom-catalog** (iteration 01 T1: realistic 2026 SMB
+   L&D-AI pilot pricing — Donald Taylor 2026 sentiment data: 60% of
+   pilots are $0–$5k, 25% $5–10k, 12% $10–25k, 3% above $25k).
+   Reject pilots below $5k unless they are explicit case-study-trade
+   (signed marketing rights) deals. **Zero credit.** The pilot fee
+   compensates for operator setup labour; it is not refundable.
 
 2. **Drop the $5/seat entry tier.** Set pricing minimum at **$15/seat
    /mo** with a 25-seat platform minimum = **$375/mo floor**. This
@@ -528,6 +564,31 @@ single point of failure for engineering AND customer success AND sales.
 **Why this is safe.** Capping growth at 10 tenants × $1k MRR average
 = $10k MRR ceiling for Year 1 is *fine*. It's better than zero.
 Removing the venture-shaped growth target removes the bandwidth crisis.
+
+### 11.7 Opportunity-cost honest accounting (added 2026-05-05, iteration 01 N11)
+
+**Operator labour cost.**
+- 10–15 hr/wk × 52 weeks = 520–780 hr/yr.
+- At a $50/hr opportunity cost (conservative for a senior ABAP
+  developer with side-consulting capacity): $26,000–$39,000/yr of
+  forgone earnings.
+- At Y1 MRR $500–2,000 and gross margin 55–70%: $3,300–$16,800
+  contribution before counting operator labour.
+
+**The choice in plain language.**
+
+> By committing 10–15 hr/wk for 12 months to this side bet, the
+> operator forgoes ~$26–39k of side-consulting income in exchange
+> for $3–17k of project profit and optionality on a Y2 outcome. Net
+> cost: **$20–35k of foregone earnings in Year 1**. The case for
+> this trade is only valid if the operator believes Year 2+
+> optionality is worth at least $25k of present-value bet.
+
+The operator must record the answer to that question in
+`decisions.md` with a date. If the answer is "I'm not sure," the
+project is the wrong shape; consider §17.2 of the negative study
+(consulting day-rates) instead — same hours, ~6× the income, no
+product risk.
 
 **What you cannot mitigate.** The "Roadmap to $100k MRR by Month
 24–30" line in `deck-investor.md:286` is gone. Realistic Year-2 MRR
@@ -757,16 +818,41 @@ custom catalogs.
 
 ### 16.3 Who you sell to
 
-Adults studying for a technical certification. Reach them through:
-- Reddit posts in /r/AnthropicAI, /r/AWSCertifications,
-  /r/cscareerquestions
-- Hacker News Show HN
-- One blog post per week on the operator's domain or dev.to
-- Word of mouth in study communities the operator already participates
-  in
+Adults studying for a technical certification with **5+ years of
+stable demand**. Default catalog: **AWS SAA-C03 or GCP ACE**, not
+CCA-F. CCA-F is a 2026-launched cert with a 12–18 month peak window
+and unknown long-term demand; treat the operator's CCA-F prep
+content as a free lead-magnet feeding the SEO funnel for the paid
+catalog. (Iteration 01 N5: "operator IS user" framing is fragile
+because the operator's user-credibility expires the day they pass
+the exam, and CCA-F is too new to bet a catalog on.)
 
-No outbound. No paid acquisition until LTV:CAC > 3:1 is measured (i.e.,
-not in Year 1).
+**Distribution motion (Year 1) — SEO-first.**
+
+1. **SEO is the primary channel.** Publish ≥30 SEO-optimised lesson
+   pages in the first 12 weeks targeting long-tail queries:
+   *"<exam-code> practice questions"*, *"<exam-code> sample mcqs"*,
+   *"<exam-code> spaced repetition"*, *"<exam-code> retake
+   strategy"*. Each page 600–1,200 words, indexable, with Open
+   Graph cards and structured-data quiz markup.
+2. **YouTube is the secondary motion.** One walkthrough video per
+   lesson; YouTube indexes the same long-tail queries. ~8–12 hr/wk
+   of operator time on this for the first 6 months produces
+   compounding traffic from Month 6 onward.
+3. **Community posts are tertiary, not primary.** Reddit / HN /
+   dev.to are *announcements*, not a channel. Budget one Reddit
+   post per quarter per relevant subreddit; expect 20–80 visitors
+   and 0–2 paying users per post. (Iteration 01 N2 — Reddit/HN
+   alone has produced zero profitable cert-prep B2C SaaS in the
+   modern era; SEO + YouTube is the proven motion.)
+4. **Realistic timing.** First paid user from organic at **Month
+   4–6** at the earliest, more likely Month **9–12**.
+5. **Kill signal.** If by Month 12 organic search traffic <1,000
+   unique monthly visitors, the SEO motion failed; stop and migrate
+   to consulting day-rates per §17.2 of the negative study.
+
+No outbound. No paid acquisition until LTV:CAC > 3:1 is measured
+(i.e., not in Year 1).
 
 ### 16.4 What you don't build (yet)
 
@@ -785,8 +871,28 @@ not in Year 1).
 | Paying users | 50–200 | 200–800 |
 | MRR | $500–2,000 | $2,000–8,000 |
 | Operator hours / week | 10–15 (side bet) | 15–25 (still side bet) |
-| Cost basis | $50/mo | $200/mo |
-| Net to operator | small but positive | meaningful |
+| Cost basis | **$130–320/mo** (Y1) | **$300–600/mo** (Y2) |
+| Net to operator (median) | **$0–4k after costs + SE tax** | **$5–15k** |
+| Net to operator (bottom-quartile) | **−$1–3k** (operator subsidises) | $0–3k |
+
+**Cost-basis breakdown** (line-by-line, replacing the earlier $50/mo
+guess; iteration 01 N4):
+
+| Line | Y1 monthly |
+|---|---|
+| Vercel Pro (commercial-licensed) | $20 |
+| Anthropic API direct OR Max 20x | $30–80 (API) / $200 (Max) |
+| Stripe transaction fees (~3%) | $5–15 |
+| Clerk free tier | $0 |
+| Cloudflare DNS / domain | $1 |
+| Resend / SES (free until ~1k MAU) | $0 |
+| Sentry free tier | $0 |
+| BetterStack uptime monitor | $25 |
+| Domain email (Fastmail / Workspace) | $6 |
+| LLC / sole-prop registration amortised | $0–25 |
+| **Subtotal Y1** | **$87–172 (API path)** / **$257–342 (Max path)** |
+
+The earlier "$50/mo" framing was indefensible.
 
 This is a **lifestyle micro-SaaS**, not a venture. It compounds. It is
 defensible against hyperscalers because they don't care about cert-
@@ -856,6 +962,36 @@ triggers.
 family, or therapist asks if this is still healthy*. Treat that as a
 P0. Most micro-SaaS founders who burn out report having dismissed
 this signal multiple times.
+
+---
+
+### 17b. Externalised kill-trigger audit (added 2026-05-05, iteration 01 N7)
+
+The §17 trigger list above is decorative if the operator is the only
+one watching it. The operator is busy, emotionally invested, and
+biased against quitting; self-monitoring fails predictably.
+
+1. **Pick one named reviewer by 2026-05-31.** Spouse, advisor, paid
+   fractional-CFO, or trusted friend. Their job is **a 60-min
+   quarterly call** in which the operator answers in numbers
+   against the §17 trigger list. Reviewer is paid $0 (or a flat
+   $500/quarter if a fractional advisor); their leverage is that
+   the operator publicly chose them.
+2. **Calendar invites are owned by the reviewer**, not the operator.
+   Cadence: Month 3, 6, 9, 12 from project start. Operator cannot
+   decline more than one without triggering an automatic stop-review.
+3. **Live MRR + cost dashboard.** Stripe webhook → public-read
+   Notion / Sheets / a custom 50-line page. Anyone with the URL
+   sees current MRR, cost basis, AI-cost-as-%-of-MRR, paying-user
+   count. Updates daily. Cost: $0.
+4. **Trigger response policy.** When a §17 trigger is hit, the
+   operator commits in writing to the action *during the call*,
+   not after. Trigger response is signed and dated to a
+   `decisions.md` file in the repo.
+5. **Quarterly redline.** Reviewer reads the §17 list aloud at each
+   call. If a trigger has been hit and not actioned, the reviewer's
+   only assignment is to ask "why are you not stopping?" until a
+   number-based answer exists.
 
 ---
 
