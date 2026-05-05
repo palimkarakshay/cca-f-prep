@@ -1,5 +1,20 @@
 # Content Pack Management Platform — Technical Collaborator Brief
 
+> **2026-05-04 status banner.** **Do not recruit on this deck in its
+> current shape.** A hostile review
+> (`./business-viability-negative-study.md` §17.2 / collaborator-deck
+> audit at `./business-viability-research-notes.md` §4) found the
+> co-founder ask is cynically vague (no equity %, no vesting, no cliff,
+> no cash floor, no gate definition), 18-day Phase 1 is fantasy, only
+> ~6 of 23 validators are actually coded (the rest are
+> `// 17 more...` stubs), and the architecture choices (RLS as primary
+> isolation, single-vendor Anthropic, seven free tiers) carry risk the
+> deck does not name. **A senior engineer reading this carefully
+> should decline.** Mitigation plan
+> (`./business-viability-mitigation-plan.md` §11–§12) prescribes
+> shrinking surface area to ≤5 routes for one segment, dropping the
+> collaborator hire entirely until paying revenue exists.
+
 > Slide-style deck for a senior engineer evaluating joining as co-founder, first hire, or technical advisor. Engineering-language; assumes you can read TypeScript and SQL. Slide breaks are marked by `---`.
 > Companion docs: [`./content-pack-management-plan.md`](./content-pack-management-plan.md), [`./deck-overview.md`](./deck-overview.md), [`./deck-investor.md`](./deck-investor.md), [`./deck-b2b-prospect.md`](./deck-b2b-prospect.md).
 

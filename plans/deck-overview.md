@@ -1,5 +1,15 @@
 # Content Pack Management Platform — Deck
 
+> **2026-05-04 status banner.** This deck reflects an earlier scope. A
+> hostile review (`./business-viability-negative-study.md`) identified
+> nine independently fatal problems; the resulting safe-path plan
+> (`./business-viability-mitigation-plan.md` §16) narrows the venture to
+> a B2C cert-prep micro-SaaS for one segment. **Numbers below
+> (especially TAM/SAM/SOM, gross-margin, NRR, $100k MRR roadmap, 18-day
+> Phase 1, $1/mo cost, Maven 96% / Duolingo CURR / altMBA citations)
+> are superseded by the negative study and mitigation plan.** Underlying
+> evidence: `./business-viability-research-notes.md`.
+
 > Slide-style summary of the build plan. Designed for a 10-minute walk-through with a non-technical stakeholder. Slide breaks are marked by `---`.
 > Companion docs: [`./content-pack-management-plan.md`](./content-pack-management-plan.md) (detailed plan), [`./deck-investor.md`](./deck-investor.md) (investor/advisor angle), [`./deck-b2b-prospect.md`](./deck-b2b-prospect.md) (B2B sales angle), [`./deck-collaborator.md`](./deck-collaborator.md) (technical collaborator angle).
 
