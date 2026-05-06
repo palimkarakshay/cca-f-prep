@@ -40,8 +40,9 @@ name: Codex review (free-first ladder)
 #     enforces the secret-leak check defensively.
 
 on:
-  pull_request:
-    types: [opened, reopened, synchronize, ready_for_review]
+  # DISABLED 2026-05-06 — automatic pull_request trigger stopped per user request.
+  # pull_request:
+  #   types: [opened, reopened, synchronize, ready_for_review]
   workflow_dispatch:
     inputs:
       pr:

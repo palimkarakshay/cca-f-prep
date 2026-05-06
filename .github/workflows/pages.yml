@@ -8,11 +8,12 @@ name: Deploy docs/ to GitHub Pages
 # root has no `index.html`. Only `docs/` should ever be uploaded.
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'docs/**'
-      - '.github/workflows/pages.yml'
+  # DISABLED 2026-05-06 — automatic triggers stopped per user request.
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'docs/**'
+  #     - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:

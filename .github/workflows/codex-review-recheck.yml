@@ -15,8 +15,9 @@ name: Codex review recheck (catch missed reviews)
 # pool.
 
 on:
-  schedule:
-    - cron: '17 */2 * * *'
+  # DISABLED 2026-05-06 — automatic schedule stopped per user request.
+  # schedule:
+  #   - cron: '17 */2 * * *'
   workflow_dispatch:
     inputs:
       apply:
