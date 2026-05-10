@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useHydrated } from "@/hooks/useHydrated";
 import { THEME_STORAGE_KEY } from "@/lib/storage-keys";
 
 const STORAGE_KEY = THEME_STORAGE_KEY;
@@ -25,10 +26,10 @@ function getThemeSnapshot(): Theme {
 }
 
 function getServerSnapshot(): Theme {
-  // Server doesn't know the user's saved theme; render as dark and let
-  // client hydration replace the icon. The shell colors are driven by
-  // CSS tokens that respect the .dark class set by the inline init
-  // script in <head>, which runs before paint.
+  // Server doesn't know the user's saved theme; render as dark to match
+  // the inline init script's no-stored-preference fallback. The shell
+  // colors are driven by CSS tokens that respect the .dark class set by
+  // the inline init script in <head>, which runs before paint.
   return "dark";
 }
 
@@ -38,9 +39,18 @@ export function ThemeToggle({ className }: { className?: string }) {
     getThemeSnapshot,
     getServerSnapshot
   );
+  // Server always renders the dark-mode icon to keep markup stable;
+  // after hydration the client picks up the real document class. The
+  // inline init script in <head> sets the right .dark class before
+  // paint so the page colors are correct from frame 1 even though the
+  // icon flips post-hydration.
+  const hydrated = useHydrated();
 
   function toggle() {
-    const next: Theme = theme === "dark" ? "light" : "dark";
+    const current: Theme = document.documentElement.classList.contains("dark")
+      ? "dark"
+      : "light";
+    const next: Theme = current === "dark" ? "light" : "dark";
     document.documentElement.classList.toggle("dark", next === "dark");
     try {
       localStorage.setItem(STORAGE_KEY, next);
@@ -49,9 +59,10 @@ export function ThemeToggle({ className }: { className?: string }) {
     }
   }
 
+  const displayTheme: Theme = hydrated ? theme : "dark";
   const label =
-    theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
-  const Icon = theme === "dark" ? Sun : Moon;
+    displayTheme === "dark" ? "Switch to light theme" : "Switch to dark theme";
+  const Icon = displayTheme === "dark" ? Sun : Moon;
 
   return (
     <button
