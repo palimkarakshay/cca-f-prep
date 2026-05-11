@@ -1,5 +1,14 @@
 # Decisions log
 
+> **Reading order (added 2026-05-11).** This log is binding for the
+> active track: [`commercialization-readiness-plan.md`](./commercialization-readiness-plan.md)
+> (the code lens) implementing [`v2-scaled-b2b-plan.md`](./v2-scaled-b2b-plan.md)
+> (the business shape). D-001 below originally accepted the B2C
+> micro-SaaS shape; that track was retired 2026-05-11 in favour of the
+> v2-scaled-B2B shape — see
+> [`archive-2026-05-04/IMPLEMENTATION-v2.md`](./archive-2026-05-04/IMPLEMENTATION-v2.md)
+> for the retired track. D-002…D-006 remain in force.
+
 > **Purpose.** Single source of truth for plan-level decisions made
 > by the operator. Required by §11.7 (opportunity cost), §17b (kill-
 > trigger response), §16.10 (cert commitment), §16.15 (founder fit

@@ -1,5 +1,10 @@
 # Business Viability — Negative Study
 
+> **Reading order (added 2026-05-11).** This is the *problem statement*.
+> The 14 responses live in [`business-viability-mitigation-plan.md`](./business-viability-mitigation-plan.md).
+> The resulting business shape is [`v2-scaled-b2b-plan.md`](./v2-scaled-b2b-plan.md).
+> The code lens on `/web/` is [`commercialization-readiness-plan.md`](./commercialization-readiness-plan.md).
+
 > **Mandate.** Hostile review of the AI-enhanced LMS plan documented in this folder
 > (decks, research dossier, implementation plan, expert audit). Solely focused on
 > the question: *should this be built as a commercial business at all?*

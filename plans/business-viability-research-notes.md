@@ -1,5 +1,10 @@
 # Business Viability — Research Notes (raw subagent findings)
 
+> **Reading order (added 2026-05-11).** Evidence-of-record for the
+> negative study. Live business shape: [`v2-scaled-b2b-plan.md`](./v2-scaled-b2b-plan.md).
+> Live code lens: [`commercialization-readiness-plan.md`](./commercialization-readiness-plan.md).
+> This document is reference material, not a plan.
+
 > **What this is.** The raw, line-cited ammunition produced by the five
 > subagents that contributed to `business-viability-negative-study.md`.
 > Preserved here as evidence of record. The negative study integrated and

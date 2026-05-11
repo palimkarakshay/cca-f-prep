@@ -1,5 +1,11 @@
 # v2 — Scaled-Down B2B Plan (canonical)
 
+> **Reading order (added 2026-05-11).** This document is the canonical
+> *business shape*. For the code-side implementation lens on `/web/`,
+> read [`commercialization-readiness-plan.md`](./commercialization-readiness-plan.md).
+> The parallel B2C micro-SaaS track (`IMPLEMENTATION-v2.md`) was retired
+> 2026-05-11 — see [`archive-2026-05-04/IMPLEMENTATION-v2.md`](./archive-2026-05-04/IMPLEMENTATION-v2.md).
+
 > **Status.** Source of truth for the post-audit shape of this venture.
 > Supersedes the v1 plans (`deck-*.md`, `content-pack-management-plan.md`,
 > `IMPLEMENTATION.md`, `research-and-strategy-dossier.md` §5–6,
