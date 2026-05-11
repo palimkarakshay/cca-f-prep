@@ -1,125 +1,249 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ArrowRight,
+  GraduationCap,
+  Briefcase,
+  Compass,
+  Sparkles,
+} from "lucide-react";
 import { CONSUMER_PACKS } from "@/content/pack-registry";
 import { Container } from "@/components/ui/Container";
 import { Card } from "@/components/ui/card";
 import { BRAND } from "@/lib/brand";
 import { LearningGoalCapture } from "@/components/dashboard/LearningGoalCapture";
+import { DesignerJourneyDecoder } from "@/components/dashboard/DesignerJourneyDecoder";
 
 export const metadata: Metadata = {
-  title: "Pick a topic",
+  title: "Pick a learning journey",
   description:
-    "Choose what you want to learn today. Each topic carries its own progress, sections, and quizzes.",
+    "Tell us what you want to learn and why. Curio shapes a learning journey for you — sectioned lessons, applied practice, and a way to verify mastery.",
 };
 
 export default function PickerPage() {
   return (
-    <Container width="wide" className="flex flex-col gap-6 py-2">
+    <Container width="wide" className="flex flex-col gap-8 py-2">
       <header>
         <p className="font-[family-name:var(--font-display)] text-xs uppercase tracking-[0.18em] text-(--muted)">
           {BRAND.name} · {BRAND.tagline}
         </p>
         <h1 className="mt-1 font-[family-name:var(--font-display)] text-2xl md:text-3xl font-semibold text-(--ink)">
-          What do you want to learn today?
+          What do you want to learn?
         </h1>
-        <p className="mt-1 text-sm text-(--muted)">
-          Tell us your goal — {BRAND.name} shapes a pack around it. Already have
-          a topic in mind? Pick one of the courses below; each is a
-          self-contained course with its own progress.
+        <p className="mt-1 max-w-2xl text-sm text-(--muted)">
+          Curio shapes <strong className="text-(--ink)">learning
+          journeys</strong> around what you want to do — not generic
+          courses. Pick a lane below: you&apos;re here to learn for
+          yourself, or you&apos;re designing a journey for someone else.
         </p>
       </header>
 
-      <LearningGoalCapture />
-
-      <section aria-labelledby="ready-to-go" className="flex flex-col gap-3">
-        <header>
-          <h2
-            id="ready-to-go"
-            className="font-[family-name:var(--font-display)] text-lg font-semibold text-(--ink)"
-          >
-            Ready-made courses
-          </h2>
-          <p className="text-sm text-(--muted)">
-            Curated topics, fully authored. Pick one to start now — switch any
-            time. Progress is kept per topic.
-          </p>
-        </header>
-      <ul
-        aria-label="Available topics"
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+      {/* Two-lane chooser. Anchors let the persistent secondary CTAs
+          jump between lanes without re-rendering. Both lanes ask the
+          same two questions (what + why) but decode the answers for
+          different audiences. */}
+      <nav
+        aria-label="Choose your lane"
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2"
       >
-        {CONSUMER_PACKS.map((pack) => {
-          const c = pack.config;
-          const sectionCount = pack.curriculum.sections.length;
-          const conceptCount = pack.curriculum.sections.reduce(
-            (n, s) => n + s.concepts.length,
-            0
-          );
-          const mockCount = (pack.curriculum.mockExams ?? []).length;
-          return (
-            <li key={c.id}>
-              <Card className="flex h-full flex-col gap-3 p-5">
-                <header className="flex items-start gap-3">
-                  <div
-                    aria-hidden
-                    className="h-12 w-12 flex-none overflow-hidden rounded-md border border-(--border) bg-(--panel-2)"
-                    dangerouslySetInnerHTML={{ __html: c.iconSvg }}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-base font-semibold text-(--ink)">
-                      {c.name}
-                    </h2>
-                    <p className="mt-0.5 text-xs text-(--muted)">
-                      {c.tagline}
-                    </p>
-                  </div>
-                </header>
+        <LaneTile
+          href="#lane-learner"
+          Icon={GraduationCap}
+          label="I want to learn for myself"
+          help="Two questions, then a shaped journey + applied practice. Pick a ready-made course, or wait for us to author yours."
+        />
+        <LaneTile
+          href="#lane-designer"
+          Icon={Briefcase}
+          label="I’m designing for someone else"
+          help="L&D leads, instructional designers, SMEs. Decode the audience’s gap into a structured brief + source-doc checklist."
+        />
+      </nav>
 
-                <p className="text-sm text-(--muted)">{c.description}</p>
+      {/* Learner lane */}
+      <section
+        id="lane-learner"
+        aria-labelledby="lane-learner-heading"
+        className="flex flex-col gap-4 scroll-mt-24"
+      >
+        <header className="flex items-center gap-2">
+          <Compass aria-hidden className="h-5 w-5 text-(--accent)" />
+          <h2
+            id="lane-learner-heading"
+            className="font-[family-name:var(--font-display)] text-xl font-semibold text-(--ink)"
+          >
+            For learners
+          </h2>
+        </header>
+        <LearningGoalCapture />
 
-                <ul className="mt-auto flex flex-wrap gap-2 text-xs text-(--muted)">
-                  <li className="rounded-full border border-(--border) px-2 py-0.5">
-                    {sectionCount} section{sectionCount === 1 ? "" : "s"}
-                  </li>
-                  <li className="rounded-full border border-(--border) px-2 py-0.5">
-                    {conceptCount} concept{conceptCount === 1 ? "" : "s"}
-                  </li>
-                  {mockCount > 0 ? (
-                    <li className="rounded-full border border-(--border) px-2 py-0.5">
-                      {mockCount}{" "}
-                      {(c.copy?.mockExamsHeading ?? "mock exam").toLowerCase()}
-                      {mockCount === 1 ? "" : "s"}
-                    </li>
-                  ) : null}
-                </ul>
+        <section
+          aria-labelledby="ready-to-go"
+          className="flex flex-col gap-3"
+        >
+          <header>
+            <h3
+              id="ready-to-go"
+              className="font-[family-name:var(--font-display)] text-lg font-semibold text-(--ink)"
+            >
+              Ready-made learning journeys
+            </h3>
+            <p className="text-sm text-(--muted)">
+              Already authored. Pick one to start now — switch any time.
+              Progress is kept per journey.
+            </p>
+          </header>
+          <ul
+            aria-label="Available learning journeys"
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {CONSUMER_PACKS.map((pack) => {
+              const c = pack.config;
+              const sectionCount = pack.curriculum.sections.length;
+              const conceptCount = pack.curriculum.sections.reduce(
+                (n, s) => n + s.concepts.length,
+                0
+              );
+              const mockCount = (pack.curriculum.mockExams ?? []).length;
+              return (
+                <li key={c.id}>
+                  <Card className="flex h-full flex-col gap-3 p-5">
+                    <header className="flex items-start gap-3">
+                      <div
+                        aria-hidden
+                        className="h-12 w-12 flex-none overflow-hidden rounded-md border border-(--border) bg-(--panel-2)"
+                        dangerouslySetInnerHTML={{ __html: c.iconSvg }}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <h4 className="text-base font-semibold text-(--ink)">
+                          {c.name}
+                        </h4>
+                        <p className="mt-0.5 text-xs text-(--muted)">
+                          {c.tagline}
+                        </p>
+                      </div>
+                    </header>
 
-                <div className="border-t border-dashed border-(--border) pt-3">
-                  <Link
-                    href={`/${c.id}`}
-                    className="inline-flex items-center gap-2 rounded-md bg-(--accent) px-3 py-2 text-sm font-semibold text-white no-underline shadow-sm transition-colors hover:bg-(--accent-2)"
-                  >
-                    Start {c.name} →
-                  </Link>
-                </div>
-              </Card>
-            </li>
-          );
-        })}
-      </ul>
+                    <p className="text-sm text-(--muted)">{c.description}</p>
+
+                    <ul className="mt-auto flex flex-wrap gap-2 text-xs text-(--muted)">
+                      <li className="rounded-full border border-(--border) px-2 py-0.5">
+                        {sectionCount} section{sectionCount === 1 ? "" : "s"}
+                      </li>
+                      <li className="rounded-full border border-(--border) px-2 py-0.5">
+                        {conceptCount} concept
+                        {conceptCount === 1 ? "" : "s"}
+                      </li>
+                      {mockCount > 0 ? (
+                        <li className="rounded-full border border-(--border) px-2 py-0.5">
+                          {mockCount}{" "}
+                          {(c.copy?.mockExamsHeading ?? "mock exam").toLowerCase()}
+                          {mockCount === 1 ? "" : "s"}
+                        </li>
+                      ) : null}
+                    </ul>
+
+                    <div className="border-t border-dashed border-(--border) pt-3">
+                      <Link
+                        href={`/${c.id}`}
+                        aria-label={`Start the ${c.name} learning journey`}
+                        className="inline-flex items-center gap-2 rounded-md bg-(--accent) px-3 py-2 text-sm font-semibold text-white no-underline shadow-sm transition-colors hover:bg-(--accent-2)"
+                      >
+                        Start journey
+                        <ArrowRight aria-hidden className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </Card>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       </section>
 
-      <footer className="mt-2 text-xs text-(--muted)">
-        For organisations:{" "}
-        <Link href="/for-teams" className="underline hover:text-(--ink)">
-          How {BRAND.b2bName} works
-        </Link>
-        {" "}·{" "}
-        <Link href="/adept" className="underline hover:text-(--ink)">
-          Try the {BRAND.b2bName} demo
-        </Link>{" "}
-        — SME-verified, company-approved content packs with measurable
-        effectivity.
-      </footer>
+      {/* Designer lane */}
+      <section
+        id="lane-designer"
+        aria-labelledby="lane-designer-heading"
+        className="flex flex-col gap-4 scroll-mt-24"
+      >
+        <header className="flex items-center gap-2">
+          <Briefcase aria-hidden className="h-5 w-5 text-(--accent)" />
+          <h2
+            id="lane-designer-heading"
+            className="font-[family-name:var(--font-display)] text-xl font-semibold text-(--ink)"
+          >
+            For Curio L&amp;D designers + SMEs
+          </h2>
+        </header>
+        <DesignerJourneyDecoder />
+
+        <Card>
+          <div className="flex items-start gap-3">
+            <Sparkles
+              aria-hidden
+              className="h-5 w-5 flex-none text-(--accent)"
+            />
+            <div>
+              <h3 className="text-base font-semibold text-(--ink)">
+                Already have a journey in mind? Skip the decoder.
+              </h3>
+              <p className="mt-1 text-sm text-(--muted)">
+                Jump straight into the SME workbench to draft, edit, validate,
+                and deploy a company-approved journey.
+              </p>
+              <p className="mt-2 text-sm">
+                <Link
+                  href="/adept"
+                  className="inline-flex items-center gap-2 underline-offset-4 hover:underline"
+                >
+                  Open {BRAND.b2bName} demo workspace
+                  <ArrowRight aria-hidden className="h-4 w-4" />
+                </Link>
+                {" "}·{" "}
+                <Link
+                  href="/for-teams"
+                  className="inline-flex items-center gap-2 underline-offset-4 hover:underline"
+                >
+                  How {BRAND.b2bName} works (full write-up)
+                </Link>
+              </p>
+            </div>
+          </div>
+        </Card>
+      </section>
     </Container>
+  );
+}
+
+function LaneTile({
+  href,
+  Icon,
+  label,
+  help,
+}: {
+  href: string;
+  Icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  label: string;
+  help: string;
+}) {
+  return (
+    <a
+      href={href}
+      className="group flex h-full flex-col gap-2 rounded-lg border border-(--border) bg-(--panel) p-4 no-underline shadow-sm transition-colors hover:border-(--accent) hover:bg-(--panel-2)"
+    >
+      <span className="flex items-center gap-2 text-sm font-semibold text-(--ink)">
+        <Icon
+          aria-hidden
+          className="h-4 w-4 text-(--accent) transition-transform group-hover:scale-110"
+        />
+        {label}
+      </span>
+      <span className="text-xs text-(--muted)">{help}</span>
+      <span className="mt-auto inline-flex items-center gap-1 text-xs font-medium text-(--accent-2)">
+        Jump in
+        <ArrowRight aria-hidden className="h-3.5 w-3.5" />
+      </span>
+    </a>
   );
 }
