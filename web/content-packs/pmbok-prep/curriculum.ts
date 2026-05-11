@@ -2555,6 +2555,633 @@ export const CURRICULUM: Curriculum = {
         ],
       },
     },
+    /* ============================================================
+       Section 7 — Performance Domains III: Resources & Risk
+       ============================================================ */
+    {
+      id: "s7-domains-3",
+      n: 7,
+      title: "Performance domains III — resources & risk",
+      blurb:
+        "Resources covers people and physical assets — including team formation and conflict. Risk covers both threats and opportunities, with five response strategies each.",
+      concepts: [
+        {
+          id: "c7-1-resources",
+          code: "PD7.1",
+          title: "Resources domain — team formation and dynamics",
+          bloom: "U",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "The Resources Performance Domain covers people and physical resources: acquiring them, developing them, and managing how they work together. PMBOK still references Bruce Tuckman's classic team-development stages: forming → storming → norming → performing → adjourning. Forming = polite and tentative; storming = conflict surfaces; norming = team agrees on how to work; performing = high productivity; adjourning = wrap up.",
+              "Conflict-resolution styles PMI explicitly tests: collaborate / problem-solve (consider multiple viewpoints to reach consensus — PMI's preferred default), compromise / reconcile (give-and-take partial satisfaction — sometimes appropriate), force / direct (one party wins, others lose — last resort), smooth / accommodate (downplay differences — rarely the right answer), withdraw / avoid (retreat or postpone — only when the issue is genuinely minor).",
+              "On the exam, default to collaborate / problem-solve unless the scenario explicitly rules it out (e.g., immediate safety risk → force, or trivial side issue → withdraw). Watch for scenarios where the PM is conflict-averse and just smooths over a real disagreement — PMI penalises that.",
+            ],
+            keyPoints: [
+              "Tuckman: forming → storming → norming → performing → adjourning.",
+              "Conflict styles: collaborate (best default), compromise, force, smooth, withdraw.",
+              "PMI default: collaborate / problem-solve.",
+              "Smooth and withdraw are rarely correct answers.",
+            ],
+            simplified: {
+              oneLiner:
+                "Teams go through stages. Conflict is normal in storming. Default to collaboration; force is for emergencies.",
+            },
+            deeper: {
+              oneLiner:
+                "When in doubt on the exam: collaborate/problem-solve is the right answer 70%+ of the time. PMI's wider stance: working through conflict openly strengthens the team.",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "Two senior engineers disagree about an architectural choice. The PM should:",
+                options: {
+                  A: "Pick one to keep things moving (force).",
+                  B: "Postpone the discussion to later (withdraw).",
+                  C: "Facilitate a session where both viewpoints are explored and a consensus solution emerges (collaborate).",
+                  D: "Suggest they split the difference (compromise).",
+                },
+                correct: "C",
+                explanations: {
+                  A: "Force creates resentment — only appropriate for emergencies.",
+                  B: "Withdraw leaves the issue unresolved. Wrong on architecturally significant choices.",
+                  C: "Right — collaborate is PMI's preferred default. Surfaces the best of both ideas.",
+                  D: "Compromise can leave both sides partially unsatisfied. Try collaborate first.",
+                },
+                principle:
+                  "PMI default conflict response: collaborate / problem-solve.",
+              },
+              {
+                kind: "fill-in",
+                n: 2,
+                question:
+                  "Tuckman's stage where conflict surfaces and team members challenge each other's ideas is:",
+                acceptedAnswers: ["storming", "the storming stage"],
+                principle:
+                  "Storming is the conflict stage. Forming-storming-norming-performing-adjourning.",
+              },
+              {
+                n: 3,
+                question:
+                  "Which Tuckman stage is characterised by HIGH productivity and minimal supervision?",
+                options: {
+                  A: "Forming.",
+                  B: "Storming.",
+                  C: "Performing.",
+                  D: "Adjourning.",
+                },
+                correct: "C",
+                principle:
+                  "Performing = team is operating at high productivity with minimal intervention.",
+              },
+            ],
+          },
+        },
+        {
+          id: "c7-2-risk-threats",
+          code: "PD7.2",
+          title: "Risk domain — threats (the five negative strategies)",
+          bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "A risk is an uncertain event that, if it occurs, has a positive (opportunity) or negative (threat) effect on objectives. PMBOK 8e gives five strategies for *threats*, all PMI-tested verbatim: Escalate, Avoid, Transfer, Mitigate, Accept (memorise the acronym EATMA, or 'Eat Ma'). Each has a typical condition under which it's the right call.",
+              "Escalate: the threat falls outside the PM's authority or affects portfolio/program-level objectives. Avoid: change the plan to eliminate the threat entirely (extend schedule, reduce scope, change strategy). Transfer: shift the threat to a third party — insurance, warranty, performance bond, contract clause. Mitigate: reduce probability OR impact (early action is more effective than after the fact). Accept: acknowledge the threat but take no proactive action — fine for low-priority threats or when no other strategy is cost-effective. Active acceptance establishes a contingency reserve; passive acceptance does nothing but periodically review.",
+              "On the exam, the right strategy usually depends on three factors: probability, impact, and the threat's relationship to project authority. Big + outside-authority → escalate. Big + within-authority → avoid or mitigate. Small/manageable → accept (often with a contingency reserve). Transferrable to someone better placed → transfer.",
+            ],
+            keyPoints: [
+              "Five threat strategies: Escalate, Avoid, Transfer, Mitigate, Accept.",
+              "Escalate when outside PM authority or program/portfolio level.",
+              "Avoid removes the cause; mitigate reduces probability or impact.",
+              "Transfer = insurance / warranty / contract clause.",
+              "Active acceptance = contingency reserve; passive acceptance = just monitor.",
+            ],
+            simplified: {
+              oneLiner:
+                "Threats: escalate it, avoid it, transfer it, mitigate it, or accept it. Pick by size and authority.",
+            },
+            deeper: {
+              oneLiner:
+                "Expected Monetary Value (EMV) is the typical numeric tool: EMV = probability × impact. Use it to compare strategies cost-effectively.",
+              examples: [
+                {
+                  title: "EMV example",
+                  body: "A risk has 30% probability and £100k impact. EMV = 0.3 × 100,000 = £30,000. If avoidance costs £50k, mitigation £15k reducing probability to 10% (new EMV £10k, net benefit £20k vs cost £15k = £5k positive), or insurance costs £25k — mitigation wins on EMV.",
+                },
+              ],
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "A regulatory change at the national level is likely to affect every project in the portfolio. The PM should:",
+                options: {
+                  A: "Avoid by re-planning the project around it.",
+                  B: "Transfer by buying insurance.",
+                  C: "Mitigate by adding contingency.",
+                  D: "Escalate — the threat is bigger than the project.",
+                },
+                correct: "D",
+                principle:
+                  "Threats above PM authority or affecting program/portfolio → escalate.",
+              },
+              {
+                n: 2,
+                question:
+                  "A team builds a redundant subsystem to limit the damage if the primary system fails. This is which threat response?",
+                options: {
+                  A: "Avoid.",
+                  B: "Mitigate.",
+                  C: "Transfer.",
+                  D: "Accept.",
+                },
+                correct: "B",
+                explanations: {
+                  A: "Avoid would remove the cause (not the consequence).",
+                  B: "Right — redundancy doesn't eliminate the failure possibility; it reduces *impact*. That's mitigation.",
+                  C: "Transfer would push the risk to a third party.",
+                  D: "Acceptance is no proactive action.",
+                },
+                principle:
+                  "Mitigate = reduce probability OR impact.",
+              },
+              {
+                kind: "true-false",
+                n: 3,
+                question:
+                  "Establishing a contingency reserve is a form of passive acceptance.",
+                correct: false,
+                explanationFalse:
+                  "Right — contingency reserve is *active* acceptance. Passive acceptance is doing nothing except periodic review.",
+                explanationTrue:
+                  "Actually no — contingency reserve = active acceptance. Passive = no proactive action.",
+                principle:
+                  "Active acceptance = contingency reserve. Passive acceptance = monitor only.",
+              },
+            ],
+          },
+        },
+        {
+          id: "c7-3-risk-opportunities",
+          code: "PD7.3",
+          title: "Risk domain — opportunities (the five positive strategies)",
+          bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Opportunities are positive risks. PMBOK 8e gives five symmetrical strategies — three are renamed twins of the threat list: Escalate, Exploit (twin of avoid — *ensure* it happens), Share (twin of transfer — give it to a third party better able to capture it), Enhance (twin of mitigate — increase probability or impact), Accept (same word, same logic for low-priority opportunities).",
+              "Exploit: actions to make the opportunity *definitely* happen — increase probability to 100%. Example: assign your best engineers to ensure an early-completion bonus is captured. Share: bring in a partner (joint venture, special-purpose company) better positioned to realise the opportunity. Enhance: increase probability OR impact — e.g., add resources to accelerate a likely-but-not-certain early finish. Accept: low-priority; active acceptance includes a contingency reserve to take advantage if the opportunity materialises.",
+              "Most-tested pattern on the exam: candidates instinctively pick *avoid* or *mitigate* when the scenario describes an opportunity. The setup is deliberately easy to misread. Slow down: 'might finish two weeks early' = opportunity; the correct verbs are exploit / share / enhance / accept — not avoid or mitigate.",
+            ],
+            keyPoints: [
+              "Five opportunity strategies: Escalate, Exploit, Share, Enhance, Accept.",
+              "Exploit = make it 100% certain.",
+              "Share = transfer to a third party who can better capture it.",
+              "Enhance = increase probability or impact.",
+              "Accept (active) = set contingency reserve to take advantage.",
+            ],
+            simplified: {
+              oneLiner:
+                "Opportunities: escalate, exploit, share, enhance, accept. Don't reach for avoid or mitigate — those are for threats.",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "A vendor has offered a 20% discount if the project signs the contract within 7 days. The PM wants to capture the discount. This is which opportunity strategy?",
+                options: {
+                  A: "Enhance.",
+                  B: "Share.",
+                  C: "Exploit.",
+                  D: "Accept.",
+                },
+                correct: "C",
+                explanations: {
+                  A: "Enhance increases probability of an already-uncertain event. The opportunity here is binary: take it or miss it.",
+                  B: "Share involves a third party. Not relevant here.",
+                  C: "Right — the PM is ensuring the opportunity is captured (probability → 100%). That's exploit.",
+                  D: "Accept = take no proactive action. The PM is taking action.",
+                },
+                principle:
+                  "Exploit = take action to make the opportunity definitely happen.",
+              },
+              {
+                n: 2,
+                question:
+                  "An opportunity is large but the project's organisation lacks the in-house skills to capture it. A partner does have the skills. PMI-correct strategy:",
+                options: {
+                  A: "Exploit alone.",
+                  B: "Share — bring in the partner.",
+                  C: "Mitigate.",
+                  D: "Accept.",
+                },
+                correct: "B",
+                principle:
+                  "Share = transfer to a third party better positioned to capture the opportunity.",
+              },
+              {
+                kind: "true-false",
+                n: 3,
+                question:
+                  "'Mitigate' is a valid response strategy for opportunities.",
+                correct: false,
+                explanationFalse:
+                  "Right — mitigate is a *threat* strategy. The opportunity twin is enhance.",
+                explanationTrue:
+                  "Actually no — mitigate is a threat strategy. Use enhance for opportunities.",
+                principle:
+                  "Mitigate → threats only. The opportunity twin is enhance.",
+              },
+            ],
+          },
+        },
+      ],
+      sectionTest: {
+        passPct: 0.7,
+        questions: [
+          {
+            n: 1,
+            question:
+              "Which is the PMI-preferred default conflict-resolution style?",
+            options: {
+              A: "Force.",
+              B: "Smooth.",
+              C: "Collaborate / problem-solve.",
+              D: "Withdraw.",
+            },
+            correct: "C",
+            principle:
+              "PMI default: collaborate / problem-solve.",
+          },
+          {
+            n: 2,
+            question:
+              "List the five threat-response strategies (in any order).",
+            options: {
+              A: "Escalate, Avoid, Transfer, Mitigate, Accept.",
+              B: "Escalate, Exploit, Share, Enhance, Accept.",
+              C: "Plan, Identify, Analyse, Respond, Monitor.",
+              D: "Crash, Fast-track, Accept, Mitigate, Transfer.",
+            },
+            correct: "A",
+            principle:
+              "Threat strategies: Escalate, Avoid, Transfer, Mitigate, Accept (EATMA).",
+          },
+          {
+            n: 3,
+            question:
+              "An opportunity could double the project's benefit if a third-party partner is brought in. Correct strategy:",
+            options: {
+              A: "Avoid.",
+              B: "Transfer.",
+              C: "Share.",
+              D: "Accept.",
+            },
+            correct: "C",
+            principle:
+              "Share = give a third party (better positioned) the opportunity.",
+          },
+          {
+            n: 4,
+            question:
+              "EMV (Expected Monetary Value) of a 25% probability, £40k impact threat:",
+            options: {
+              A: "£40,000.",
+              B: "£10,000.",
+              C: "£4,000.",
+              D: "£100,000.",
+            },
+            correct: "B",
+            principle:
+              "EMV = probability × impact = 0.25 × £40k = £10k.",
+          },
+          {
+            n: 5,
+            question:
+              "Tuckman stage with high productivity, minimal supervision needed:",
+            options: {
+              A: "Forming.",
+              B: "Storming.",
+              C: "Norming.",
+              D: "Performing.",
+            },
+            correct: "D",
+            principle:
+              "Performing = high productivity, minimal management overhead.",
+          },
+        ],
+      },
+    },
+    /* ============================================================
+       Section 8 — Exam strategy & final review
+       ============================================================ */
+    {
+      id: "s8-exam-strategy",
+      n: 8,
+      title: "Exam strategy & final review",
+      blurb:
+        "PMI-isms, scenario triage, ethics, and a study-plan checklist for the final two weeks before the exam.",
+      concepts: [
+        {
+          id: "c8-1-pmi-isms",
+          code: "ES8.1",
+          title: "PMI-isms — how the exam thinks",
+          bloom: "E",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "'PMI-ism' is shorthand for the unwritten assumptions baked into PMP exam questions. They diverge from real-world practice in predictable ways and the candidates who learn them pass; those who answer from experience alone often fail. Five worth memorising:",
+              "(1) The PM is professional, ethical, proactive, and process-following. Always. There is no 'realistic' option — choose the response a well-trained, ethical PM would take. (2) The PM does not skip the plan. Any answer that bypasses the project management plan is almost certainly wrong. (3) The PM does not unilaterally decide outside their authority. When the scenario implies the PM exceeds their threshold, escalate. (4) The customer/sponsor relationship is collaborative, not adversarial. Hide-the-news answers are wrong. (5) The team is competent and trustworthy unless the scenario explicitly says otherwise. Don't pick 'replace the team' as a first response.",
+              "Three more PMI-isms about timing: the PM addresses problems first, not paperwork. Documentation follows action. Lessons learned are recorded continuously, not just at closing. And: 'always plan first' in scenarios where the PM is presented mid-Execution with new information. Almost any 'analyse and plan' option beats 'act immediately'.",
+            ],
+            keyPoints: [
+              "PM is professional, ethical, proactive, plan-following.",
+              "Escalate when over threshold; don't unilaterally decide.",
+              "Customer relationship is collaborative; don't hide news.",
+              "Address problems first, then documentation.",
+              "When two answers look right, prefer the one that analyses/plans first.",
+            ],
+            simplified: {
+              oneLiner:
+                "Answer like the textbook-perfect PM, not like your real-world experience.",
+            },
+            deeper: {
+              oneLiner:
+                "Common trap: 'realistic' answers (skip the plan, decide unilaterally, fix it yourself) feel right. They're wrong on PMP. Pick the answer that fits the idealised PM.",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "A team member just discovered a major scope gap. Two options stand out: (A) immediately escalate to the sponsor, (B) analyse impact and bring options to the sponsor. PMI prefers:",
+                options: {
+                  A: "Option A — speed of escalation matters.",
+                  B: "Option B — analyse first, then escalate with options.",
+                  C: "Neither — handle it silently.",
+                  D: "Defer the decision to the next review.",
+                },
+                correct: "B",
+                principle:
+                  "PMI prefers analysis + options over immediate escalation. Bring the sponsor a decision-ready package.",
+              },
+              {
+                kind: "true-false",
+                n: 2,
+                question:
+                  "When two answers look correct, the 'realistic / pragmatic' one is usually the PMI-preferred choice.",
+                correct: false,
+                explanationFalse:
+                  "Right — PMI prefers the textbook-perfect, process-following answer over the 'realistic' shortcut.",
+                explanationTrue:
+                  "Actually no — PMI prefers the process-following textbook answer over the realistic shortcut.",
+                principle:
+                  "Idealised PM > realistic PM on the exam.",
+              },
+              {
+                n: 3,
+                question:
+                  "A stakeholder calls the team lead directly to demand a change. Best PMI-aligned next step:",
+                options: {
+                  A: "Build the change — keep the stakeholder happy.",
+                  B: "Refuse the request and report the stakeholder for going around the PM.",
+                  C: "Route the request through the integrated change-control process and inform the stakeholder of the process.",
+                  D: "Wait until the next steering meeting.",
+                },
+                correct: "C",
+                principle:
+                  "All changes through change control; stakeholder relationships handled collaboratively.",
+              },
+            ],
+          },
+        },
+        {
+          id: "c8-2-scenario-triage",
+          code: "ES8.2",
+          title: "Scenario triage — how to read a PMP question",
+          bloom: "E",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "PMP scenarios are dense and often run 100+ words. A reliable triage pattern: (1) read the *last sentence* first — it usually contains the actual question ('what should the PM do FIRST / NEXT / BEST?'). (2) Identify the focus area (Initiating / Planning / Executing / M&C / Closing) and the performance domain. (3) Note the wording: 'first' means immediate action; 'best' implies a strategic choice; 'next' implies a sequence.",
+              "Eliminate two answers immediately. Two of four options will usually be obviously wrong (ignores the plan, breaks ethics, bypasses change control). The remaining two are the harder choice. Apply PMI-isms: plan-following > action-first; analyse > act; escalate when over threshold; collaborate > force.",
+              "Be alert for 'do nothing' answers — they are sometimes correct (e.g., 'monitor only' for low-priority stakeholders, 'passive acceptance' for low-priority risks). They are rarely the right call for the FIRST action in execution, but not always wrong.",
+            ],
+            keyPoints: [
+              "Read the last sentence first.",
+              "Identify focus area + performance domain.",
+              "Eliminate two obviously-wrong options.",
+              "Apply PMI-isms to the remaining pair.",
+              "'First' vs 'best' vs 'next' matters.",
+            ],
+            simplified: {
+              oneLiner:
+                "Read the question last sentence first. Eliminate the two obviously-wrong options. PMI-ism the remaining pair.",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "Reading 100+ word scenarios efficiently means starting with:",
+                options: {
+                  A: "The first sentence — it sets the context.",
+                  B: "The last sentence — it usually contains the actual question.",
+                  C: "All four options — choose by gut.",
+                  D: "The middle paragraph — it has the data.",
+                },
+                correct: "B",
+                principle:
+                  "Read the last sentence first to anchor on the question being asked.",
+              },
+              {
+                kind: "true-false",
+                n: 2,
+                question:
+                  "'Do nothing' is always the wrong answer on a PMP exam question.",
+                correct: false,
+                explanationFalse:
+                  "Right — 'do nothing / monitor only' can be correct for low-priority risks (passive acceptance) or low-power-low-interest stakeholders (monitor).",
+                explanationTrue:
+                  "Actually no — there are cases (passive acceptance, monitor-only stakeholders) where 'do nothing' is correct.",
+                principle:
+                  "'Do nothing' is occasionally correct — for low-priority risks or stakeholders.",
+              },
+              {
+                n: 3,
+                question:
+                  "Words that change which response is correct on the same scenario:",
+                options: {
+                  A: "'FIRST' implies immediate action sequence; 'BEST' implies strategic fit.",
+                  B: "'FIRST', 'NEXT', 'BEST' all mean the same thing.",
+                  C: "Only 'FIRST' matters; the others are noise.",
+                  D: "Only 'BEST' matters.",
+                },
+                correct: "A",
+                principle:
+                  "FIRST = order-of-action. BEST = quality/strategic fit. NEXT = sequence after current step.",
+              },
+            ],
+          },
+        },
+        {
+          id: "c8-3-ethics-and-study-plan",
+          code: "ES8.3",
+          title: "PMI Code of Ethics + final two weeks",
+          bloom: "E",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "PMI's Code of Ethics and Professional Conduct is enforced in two ways: it's a separate testable domain on the PMP exam, and a few scenarios are designed to trip up candidates who deprioritise it. Four pillars: Responsibility (ownership of decisions), Respect (for people, dignity, resources), Fairness (impartial, transparent), Honesty (truthful, accurate). Memorise them: R-R-F-H.",
+              "Ethics scenarios usually have a candidate ethical breach (bribery, conflict of interest, hiding information, plagiarism, retaliation) and a 'business pressure' option that asks the PM to look the other way. The PMI-correct answer is always the ethical one, even when it's commercially painful. Disclose conflicts; refuse bribes; report violations.",
+              "Final-two-weeks study plan: (1) one full timed mock exam per week; (2) drill the worst-performing domain daily; (3) re-read the PMBOK principles section once a week; (4) write the EVM formulas, PERT formula, and the five threat / five opportunity strategies on a single index card you read every morning; (5) sleep more than the day before — fatigued candidates underperform their material by ~10%.",
+            ],
+            keyPoints: [
+              "Four ethics pillars: Responsibility, Respect, Fairness, Honesty.",
+              "Ethics always wins over commercial pressure on the exam.",
+              "Two full mocks in final two weeks, plus daily targeted drills.",
+              "Memorise EVM, PERT, and the five-strategy lists on an index card.",
+              "Sleep — fatigue costs ~10% on real-exam performance.",
+            ],
+            simplified: {
+              oneLiner:
+                "Ethics: always pick the ethical option. Study plan: two timed mocks + daily drills + sleep.",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "A vendor offers the PM a gift worth £200 to 'expedite invoice approval'. PMI-correct response:",
+                options: {
+                  A: "Accept — it's within typical gift-giving etiquette.",
+                  B: "Decline politely and disclose the offer to the appropriate authority.",
+                  C: "Accept and disclose it afterwards.",
+                  D: "Negotiate the gift's value down.",
+                },
+                correct: "B",
+                principle:
+                  "Conflicts of interest: decline + disclose. Always.",
+              },
+              {
+                kind: "fill-in",
+                n: 2,
+                question:
+                  "PMI's four ethics pillars (in any order). Memorisation aid is R-R-F-H. Name any one of them.",
+                acceptedAnswers: [
+                  "responsibility",
+                  "respect",
+                  "fairness",
+                  "honesty",
+                ],
+                placeholder: "one word",
+                principle:
+                  "Responsibility, Respect, Fairness, Honesty.",
+              },
+              {
+                n: 3,
+                question:
+                  "In a final-two-weeks study plan, the highest-value daily activity is:",
+                options: {
+                  A: "Reading random forum posts.",
+                  B: "Watching new long-form videos.",
+                  C: "Drilling the domain where mock-exam performance is weakest.",
+                  D: "Re-reading the entire PMBOK Guide from page 1.",
+                },
+                correct: "C",
+                principle:
+                  "Spaced, targeted practice at weak spots beats broad re-reading in the final fortnight.",
+              },
+            ],
+          },
+        },
+      ],
+      sectionTest: {
+        passPct: 0.7,
+        questions: [
+          {
+            n: 1,
+            question:
+              "When two answers both seem correct, prefer:",
+            options: {
+              A: "The faster, more pragmatic one.",
+              B: "The textbook-PM-following-process one.",
+              C: "The one that requires least documentation.",
+              D: "The one that avoids stakeholder contact.",
+            },
+            correct: "B",
+            principle:
+              "PMI-ism #1: prefer the idealised PM, not the realistic shortcut.",
+          },
+          {
+            n: 2,
+            question:
+              "PMI's four ethics pillars are:",
+            options: {
+              A: "Speed, scale, cost, quality.",
+              B: "Responsibility, Respect, Fairness, Honesty.",
+              C: "Plan, Do, Check, Act.",
+              D: "Initiate, Plan, Execute, Close.",
+            },
+            correct: "B",
+            principle:
+              "Ethics: R-R-F-H. Memorise.",
+          },
+          {
+            n: 3,
+            question:
+              "PMP question reading strategy: read first which sentence?",
+            options: {
+              A: "First sentence.",
+              B: "The four options.",
+              C: "Last sentence (the actual question).",
+              D: "Middle paragraph.",
+            },
+            correct: "C",
+            principle:
+              "Read the last sentence first to anchor on the actual question.",
+          },
+          {
+            n: 4,
+            question:
+              "A vendor offers a gift to expedite a decision. The PM should:",
+            options: {
+              A: "Accept and split with the team.",
+              B: "Decline and disclose.",
+              C: "Accept under £100, decline above.",
+              D: "Ignore — no rule has been broken.",
+            },
+            correct: "B",
+            principle:
+              "Conflict of interest → decline + disclose.",
+          },
+          {
+            n: 5,
+            question:
+              "Two weeks before the exam, daily highest-value activity:",
+            options: {
+              A: "Drill the weakest domain.",
+              B: "Cram new topics.",
+              C: "Re-read PMBOK cover to cover.",
+              D: "Stop studying entirely.",
+            },
+            correct: "A",
+            principle:
+              "Targeted weak-spot drilling beats broad re-reading in the final fortnight.",
+          },
+        ],
+      },
+    },
   ],
   /* ============================================================
      Mock exams — full list authored after the section content.
