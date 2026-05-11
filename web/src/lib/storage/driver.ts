@@ -28,6 +28,17 @@ export type StoragePolicy =
   | "local-first-server-sync" // optimistic local, async push, last-write-wins
   | "server-of-record"; // server is truth; local is a cache
 
+/**
+ * Schema version of the driver contract itself (not of any
+ * particular store's payload). Bumped only when the driver
+ * interface shape changes in a way that forces every consumer to
+ * re-read. Store-payload schema versions live in `:vN` suffixes
+ * on their storage keys, independent of this constant.
+ */
+export const STORE_SCHEMA_VERSION = 2;
+
+export type { SyncMeta, WithSyncMeta } from "./sync-meta";
+
 export interface StorageDriver<T> {
   /** Synchronous snapshot for useSyncExternalStore. */
   getSnapshot(): T;
