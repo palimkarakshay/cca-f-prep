@@ -15,6 +15,8 @@ export type {
   NavItem,
   AskAIConfig,
   PackTheme,
+  PackPrerequisites,
+  PackPrerequisiteItem,
 } from "@/content/pack-types";
 
 export type {

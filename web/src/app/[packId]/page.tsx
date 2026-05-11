@@ -6,6 +6,7 @@ import { RecommendationBanner } from "@/components/dashboard/RecommendationBanne
 import { SectionList } from "@/components/dashboard/SectionList";
 import { MockExamPanel } from "@/components/dashboard/MockExamPanel";
 import { StatsPanel } from "@/components/dashboard/StatsPanel";
+import { BeforeYouBegin } from "@/components/dashboard/BeforeYouBegin";
 import { Container } from "@/components/ui/Container";
 import { LastVisitTracker } from "@/components/layout/LastVisitTracker";
 import { getPack } from "@/content/pack-registry";
@@ -59,6 +60,13 @@ export default async function PackHomePage({
         <p className="text-sm text-(--muted)">{cfg.tagline}</p>
       </header>
       <RecommendationBanner />
+
+      {pack.config.prerequisites ? (
+        <BeforeYouBegin
+          packId={pack.config.id}
+          prerequisites={pack.config.prerequisites}
+        />
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_280px] lg:items-start">
         <div className="flex flex-col gap-6 min-w-0">

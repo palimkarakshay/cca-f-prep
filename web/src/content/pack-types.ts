@@ -172,6 +172,38 @@ export interface PackConfig {
    * declare it explicitly.
    */
   audience?: "consumer" | "b2b";
+  /**
+   * Optional pre-flight gate surfaced on the pack home page above
+   * the section list. Use for packs that lead to a real-world
+   * certification or step with hard prerequisites (the PMP exam's
+   * 35 contact hours + work-experience requirement, for example).
+   * The card is a self-check, not a hard block — but it lets a
+   * learner discover early that this journey isn't yet a fit.
+   * Omit the field entirely to skip the card.
+   */
+  prerequisites?: PackPrerequisites;
+}
+
+export interface PackPrerequisiteItem {
+  /** Short label shown in the checklist. */
+  label: string;
+  /** Optional supporting note rendered under the label in muted text. */
+  detail?: string;
+}
+
+export interface PackPrerequisites {
+  /** Heading on the card (e.g. "Before you begin"). */
+  heading: string;
+  /** One-paragraph framing of who this journey is for. */
+  intro: string;
+  /** Items the learner should self-check before starting. */
+  requirements: PackPrerequisiteItem[];
+  /** Optional list of practical assumptions (cost, time, environment). */
+  assumptions?: PackPrerequisiteItem[];
+  /** Optional links to authoritative sources (official exam page, registration). */
+  externalLinks?: { label: string; href: string; }[];
+  /** Optional disclaimer / "this is not a fit if…" copy. */
+  notForYouIf?: string[];
 }
 
 export interface ContentPack {
