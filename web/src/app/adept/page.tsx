@@ -10,6 +10,7 @@ import {
   PencilLine,
 } from "lucide-react";
 import { B2B_PACKS } from "@/content/pack-registry";
+import type { ContentPack } from "@/content/pack-types";
 import { Container } from "@/components/ui/Container";
 import { Card } from "@/components/ui/card";
 import { BRAND } from "@/lib/brand";
@@ -107,93 +108,40 @@ export default function AdeptPage() {
         </ol>
       </section>
 
-      <section
-        aria-labelledby="demo-packs"
-        className="flex flex-col gap-3"
-      >
-        <header>
-          <h2
-            id="demo-packs"
-            className="font-[family-name:var(--font-display)] text-xl font-semibold text-(--ink)"
-          >
-            Demo packs
-          </h2>
-          <p className="text-sm text-(--muted)">
-            Company-approved, SME-verifiable content packs. Take the
-            learner experience, or jump straight to the SME workbench.
-          </p>
-        </header>
+      {(() => {
+        // Two groups: "general library" packs (pre-approved, swap-and-deploy)
+        // and "company-specific" packs (drafted for one customer). The
+        // heuristic uses the author label — "Curio L&D (general library)"
+        // marks the shared library; everything else is treated as
+        // tenant-specific demo content.
+        const isGeneral = (a?: string) =>
+          (a ?? "").toLowerCase().includes("general library");
+        const generalPacks = B2B_PACKS.filter((p) =>
+          isGeneral(p.config.author)
+        );
+        const companyPacks = B2B_PACKS.filter(
+          (p) => !isGeneral(p.config.author)
+        );
 
-        {B2B_PACKS.length === 0 ? (
-          <Card>
-            <p className="text-sm text-(--muted)">
-              No B2B demo packs registered yet.
-            </p>
-          </Card>
-        ) : (
-          <ul
-            aria-label="B2B demo packs"
-            className="grid grid-cols-1 gap-4 md:grid-cols-2"
-          >
-            {B2B_PACKS.map((pack) => {
-              const c = pack.config;
-              const sectionCount = pack.curriculum.sections.length;
-              const conceptCount = pack.curriculum.sections.reduce(
-                (n, s) => n + s.concepts.length,
-                0
-              );
-              return (
-                <li key={c.id}>
-                  <Card className="flex h-full flex-col gap-3 p-5">
-                    <header className="flex items-start gap-3">
-                      <div
-                        aria-hidden
-                        className="h-12 w-12 flex-none overflow-hidden rounded-md border border-(--border) bg-(--panel-2)"
-                        dangerouslySetInnerHTML={{ __html: c.iconSvg }}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-base font-semibold text-(--ink)">
-                          {c.name}
-                        </h3>
-                        <p className="mt-0.5 text-xs text-(--muted)">
-                          {c.tagline}
-                        </p>
-                      </div>
-                    </header>
-
-                    <p className="text-sm text-(--muted)">{c.description}</p>
-
-                    <ul className="mt-auto flex flex-wrap gap-2 text-xs text-(--muted)">
-                      <li className="rounded-full border border-(--border) px-2 py-0.5">
-                        {sectionCount} section{sectionCount === 1 ? "" : "s"}
-                      </li>
-                      <li className="rounded-full border border-(--border) px-2 py-0.5">
-                        {conceptCount} concept{conceptCount === 1 ? "" : "s"}
-                      </li>
-                    </ul>
-
-                    <div className="flex flex-wrap gap-2 border-t border-dashed border-(--border) pt-3">
-                      <Link
-                        href={`/${c.id}`}
-                        className="inline-flex items-center gap-2 rounded-md bg-(--accent) px-3 py-2 text-sm font-semibold text-white no-underline shadow-sm transition-colors hover:bg-(--accent-2)"
-                      >
-                        Take it as a learner →
-                      </Link>
-                      <Link
-                        href={`/adept/sme/${c.id}`}
-                        className="inline-flex items-center gap-2 rounded-md border border-(--border) bg-(--panel) px-3 py-2 text-sm font-semibold text-(--ink) no-underline shadow-sm transition-colors hover:border-(--accent) hover:text-(--accent-2)"
-                      >
-                        <PencilLine aria-hidden className="h-4 w-4" />
-                        Open SME workbench
-                      </Link>
-                    </div>
-                  </Card>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
+        return (
+          <>
+            <DemoPackSection
+              id="general-library"
+              heading="General library — pre-approved by Curio L&D"
+              blurb="Baseline content companies adopt as-is. Your SME swaps any concept via the workbench without rewriting from scratch."
+              packs={generalPacks}
+              kind="general"
+            />
+            <DemoPackSection
+              id="company-specific"
+              heading="Company-specific demo packs"
+              blurb="One-tenant content authored against a customer's policies + tooling. Acme Co. is the shipped example."
+              packs={companyPacks}
+              kind="company"
+            />
+          </>
+        );
+      })()}
 
       <section
         aria-labelledby="sme-workbench-intro"
@@ -233,5 +181,99 @@ export default function AdeptPage() {
         </Link>
       </footer>
     </Container>
+  );
+}
+
+function DemoPackSection({
+  id,
+  heading,
+  blurb,
+  packs,
+  kind,
+}: {
+  id: string;
+  heading: string;
+  blurb: string;
+  packs: ContentPack[];
+  kind: "general" | "company";
+}) {
+  if (packs.length === 0) return null;
+  const badgeLabel =
+    kind === "general"
+      ? "Pre-approved · swap-and-deploy"
+      : "Company-specific · tenant-only";
+  return (
+    <section aria-labelledby={id} className="flex flex-col gap-3">
+      <header>
+        <h2
+          id={id}
+          className="font-[family-name:var(--font-display)] text-xl font-semibold text-(--ink)"
+        >
+          {heading}
+        </h2>
+        <p className="text-sm text-(--muted)">{blurb}</p>
+      </header>
+      <ul
+        aria-label={heading}
+        className="grid grid-cols-1 gap-4 md:grid-cols-2"
+      >
+        {packs.map((pack) => {
+          const c = pack.config;
+          const sectionCount = pack.curriculum.sections.length;
+          const conceptCount = pack.curriculum.sections.reduce(
+            (n, s) => n + s.concepts.length,
+            0
+          );
+          return (
+            <li key={c.id}>
+              <Card className="flex h-full flex-col gap-3 p-5">
+                <header className="flex items-start gap-3">
+                  <div
+                    aria-hidden
+                    className="h-12 w-12 flex-none overflow-hidden rounded-md border border-(--border) bg-(--panel-2)"
+                    dangerouslySetInnerHTML={{ __html: c.iconSvg }}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-base font-semibold text-(--ink)">
+                      {c.name}
+                    </h3>
+                    <p className="mt-0.5 text-xs text-(--muted)">
+                      {c.tagline}
+                    </p>
+                  </div>
+                </header>
+                <p className="inline-flex w-fit rounded-full border border-(--accent)/40 bg-(--accent)/10 px-2 py-0.5 text-xs font-medium text-(--accent-2)">
+                  {badgeLabel}
+                </p>
+                <p className="text-sm text-(--muted)">{c.description}</p>
+                <ul className="mt-auto flex flex-wrap gap-2 text-xs text-(--muted)">
+                  <li className="rounded-full border border-(--border) px-2 py-0.5">
+                    {sectionCount} section{sectionCount === 1 ? "" : "s"}
+                  </li>
+                  <li className="rounded-full border border-(--border) px-2 py-0.5">
+                    {conceptCount} concept{conceptCount === 1 ? "" : "s"}
+                  </li>
+                </ul>
+                <div className="flex flex-wrap gap-2 border-t border-dashed border-(--border) pt-3">
+                  <Link
+                    href={`/${c.id}`}
+                    className="inline-flex items-center gap-2 rounded-md bg-(--accent) px-3 py-2 text-sm font-semibold text-white no-underline shadow-sm transition-colors hover:bg-(--accent-2)"
+                  >
+                    Take it as a learner →
+                  </Link>
+                  <Link
+                    href={`/adept/sme/${c.id}`}
+                    className="inline-flex items-center gap-2 rounded-md border border-(--border) bg-(--panel) px-3 py-2 text-sm font-semibold text-(--ink) no-underline shadow-sm transition-colors hover:border-(--accent) hover:text-(--accent-2)"
+                  >
+                    <PencilLine aria-hidden className="h-4 w-4" />
+                    Open SME workbench
+                  </Link>
+                </div>
+              </Card>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }

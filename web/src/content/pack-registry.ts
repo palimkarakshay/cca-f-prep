@@ -17,6 +17,9 @@ import { pack as frenchPack } from "../../content-packs/learn-french";
 import { pack as samplePack } from "../../content-packs/sample-pack";
 import { pack as sewingPack } from "../../content-packs/sewing-beginners";
 import { pack as acmePack } from "../../content-packs/acme-onboarding";
+import { pack as commsPack } from "../../content-packs/workplace-comms";
+import { pack as securityPack } from "../../content-packs/security-awareness";
+import { pack as managerPack } from "../../content-packs/new-manager-basics";
 import type { ContentPack } from "./pack-types";
 
 export const PACK_REGISTRY: Record<string, ContentPack> = {
@@ -25,6 +28,9 @@ export const PACK_REGISTRY: Record<string, ContentPack> = {
   "sample-pack": samplePack,
   "sewing-beginners": sewingPack,
   "acme-onboarding": acmePack,
+  "workplace-comms": commsPack,
+  "security-awareness": securityPack,
+  "new-manager-basics": managerPack,
 };
 
 export const ALL_PACK_IDS: string[] = Object.keys(PACK_REGISTRY);
