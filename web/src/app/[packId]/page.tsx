@@ -7,6 +7,7 @@ import { SectionList } from "@/components/dashboard/SectionList";
 import { MockExamPanel } from "@/components/dashboard/MockExamPanel";
 import { StatsPanel } from "@/components/dashboard/StatsPanel";
 import { Container } from "@/components/ui/Container";
+import { LastVisitTracker } from "@/components/layout/LastVisitTracker";
 import { getPack } from "@/content/pack-registry";
 import { siteConfigFor } from "@/lib/pack-helpers";
 
@@ -36,6 +37,11 @@ export default async function PackHomePage({
 
   return (
     <Container width="wide" className="flex flex-col gap-6 py-2">
+      <LastVisitTracker
+        packId={pack.config.id}
+        packName={pack.config.name}
+        href={`/${pack.config.id}`}
+      />
       <header className="flex flex-col gap-2">
         <Link
           href="/"

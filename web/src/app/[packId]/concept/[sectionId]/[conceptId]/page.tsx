@@ -6,6 +6,7 @@ import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
 import { Container } from "@/components/ui/Container";
 import { LessonView } from "@/components/concept/LessonView";
 import { ConceptHeaderNav } from "@/components/concept/ConceptHeaderNav";
+import { LastVisitTracker } from "@/components/layout/LastVisitTracker";
 import { journeyTrail } from "@/lib/nav-trail";
 
 type Params = { packId: string; sectionId: string; conceptId: string };
@@ -54,6 +55,15 @@ export default async function ConceptPage({
 
   return (
     <Container width="widest" className="py-2">
+      <LastVisitTracker
+        packId={pack.config.id}
+        packName={pack.config.name}
+        sectionId={section.id}
+        sectionTitle={section.title}
+        conceptId={concept.id}
+        conceptTitle={concept.title}
+        href={`/${pack.config.id}/concept/${section.id}/${concept.id}`}
+      />
       <Breadcrumbs
         trail={journeyTrail(
           pack,
