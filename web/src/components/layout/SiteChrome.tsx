@@ -1,10 +1,12 @@
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { BottomNav } from "./BottomNav";
+import { BrandSync } from "./BrandSync";
 
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">
+      <BrandSync />
       <Header />
       <main
         id="main"

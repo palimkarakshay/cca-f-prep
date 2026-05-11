@@ -6,6 +6,8 @@ import { BRAND } from "@/lib/brand";
 import { THEME_STORAGE_KEY, PACK_ID } from "@/lib/storage-keys";
 import { ACTIVE_PACK } from "@/content/active-pack";
 import { initScript as displayPrefsInitScript } from "@/lib/display-prefs";
+import { B2B_PACK_IDS } from "@/lib/brand-route";
+import { BRAND_THEME_CSS } from "@/lib/brand-theme";
 import "./globals.css";
 
 const display = Fraunces({
@@ -84,6 +86,12 @@ export const viewport: Viewport = {
 // Set the theme class on <html> before paint to avoid a flash of the wrong
 // theme. Reads the user's saved preference from localStorage; falls back to
 // prefers-color-scheme. Pack id and storage key are inlined at build time.
+//
+// Also resolves the route's *brand* (curio vs adept) and *role* (learner
+// vs expert) from the current URL so the brand-token <style> block below
+// applies on first paint — no flash of the wrong accent. The B2B pack
+// id list is inlined at build time and kept in sync with the registry
+// via `B2B_PACK_IDS`.
 const themeInitScript = `
 (function () {
   try {
@@ -92,6 +100,18 @@ const themeInitScript = `
     var theme = stored || (prefersDark ? "dark" : "light");
     if (theme === "dark") document.documentElement.classList.add("dark");
     document.documentElement.dataset.pack = ${JSON.stringify(PACK_ID)};
+    var path = (window.location && window.location.pathname) || "/";
+    var b2b = ${JSON.stringify(B2B_PACK_IDS)};
+    var first = (path.split("/")[1] || "").toLowerCase();
+    var brand = "curio";
+    if (path === "/adept" || path.indexOf("/adept/") === 0) brand = "adept";
+    else if (path === "/for-teams" || path.indexOf("/for-teams/") === 0) brand = "adept";
+    else if (first && b2b.indexOf(first) !== -1) brand = "adept";
+    document.documentElement.dataset.brand = brand;
+    var role = "learner";
+    if (path === "/adept" || path.indexOf("/adept/") === 0) role = "expert";
+    else if (path === "/for-teams" || path.indexOf("/for-teams/") === 0) role = "expert";
+    document.documentElement.dataset.role = role;
   } catch (_) {}
 })();
 `.trim();
@@ -140,6 +160,10 @@ export default function RootLayout({
         {packThemeCSS ? (
           <style dangerouslySetInnerHTML={{ __html: packThemeCSS }} />
         ) : null}
+        {/* Brand + role tokens — emitted AFTER pack theme so the
+            `data-brand` / `data-role` selectors win on equal specificity
+            for surfaces classified as Adept or expert-mode. */}
+        <style dangerouslySetInnerHTML={{ __html: BRAND_THEME_CSS }} />
       </head>
       <body>
         <a href="#main" className="skip-link">
