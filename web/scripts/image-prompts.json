@@ -1,0 +1,94 @@
+{
+  "_meta": {
+    "style": "Warm editorial flat illustration. Hand-drawn line work over soft fills, muted paper texture, terracotta + ember + warm cream palette anchored on accent #d97757 and canvas #0e0f12 (dark) / #fafaf9 (light). Generous negative space. Reads as a thoughtful study product, not a SaaS dashboard. No photorealism, no 3D render, no gradients with shine, no stock-art clip-art, no text in the image unless the prompt explicitly asks for a wordmark.",
+    "negative": "no photoreal, no 3d render, no glossy gradients, no stock-photo people, no watermarks, no AI artifacts, no extra fingers, no signage with random text, no logos of real companies"
+  },
+  "brand": {
+    "curio-logo": {
+      "size": "square_hd",
+      "model": "flux/schnell",
+      "prompt": "A minimalist editorial wordmark logo for 'Curio', warm cream background, hand-drawn serif lettering in terracotta #b04829, paired with a small circular logomark to the left containing a stylized open book whose pages curl into a question-mark spiral. Flat illustration, soft paper texture, single accent color, generous margin, balanced composition, designed for use on light backgrounds. The word 'Curio' must be spelled clearly and legibly."
+    },
+    "curio-mark": {
+      "size": "square_hd",
+      "model": "flux/schnell",
+      "prompt": "A square app icon, 512x512, deep charcoal background #0e0f12, containing only a single terracotta #d97757 logomark: a stylized open book whose pages curl into a question-mark spiral. Flat editorial illustration, hand-drawn line work, soft paper grain, centered, generous padding, no text, no wordmark."
+    },
+    "adept-logo": {
+      "size": "square_hd",
+      "model": "flux/schnell",
+      "prompt": "A minimalist editorial wordmark logo for 'Adept', warm cream background, hand-drawn serif lettering in deep terracotta #913a1d, paired with a small square logomark to the left containing three concentric stepped chevrons pointing up. Flat illustration, soft paper texture, slightly more corporate than playful, balanced composition. The word 'Adept' must be spelled clearly and legibly."
+    },
+    "adept-mark": {
+      "size": "square_hd",
+      "model": "flux/schnell",
+      "prompt": "A square app icon, 512x512, deep charcoal background #0e0f12, containing only a single terracotta #d97757 logomark: three concentric stepped chevrons pointing up, suggesting progress and mastery. Flat editorial illustration, hand-drawn line work, soft paper grain, centered, generous padding, no text."
+    }
+  },
+  "packs": {
+    "cca-f-prep": {
+      "size": "square_hd",
+      "model": "flux/schnell",
+      "prompt": "Square app icon, 512x512, deep charcoal #0e0f12 background, centered terracotta #d97757 flat illustration of a brass architect's compass drawing a half-arc over a small glowing ember. Hand-drawn line work, soft paper grain, generous padding, no text. Editorial flat style."
+    },
+    "learn-french": {
+      "size": "square_hd",
+      "model": "flux/schnell",
+      "prompt": "Square app icon, 512x512, deep charcoal #0e0f12 background, centered terracotta #d97757 flat illustration of a small steaming café cup with a flaky croissant beside it, a thin Eiffel-tower silhouette rising softly behind. Hand-drawn line work, paper grain, generous padding, no text. Editorial flat style."
+    },
+    "sewing-beginners": {
+      "size": "square_hd",
+      "model": "flux/schnell",
+      "prompt": "Square app icon, 512x512, deep charcoal #0e0f12 background, centered terracotta #d97757 flat illustration of a sewing needle pulling a single curving thread through a folded swatch of fabric. Hand-drawn line work, paper grain, generous padding, no text. Editorial flat style."
+    },
+    "security-awareness": {
+      "size": "square_hd",
+      "model": "flux/schnell",
+      "prompt": "Square app icon, 512x512, deep charcoal #0e0f12 background, centered terracotta #d97757 flat illustration of a rounded heraldic shield with a simple keyhole at its center and a small key resting at the lower right. Warm and approachable, not aggressive. Hand-drawn line work, paper grain, generous padding, no text. Editorial flat style."
+    },
+    "workplace-comms": {
+      "size": "square_hd",
+      "model": "flux/schnell",
+      "prompt": "Square app icon, 512x512, deep charcoal #0e0f12 background, centered terracotta #d97757 flat illustration of two overlapping speech bubbles, one slightly rotated, with three small dots in one and a small spark in the other. Hand-drawn line work, paper grain, generous padding, no text. Editorial flat style."
+    },
+    "new-manager-basics": {
+      "size": "square_hd",
+      "model": "flux/schnell",
+      "prompt": "Square app icon, 512x512, deep charcoal #0e0f12 background, centered terracotta #d97757 flat illustration of three small abstract figures standing together, with a fourth slightly taller figure gesturing toward them, suggesting guidance. Hand-drawn line work, paper grain, generous padding, no text. Editorial flat style."
+    },
+    "acme-onboarding": {
+      "size": "square_hd",
+      "model": "flux/schnell",
+      "prompt": "Square app icon, 512x512, deep charcoal #0e0f12 background, centered terracotta #d97757 flat illustration of an open doorway with warm light spilling out and a softly curving stepping-stone path leading toward it. Hand-drawn line work, paper grain, generous padding, no text. Editorial flat style."
+    },
+    "sample-pack": {
+      "size": "square_hd",
+      "model": "flux/schnell",
+      "prompt": "Square app icon, 512x512, deep charcoal #0e0f12 background, centered terracotta #d97757 flat illustration of three stacked cards fanned out slightly, the top card showing a single abstract sparkline. Hand-drawn line work, paper grain, generous padding, no text. Editorial flat style."
+    }
+  },
+  "og": {
+    "curio-og": {
+      "size": "landscape_16_9",
+      "model": "flux/schnell",
+      "prompt": "Open Graph social card, 1200x630, warm cream background #fafaf9 with soft paper grain, terracotta #b04829 hand-drawn serif headline reading 'Curio — Learn anything.' on the left half, and a flat editorial illustration on the right half showing a small stack of open books with a question-mark spiral rising as steam. Generous margin, balanced composition, no other text. Editorial flat style."
+    }
+  },
+  "hero": {
+    "picker-hero": {
+      "size": "landscape_16_9",
+      "model": "flux/schnell",
+      "prompt": "Wide editorial banner illustration, 16:9, warm cream background with soft paper grain, terracotta #d97757 and ochre flat illustration of a thoughtful study scene: an open notebook on a wooden desk, a small mug, a single houseplant, and three faint floating thought-bubbles each containing a simple icon (compass, croissant, shield), suggesting many topics. Hand-drawn line work, generous negative space, no text, no people. Editorial flat style."
+    },
+    "for-teams-hero": {
+      "size": "landscape_16_9",
+      "model": "flux/schnell",
+      "prompt": "Wide editorial banner illustration, 16:9, warm cream background with soft paper grain, terracotta #d97757 flat illustration of a collaborative scene: three abstract figures at a long shared desk, each with an open notebook, a single rising chart line connecting their notebooks, soft connection threads between them. Hand-drawn line work, generous negative space, no text, no recognizable faces. Editorial flat style, slightly more corporate than the consumer banner."
+    },
+    "adept-hero": {
+      "size": "landscape_16_9",
+      "model": "flux/schnell",
+      "prompt": "Wide editorial banner illustration, 16:9, warm cream background with soft paper grain, terracotta #d97757 flat illustration of an SME workbench scene: an architect's draft table seen from above with a stack of approved content cards, a stamped seal of approval, a measuring rule, and a single quill, suggesting expert review. Hand-drawn line work, generous negative space, no text, no people. Editorial flat style."
+    }
+  }
+}
