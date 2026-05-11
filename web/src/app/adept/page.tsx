@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ClipboardCheck,
@@ -51,6 +52,15 @@ const STEPS = [
 export default function AdeptPage() {
   return (
     <Container width="wide" className="flex flex-col gap-8 py-2">
+      <Image
+        src="/images/hero/final/adept-hero.jpg"
+        alt=""
+        width={1024}
+        height={576}
+        priority
+        sizes="(min-width: 1024px) 1024px, 100vw"
+        className="w-full rounded-lg border border-(--border) object-cover"
+      />
       <header className="flex flex-col gap-3">
         <p className="font-[family-name:var(--font-display)] text-xs uppercase tracking-[0.18em] text-(--muted)">
           {BRAND.name} for organisations

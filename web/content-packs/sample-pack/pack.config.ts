@@ -77,4 +77,5 @@ export const packConfig: PackConfig = {
   },
   iconSvg: ICON_SVG,
   iconMaskableSvg: ICON_MASKABLE_SVG,
+  iconImagePath: "/images/packs/final/sample-pack.jpg",
 };

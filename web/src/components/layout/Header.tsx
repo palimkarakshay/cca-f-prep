@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -86,6 +87,18 @@ export function Header() {
     ? pack.config.nav.filter((n) => n.href !== "/")
     : [];
   const homeHref = packId ? `/${packId}` : "/";
+  // Adept mark on B2B routes (/adept, /adept/*, /for-teams), Curio mark
+  // everywhere else. Both marks share the same dark-canvas + accent
+  // design so the swap is decorative, not load-bearing — the wordmark
+  // text remains the source of truth for which brand the visitor is
+  // looking at.
+  const isB2BRoute =
+    pathname === "/adept" ||
+    pathname?.startsWith("/adept/") ||
+    pathname === "/for-teams";
+  const markSrc = isB2BRoute
+    ? "/images/brand/final/adept-mark.jpg"
+    : "/images/brand/final/curio-mark.jpg";
 
   return (
     <header className="border-b border-(--border) mb-6">
@@ -93,12 +106,22 @@ export function Header() {
         <Link
           href={homeHref}
           aria-label={`${BRAND.name} home`}
-          className="flex min-h-11 flex-col justify-center gap-0.5 no-underline"
+          className="flex min-h-11 items-center gap-2 no-underline"
         >
-          <span className="font-[family-name:var(--font-display)] text-base font-semibold text-(--ink)">
-            {BRAND.name}
+          <Image
+            aria-hidden
+            src={markSrc}
+            alt=""
+            width={32}
+            height={32}
+            className="h-8 w-8 flex-none rounded-md object-cover"
+          />
+          <span className="flex flex-col justify-center gap-0.5">
+            <span className="font-[family-name:var(--font-display)] text-base font-semibold text-(--ink)">
+              {BRAND.name}
+            </span>
+            <span className="text-xs text-(--muted)">{BRAND.tagline}</span>
           </span>
-          <span className="text-xs text-(--muted)">{BRAND.tagline}</span>
         </Link>
         <nav
           aria-label="Primary"
