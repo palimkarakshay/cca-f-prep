@@ -1,13 +1,36 @@
 # Commercialization Readiness Plan — `cca-f-prep/web/`
 
-> **Status.** Applies the canonical `v2-scaled-b2b-plan.md` to the
-> actual code in `web/`. v2 wins where it conflicts with this
-> document; this document is the *implementation lens* — what the
-> app needs in order, with file paths and effort estimates.
->
-> **Created** 2026-05-11 alongside PR #46 (the immediate-wins
-> landing). Phase 1 / Phase 2 sequencing and stop-signals come
-> from `v2-scaled-b2b-plan.md` §6–11.
+## 0. Status (canonical as of 2026-05-11)
+
+This is the **canonical implementation lens** for the live product at
+`web/`. Two related documents stay live:
+
+- **`plans/v2-scaled-b2b-plan.md`** — the *business shape* this plan
+  implements. Pricing, ICP, vendor cap, weekly cadence, stop-signals
+  originate there. v2 wins where the two conflict.
+- **`plans/business-viability-mitigation-plan.md`** — the 14
+  problem→mitigation map that drove v2. Read for "why we shrank".
+
+Documents that have been **superseded** by this plan as far as the
+`/web/` codebase is concerned:
+
+- `plans/archive-2026-05-04/IMPLEMENTATION-v2.md` (formerly
+  `plans/IMPLEMENTATION-v2.md`) — the parallel B2C micro-SaaS / Render
+  Pro / $29-one-time track. Archived 2026-05-11. Kept on disk as
+  historical record only; do not follow.
+- The other docs under `plans/archive-2026-05-04/` — the original v1
+  venture-shape plans that the hostile review struck down.
+
+Older banners on prior plan docs point here as the implementation lens;
+this Status block tells a fresh reader why.
+
+> **Original status note (kept for provenance).** Applies the canonical
+> `v2-scaled-b2b-plan.md` to the actual code in `web/`. v2 wins where it
+> conflicts with this document; this document is the *implementation
+> lens* — what the app needs in order, with file paths and effort
+> estimates. **Created** 2026-05-11 alongside PR #46 (the immediate-wins
+> landing). Phase 1 / Phase 2 sequencing and stop-signals come from
+> `v2-scaled-b2b-plan.md` §6–11.
 
 ## Context
 
@@ -332,3 +355,112 @@ This plan honours v2 in full:
 - Stop-signals enforced as production-monitoring gates, not advisory text.
 
 Where this plan extends v2: the broader role matrix (§2), the LLM model-routing matrix (§3), the per-store driver policy table (§4), and the v0.6+ roadmap are net-new specificity layered on v2's framework — they don't contradict v2, they apply it to the actual code in `/web/`.
+
+---
+
+## 12. Gap analysis vs prior plans (added 2026-05-11)
+
+A coherence pass after this plan landed (PR #47) audited it against
+`business-viability-negative-study.md` (9 fatal problems),
+`business-viability-mitigation-plan.md` (14 mitigations),
+`v2-scaled-b2b-plan.md`, the now-archived `IMPLEMENTATION-v2.md`, and
+`decisions.md`. Summary so a future reader doesn't have to redo it:
+
+**A. The 9 fatal problems — coverage.** All addressed:
+
+| # | Fatal problem | Where it's handled in this plan |
+|---|---|---|
+| 1 | TAM fallacy (top-down %) | Inherited from v2; this plan never restates the % math |
+| 2 | AI cost 25–30× mispriced | §3 cost defences (debounce + cache + token ledger + Haiku default + ≤5% Opus critic) |
+| 3 | Maven 96% misattribution | N/A in code lens; v2 struck the claim |
+| 4 | 18-day Phase-1 fantasy | §7 prescribes 8–12 weeks part-time per v2 |
+| 5 | Free-tier ToS breach (Vercel Hobby) | §5 step 1 specifies Vercel **Pro** |
+| 6 | SOC2 chicken-and-egg | §5 step 9: SOC2 explicitly **out** in v1 |
+| 7 | Pilot-pricing inversion | **Partial** — §5 step 5 names Stripe but the $10k non-credited pilot floor is in v2 §1, not restated here. Inherited but not foregrounded. |
+| 8 | Hyperscaler commoditisation | §3: all AI through `lib/ai/router.ts`, no Anthropic-only features in core paths |
+| 9 | Pedagogical-moat decay | Inherited from v2; this plan replaces "23 validators = moat" with §3's sampled-critic + content-validator pipeline |
+
+**B. Mitigations from the mitigation plan that this plan does NOT
+restate.** These are documentation gaps, not plan gaps — they live in
+v2 / mitigation-plan / `decisions.md` and remain binding even when this
+doc is silent:
+
+- §16 minimum-viable safe-path framing (this plan is its application)
+- §17 stop-signals as **operator-behaviour kills** (see §13 below — now
+  restated)
+- §18 weekend action list + pre-flight gates G-1…G-7 (lived in the
+  now-archived `IMPLEMENTATION-v2.md`; operator-behaviour, not code)
+- §12 anti-promise list ("no $25M ARR, no NRR 110%, no venture funding")
+- D-002 opportunity-cost framing from `plans/decisions.md`
+
+**C. Drift / conflicts.** Three:
+
+1. **Pricing scope.** This plan prescribes B2C ($15) + B2B ($20–25) per
+   v2. The archived `IMPLEMENTATION-v2.md` prescribed B2C-only ($29 +
+   $19/mo + $149/yr). Resolution: B2C-only track retired 2026-05-11;
+   B2B-via-this-plan is the active track.
+2. **Hosting.** This plan says Vercel Pro $20/mo (matches v2); the
+   archived `IMPLEMENTATION-v2.md` said Render Pro $19/mo. Resolution:
+   Vercel Pro wins (matches v2 §9 + existing `vercel.json`).
+3. **Stop-signal authority.** §11 of this plan listed prod-monitoring
+   gates as *advisory*. v2 §11 and the now-archived `IMPLEMENTATION-v2.md`
+   §17b treated them as **binding**. Resolution: §13 below now
+   restates them as binding kills, not advice.
+
+**D. Open design questions resolved 2026-05-11.**
+
+- **GDPR erasure vs immutable `pack_deploy.snapshot` audit row (§9.6).**
+  Inherit `business-viability-mitigation-plan.md` §8 policy: the
+  audit row is immutable, but the actor's identifying fields
+  (`actor_name`, `actor_email`) are tombstoned on a GDPR-erasure
+  request — i.e., replaced with `'[erased on ' || erased_at || ']'`
+  and a foreign-key to a `erasure_event` row. The snapshot body stays
+  intact. Endpoint: `/api/data-delete` ships in v0.5 (per §5 step 9)
+  and invokes the tombstone procedure as part of its transaction.
+- **Static `curriculum.ts` vs DB-backed `pack_registry` (§4 vs §9.2).**
+  v0.1 ships `pack_registry` as a registry of *which packs exist for
+  which tenant* (rows: `id`, `kind`, `tenant_id`, `is_active`), **not**
+  the curriculum body. The curriculum itself stays in
+  `content-packs/*/curriculum.ts` until v0.6, when AI-generated drafts
+  require persistence. This removes the apparent §4-vs-§9.2
+  contradiction.
+
+**E. Net answer to the operator's four questions.**
+
+1. *Did we miss anything from previous commercialization attempts?* —
+   Yes, narratively. The operator-behaviour mitigations (B above) are
+   not restated in this plan; §13 below now imports them.
+2. *Does this plan solve previously identified problems?* — Yes (A
+   above), with one partial: pilot-pricing inversion is inherited but
+   not foregrounded.
+3. *Does it mitigate previously found problems?* — Yes, structurally,
+   via v2 alignment (Appendix).
+4. *Does it create new problems?* — No new risks. Two open design
+   questions were surfaced; both resolved inline above.
+
+---
+
+## 13. Operator-behaviour kills (binding, inherited from v2 §11 + mitigation §17)
+
+These are **kill triggers**, not advice. When any one trips, the
+operator stops or restructures — they do not re-plan around it. They
+sit alongside the production-monitoring gates in §11.
+
+| Trigger | Action |
+|---|---|
+| MRR < $1k by Month 6 from launch | Stop the SaaS motion; pivot to OSS + consulting per v2 §11 |
+| AI cost > 30% of MRR for 2 consecutive months | Raise prices to restore margin, or stop |
+| Operator working > 30 hr/wk for 2 consecutive months | Stop the side-project shape, **or** quit the day job consciously |
+| 3 B2B pilots fail their pre-agreed success criteria | Stop the B2B motion; do not start a 4th pilot |
+| Codex review labels a launch PR `codex-blockers` and the operator merges anyway | Treat as a discipline gate failure; review monthly cadence |
+
+The plan in §1–§11 is sized for a B2C-anchor + ≤ 25 hr/wk operator load.
+If sustained load passes 25 hr/wk pre-launch or 30 hr/wk post-launch,
+the plan is wrong, not the operator. Cut scope (defer a v0.x release,
+freeze a feature flag) before pushing through.
+
+**Anti-promise list (kept here so it never gets lost again).** This
+plan does NOT promise: $25M ARR, 95% gross margin, NRR ≥ 110%, SOC2 in
+Year 1, SAML / SCIM in Year 1, multi-tenant RLS in v1, venture funding,
+peer-comparison / leaderboard features, embedding-based dedup, custom
+team catalog drafting before Phase 2 revenue gate.
