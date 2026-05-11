@@ -21,6 +21,7 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Home, ChevronUp } from "lucide-react";
 import { getAdjacentConceptsFrom } from "@/content/curriculum-loader";
+import { NumberedJumper } from "@/components/primitives/NumberedJumper";
 import type { ContentPack } from "@/content/pack-types";
 import type { Concept, Section } from "@/content/curriculum-types";
 
@@ -62,6 +63,15 @@ export function ConceptHeaderNav({
         Concept <span className="font-mono">{conceptIndex}</span> of{" "}
         <span className="font-mono">{total}</span>
       </span>
+
+      <NumberedJumper
+        ariaLabel="Jump to concept"
+        activeIndex={conceptIndex - 1}
+        items={section.concepts.map((c) => ({
+          href: `/${packId}/concept/${section.id}/${c.id}`,
+          label: `${c.code} ${c.title}`,
+        }))}
+      />
 
       <div className="ml-auto flex flex-wrap items-center gap-2">
         {prev ? (

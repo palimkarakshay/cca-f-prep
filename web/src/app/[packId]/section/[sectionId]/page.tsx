@@ -11,6 +11,7 @@ import {
 } from "@/content/curriculum-loader";
 import { ArrowLeft, ArrowRight, ChevronUp } from "lucide-react";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
+import { NumberedJumper } from "@/components/primitives/NumberedJumper";
 import { journeyTrail } from "@/lib/nav-trail";
 import { SectionConceptList } from "@/components/section/SectionConceptList";
 import { SectionConceptMap } from "@/components/section/SectionConceptMap";
@@ -120,12 +121,20 @@ export default async function SectionPage({
       <Breadcrumbs trail={journeyTrail(pack, { label: section.title })} />
       <nav
         aria-label="Section navigation"
-        className="mb-4 flex flex-wrap items-center gap-2 rounded-md border border-(--border) bg-(--panel-2) p-3 text-xs"
+        className="mb-4 flex flex-wrap items-center gap-3 rounded-md border border-(--border) bg-(--panel-2) p-3 text-xs"
       >
         <span className="text-(--muted)">
           Section <span className="font-mono">{sectionIndex}</span> of{" "}
           <span className="font-mono">{totalSections}</span>
         </span>
+        <NumberedJumper
+          ariaLabel="Jump to section"
+          activeIndex={sectionIndex - 1}
+          items={pack.curriculum.sections.map((s) => ({
+            href: `/${packId}/section/${s.id}`,
+            label: `Section ${s.n}: ${s.title}`,
+          }))}
+        />
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {prevSection ? (
             <Link
