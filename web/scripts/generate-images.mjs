@@ -27,14 +27,22 @@ const FAL_BASE = "https://queue.fal.run";
 const MODEL_DRAFT = "fal-ai/flux/schnell";
 const MODEL_FINAL = "fal-ai/flux-pro/v1.1";
 
+function parsePositiveInt(raw, flag) {
+  const n = Number(raw);
+  if (!Number.isFinite(n) || !Number.isInteger(n) || n <= 0) {
+    throw new Error(`${flag} must be a positive integer, got ${JSON.stringify(raw)}`);
+  }
+  return n;
+}
+
 function parseArgs(argv) {
   const out = { mode: "draft", only: null, dry: false, variants: null, maxImages: 80 };
   for (const arg of argv.slice(2)) {
     if (arg === "--dry") out.dry = true;
     else if (arg.startsWith("--mode=")) out.mode = arg.slice(7);
     else if (arg.startsWith("--only=")) out.only = arg.slice(7).split(",").map(s => s.trim()).filter(Boolean);
-    else if (arg.startsWith("--variants=")) out.variants = parseInt(arg.slice(11), 10);
-    else if (arg.startsWith("--max-images=")) out.maxImages = parseInt(arg.slice(13), 10);
+    else if (arg.startsWith("--variants=")) out.variants = parsePositiveInt(arg.slice(11), "--variants");
+    else if (arg.startsWith("--max-images=")) out.maxImages = parsePositiveInt(arg.slice(13), "--max-images");
     else throw new Error(`unknown arg: ${arg}`);
   }
   if (!["draft", "final"].includes(out.mode)) {
@@ -86,8 +94,13 @@ async function submit({ apiKey, model, prompt, size, n }) {
 
 async function poll({ apiKey, statusUrl, responseUrl }) {
   // fal queue: GET status_url until status === "COMPLETED", then GET response_url.
+  // The deadline expiring without an observed COMPLETED must throw — otherwise
+  // fal's 202 on responseUrl (still in progress) passes Response.ok and we'd
+  // silently record a successful surface with zero images.
   const deadline = Date.now() + 5 * 60 * 1000;
   let delay = 1500;
+  let lastStatus = "(none)";
+  let completed = false;
   while (Date.now() < deadline) {
     const res = await fetch(statusUrl, {
       headers: { "authorization": `Key ${apiKey}` },
@@ -97,12 +110,19 @@ async function poll({ apiKey, statusUrl, responseUrl }) {
       throw new Error(`fal status failed ${res.status}: ${text.slice(0, 400)}`);
     }
     const status = await res.json();
-    if (status.status === "COMPLETED") break;
-    if (status.status === "FAILED" || status.status === "CANCELED") {
-      throw new Error(`fal job ${status.status}: ${JSON.stringify(status).slice(0, 400)}`);
+    lastStatus = status.status ?? "(missing)";
+    if (lastStatus === "COMPLETED") {
+      completed = true;
+      break;
+    }
+    if (lastStatus === "FAILED" || lastStatus === "CANCELED") {
+      throw new Error(`fal job ${lastStatus}: ${JSON.stringify(status).slice(0, 400)}`);
     }
     await new Promise(r => setTimeout(r, delay));
     delay = Math.min(delay * 1.3, 4000);
+  }
+  if (!completed) {
+    throw new Error(`fal poll deadline exceeded after 5min; last status=${lastStatus}`);
   }
   const final = await fetch(responseUrl, {
     headers: { "authorization": `Key ${apiKey}` },

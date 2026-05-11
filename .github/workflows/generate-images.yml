@@ -66,7 +66,8 @@ jobs:
           VARIANTS: ${{ inputs.variants }}
           MAX_IMAGES: ${{ inputs.max_images }}
         run: |
-          ARGS="--mode=${MODE} --max-images=${MAX_IMAGES}"
+          ARGS="--mode=${MODE}"
+          if [ -n "${MAX_IMAGES}" ]; then ARGS="${ARGS} --max-images=${MAX_IMAGES}"; fi
           if [ -n "${ONLY}" ]; then ARGS="${ARGS} --only=${ONLY}"; fi
           if [ -n "${VARIANTS}" ]; then ARGS="${ARGS} --variants=${VARIANTS}"; fi
           echo "running: node web/scripts/generate-images.mjs ${ARGS}"
