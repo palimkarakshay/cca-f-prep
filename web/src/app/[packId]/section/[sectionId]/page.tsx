@@ -10,6 +10,7 @@ import {
 } from "@/content/curriculum-loader";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
 import { SectionConceptList } from "@/components/section/SectionConceptList";
+import { SectionConceptMap } from "@/components/section/SectionConceptMap";
 import { SectionTabs } from "@/components/section/SectionTabs";
 import { resolveTab } from "@/components/section/section-tabs-shared";
 import { GoalsPanel } from "@/components/section/GoalsPanel";
@@ -74,14 +75,17 @@ export default async function SectionPage({
   );
 
   const conceptsPanel = (
-    <section aria-labelledby="concepts-heading">
-      <h2
-        id="concepts-heading"
-        className="mb-2 text-xs font-semibold uppercase tracking-wide text-(--accent-2)"
-      >
-        Concepts
-      </h2>
-      <SectionConceptList section={section} packId={packId} />
+    <section aria-labelledby="concepts-heading" className="flex flex-col gap-4">
+      <SectionConceptMap section={section} packId={packId} />
+      <div>
+        <h2
+          id="concepts-heading"
+          className="mb-2 text-xs font-semibold uppercase tracking-wide text-(--accent-2)"
+        >
+          Concepts
+        </h2>
+        <SectionConceptList section={section} packId={packId} />
+      </div>
     </section>
   );
 
