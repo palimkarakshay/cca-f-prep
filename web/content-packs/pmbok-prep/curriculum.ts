@@ -780,6 +780,20 @@ export const CURRICULUM: Curriculum = {
             deeper: {
               oneLiner:
                 "PMI prefers servant-leader options. Watch for 'tell the team', 'order', 'mandate' — usually wrong. 'Coach', 'facilitate', 'remove blockers', 'model' — usually right.",
+              paragraphs: [
+                "PMBOK 8e draws on five leadership styles you should be able to distinguish on the exam: directive (assign work, tight oversight), transactional (reward + penalty, KPIs), servant (support the team, remove impediments), transformational (vision + intrinsic motivation), and laissez-faire (hands-off). Most PMP scenarios reward servant + transformational. Directive is reserved for emergencies, safety incidents, or wholly new teams with no shared norms. Laissez-faire is almost never the right answer.",
+                "There is a subtle exam pattern around situational leadership (Hersey-Blanchard). The 'correct' style depends on the team's task-readiness: low capability + low commitment → directing; low capability + high commitment → coaching; high capability + low commitment → supporting; high capability + high commitment → delegating. The trap option is always 'one style for everyone' — PMI penalises rigid leaders.",
+              ],
+              keyPoints: [
+                "Five styles: directive, transactional, servant, transformational, laissez-faire.",
+                "Default to servant on the exam; reserve directive for safety/emergency.",
+                "Situational leadership: match style to team task-readiness, not to your own preference.",
+                "Emotional intelligence (EI) — self-awareness, self-regulation, motivation, empathy, social skill — is explicitly named in the 8e principle.",
+              ],
+              pitfalls: [
+                "Don't pick 'use authority' just because the PM has formal authority. PMBOK separates positional power from leadership.",
+                "Don't escalate first when a facilitative attempt is still available — PMI prefers the lowest-authority resolution that works.",
+              ],
             },
           },
           quiz: {
@@ -859,6 +873,20 @@ export const CURRICULUM: Curriculum = {
             deeper: {
               oneLiner:
                 "Sustainability often shows up via Risk: long-term environmental or regulatory threats become near-term risks once you take a sustainable lens.",
+              paragraphs: [
+                "The 2025 PMBOK explicitly references the UN Sustainable Development Goals (SDGs) and ISO 14001 as external frameworks a project may need to align to. Public-sector and EU-funded projects increasingly mandate this alignment in the contract — meaning sustainability is no longer a 'nice to have' principle, it is a constraint on the project management plan.",
+                "Sustainability decisions also reframe the cost baseline. A higher up-front spend that avoids a future remediation cost is *not* a budget overrun — it's an NPV-positive choice when the avoided remediation is correctly valued. On the exam, watch for scenarios that present 'cheaper now / costlier later' choices: the PMI-correct answer follows the sustainability pyramid (avoid > minimise > restore > compensate) when the externality is named.",
+              ],
+              keyPoints: [
+                "Triple bottom line: economic + social + environmental, all three measured.",
+                "Sustainability constraints can be contractual (EU, SDG-aligned funders, ISO 14001).",
+                "Avoid > minimise > restore > compensate — pick the higher rung when available.",
+                "Long-tail externalities (carbon, regulatory, reputational) belong in the risk register.",
+              ],
+              pitfalls: [
+                "Don't treat sustainability as marketing copy on the exam. PMBOK 8e tests it as a real planning input.",
+                "Don't pick 'compensate' (offset) when 'avoid' or 'minimise' is feasible — the pyramid is strict-order.",
+              ],
             },
           },
           quiz: {
@@ -1095,6 +1123,20 @@ export const CURRICULUM: Curriculum = {
             deeper: {
               oneLiner:
                 "Adaptive projects still need a charter — it just covers less detail (vision + initial backlog rather than full scope) and is revisited more often.",
+              paragraphs: [
+                "The Initiating focus area produces two anchor artefacts: the project charter and the initial stakeholder register. The charter names the sponsor, the high-level objectives, the success criteria, the assumptions and constraints, the high-level risks, the budget summary, and — crucially — the PM's level of authority. It is the document the PM points at whenever a stakeholder asks 'do you have the authority to decide that?'.",
+                "Initiating also resolves the predictive-vs-adaptive choice (or the hybrid mix). On predictive (waterfall) projects a single charter survives to closeout; on adaptive (agile) projects a 'lightweight' charter is paired with a continuously-refined product backlog and re-validated at every phase gate. Either way, the project should not move into Planning until the charter is signed by the sponsor — running unauthorised work is a classic exam trap.",
+              ],
+              keyPoints: [
+                "Charter contents: objective, success criteria, high-level scope, milestones, budget summary, assumptions, constraints, high-level risk, PM authority.",
+                "Charter is owned by the sponsor; the PM drafts but does not sign.",
+                "Stakeholder register starts in Initiating and is updated continuously.",
+                "Adaptive charter = lighter + revisited; predictive charter = heavier + stable.",
+              ],
+              pitfalls: [
+                "Don't begin planning without a signed charter — 'we'll write it later' is wrong on the exam.",
+                "Don't confuse the charter (high-level, sponsor-signed) with the project management plan (detailed, PM-owned).",
+              ],
             },
           },
           quiz: {
@@ -1174,6 +1216,21 @@ export const CURRICULUM: Curriculum = {
             deeper: {
               oneLiner:
                 "The exam keywords: 'progressive elaboration' (you can't plan in full detail up front), 'rolling-wave' (detail decays with time horizon), and 'baseline' (the approved version against which you measure progress).",
+              paragraphs: [
+                "The project management plan is a *plan of plans*: it integrates subsidiary plans (scope, schedule, cost, quality, resources, communications, risk, procurement, stakeholder engagement) plus the three baselines (scope, schedule, cost). Together with the configuration management plan and the change management plan, they form the formal document the PM uses to direct execution. Subsidiary plans are signed off as a single package — you don't approve scope but defer cost.",
+                "Three exam patterns about baselines: (1) baselines change only through approved change requests via integrated change control; (2) 'compare actual vs baseline' is the canonical measurement; (3) when a question asks 'what reference does the PM use', the answer is almost always the relevant baseline. Note: the performance measurement baseline (PMB) is the *combined* scope + schedule + cost baseline that EVM compares against.",
+              ],
+              keyPoints: [
+                "Subsidiary plans + baselines + change/config plans = the project management plan.",
+                "Progressive elaboration = increasing detail as the project moves forward.",
+                "Rolling-wave = detailed for the near-term, summary for the long-term.",
+                "Baselines move only via integrated change control, never silently.",
+                "Performance Measurement Baseline = scope + schedule + cost combined (used by EVM).",
+              ],
+              pitfalls: [
+                "Don't pick 'update the baseline informally' on the exam — baseline changes require an approved change request.",
+                "Don't confuse 'baseline' (approved, frozen until CR) with 'current plan' (working copy that changes daily).",
+              ],
             },
           },
           quiz: {
@@ -1327,6 +1384,20 @@ export const CURRICULUM: Curriculum = {
             deeper: {
               oneLiner:
                 "Earned Value Management (EVM) is the canonical numeric tool. CPI < 1 means over budget; SPI < 1 means behind schedule. EVM detail lives in Section 6.",
+              paragraphs: [
+                "Monitoring & Controlling is the focus area where the PMI question 'is the project on track?' lives. Predictive projects answer it with variance against the baselines (scope, schedule, cost) plus quality metrics; adaptive projects answer it with velocity, throughput, lead time, and a burn-up chart. Either way the PM measures, compares, decides, and acts — passive monitoring without action is a wrong-answer trap.",
+                "Integrated Change Control is the M&C process candidates most often misapply on the exam. The flow is: change request raised → impact analysed across the triple constraint → CCB (Change Control Board) approves/rejects → baselines and subsidiary plans updated → change communicated to stakeholders. Any answer that skips analysis, skips the board, or makes the change before approval is wrong.",
+              ],
+              keyPoints: [
+                "Five steps: measure, compare to baseline, decide, act, log.",
+                "Lagging metric (variance) tells you what happened; leading metric (forecast EAC) tells you what's coming.",
+                "Quality control = product conformance; quality assurance = process conformance.",
+                "All baseline changes go through Integrated Change Control — no exceptions on the exam.",
+              ],
+              pitfalls: [
+                "Don't pick 'fix it quietly and move on' — undocumented corrective actions fail the exam every time.",
+                "Don't confuse corrective action (bring back to plan) with preventive action (avoid future variance) with defect repair (fix a delivered defect).",
+              ],
             },
           },
           quiz: {
@@ -1637,6 +1708,22 @@ export const CURRICULUM: Curriculum = {
             deeper: {
               oneLiner:
                 "Common variants: Scrum (timeboxed sprints, defined roles), Kanban (continuous flow, WIP limits), XP (engineering practices), SAFe (scaled agile for enterprises).",
+              paragraphs: [
+                "Scrum specifics PMP candidates are expected to know: roles (Product Owner, Scrum Master, Developers), events (sprint planning, daily scrum, sprint review, sprint retrospective, the sprint itself), artefacts (product backlog, sprint backlog, increment), and the Definition of Done. The Product Owner owns priority; the Scrum Master is a servant-leader who removes impediments; the team self-organises around the sprint goal. The PM-as-Scrum-Master mapping is common but not universal — sometimes the PM is closer to the Product Owner role.",
+                "Kanban differs from Scrum in two ways: there is no fixed iteration length (work flows continuously), and there is an explicit WIP (work-in-progress) limit per column. The metric is cycle time (how long an item takes from start to done) and throughput. XP layers engineering practices on top (TDD, pair programming, continuous integration). SAFe coordinates many agile teams via a 'release train' construct — useful when the project crosses organisational boundaries.",
+                "Adaptive does *not* mean 'no documentation' or 'no planning'. It means short feedback loops, frequent inspection, and incremental delivery. On the exam, an option that conflates adaptive with chaos is almost always wrong.",
+              ],
+              keyPoints: [
+                "Scrum: timeboxed sprints (1–4 weeks), three roles, five events, three artefacts.",
+                "Kanban: continuous flow, WIP limits, optimise cycle time + throughput.",
+                "XP adds engineering practices: TDD, pair programming, CI, refactoring.",
+                "SAFe: scaled agile, release trains, multiple teams aligned on a cadence.",
+                "Adaptive ≠ ad-hoc — it is still disciplined planning + inspection.",
+              ],
+              pitfalls: [
+                "Don't confuse the Scrum Master (servant-leader) with the Product Owner (priority-setter).",
+                "Don't treat 'no documentation' as agile — agile keeps documentation 'just enough', not zero.",
+              ],
             },
           },
           quiz: {
@@ -1779,6 +1866,20 @@ export const CURRICULUM: Curriculum = {
             deeper: {
               oneLiner:
                 "PMBOK explicitly says: 'There may be situations that limit the degree to which project teams can tailor their approach (e.g., when organizational policies mandate the use of a specific approach or when a contract specifies a mandated approach).'",
+              paragraphs: [
+                "Tailoring inputs are listed in PMBOK 8e in four buckets: (1) project context — size, complexity, urgency, regulatory environment; (2) team context — skill level, distribution, autonomy; (3) culture — organisational appetite for ceremony, risk, formality; (4) constraints — contracts, policies, parent-portfolio rules. The PM should produce a deliberate tailoring rationale at the start of planning, not after the fact.",
+                "Common tailoring decisions: how often the project status is published (weekly vs daily), how much documentation each artefact carries (one-pager vs full template), whether change requests need a CCB vote or a single approver, and which performance domains get a dedicated subsidiary plan vs being folded into the integrated plan. None of those choices are 'optional' — they are *required* tailoring outputs.",
+              ],
+              keyPoints: [
+                "Tailoring is mandatory, not optional. PMBOK 8e requires a deliberate choice.",
+                "Inputs: project context + team + culture + constraints.",
+                "Document the tailoring rationale in the project management plan.",
+                "Re-tailor at phase gates when context changes — don't lock in a choice forever.",
+              ],
+              pitfalls: [
+                "Don't pick 'follow PMBOK exactly as written' — PMBOK itself rejects that on the exam.",
+                "Don't tailor without documenting the rationale — undocumented tailoring is indistinguishable from skipping a step.",
+              ],
             },
           },
           quiz: {
@@ -2005,6 +2106,21 @@ export const CURRICULUM: Curriculum = {
             deeper: {
               oneLiner:
                 "Adaptive (agile) scope uses a product backlog instead of a fixed WBS, but the underlying principle — 'this is what we're committed to' — is the same.",
+              paragraphs: [
+                "PMBOK distinguishes *product scope* (the features/functions of the deliverable) from *project scope* (the work required to produce them). The WBS decomposes project scope; the requirements traceability matrix decomposes product scope back to its source request. Both are referenced from the scope baseline (= scope statement + WBS + WBS dictionary).",
+                "Scope verification (formal stakeholder acceptance) is separate from scope control (preventing unauthorised changes) and from quality control (does it meet requirements). Many exam questions hinge on noticing which of those three the scenario actually describes. Scope creep is the slow accumulation of small unmanaged additions; gold-plating is the team adding features the customer didn't ask for. Both fail integrated change control.",
+              ],
+              keyPoints: [
+                "Product scope (what is built) ≠ project scope (work to build it).",
+                "Scope baseline = scope statement + WBS + WBS dictionary.",
+                "Requirements traceability matrix links each requirement back to its source.",
+                "Scope verification (acceptance) ≠ scope control (change defence) ≠ quality control (meets spec).",
+                "Scope creep + gold-plating both bypass integrated change control.",
+              ],
+              pitfalls: [
+                "Don't pick 'just add it' when the change is small — PMI treats every change as a change request.",
+                "Don't treat 'stakeholder is happy' as scope verification — verification is the formal sign-off step.",
+              ],
             },
           },
           quiz: {
@@ -2252,6 +2368,27 @@ export const CURRICULUM: Curriculum = {
             deeper: {
               oneLiner:
                 "On benefits-vs-cost questions: choose the project with the highest NPV unless the question specifies a different metric. If asked about payback alone, shorter wins.",
+              paragraphs: [
+                "Memorise the EVM formula family. Earned Value (EV) = % complete × Budget at Completion (BAC) for the work. Cost Variance (CV) = EV − AC; Schedule Variance (SV) = EV − PV. Cost Performance Index (CPI) = EV / AC; Schedule Performance Index (SPI) = EV / PV. Estimate at Completion (EAC) under typical conditions = BAC / CPI; if past variance is one-off, EAC = AC + (BAC − EV); if both cost and schedule drift, EAC = AC + (BAC − EV) / (CPI × SPI). Variance at Completion (VAC) = BAC − EAC. To-Complete Performance Index (TCPI) = (BAC − EV) / (BAC − AC).",
+                "Time-value-of-money basics: NPV discounts future cash flows to today (positive = create value); IRR is the discount rate where NPV = 0 (compare to hurdle rate); payback is the time to recover initial investment (shorter = better but ignores time value). Benefit-Cost Ratio (BCR) > 1 means benefits exceed costs in today's money. PMI's preferred selection metric is NPV — pick the project with the highest NPV when the prompt is silent.",
+              ],
+              keyPoints: [
+                "EVM: EV, PV, AC → CV, SV, CPI, SPI → EAC, VAC, TCPI.",
+                "CPI < 1 = over budget. SPI < 1 = behind schedule.",
+                "EAC formulas: typical = BAC/CPI; atypical = AC + (BAC−EV); both = AC + (BAC−EV)/(CPI·SPI).",
+                "NPV is PMI's preferred selection metric when nothing else is specified.",
+                "Sunk costs are never relevant to a go/no-go decision.",
+              ],
+              furtherReading: [
+                {
+                  href: "https://www.pmi.org/learning/library/earned-value-management-systems-analysis-8474",
+                  title: "PMI · Earned Value Management Systems Analysis",
+                },
+              ],
+              pitfalls: [
+                "Don't confuse EAC (forecast total cost) with ETC (estimate to complete the rest); ETC = EAC − AC.",
+                "Don't subtract sunk cost when deciding to continue — PMI ignores it.",
+              ],
             },
           },
           quiz: {
@@ -2424,6 +2561,21 @@ export const CURRICULUM: Curriculum = {
             deeper: {
               oneLiner:
                 "PMI's most-tested stakeholder pattern: a low-power but high-interest stakeholder is dissatisfied. Correct answer is usually 'keep informed' — not 'manage closely' (that's for high-power high-interest) and not 'ignore'.",
+              paragraphs: [
+                "Memorise the four quadrants of the power/interest grid: (1) high power + high interest = manage closely (active engagement); (2) high power + low interest = keep satisfied (don't bore them, but don't lose them); (3) low power + high interest = keep informed (they're advocates, give them what they need); (4) low power + low interest = monitor (don't over-invest). Alternative grids — power/influence, influence/impact, salience model (power/legitimacy/urgency) — show up rarely on the exam but the canonical 2×2 is power/interest.",
+                "The Stakeholder Engagement Assessment Matrix maps each stakeholder's *current* engagement level (unaware, resistant, neutral, supportive, leading) against their *desired* engagement level. The gap drives the engagement plan. PMBOK 8e treats stakeholder management as a continuous, principle-level concern — not a one-shot register at Initiating.",
+              ],
+              keyPoints: [
+                "Power/interest grid: manage closely / keep satisfied / keep informed / monitor.",
+                "Engagement assessment matrix: current vs desired engagement, plan to close the gap.",
+                "Salience model adds legitimacy + urgency for high-stakes contexts.",
+                "Stakeholder register is a living document — update on every change.",
+                "Engagement is principle-level in PMBOK 8e — runs through every focus area.",
+              ],
+              pitfalls: [
+                "Don't 'manage closely' a low-power high-interest stakeholder — that's over-investment.",
+                "Don't ignore a stakeholder just because they're low-power — they may be a future advocate or saboteur.",
+              ],
             },
           },
           quiz: {
@@ -2590,6 +2742,21 @@ export const CURRICULUM: Curriculum = {
             deeper: {
               oneLiner:
                 "When in doubt on the exam: collaborate/problem-solve is the right answer 70%+ of the time. PMI's wider stance: working through conflict openly strengthens the team.",
+              paragraphs: [
+                "The five Thomas-Kilmann conflict-resolution modes appear directly on the exam: collaborate (win/win, the default), compromise (lose/lose-lite, for time-pressured or trivial issues), smooth/accommodate (preserve harmony, useful for low-impact items), force/direct (one party wins, reserve for safety/emergency), and withdraw/avoid (defer, rarely correct). Tuckman's team-development model — forming, storming, norming, performing, adjourning — provides the temporal frame: conflict is expected in storming and is a signal of progress, not failure.",
+                "When the exam describes a virtual / distributed team, expect higher communication overhead and explicit attention to cultural and time-zone differences. PMBOK 8e adds a hybrid-team variant where some members are co-located and others remote — the failure mode is treating remote members as second-class, which the PM must actively prevent.",
+              ],
+              keyPoints: [
+                "Five conflict modes: collaborate > compromise > accommodate > force > avoid. Collaborate is the default on the exam.",
+                "Tuckman: forming, storming, norming, performing, adjourning.",
+                "Storming is normal — don't reorganise the team to escape it.",
+                "Virtual / hybrid teams need more frequent, more structured communication, not less.",
+                "Don't reward individuals when the work was team-delivered — it undermines team cohesion.",
+              ],
+              pitfalls: [
+                "Don't pick 'force' on the exam unless safety or compliance is at stake.",
+                "Don't avoid conflict by withdrawing — PMI considers that a competence gap, not a strategy.",
+              ],
             },
           },
           quiz: {
@@ -2915,6 +3082,22 @@ export const CURRICULUM: Curriculum = {
             deeper: {
               oneLiner:
                 "Common trap: 'realistic' answers (skip the plan, decide unilaterally, fix it yourself) feel right. They're wrong on PMP. Pick the answer that fits the idealised PM.",
+              paragraphs: [
+                "PMI's 'idealised PM' has seven recurring exam patterns worth memorising: (1) the PM follows the plan and uses integrated change control for any deviation; (2) the PM analyses before acting (don't pick 'do the thing immediately'); (3) the PM escalates over their threshold but solves at their level when possible; (4) the PM consults stakeholders before deciding *on* them; (5) the PM treats the team as competent (don't replace, coach); (6) the PM documents continuously, not just at closing; (7) the PM picks the ethical option even when it costs the project.",
+                "Many wrong-answer distractors echo real-world shortcuts: skip the meeting to save time, fix the issue yourself rather than coach the responsible person, agree to the customer's pet feature to keep them happy, work the team overtime to recover schedule. Each of these is testable. The PMI-correct response is almost always the slower, more process-following alternative — provided it doesn't violate ethics.",
+              ],
+              keyPoints: [
+                "Plan-following > shortcut.",
+                "Analyse > immediate action.",
+                "Solve at your level > escalate too early.",
+                "Coach the team > replace the team.",
+                "Document continuously > document at closing.",
+                "Ethics > business pressure.",
+              ],
+              pitfalls: [
+                "Don't pick 'work overtime to recover schedule' — PMI prefers replanning, fast-tracking, or crashing through formal change control.",
+                "Don't pick 'fix it myself' — the PM coaches the responsible team member.",
+              ],
             },
           },
           quiz: {
