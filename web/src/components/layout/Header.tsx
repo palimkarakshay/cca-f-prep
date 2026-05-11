@@ -2,11 +2,26 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  Home,
+  Layers,
+  Award,
+  TrendingUp,
+  Grid3X3,
+  type LucideIcon,
+} from "lucide-react";
 import { useSiteConfig } from "@/content/pack-hooks";
-import type { NavItem } from "@/lib/site-config";
+import type { NavIcon, NavItem } from "@/lib/site-config";
 import { BRAND } from "@/lib/brand";
 import { ThemeToggle } from "@/components/primitives/ThemeToggle";
 import { cn } from "@/lib/utils";
+
+const ICONS: Record<NavIcon, LucideIcon> = {
+  home: Home,
+  layers: Layers,
+  award: Award,
+  "trending-up": TrendingUp,
+};
 
 function isActive(item: NavItem, pathname: string | null): boolean {
   if (!pathname) return false;
@@ -48,6 +63,12 @@ export function Header() {
   // means "/<active pack>/mock"). Surfacing them un-prefixed leads
   // visitors to 404s like /mock or anchor-only pages. Hide the inline
   // nav until the user has picked a pack; the brand + ThemeToggle stay.
+  //
+  // Brand-line discipline: the second line always reads `BRAND.tagline`
+  // ("Learn anything."), never the pack name. Pack identity surfaces
+  // on the page H1 + the Switch-topic affordance, so the top chrome
+  // doesn't accidentally surface a single pack's identity (e.g. "CCA-F
+  // Prep") to a visitor who is exploring multiple topics.
   const visibleNav = packId
     ? siteConfig.nav.filter((n) => n.href !== "/")
     : [];
@@ -55,39 +76,40 @@ export function Header() {
 
   return (
     <header className="border-b border-(--border) mb-6">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 py-4">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 py-4">
         <Link
           href={homeHref}
+          aria-label={`${BRAND.name} home`}
           className="flex min-h-11 flex-col justify-center gap-0.5 no-underline"
         >
           <span className="font-[family-name:var(--font-display)] text-base font-semibold text-(--ink)">
             {BRAND.name}
           </span>
-          <span className="text-xs text-(--muted)">
-            {packId ? siteConfig.name : BRAND.tagline}
-          </span>
+          <span className="text-xs text-(--muted)">{BRAND.tagline}</span>
         </Link>
         <nav
           aria-label="Primary"
-          className="flex items-center gap-1 sm:gap-2 md:gap-4 text-sm"
+          className="flex items-center gap-1 sm:gap-2 md:gap-3 text-sm"
         >
           <ul className="hidden items-center gap-1 md:flex">
             {visibleNav.map((item) => {
               const href = prefixWithPack(item.href, packId);
               const active = isActive(item, pathname);
+              const Icon = item.icon ? ICONS[item.icon] : null;
               return (
                 <li key={item.href}>
                   <Link
                     href={href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "rounded-md px-3 py-2 text-sm no-underline transition-colors",
+                      "inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm no-underline transition-colors",
                       active
                         ? "text-(--ink) bg-(--panel-2)"
                         : "text-(--muted) hover:bg-(--panel-2) hover:text-(--ink)"
                     )}
                   >
-                    {item.label}
+                    {Icon ? <Icon aria-hidden className="h-4 w-4" /> : null}
+                    <span>{item.label}</span>
                   </Link>
                 </li>
               );
@@ -96,10 +118,16 @@ export function Header() {
           {packId ? (
             <Link
               href="/"
-              className="hidden md:inline-flex rounded-md border border-(--border) px-2 py-1 text-xs text-(--muted) no-underline transition-colors hover:border-(--accent) hover:text-(--ink)"
-              title="Switch topic"
+              aria-label="Switch topic — back to all topics"
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-md border border-(--border) bg-(--panel) px-3 py-2 text-xs font-medium text-(--ink) no-underline shadow-sm",
+                "transition-colors hover:border-(--accent) hover:text-(--accent-2)",
+                "min-h-9"
+              )}
             >
-              Switch topic
+              <Grid3X3 aria-hidden className="h-4 w-4" />
+              <span className="hidden sm:inline">Switch topic</span>
+              <span className="sm:hidden">Topics</span>
             </Link>
           ) : null}
           <ThemeToggle />
