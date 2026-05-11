@@ -1060,6 +1060,847 @@ export const CURRICULUM: Curriculum = {
         ],
       },
     },
+    /* ============================================================
+       Section 3 — The Five Focus Areas (formerly Process Groups)
+       ============================================================ */
+    {
+      id: "s3-focus-areas",
+      n: 3,
+      title: "The five focus areas",
+      blurb:
+        "PMBOK 8e renames the historic Process Groups as Focus Areas: Initiating, Planning, Executing, Monitoring & Controlling, Closing. They overlap, iterate, and are independent of approach.",
+      concepts: [
+        {
+          id: "c3-1-initiating",
+          code: "FA3.1",
+          title: "Initiating: charter the project, identify stakeholders",
+          bloom: "U",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "The Initiating focus area covers the work needed to authorise a new project or phase. Its purpose is to align stakeholders' expectations on the project's purpose, define the initial scope and resources, identify key stakeholders, and assign project-management roles. Two artefacts dominate the output: the project charter and the stakeholder register.",
+              "The project charter is the document — signed by the sponsor — that formally authorises the project and gives the PM authority to apply organisational resources. It typically captures the high-level scope, the business case link, the key stakeholders, the high-level risks, the success criteria, and the assumptions. Without a charter, the project has no legitimate claim on the org's people or money.",
+              "The stakeholder register identifies who is involved, what they care about, and how to engage them. It's a living document — stakeholders change as the project evolves — but the *initial* register must exist before Planning begins, because every later plan (communications, risk, scope) depends on knowing who to plan for.",
+            ],
+            keyPoints: [
+              "Initiating produces the charter and the initial stakeholder register.",
+              "Sponsor signs the charter; PM uses it as authority.",
+              "Initiating happens at project start AND at the start of each new phase.",
+              "Without a charter, the PM has no claim on org resources.",
+            ],
+            simplified: {
+              oneLiner:
+                "Initiating is the 'we're really doing this' moment — sponsor signs the charter, key stakeholders are named.",
+            },
+            deeper: {
+              oneLiner:
+                "Adaptive projects still need a charter — it just covers less detail (vision + initial backlog rather than full scope) and is revisited more often.",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "Which artefact formally authorises a project and grants the PM authority to apply organisational resources?",
+                options: {
+                  A: "Project management plan.",
+                  B: "Project charter.",
+                  C: "Statement of work.",
+                  D: "Work breakdown structure.",
+                },
+                correct: "B",
+                explanations: {
+                  A: "The PM plan covers HOW the project will be managed — it follows the charter.",
+                  B: "Right — the charter authorises the project and the PM. Signed by the sponsor.",
+                  C: "The SOW describes what's to be delivered, usually input to a contract or charter, not an authorising artefact.",
+                  D: "The WBS decomposes scope; it comes after authorisation.",
+                },
+                principle:
+                  "Charter authorises. PM plan plans. SOW describes the work. WBS decomposes it.",
+              },
+              {
+                n: 2,
+                question:
+                  "When does Initiating happen in a multi-phase project?",
+                options: {
+                  A: "Only at project start.",
+                  B: "At project start and at the start of each new phase.",
+                  C: "Only when scope expands.",
+                  D: "Continuously throughout the project.",
+                },
+                correct: "B",
+                principle:
+                  "Initiating recurs at each phase boundary, not just at project start.",
+              },
+              {
+                kind: "true-false",
+                n: 3,
+                question:
+                  "Adaptive (agile) projects do not need a project charter.",
+                correct: false,
+                explanationFalse:
+                  "Right — adaptive projects still need a charter (often called the 'project vision' or 'product charter'). It's leaner but it still authorises the work.",
+                explanationTrue:
+                  "Actually no — adaptive projects still need authorisation; the charter is leaner but it exists.",
+                principle:
+                  "All projects need authorisation. Adaptive charters are leaner, not absent.",
+              },
+            ],
+          },
+        },
+        {
+          id: "c3-2-planning",
+          code: "FA3.2",
+          title: "Planning: scope, schedule, cost, risk, response",
+          bloom: "U",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "The Planning focus area defines the course of action: it establishes scope, refines objectives, and develops the plan needed to deliver. Outputs include the project management plan (an integrated document or set of documents) plus the project's baselines: scope baseline, schedule baseline, cost baseline.",
+              "PMBOK 8e is explicit that planning is iterative. The phrase to memorise is *progressive elaboration*: the plan starts at the level of detail you can support today and is refined as more information arrives. Adaptive projects do less up-front planning and more continuous planning ('rolling-wave'); predictive projects front-load it. Either way, replanning is normal and expected.",
+              "The PM plan is more than schedule + cost. It includes subsidiary plans for scope, schedule, cost, quality, resources, communications, risk, procurement, stakeholder engagement, and change management — plus the configuration management plan that says how versions and baselines are governed. Tailoring (Section 4) decides which of these subsidiary plans actually get authored.",
+            ],
+            keyPoints: [
+              "Outputs: project management plan + baselines (scope/schedule/cost).",
+              "Progressive elaboration: refine the plan as more info arrives.",
+              "Rolling-wave: detailed near-term plans, high-level far-term plans.",
+              "Replanning is normal, not a failure signal.",
+            ],
+            simplified: {
+              oneLiner:
+                "Planning sets the route, the milestones, and the rules — and you replan whenever the map changes.",
+            },
+            deeper: {
+              oneLiner:
+                "The exam keywords: 'progressive elaboration' (you can't plan in full detail up front), 'rolling-wave' (detail decays with time horizon), and 'baseline' (the approved version against which you measure progress).",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "The customer adds a major new feature mid-project. The PM updates the plan, baselines, and budget through formal change control. PMBOK calls this practice:",
+                options: {
+                  A: "Scope creep.",
+                  B: "Progressive elaboration.",
+                  C: "Replanning following an approved change.",
+                  D: "Failure to plan.",
+                },
+                correct: "C",
+                explanations: {
+                  A: "Scope creep is *uncontrolled* scope growth. This was controlled.",
+                  B: "Progressive elaboration is *internal* refinement, not customer-driven scope change.",
+                  C: "Right — formally approved change triggers replanning. Normal, expected, and PMI-correct.",
+                  D: "Replanning is not a failure — failing to replan is.",
+                },
+                principle:
+                  "Approved changes → replan + rebaseline. This is healthy planning, not failure.",
+              },
+              {
+                n: 2,
+                question:
+                  "Which is the BEST description of rolling-wave planning?",
+                options: {
+                  A: "Planning the whole project once at the start.",
+                  B: "Detailed near-term planning, high-level planning for future phases.",
+                  C: "Adaptive teams refusing to plan beyond the next sprint.",
+                  D: "Re-planning everything every iteration.",
+                },
+                correct: "B",
+                principle:
+                  "Rolling-wave: plan in detail where you can; keep distant work at higher level until information arrives.",
+              },
+              {
+                kind: "fill-in",
+                n: 3,
+                question:
+                  "What's the PMBOK term for the iterative, ongoing refinement of the project management plan as more information becomes known?",
+                acceptedAnswers: [
+                  "progressive elaboration",
+                  "progressive-elaboration",
+                ],
+                placeholder: "two words",
+                principle:
+                  "Progressive elaboration: planning detail grows with information.",
+              },
+            ],
+          },
+        },
+        {
+          id: "c3-3-executing",
+          code: "FA3.3",
+          title: "Executing: coordinate work, engage stakeholders",
+          bloom: "U",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Executing performs the work defined in the plan: coordinating resources, managing stakeholder engagement, and producing deliverables. It is also where the choice of approach (predictive, adaptive, or hybrid) becomes most visible — predictive execution is plan-driven and milestone-paced; adaptive execution iterates around feedback loops and demos.",
+              "The PM's job in execution is largely facilitation and integration, not building. The PM enables the team to do the work: removes blockers, integrates outputs, handles change requests, and keeps stakeholders aligned. In an adaptive context this looks like servant leadership; in a predictive context it looks like classical project coordination — but the underlying activity is the same.",
+              "Change requests are the most-tested artefact in Execution scenarios. PMI's pattern is rigid: any change goes through the integrated change control process. The PM evaluates impact (Holistic View!), the appropriate authority (Change Control Board, sponsor, or PM depending on threshold) decides, and the plan + baselines are updated only after approval.",
+            ],
+            keyPoints: [
+              "Execution = coordinate + engage + produce. PM facilitates, doesn't build.",
+              "Change requests must go through integrated change control. No exceptions.",
+              "Adaptive vs predictive execution differs in cadence and visibility, not in goal.",
+            ],
+            simplified: {
+              oneLiner:
+                "Execution is when the team builds. The PM clears the path and runs change requests through the proper channel.",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "A stakeholder approaches the team lead directly and asks them to add a small feature 'just this once' — bypassing the PM. The PMI-correct response is to:",
+                options: {
+                  A: "Build it — small enough to absorb.",
+                  B: "Refuse and ignore the stakeholder.",
+                  C: "Route the request through the integrated change control process.",
+                  D: "Defer all change requests to the next phase.",
+                },
+                correct: "C",
+                explanations: {
+                  A: "Bypasses change control. Sets a precedent. Erodes baselines.",
+                  B: "Stakeholder engagement (and Build an Empowered Culture) says don't refuse outright. Route it.",
+                  C: "Right — even small requests go through formal change control. Impact analysis, decision, update.",
+                  D: "Indiscriminate deferral isn't the answer either.",
+                },
+                principle:
+                  "All changes — small or large — go through integrated change control. No 'just this once'.",
+              },
+              {
+                kind: "true-false",
+                n: 2,
+                question:
+                  "The PM is mainly accountable for personally producing project deliverables during the Executing focus area.",
+                correct: false,
+                explanationFalse:
+                  "Right — the team produces deliverables. The PM coordinates, integrates, engages stakeholders, and handles changes.",
+                explanationTrue:
+                  "Actually no — the team produces deliverables in Execution. The PM is accountable for outcomes but not for hands-on production.",
+                principle:
+                  "Team produces. PM coordinates and integrates.",
+              },
+              {
+                n: 3,
+                question:
+                  "In a hybrid project, the construction part executes predictively (Gantt + milestones) and the software part executes adaptively (2-week sprints). PMBOK calls this:",
+                options: {
+                  A: "An anti-pattern — pick one approach.",
+                  B: "A correctly tailored hybrid execution.",
+                  C: "Operations — too varied to be a project.",
+                  D: "Out of scope for PMBOK 8e.",
+                },
+                correct: "B",
+                principle:
+                  "Hybrid is a valid tailored choice when different parts of a project suit different approaches.",
+              },
+            ],
+          },
+        },
+        {
+          id: "c3-4-monitor-control",
+          code: "FA3.4",
+          title: "Monitoring & Controlling: variance, change, course-correct",
+          bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Monitoring & Controlling tracks, measures, reviews, and regulates the progress and performance of the project. It runs *in parallel* with the other focus areas — it isn't a separate phase. The key benefit is to detect variances early enough to take corrective action before they become baseline-breaking failures.",
+              "PMBOK distinguishes monitoring (observe, measure, report) from controlling (analyse variance, decide a response, implement the change). Variance analysis compares actual to plan; trend analysis projects whether the variance is likely to widen, narrow, or stay stable; root-cause analysis explains why the variance occurred.",
+              "The most common controlling tool the exam tests is integrated change control. Whatever the variance, the response — corrective action, preventive action, defect repair, or scope change — flows through integrated change control to keep baselines consistent. The exception is *workarounds*: small unanticipated responses to risks that have already occurred and that don't change the plan.",
+            ],
+            keyPoints: [
+              "M&C runs in parallel with all other focus areas — not after.",
+              "Monitoring observes; controlling responds.",
+              "Tools: variance analysis, trend analysis, root-cause analysis.",
+              "Integrated change control keeps baselines synchronised.",
+            ],
+            simplified: {
+              oneLiner:
+                "Watch the numbers, find the variance, do something about it, log it.",
+            },
+            deeper: {
+              oneLiner:
+                "Earned Value Management (EVM) is the canonical numeric tool. CPI < 1 means over budget; SPI < 1 means behind schedule. EVM detail lives in Section 6.",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "A weekly status review shows actual cost is 18% higher than planned. The PMI-correct first response is to:",
+                options: {
+                  A: "Crash the schedule to catch up.",
+                  B: "Run variance and root-cause analysis to understand WHY before deciding the response.",
+                  C: "Reduce scope.",
+                  D: "Inform the customer of the overrun.",
+                },
+                correct: "B",
+                explanations: {
+                  A: "Crashing addresses schedule, not cost variance. Wrong tool, and wrong order.",
+                  B: "Right — understand the variance and its cause before choosing a response. Adopt a Holistic View.",
+                  C: "Could be the right response but not the first action.",
+                  D: "Communication matters but understanding first.",
+                },
+                principle:
+                  "Variance → root-cause → response. Always analyse before acting.",
+              },
+              {
+                kind: "true-false",
+                n: 2,
+                question:
+                  "Monitoring & Controlling is a separate, sequential phase that happens after Executing.",
+                correct: false,
+                explanationFalse:
+                  "Right — M&C runs *in parallel* with Initiating, Planning, Executing, and Closing. Not sequential.",
+                explanationTrue:
+                  "Actually no — M&C is in parallel with all other focus areas.",
+                principle:
+                  "M&C is parallel, not sequential. It runs throughout the project.",
+              },
+              {
+                n: 3,
+                question:
+                  "A team uses an unplanned workaround to handle a risk that has just occurred. PMBOK considers this:",
+                options: {
+                  A: "A violation of integrated change control.",
+                  B: "An acceptable response when the risk is realised and the response doesn't alter the plan.",
+                  C: "A reason to terminate the project.",
+                  D: "Always a change request that needs CCB approval.",
+                },
+                correct: "B",
+                principle:
+                  "Workarounds are unplanned responses to realised risks; they don't have to go through change control if the plan isn't affected.",
+              },
+            ],
+          },
+        },
+        {
+          id: "c3-5-closing",
+          code: "FA3.5",
+          title: "Closing: hand over, document, release",
+          bloom: "U",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Closing formally completes a phase, project, or contract — including (when appropriate) terminating a project before completion. The work includes verifying that all deliverables are accepted, transitioning to operations, releasing resources, archiving documents, capturing lessons learned, and confirming that target benefits are aligned for realisation.",
+              "PMBOK 8e calls out the early-closure case explicitly. If terminating becomes the best way to maximise return (or minimise loss), Closing handles that too. Stopping is not failure if continuing would destroy more value.",
+              "Lessons learned is the most-tested artefact in Closing. It's a knowledge transfer to the organisation — what worked, what didn't, what would we change next time. It feeds the organisational process assets so future projects benefit. Closing without lessons learned is closing on autopilot, and PMI penalises that on the exam.",
+            ],
+            keyPoints: [
+              "Closing applies to phase end, project end, contract end, and early termination.",
+              "Outputs: accepted deliverables, lessons learned, archived docs, released resources.",
+              "Lessons learned fund future projects via OPAs.",
+              "Termination is a valid Closing scenario when value is gone.",
+            ],
+            simplified: {
+              oneLiner:
+                "Hand off the work, write down what you learned, free up the people, archive the rest.",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "Which output of Closing most directly funds *future* projects in the organisation?",
+                options: {
+                  A: "Final cost report.",
+                  B: "Lessons learned (added to organisational process assets).",
+                  C: "Released team resources.",
+                  D: "Customer acceptance signature.",
+                },
+                correct: "B",
+                principle:
+                  "Lessons learned → OPAs → reusable across future projects.",
+              },
+              {
+                kind: "true-false",
+                n: 2,
+                question:
+                  "Closing is only for projects that finish all their planned deliverables.",
+                correct: false,
+                explanationFalse:
+                  "Right — Closing also handles early termination, phase closure, and contract closure.",
+                explanationTrue:
+                  "Actually no — early-terminated projects still go through Closing.",
+                principle:
+                  "Closing handles completion AND early termination.",
+              },
+              {
+                n: 3,
+                question:
+                  "Which is NOT a Closing activity?",
+                options: {
+                  A: "Archive project records.",
+                  B: "Release team resources.",
+                  C: "Develop the project charter.",
+                  D: "Capture lessons learned.",
+                },
+                correct: "C",
+                principle:
+                  "Charter is an Initiating artefact, not Closing.",
+              },
+            ],
+          },
+        },
+      ],
+      sectionTest: {
+        passPct: 0.7,
+        questions: [
+          {
+            n: 1,
+            question:
+              "Order the five focus areas as PMBOK 8e lists them.",
+            options: {
+              A: "Initiating, Planning, Executing, Monitoring & Controlling, Closing.",
+              B: "Planning, Initiating, Executing, Closing, Monitoring.",
+              C: "Initiating, Executing, Planning, Closing, Monitoring.",
+              D: "Initiating, Planning, Monitoring & Controlling, Executing, Closing.",
+            },
+            correct: "A",
+            principle:
+              "Canonical order: Initiating, Planning, Executing, Monitoring & Controlling, Closing.",
+          },
+          {
+            n: 2,
+            question:
+              "Which focus area runs in PARALLEL with all the others?",
+            options: {
+              A: "Initiating.",
+              B: "Planning.",
+              C: "Monitoring & Controlling.",
+              D: "Closing.",
+            },
+            correct: "C",
+            principle:
+              "M&C is parallel with all the others — it isn't a sequential phase.",
+          },
+          {
+            n: 3,
+            question:
+              "An adaptive project does very brief up-front planning, then continuously re-plans every sprint. PMBOK calls this:",
+            options: {
+              A: "Failure to plan.",
+              B: "Rolling-wave planning.",
+              C: "Big design up front (BDUF).",
+              D: "Charter inflation.",
+            },
+            correct: "B",
+            principle:
+              "Rolling-wave: detailed plan near-term, high-level plan further out. Re-planned as info arrives.",
+          },
+          {
+            n: 4,
+            question:
+              "A stakeholder asks the developer to slip in a small extra feature, bypassing the PM. The PMI-correct answer is:",
+            options: {
+              A: "Build it quietly — it's small.",
+              B: "Refuse and inform the stakeholder it cannot be done.",
+              C: "Route the request through the integrated change control process.",
+              D: "Defer to the next project.",
+            },
+            correct: "C",
+            principle:
+              "All changes go through integrated change control, regardless of size.",
+          },
+          {
+            n: 5,
+            question:
+              "A project is terminated early because the business case is no longer valid. What Closing activity should still happen?",
+            options: {
+              A: "None — terminated projects don't close.",
+              B: "Only the final cost report.",
+              C: "Full closing including lessons learned and resource release.",
+              D: "Only release resources; skip lessons learned.",
+            },
+            correct: "C",
+            principle:
+              "Early-terminated projects still go through Closing — including lessons learned.",
+          },
+        ],
+      },
+    },
+    /* ============================================================
+       Section 4 — Development Approaches & Tailoring
+       ============================================================ */
+    {
+      id: "s4-approaches-tailoring",
+      n: 4,
+      title: "Approaches & tailoring",
+      blurb:
+        "Predictive, adaptive, hybrid: choose by characteristic, then tailor lifecycle / processes / engagement to the actual project.",
+      concepts: [
+        {
+          id: "c4-1-predictive",
+          code: "AT4.1",
+          title: "Predictive (plan-driven) approach",
+          bloom: "U",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Predictive (sometimes called 'waterfall' or 'plan-driven') is the approach where scope, schedule, and cost are determined in detail early in the life cycle and changes are formally controlled. Predictive favours up-front planning, clear baselines, and milestone-based progress measurement. It works best when requirements are stable, the team has solved similar problems before, and stakeholders prefer predictability over flexibility.",
+              "PMBOK 8e identifies when predictive is the right call: safety- or regulation-critical work (where signed-off requirements are non-negotiable), large up-front capital commitments (capital construction, factory build-outs), and contexts where the customer needs fixed-price/fixed-scope contracts. Predictive is not 'old-fashioned' — it's the right approach when the conditions match.",
+              "Watch out for the exam trap of treating predictive as inferior to adaptive. PMBOK is explicit that neither is universally better. Each is correct in its conditions; choosing wrong is the failure, not choosing predictive itself.",
+            ],
+            keyPoints: [
+              "Plan-driven, scope/schedule/cost defined early.",
+              "Right when requirements stable, deliverables physical, change costly.",
+              "Heavy on baselines and formal change control.",
+              "Not inferior to adaptive — context-dependent.",
+            ],
+            simplified: {
+              oneLiner:
+                "Predictive = 'we know what we're building, so let's plan it carefully and execute the plan'.",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "Which is the BEST candidate for a predominantly predictive approach?",
+                options: {
+                  A: "Building a new nuclear-reactor cooling system with strict regulatory sign-off.",
+                  B: "Designing a new mobile-app onboarding flow with unclear user behaviour.",
+                  C: "Discovering whether a research drug works.",
+                  D: "Refreshing a marketing campaign in response to real-time feedback.",
+                },
+                correct: "A",
+                explanations: {
+                  A: "Right — high-regulation + safety-critical + heavy up-front design + costly late changes → predictive.",
+                  B: "User-behaviour discovery is an adaptive sweet spot.",
+                  C: "Drug discovery is highly iterative with adaptive elements within each phase.",
+                  D: "Real-time feedback → adaptive cadence.",
+                },
+                principle:
+                  "Predictive fits stable requirements + costly change + safety / regulation.",
+              },
+              {
+                kind: "true-false",
+                n: 2,
+                question:
+                  "Predictive approaches are always slower than adaptive approaches.",
+                correct: false,
+                explanationFalse:
+                  "Right — speed depends on context, not approach. A well-tailored predictive project can outpace a poorly-managed adaptive one.",
+                explanationTrue:
+                  "Actually no — speed is a function of context, scope, and team, not approach.",
+                principle:
+                  "Approach is about fit, not absolute speed.",
+              },
+              {
+                n: 3,
+                question:
+                  "In a predictive project, the primary lever for handling a customer-requested mid-project scope change is:",
+                options: {
+                  A: "Build it next sprint.",
+                  B: "Integrated change control with impact analysis and rebaselining.",
+                  C: "Refuse it — scope is frozen.",
+                  D: "Add it silently to avoid the paperwork.",
+                },
+                correct: "B",
+                principle:
+                  "Predictive change handling = formal change control + impact analysis + rebaselining.",
+              },
+            ],
+          },
+        },
+        {
+          id: "c4-2-adaptive",
+          code: "AT4.2",
+          title: "Adaptive (agile) approach",
+          bloom: "U",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Adaptive approaches (Scrum, Kanban, XP, SAFe — the family commonly called 'agile') iterate scope around fixed time-and-cost boxes. Plans evolve constantly; the product backlog is reprioritised every iteration; customer/users provide regular feedback that shapes what's built next. The trade is predictability of *scope* for predictability of *cadence* and *learning*.",
+              "PMBOK 8e situates adaptive as the right fit when requirements are uncertain or evolving, when frequent feedback delivers genuine value, when fixed end-dates dominate over fixed-scope contracts, and when teams are small enough to self-organise (PMBOK references the classic 'three-to-nine' team size from adaptive frameworks). Adaptive depends on Build an Empowered Culture.",
+              "Common adaptive artefacts: product backlog (prioritised list of work), increment (the produced output of one iteration), definition of done (the criterion for accepting an increment), retrospective (structured reflection at iteration end). The PM role transforms: more facilitation and servant-leadership, less directive control.",
+            ],
+            keyPoints: [
+              "Fixed time + cost; variable scope.",
+              "Iteration → demo → feedback → adjust.",
+              "Right when requirements evolve, feedback adds value, teams small.",
+              "Depends on team empowerment + customer engagement.",
+            ],
+            simplified: {
+              oneLiner:
+                "Adaptive = 'we don't fully know what to build yet, so let's deliver small increments and learn'.",
+            },
+            deeper: {
+              oneLiner:
+                "Common variants: Scrum (timeboxed sprints, defined roles), Kanban (continuous flow, WIP limits), XP (engineering practices), SAFe (scaled agile for enterprises).",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "Which project condition most strongly suggests an adaptive approach?",
+                options: {
+                  A: "Strict regulatory documentation requirements.",
+                  B: "Fixed-price contract with locked scope.",
+                  C: "Evolving requirements and high value from frequent feedback.",
+                  D: "Two-decade physical infrastructure rollout.",
+                },
+                correct: "C",
+                principle:
+                  "Adaptive is suited to evolving requirements + feedback-driven value.",
+              },
+              {
+                kind: "true-false",
+                n: 2,
+                question:
+                  "An adaptive project never produces a baseline.",
+                correct: false,
+                explanationFalse:
+                  "Right — adaptive projects still produce baselines (release-level or roadmap-level). The granularity is coarser, but they exist.",
+                explanationTrue:
+                  "Actually no — adaptive projects still baseline (releases, roadmaps), just at coarser granularity.",
+                principle:
+                  "Adaptive ≠ no baselines. Granularity changes, not existence.",
+              },
+              {
+                n: 3,
+                question:
+                  "Which is NOT one of PMBOK's standard adaptive artefacts?",
+                options: {
+                  A: "Product backlog.",
+                  B: "Increment.",
+                  C: "Definition of done.",
+                  D: "Earned value baseline.",
+                },
+                correct: "D",
+                principle:
+                  "EV baselining is a predictive-leaning practice; adaptive uses backlog, increment, DoD, retrospective.",
+              },
+            ],
+          },
+        },
+        {
+          id: "c4-3-hybrid",
+          code: "AT4.3",
+          title: "Hybrid approach",
+          bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Hybrid combines predictive and adaptive elements within a single project. PMBOK gives the example of a data-centre rollout where the building construction is predictive (physical, milestone-paced) and the computing capability inside is adaptive (iterated with feedback). Hybrid is the most common real-world choice — pure predictive and pure adaptive are surprisingly rare in large organisations.",
+              "Hybrid is not a compromise; it's a tailored choice. The art is identifying which parts of the project benefit from which approach and aligning the team's working practices accordingly. The hybrid PM must reconcile two cadences: predictive milestones with adaptive increments, and the reporting that goes with both.",
+              "Watch for hybrid scenarios on the exam where one part of the project is unambiguously predictive (regulated, fixed-scope) and another is unambiguously adaptive (exploratory, feedback-driven). The PMI-correct answer is usually to *not* force one approach across the whole project.",
+            ],
+            keyPoints: [
+              "Hybrid = different approaches for different parts of the project.",
+              "Most common real-world choice in large organisations.",
+              "Reconcile two cadences (milestones + iterations) in reporting.",
+              "Common on enterprise IT, infrastructure-plus-software programs.",
+            ],
+            simplified: {
+              oneLiner:
+                "Hybrid = some parts predictive, some parts adaptive — match the approach to the work.",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "A regulated medical device company is building (a) the physical device and (b) the companion app. (a) is heavily regulated, (b) iterates with users. The PMI-correct approach is:",
+                options: {
+                  A: "Pure predictive across both.",
+                  B: "Pure adaptive across both.",
+                  C: "Hybrid: predictive for (a), adaptive for (b).",
+                  D: "Stop the project — too varied.",
+                },
+                correct: "C",
+                principle:
+                  "Hybrid matches approach to the work characteristics in each part.",
+              },
+              {
+                kind: "true-false",
+                n: 2,
+                question:
+                  "Hybrid approaches are PMBOK's least-recommended choice.",
+                correct: false,
+                explanationFalse:
+                  "Right — PMBOK 8e treats hybrid as a fully valid, often-preferred choice. There is no 'less-recommended'.",
+                explanationTrue:
+                  "Actually no — PMBOK 8e treats hybrid as an equal, valid choice — often the most realistic.",
+                principle:
+                  "Hybrid is a valid first-class choice, not a fallback.",
+              },
+              {
+                n: 3,
+                question:
+                  "In a hybrid project the construction team experiences Gantt milestones; the software team experiences sprint demos. How does PMBOK describe this from the project level?",
+                options: {
+                  A: "Inconsistent — must be unified.",
+                  B: "Each team correctly experiences the approach that fits their work; the project as a whole is hybrid.",
+                  C: "Adaptive — the most flexible label wins.",
+                  D: "Predictive — the slower discipline dominates.",
+                },
+                correct: "B",
+                principle:
+                  "Sub-teams may experience different approaches even when the project label is hybrid.",
+              },
+            ],
+          },
+        },
+        {
+          id: "c4-4-tailoring",
+          code: "AT4.4",
+          title: "Tailoring: what, why, how",
+          bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Tailoring is the deliberate choice of which life cycle, processes, and engagement practices to use on a given project. PMBOK 8e gives tailoring its own section (Section 3 of the Guide) and frames it as essential, not optional. 'No single approach can be applied to all projects all of the time.'",
+              "PMBOK names three things you tailor: the life cycle and development approach (predictive / adaptive / hybrid), the processes themselves (add / modify / remove / blend / align), and the engagement (people involved, level of empowerment, integration of contributors). The drivers are project size, criticality, complexity, industry, organisational culture, stakeholder count, and PM maturity.",
+              "The exam tests tailoring by giving a project context and asking what's appropriate. Too much process = costly and wasteful; too little = ineffective. PMI's answer almost always favours the middle: enough rigour to manage risk without slowing the team. Mandatory inputs (regulation, contract, org policy) are non-negotiable; everything else is negotiable.",
+            ],
+            keyPoints: [
+              "Tailor: (1) life cycle / approach, (2) processes, (3) engagement.",
+              "Drivers: size, complexity, criticality, industry, culture, maturity.",
+              "Too few processes = ineffective. Too many = wasteful.",
+              "Mandatory inputs (regulation, contract) cannot be tailored out.",
+            ],
+            simplified: {
+              oneLiner:
+                "Use enough process to manage the risk, no more. Adjust to fit the project.",
+            },
+            deeper: {
+              oneLiner:
+                "PMBOK explicitly says: 'There may be situations that limit the degree to which project teams can tailor their approach (e.g., when organizational policies mandate the use of a specific approach or when a contract specifies a mandated approach).'",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "A 4-person internal team is running a 6-week marketing-page refresh. The PM is using the same heavyweight 80-page PM plan template the company uses for nuclear-reactor projects. PMBOK's likely critique is:",
+                options: {
+                  A: "Insufficient documentation — add more.",
+                  B: "Over-process — tailor the plan down to fit the project's actual risk.",
+                  C: "Wrong template — use the adaptive-only template.",
+                  D: "No critique — consistency is good.",
+                },
+                correct: "B",
+                principle:
+                  "Tailor processes to project risk and size. Too much process is wasteful.",
+              },
+              {
+                kind: "fill-in",
+                n: 2,
+                question:
+                  "PMBOK names three things you tailor. Life cycle / approach is one; engagement is another. What's the third? (One word.)",
+                acceptedAnswers: ["processes", "process"],
+                placeholder: "one word",
+                principle:
+                  "Tailor: life cycle, processes, engagement.",
+              },
+              {
+                n: 3,
+                question:
+                  "Which factor CANNOT be tailored away?",
+                options: {
+                  A: "Internal status-report cadence.",
+                  B: "The team's daily stand-up format.",
+                  C: "A mandatory regulatory documentation requirement.",
+                  D: "The team agreement on working hours.",
+                },
+                correct: "C",
+                principle:
+                  "Mandatory inputs (regulation, contract, org policy) cannot be tailored away.",
+              },
+            ],
+          },
+        },
+      ],
+      sectionTest: {
+        passPct: 0.7,
+        questions: [
+          {
+            n: 1,
+            question:
+              "Which approach fits 'evolving requirements + high value from frequent feedback'?",
+            options: {
+              A: "Predictive.",
+              B: "Adaptive.",
+              C: "Operations.",
+              D: "Charter-only.",
+            },
+            correct: "B",
+            principle:
+              "Adaptive fits evolving requirements and feedback-driven value.",
+          },
+          {
+            n: 2,
+            question:
+              "A datacentre build (physical) plus the cloud platform inside it (software). Best PMI-aligned approach?",
+            options: {
+              A: "Pure predictive.",
+              B: "Pure adaptive.",
+              C: "Hybrid.",
+              D: "Operations.",
+            },
+            correct: "C",
+            principle:
+              "Different parts → different approaches = hybrid.",
+          },
+          {
+            n: 3,
+            question:
+              "Tailoring is best described as:",
+            options: {
+              A: "Removing all process to maximise speed.",
+              B: "Adding process to maximise rigour.",
+              C: "Choosing the right amount of life cycle, process, and engagement for THIS project.",
+              D: "Doing whatever the customer wants.",
+            },
+            correct: "C",
+            principle:
+              "Tailoring = right amount of process for THIS project's risk and size.",
+          },
+          {
+            n: 4,
+            question:
+              "Which is the BEST reason to choose predictive over adaptive for a project?",
+            options: {
+              A: "It's older and therefore safer.",
+              B: "Requirements are stable, scope is well-defined, late changes are very costly.",
+              C: "The PM prefers Gantt charts.",
+              D: "The organisation has more predictive templates.",
+            },
+            correct: "B",
+            principle:
+              "Choose by fit: stable + defined + costly-late-change → predictive.",
+          },
+          {
+            n: 5,
+            question:
+              "Delivery cadence options PMBOK lists include single, multiple, periodic, and ___ deliveries.",
+            options: {
+              A: "annual.",
+              B: "instantaneous.",
+              C: "continuous.",
+              D: "frozen.",
+            },
+            correct: "C",
+            principle:
+              "PMBOK delivery cadences: single, multiple, periodic, continuous.",
+          },
+        ],
+      },
+    },
   ],
   /* ============================================================
      Mock exams — full list authored after the section content.
