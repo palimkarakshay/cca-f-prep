@@ -13,6 +13,11 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
       "@active-pack": path.resolve(__dirname, `./content-packs/${PACK_ID}`),
+      // `server-only` is a Next.js build-time guard that throws when
+      // imported into a client bundle. Vitest treats files as client
+      // by default, so resolve the import to an empty shim — the
+      // boundary it enforces is irrelevant in unit tests.
+      "server-only": path.resolve(__dirname, "./test/server-only-shim.ts"),
     },
   },
 });
