@@ -1,16 +1,20 @@
 name: CI
 
+# Re-enabled 2026-05-11 as part of the commercialization-readiness
+# pass. Fast lane (lint + types + unit) runs on every PR + push to
+# main; the slow Playwright lane has moved to ci-e2e.yml on a nightly
+# cron to control flake.
+
 on:
-  # DISABLED 2026-05-06 — automatic triggers stopped per user request.
-  # pull_request:
-  #   branches: [main]
-  # push:
-  #   branches: [main]
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   web:
-    name: web (lint + types + unit + e2e)
+    name: web (lint + types + unit)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -35,12 +39,3 @@ jobs:
 
       - name: Unit tests
         run: npm test
-
-      - name: Install Playwright browsers
-        # Three engines: chromium, webkit (Safari), firefox. WebKit +
-        # Firefox catch engine-specific a11y / layout bugs Chromium
-        # passes silently. See web/playwright.config.ts.
-        run: npx playwright install --with-deps chromium webkit firefox
-
-      - name: E2E tests
-        run: npm run test:e2e
