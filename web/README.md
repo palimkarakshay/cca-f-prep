@@ -71,14 +71,18 @@ web/
   src/
     app/                         ← Next.js routes (content-agnostic)
       layout.tsx                   fonts, metadata, theme init, pack tokens
-      page.tsx                     dashboard
-      section/[sectionId]/         section detail
-      section/[sectionId]/test/    section test runner
-      concept/[sectionId]/[conceptId]/        lesson view
-      concept/[sectionId]/[conceptId]/quiz/   concept quiz runner
-      mock/                        mock-exam index
-      mock/[mockId]/               mock-exam runner
-      mock/[mockId]/result/        last-attempt review
+      page.tsx                     two-lane chooser (learner / L&D-designer)
+      for-teams/page.tsx           Adept full write-up (B2B explainer)
+      adept/page.tsx               Adept demo workspace (B2B packs + workbench entry)
+      adept/sme/[packId]/page.tsx  SME create / edit / validate / deploy workbench
+      [packId]/                    pack-scoped routes (dashboard, sections, …)
+      [packId]/section/[sectionId]/         section detail
+      [packId]/section/[sectionId]/test/    section test runner
+      [packId]/concept/[sectionId]/[conceptId]/        lesson view
+      [packId]/concept/[sectionId]/[conceptId]/quiz/   concept quiz runner
+      [packId]/mock/                        mock-exam index
+      [packId]/mock/[mockId]/               mock-exam runner
+      [packId]/mock/[mockId]/result/        last-attempt review
       manifest.ts                  PWA manifest (derived from active pack)
       icon.svg/route.ts            served from pack.config.iconSvg
       icon-maskable.svg/route.ts   served from pack.config.iconMaskableSvg
@@ -137,13 +141,51 @@ web/
 - Tests + e2e — they read from the active pack, not from hardcoded
   brand strings
 
+## Two-lane home page (Curio / Adept)
+
+The shell is the same Next.js app under either brand; the home page
+at `/` splits visitors into two lanes that share the same `what + why`
+two-question intake but decode the answers for different audiences:
+
+| Lane | Audience | Front door | Build surface |
+|---|---|---|---|
+| **Learner** | Self-paced learners | `LearningGoalCapture` on `/` | Pick a consumer pack → run lessons + quizzes |
+| **Designer** (Adept) | L&D leads, instructional designers, SMEs | `DesignerJourneyDecoder` on `/` → structured brief | `/adept` demo workspace → `/adept/sme/[packId]` workbench |
+
+The designer lane is the B2B surface — branded **Adept**. `/for-teams`
+is the full write-up of how the designer lane delivers
+company-approved, SME-verified packs; `/adept` is the interactive
+demo workspace. Both link back to the home-page `#lane-designer`
+anchor so a visitor can re-enter the decoder.
+
+Consumer packs (audience `consumer`, or unset) appear on the `/`
+learner-lane grid. B2B packs (audience `b2b`) appear only on `/adept`
+and are gated from the consumer picker — keeps single-tenant demo
+content out of the consumer pitch.
+
 ## Available features (today)
 
-- **Topic picker at `/`** — visit the root URL to choose between any
-  installed content pack. Each pack has its own URL prefix
-  (`/cca-f-prep/...`, `/sewing-beginners/...`, etc.), its own
-  progress storage, its own theme, and its own brand. The header
-  shows a "Switch topic" link when inside a pack.
+- **Two-lane chooser at `/`** — learner lane (pick a ready-made
+  journey or capture your own goal) and designer lane (decode an
+  audience gap into a structured brief). Both run locally in the
+  browser; the learner goal persists to `localStorage`, the designer
+  brief is recomputed live.
+- **Topic picker for learners** — consumer packs grid on `/`. Each
+  pack has its own URL prefix (`/cca-f-prep/...`,
+  `/sewing-beginners/...`, etc.), its own progress storage, its own
+  theme, and its own brand. The header shows a "Switch journey" link
+  when inside a pack.
+- **Adept demo workspace at `/adept`** — B2B packs split into
+  general-library (pre-approved by Curio L&D) and company-specific
+  (drafted from a customer's source material). "Take it as a
+  learner" + "Open SME workbench" CTAs per pack.
+- **SME workbench at `/adept/sme/[packId]`** — create / edit /
+  validate / deploy surface for B2B pack content. SME-signed +
+  timestamped approvals, pack-level deploy snapshot, all in
+  `localStorage` for the demo.
+- **Adept full write-up at `/for-teams`** — the lane model,
+  pack-kind paths (library vs. company-specific), 5-step delivery
+  flow, effectivity layer, pilot framing.
 - **Lesson delivery** — TOC, scroll-progress bar, mastery badge,
   3-way Easy / Conceptual / Deeper depth picker (per-lesson choice
   persists), prev/next nav, "What you'll learn" callout

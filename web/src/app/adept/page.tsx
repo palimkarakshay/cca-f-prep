@@ -9,6 +9,7 @@ import {
   LineChart,
   ArrowRight,
   PencilLine,
+  Compass,
 } from "lucide-react";
 import { B2B_PACKS } from "@/content/pack-registry";
 import type { ContentPack } from "@/content/pack-types";
@@ -69,10 +70,11 @@ export default function AdeptPage() {
           {BRAND.b2bName} — {BRAND.b2bTagline}
         </h1>
         <p className="max-w-2xl text-sm text-(--muted)">
-          The {BRAND.b2bName} demo workspace. Take the same Acme
-          onboarding pack a real customer would take, then jump into the
-          SME workbench to see how a subject-matter expert edits,
-          validates, and deploys company-approved content.
+          The {BRAND.b2bName} demo workspace — the designer-lane build
+          surface. Take a general-library pack the way a learner would,
+          then open the same pack in the SME workbench to see how a
+          subject-matter expert edits, validates, and deploys
+          company-approved content.
         </p>
         <div className="flex flex-wrap gap-2 text-sm">
           <Link
@@ -82,8 +84,36 @@ export default function AdeptPage() {
             How it works (full write-up)
             <ArrowRight aria-hidden className="h-4 w-4" />
           </Link>
+          <Link
+            href="/#lane-designer"
+            className="inline-flex items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-3 py-2 text-(--ink) no-underline shadow-sm hover:border-(--accent) hover:text-(--accent-2)"
+          >
+            <Compass aria-hidden className="h-4 w-4" />
+            Back to the journey decoder
+          </Link>
         </div>
       </header>
+
+      <Card tone="accent">
+        <div className="flex items-start gap-3">
+          <Compass
+            aria-hidden
+            className="h-5 w-5 flex-none text-(--accent)"
+          />
+          <p className="text-sm text-(--muted)">
+            <strong className="text-(--ink)">You&apos;re in the designer
+            lane.</strong>{" "}
+            If you came here from the journey decoder on the home page,
+            the brief it produced maps to the five steps below — the
+            decoder is step 1, this workspace is steps 2–4, and the
+            effectivity readout is step 5. New here?{" "}
+            <Link href="/for-teams" className="underline hover:text-(--ink)">
+              Read the full write-up
+            </Link>
+            .
+          </p>
+        </div>
+      </Card>
 
       <section aria-labelledby="how-summary" className="flex flex-col gap-3">
         <h2
@@ -165,8 +195,9 @@ export default function AdeptPage() {
         </h2>
         <Card>
           <p className="text-sm text-(--muted)">
-            Where a subject-matter expert turns an AI-drafted concept
-            into a company-approved one. For each concept, the SME can
+            The build surface for the designer lane. A subject-matter expert
+            turns an AI-drafted concept into a company-approved one. For
+            each concept, the SME can
             <strong className="text-(--ink)"> edit </strong>
             the title, lesson, and quiz options;
             <strong className="text-(--ink)"> validate </strong>

@@ -44,7 +44,8 @@ export default function PickerPage() {
           Curio shapes <strong className="text-(--ink)">learning
           journeys</strong> around what you want to do — not generic
           courses. Pick a lane below: you&apos;re here to learn for
-          yourself, or you&apos;re designing a journey for someone else.
+          yourself, or you&apos;re designing a journey for someone else
+          (that lane is <strong className="text-(--ink)">{BRAND.b2bName}</strong>).
         </p>
       </header>
 
@@ -66,7 +67,7 @@ export default function PickerPage() {
           href="#lane-designer"
           Icon={Briefcase}
           label="I’m designing for someone else"
-          help="L&D leads, instructional designers, SMEs. Decode the audience’s gap into a structured brief + source-doc checklist."
+          help="L&D leads, instructional designers, SMEs. Decode the gap into a brief, then build the pack in the Adept SME workbench."
         />
       </nav>
 
