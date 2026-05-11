@@ -54,6 +54,15 @@ for each, and restores the original pointer on exit. Use it after
 authoring a new pack or before merging changes that touch the
 contract.
 
+## Environment variables
+
+Copy `.env.example` to `.env.local` and fill in. `.env.local` is
+gitignored. Public values prefixed with `NEXT_PUBLIC_*` are inlined
+into the client bundle; everything else is server-only. Server-side
+secrets (Clerk, Neon, OpenRouter) belong in Vercel project env, never
+in code or commits. See `.env.example` for the full inventory and the
+secrets-policy notes.
+
 ## Architecture — shell vs. content pack
 
 ```
