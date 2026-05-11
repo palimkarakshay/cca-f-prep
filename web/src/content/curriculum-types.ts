@@ -53,6 +53,25 @@ export interface Lesson {
   simplified?: LessonSimplified;
   /** Deeper / advanced take on the same lesson. Picker disables "Deeper" if absent. */
   deeper?: LessonDeeper;
+  /**
+   * Optional narrator-style transcript — a single coherent paragraph
+   * (or a small list of paragraphs) written for ear-first
+   * consumption. Distinct from `paragraphs`, which is written for
+   * the eye. When present, the read-aloud control prefers this
+   * transcript over auto-concatenating the visual body. Helpful for
+   * audio-leaning learners (commutes, accessibility tools that
+   * stream uniform audio).
+   */
+  audioTranscript?: string;
+  /**
+   * Plain-language descriptions for any embedded visuals (diagrams,
+   * screenshots, charts) that appear in this lesson. Each entry
+   * carries a stable `ref` so the visual element can link to its
+   * description via `aria-describedby`. Rendered visibly under the
+   * lesson body so screen-reader and sighted-but-image-blocked users
+   * still get the information the visual carried.
+   */
+  imageDescriptions?: Array<{ ref: string; description: string }>;
 }
 
 /** Three-way depth selector backing the LessonView toggle. */

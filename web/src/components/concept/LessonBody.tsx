@@ -1,4 +1,4 @@
-import { Lightbulb, Terminal, AlertTriangle, BookOpen } from "lucide-react";
+import { Lightbulb, Terminal, AlertTriangle, BookOpen, Image as ImageIcon } from "lucide-react";
 import type { Lesson } from "@/content/curriculum-types";
 
 export function LessonBody({ lesson }: { lesson: Lesson }) {
@@ -71,6 +71,26 @@ export function LessonBody({ lesson }: { lesson: Lesson }) {
               </li>
             ))}
           </ul>
+        </section>
+      ) : null}
+
+      {lesson.imageDescriptions && lesson.imageDescriptions.length > 0 ? (
+        <section
+          aria-label="Image descriptions"
+          className="mt-6 rounded-md border border-(--border) bg-(--panel-2) p-3"
+        >
+          <h2 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
+            <ImageIcon className="h-3.5 w-3.5" aria-hidden />
+            Image descriptions
+          </h2>
+          <dl className="grid grid-cols-1 gap-2 text-sm">
+            {lesson.imageDescriptions.map((d) => (
+              <div key={d.ref} id={`img-desc-${d.ref}`} className="flex flex-col gap-0.5">
+                <dt className="text-xs font-mono text-(--muted)">{d.ref}</dt>
+                <dd className="text-sm text-(--ink)">{d.description}</dd>
+              </div>
+            ))}
+          </dl>
         </section>
       ) : null}
 

@@ -203,16 +203,29 @@ export function LessonView({
               a user toggling between reading and listening hears
               exactly what the eye sees. */}
           {(() => {
-            const ttsParts: string[] = [
-              concept.title,
-              ...(lesson.paragraphs ?? []),
-              ...(lesson.keyPoints ?? []),
-              ...(lesson.examples?.flatMap((ex) => [ex.title, ex.body]) ?? []),
-              ...(lesson.pitfalls ?? []),
-            ];
+            // Prefer a hand-authored narrator transcript when the
+            // curriculum supplies one — it's written ear-first and
+            // reads more naturally than the auto-concatenated visual
+            // body. When absent, fall back to the visible content.
+            const ttsParts: string[] = lesson.audioTranscript
+              ? [concept.title, lesson.audioTranscript]
+              : [
+                  concept.title,
+                  ...(lesson.paragraphs ?? []),
+                  ...(lesson.keyPoints ?? []),
+                  ...(lesson.examples?.flatMap((ex) => [ex.title, ex.body]) ?? []),
+                  ...(lesson.pitfalls ?? []),
+                ];
             return (
               <div className="mb-4">
-                <ReadAloudButton parts={ttsParts} />
+                <ReadAloudButton
+                  parts={ttsParts}
+                  label={
+                    lesson.audioTranscript
+                      ? "Read aloud (narrator)"
+                      : "Read aloud"
+                  }
+                />
               </div>
             );
           })()}

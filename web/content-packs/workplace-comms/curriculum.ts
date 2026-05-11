@@ -33,6 +33,17 @@ export const CURRICULUM: Curriculum = {
             simplified: {
               oneLiner: "Async by default; sync for the human moments.",
             },
+            // Ear-first narration of the same lesson, used by the TTS
+            // control. Reads more naturally aloud than the visual body.
+            audioTranscript:
+              "Here's the rule of thumb. Default to writing things down — async — when the response can wait, when more than three people need to weigh in, or when the topic gets better with thinking time. Default to a meeting — sync — when the topic is high-stakes, when there's real back-and-forth in the room, or when there's an interpersonal moment at play: feedback, conflict, recognition. The most common failure mode is over-meeting. The equal-and-opposite failure mode is over-writing — async feedback can feel cold, and async conflict festers. The practical trick: write the message async first. The moment you catch yourself writing 'I think we should just chat about this' is the moment to book the meeting — but only after you've written the agenda you would have written anyway.",
+            imageDescriptions: [
+              {
+                ref: "async-sync-quadrant",
+                description:
+                  "A two-by-two quadrant labelled 'audience size' on the horizontal axis and 'stakes' on the vertical. The top-right cell (large audience, high stakes) is shaded as async-with-sync-decision; the top-left (small audience, high stakes) sits squarely in the sync column; the bottom-left (small audience, low stakes) is informal sync; the bottom-right (large audience, low stakes) is pure async.",
+              },
+            ],
           },
           quiz: {
             questions: [
