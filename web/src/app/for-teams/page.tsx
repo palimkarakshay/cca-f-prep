@@ -8,6 +8,10 @@ import {
   ArrowRight,
   ShieldCheck,
   Workflow,
+  Compass,
+  Briefcase,
+  Library,
+  Building2,
 } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Card } from "@/components/ui/card";
@@ -28,38 +32,60 @@ interface Step {
 const STEPS: Step[] = [
   {
     num: 1,
-    title: "Scope with the customer",
+    title: "Scope with the journey decoder",
     body:
-      "We start from the company's actual capability gaps — onboarding for a role, compliance refresh, internal tool adoption. The output is a one-page brief: target audience, success criteria, end-use, and the SME who will own sign-off.",
+      "Start in the designer lane on the home page. Two questions — the capability gap and the business driver — feed the journey decoder, which produces a structured brief: section spine, audience cues, success signals, and the source documents you'll need to upload. That brief is what your SME signs off on before drafting begins.",
     Icon: ClipboardCheck,
   },
   {
     num: 2,
-    title: "Draft with the Curio engine",
+    title: "Draft in the SME workbench",
     body:
-      "Same content-pack engine as the consumer product. We seed it with the customer's source-of-truth material (SOPs, policies, code docs, training decks) and generate a structured pack: sections, concept lessons, quizzes, section tests, optional mock exam.",
+      "Same content-pack engine as the consumer Curio product, opened inside the SME workbench at /adept. We seed it with your source-of-truth material (SOPs, policies, code docs, training decks) and the workbench renders a draft pack — sections, concept lessons, quizzes, section tests, optional mock exam — ready for SME review.",
     Icon: Workflow,
   },
   {
     num: 3,
-    title: "SME elicit + verify",
+    title: "SME elicit + verify in the workbench",
     body:
-      "The customer's subject-matter expert reviews each concept in a side-by-side editor: keep, edit, or reject. Every accepted concept records who signed it off and on what date — audit-ready by construction. Nothing ships unverified.",
+      "Your subject-matter expert works through the workbench concept-by-concept: accept, edit, or revert. Each approval is signed with the SME's name and timestamped, so the pack is audit-ready by construction. A pack-level Deploy action snapshots the approved state — nothing ships unverified.",
     Icon: ShieldCheck,
   },
   {
     num: 4,
     title: "Roll out to learners",
     body:
-      "Same Curio shell, the customer's branding and content. SSO-ready (roadmap), per-learner progress, optional cohort grouping. Same backward-design prompts on first run so each learner names their own success criteria and end-use.",
+      "The same consumer Curio shell, now serving your branded, SME-approved content. Per-learner progress, optional cohort grouping, SSO on the roadmap. Learners run the same backward-design prompts on first touch, so each one names their own success criteria — and you can compare those against the SME-defined ones from step 1.",
     Icon: Users,
   },
   {
     num: 5,
     title: "Effectivity report + next steps",
     body:
-      "After each cohort: mastery curves per concept, time-to-pass distribution, drill-trigger frequency, and the concepts most learners stalled on. The SME uses that to rewrite weak concepts; the loop closes. We propose the next pack only when the data says the current one is landing.",
+      "After each cohort: mastery curves per concept, time-to-pass distribution, drill-trigger frequency, and the concepts most learners stalled on. The SME uses that to rewrite weak concepts in the workbench; the loop closes. We propose the next pack only when the data says the current one is landing.",
     Icon: LineChart,
+  },
+];
+
+interface PackKind {
+  Icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  title: string;
+  body: string;
+  badge: string;
+}
+
+const PACK_KINDS: PackKind[] = [
+  {
+    Icon: Library,
+    title: "General library — pre-approved by Curio L&D",
+    body: "Baseline content companies adopt as-is (workplace comms, security awareness, new-manager basics, …). Your SME swaps any concept via the workbench without rewriting from scratch. Fastest path to a deployed pack.",
+    badge: "Pre-approved · swap-and-deploy",
+  },
+  {
+    Icon: Building2,
+    title: "Company-specific — drafted from your material",
+    body: "One-tenant content authored against your policies, tooling, and source-of-truth docs. Acme Co. onboarding is the shipped example. Longer pilot, but the pack matches your reality exactly.",
+    badge: "Company-specific · tenant-only",
   },
 ];
 
@@ -96,7 +122,134 @@ export default function ForTeamsPage() {
           SME-verified content, measurable effectivity. No hallucinated
           training material, no untracked sign-off.
         </p>
+        <div className="flex flex-wrap gap-2 text-sm">
+          <Link
+            href="/adept"
+            className="inline-flex items-center gap-1 rounded-md bg-(--accent) px-3 py-2 font-semibold text-white no-underline shadow-sm hover:bg-(--accent-2)"
+          >
+            Try the {BRAND.b2bName} demo workspace
+            <ArrowRight aria-hidden className="h-4 w-4" />
+          </Link>
+          <Link
+            href="/#lane-designer"
+            className="inline-flex items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-3 py-2 font-medium text-(--ink) no-underline shadow-sm hover:border-(--accent) hover:text-(--accent-2)"
+          >
+            Start with the journey decoder
+            <ArrowRight aria-hidden className="h-4 w-4" />
+          </Link>
+        </div>
       </header>
+
+      <section aria-labelledby="lane-context" className="flex flex-col gap-3">
+        <h2
+          id="lane-context"
+          className="font-[family-name:var(--font-display)] text-xl font-semibold text-(--ink)"
+        >
+          Where {BRAND.b2bName} fits — the designer lane
+        </h2>
+        <Card tone="accent">
+          <div className="flex items-start gap-3">
+            <Compass
+              aria-hidden
+              className="h-5 w-5 flex-none text-(--accent)"
+            />
+            <div className="flex flex-col gap-2 text-sm text-(--muted)">
+              <p>
+                {BRAND.name} opens with a two-lane chooser. Each lane asks the
+                same two questions (what + why) but decodes the answers for a
+                different audience:
+              </p>
+              <ul className="flex flex-col gap-1.5">
+                <li className="flex items-start gap-2">
+                  <Users
+                    aria-hidden
+                    className="mt-0.5 h-4 w-4 flex-none text-(--accent-2)"
+                  />
+                  <span>
+                    <strong className="text-(--ink)">Learner lane.</strong>{" "}
+                    The consumer Curio surface — pick a ready-made journey or
+                    have one shaped for you. Self-paced, per-learner progress.
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Briefcase
+                    aria-hidden
+                    className="mt-0.5 h-4 w-4 flex-none text-(--accent-2)"
+                  />
+                  <span>
+                    <strong className="text-(--ink)">Designer lane.</strong>{" "}
+                    For L&amp;D leads, instructional designers, and SMEs. The
+                    journey decoder produces a structured brief; the SME
+                    workbench at <code>/adept</code> turns that brief into an
+                    approved pack. <strong className="text-(--ink)">
+                      That&apos;s {BRAND.b2bName}.
+                    </strong>
+                  </span>
+                </li>
+              </ul>
+              <p>
+                The five steps below are what happens once you&apos;re in the
+                designer lane. The decoder + workbench are not bolt-ons — they
+                are the shell.
+              </p>
+            </div>
+          </div>
+        </Card>
+      </section>
+
+      <section
+        aria-labelledby="pack-kinds"
+        className="flex flex-col gap-3"
+      >
+        <h2
+          id="pack-kinds"
+          className="font-[family-name:var(--font-display)] text-xl font-semibold text-(--ink)"
+        >
+          Two paths into {BRAND.b2bName}
+        </h2>
+        <p className="max-w-2xl text-sm text-(--muted)">
+          Companies adopt {BRAND.b2bName} from one of two starting points.
+          Both end up in the same SME workbench and ship through the same
+          deploy action — they differ only in where the first draft comes
+          from.
+        </p>
+        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {PACK_KINDS.map((kind) => {
+            const Icon = kind.Icon;
+            return (
+              <li key={kind.title}>
+                <Card className="flex h-full flex-col gap-3">
+                  <header className="flex items-start gap-3">
+                    <Icon
+                      aria-hidden
+                      className="h-5 w-5 flex-none text-(--accent)"
+                    />
+                    <div>
+                      <h3 className="text-base font-semibold text-(--ink)">
+                        {kind.title}
+                      </h3>
+                      <p className="mt-1 inline-flex w-fit rounded-full border border-(--accent)/40 bg-(--accent)/10 px-2 py-0.5 text-xs font-medium text-(--accent-2)">
+                        {kind.badge}
+                      </p>
+                    </div>
+                  </header>
+                  <p className="text-sm text-(--muted)">{kind.body}</p>
+                </Card>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="text-sm text-(--muted)">
+          See both live on the{" "}
+          <Link
+            href="/adept"
+            className="underline-offset-4 hover:underline"
+          >
+            {BRAND.b2bName} demo workspace
+          </Link>
+          .
+        </p>
+      </section>
 
       <section
         aria-labelledby="how-it-works"
@@ -217,6 +370,43 @@ export default function ForTeamsPage() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section
+        aria-labelledby="try-first"
+        className="flex flex-col gap-3"
+      >
+        <h2
+          id="try-first"
+          className="font-[family-name:var(--font-display)] text-xl font-semibold text-(--ink)"
+        >
+          Try it before you brief us
+        </h2>
+        <Card>
+          <p className="text-sm text-(--muted)">
+            The {BRAND.b2bName} demo workspace is fully interactive and runs
+            entirely in your browser — no signup, no server. Take a general-
+            library pack as a learner, then open the same pack in the SME
+            workbench to see the accept / edit / revert / deploy loop a real
+            customer SME walks through.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2 text-sm">
+            <Link
+              href="/adept"
+              className="inline-flex items-center gap-1 rounded-md bg-(--accent) px-3 py-2 font-semibold text-white no-underline shadow-sm hover:bg-(--accent-2)"
+            >
+              Open the {BRAND.b2bName} demo
+              <ArrowRight aria-hidden className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/#lane-designer"
+              className="inline-flex items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-3 py-2 font-medium text-(--ink) no-underline shadow-sm hover:border-(--accent) hover:text-(--accent-2)"
+            >
+              Decode a journey from your own gap
+              <ArrowRight aria-hidden className="h-4 w-4" />
+            </Link>
+          </div>
+        </Card>
       </section>
 
       <section
