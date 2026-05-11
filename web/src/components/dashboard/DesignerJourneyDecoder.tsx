@@ -37,10 +37,11 @@ import {
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
-  decodeJourney,
+  decodeJourneyCached,
   JOURNEY_KIND_LABEL,
   type DecodedJourney,
 } from "@/lib/journey-decoder";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { BRAND } from "@/lib/brand";
 
 const inputClass = cn(
@@ -57,10 +58,17 @@ export function DesignerJourneyDecoder() {
   const [what, setWhat] = useState("");
   const [why, setWhy] = useState("");
   const [audience, setAudience] = useState("");
+  // Debounce keeps the decoder off the per-keystroke critical path —
+  // free today (cheap regex), bounded when the same call swaps to
+  // an LLM behind NEXT_PUBLIC_AI_DECODER_ENABLED.
+  const debouncedWhat = useDebouncedValue(what, 800);
+  const debouncedWhy = useDebouncedValue(why, 800);
   const decoded: DecodedJourney | null = useMemo(() => {
-    if (what.trim().length < 3 && why.trim().length < 3) return null;
-    return decodeJourney({ what, why });
-  }, [what, why]);
+    if (debouncedWhat.trim().length < 3 && debouncedWhy.trim().length < 3) {
+      return null;
+    }
+    return decodeJourneyCached({ what: debouncedWhat, why: debouncedWhy });
+  }, [debouncedWhat, debouncedWhy]);
 
   return (
     <Card tone="accent" className="flex flex-col gap-4">

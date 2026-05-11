@@ -1,0 +1,36 @@
+name: CI / E2E
+
+# Playwright runs on three engines (chromium, webkit, firefox); see
+# web/playwright.config.ts. Run as a nightly cron and on demand —
+# keeping it off the PR critical path keeps the fast lane fast and
+# avoids cross-engine flake blocking merges.
+
+on:
+  schedule:
+    - cron: "17 4 * * *" # 04:17 UTC daily
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    name: web e2e (chromium + webkit + firefox)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium webkit firefox
+
+      - name: E2E tests
+        run: npm run test:e2e

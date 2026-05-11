@@ -14,9 +14,11 @@
      renders a "tell us more" hint, not a stack trace.
 ------------------------------------------------------------------ */
 
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
+  __resetJourneyDecoderCacheForTests,
   decodeJourney,
+  decodeJourneyCached,
   detectKind,
   JOURNEY_KIND_LABEL,
   type JourneyKind,
@@ -132,5 +134,41 @@ describe("JOURNEY_KIND_LABEL", () => {
     for (const k of ALL_KINDS) {
       expect(JOURNEY_KIND_LABEL[k].length).toBeGreaterThan(0);
     }
+  });
+});
+
+describe("decodeJourneyCached", () => {
+  beforeEach(() => {
+    __resetJourneyDecoderCacheForTests();
+  });
+
+  it("returns the same value as decodeJourney for equivalent input", () => {
+    const a = decodeJourney({ what: "AWS cert", why: "promotion" });
+    const b = decodeJourneyCached({ what: "AWS cert", why: "promotion" });
+    expect(b).toEqual(a);
+  });
+
+  it("collapses cosmetic whitespace + case in the cache key", () => {
+    const first = decodeJourneyCached({
+      what: "  AWS Cert  ",
+      why: "PROMOTION",
+    });
+    const second = decodeJourneyCached({
+      what: "aws cert",
+      why: "promotion",
+    });
+    // Same reference proves the cache hit (no fresh allocation).
+    expect(second).toBe(first);
+  });
+
+  it("misses on substantively different inputs", () => {
+    const first = decodeJourneyCached({ what: "AWS cert", why: "promotion" });
+    const second = decodeJourneyCached({
+      what: "Spanish",
+      why: "travel",
+    });
+    expect(second).not.toBe(first);
+    expect(first.kind).toBe("certification");
+    expect(second.kind).toBe("language");
   });
 });

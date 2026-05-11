@@ -613,6 +613,41 @@ export function decodeJourney(input: JourneyInput): DecodedJourney {
   };
 }
 
+import { createLRU } from "./lru-cache";
+
+/**
+ * Memoised decoder. The cache is keyed on the normalised input
+ * (whitespace-collapsed, lower-cased) so cosmetic edits don't bust
+ * it. Today the underlying call is a cheap regex; tomorrow (when
+ * NEXT_PUBLIC_AI_DECODER_ENABLED=1 lights the AI path through
+ * `lib/ai/router.ts`) the same cache layer protects against
+ * runaway token spend on repeated identical prompts.
+ *
+ * Cap of 32 entries is enough for a typical typing session — the
+ * cache exists to dedupe back-and-forth edits, not to be a
+ * cross-session store. Clears on full reload, which is fine.
+ */
+const decoderCache = createLRU<string, DecodedJourney>(32);
+
+function cacheKey(input: JourneyInput): string {
+  const norm = (s: string) => s.trim().replace(/\s+/g, " ").toLowerCase();
+  return `${norm(input.what)}|${norm(input.why)}`;
+}
+
+export function decodeJourneyCached(input: JourneyInput): DecodedJourney {
+  const key = cacheKey(input);
+  const hit = decoderCache.get(key);
+  if (hit) return hit;
+  const value = decodeJourney(input);
+  decoderCache.set(key, value);
+  return value;
+}
+
+/** Test-only — drop memoised decodes between cases. */
+export function __resetJourneyDecoderCacheForTests(): void {
+  decoderCache.clear();
+}
+
 export const JOURNEY_KIND_LABEL: Record<JourneyKind, string> = {
   certification: "Certification prep",
   "role-onboarding": "Role onboarding",
