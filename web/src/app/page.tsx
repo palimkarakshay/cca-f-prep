@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ALL_PACKS } from "@/content/pack-registry";
+import { CONSUMER_PACKS } from "@/content/pack-registry";
 import { Container } from "@/components/ui/Container";
 import { Card } from "@/components/ui/card";
 import { BRAND } from "@/lib/brand";
@@ -48,7 +48,7 @@ export default function PickerPage() {
         aria-label="Available topics"
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
       >
-        {ALL_PACKS.map((pack) => {
+        {CONSUMER_PACKS.map((pack) => {
           const c = pack.config;
           const sectionCount = pack.curriculum.sections.length;
           const conceptCount = pack.curriculum.sections.reduce(
@@ -111,7 +111,11 @@ export default function PickerPage() {
       <footer className="mt-2 text-xs text-(--muted)">
         For organisations:{" "}
         <Link href="/for-teams" className="underline hover:text-(--ink)">
-          {BRAND.b2bName} for teams
+          How {BRAND.b2bName} works
+        </Link>
+        {" "}·{" "}
+        <Link href="/adept" className="underline hover:text-(--ink)">
+          Try the {BRAND.b2bName} demo
         </Link>{" "}
         — SME-verified, company-approved content packs with measurable
         effectivity.

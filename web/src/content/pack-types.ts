@@ -155,6 +155,15 @@ export interface PackConfig {
   iconSvg: string;
   /** SVG markup for the maskable icon. Used at /icon-maskable.svg. */
   iconMaskableSvg: string;
+  /**
+   * Audience this pack targets. `consumer` packs surface on the
+   * public picker at `/`. `b2b` packs surface only on the Adept
+   * area at `/adept` (company-approved, SME-verified content with
+   * its own create/edit/validate/deploy workbench). Omitting the
+   * field defaults to `consumer` so existing packs don't need to
+   * declare it explicitly.
+   */
+  audience?: "consumer" | "b2b";
 }
 
 export interface ContentPack {

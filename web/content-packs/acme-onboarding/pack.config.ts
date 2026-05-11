@@ -87,4 +87,6 @@ export const packConfig: PackConfig = {
   },
   iconSvg: ICON_SVG,
   iconMaskableSvg: ICON_MASKABLE_SVG,
+  // B2B audience — surfaces under /adept, not on the consumer picker.
+  audience: "b2b",
 };

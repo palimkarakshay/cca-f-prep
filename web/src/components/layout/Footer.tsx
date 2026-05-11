@@ -15,7 +15,14 @@ export function Footer() {
           href="/for-teams"
           className="text-(--muted) underline hover:text-(--ink)"
         >
-          {BRAND.b2bName} for teams
+          How {BRAND.b2bName} works
+        </Link>
+        {" "}·{" "}
+        <Link
+          href="/adept"
+          className="text-(--muted) underline hover:text-(--ink)"
+        >
+          {BRAND.b2bName} demo
         </Link>
         {siteConfig.repoUrl ? (
           <>
