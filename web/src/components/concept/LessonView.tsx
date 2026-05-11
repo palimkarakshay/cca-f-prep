@@ -7,6 +7,7 @@ import { useScrollProgress } from "@/hooks/useScrollProgress";
 import { LessonBody, SimplifiedBody, DeeperBody } from "./LessonBody";
 import { LessonTOC } from "./LessonTOC";
 import { AskClaudePanel } from "./AskClaudePanel";
+import { ReadAloudButton } from "./ReadAloudButton";
 import { MasteryBadge } from "@/components/primitives/MasteryBadge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -194,6 +195,27 @@ export function LessonView({
           <h1 className="mb-1 font-[family-name:var(--font-display)] text-2xl md:text-3xl xl:text-4xl font-semibold text-(--ink)">
             {concept.title}
           </h1>
+
+          {/* Read-aloud (TTS) — uses the browser's Web Speech API to
+              speak the lesson body for audio-leaning learners. Falls
+              back to invisible if the API isn't available. The parts
+              array is the same content the visible body shows, so
+              a user toggling between reading and listening hears
+              exactly what the eye sees. */}
+          {(() => {
+            const ttsParts: string[] = [
+              concept.title,
+              ...(lesson.paragraphs ?? []),
+              ...(lesson.keyPoints ?? []),
+              ...(lesson.examples?.flatMap((ex) => [ex.title, ex.body]) ?? []),
+              ...(lesson.pitfalls ?? []),
+            ];
+            return (
+              <div className="mb-4">
+                <ReadAloudButton parts={ttsParts} />
+              </div>
+            );
+          })()}
 
           {lesson.simplified?.oneLiner ||
           (lesson.keyPoints && lesson.keyPoints.length > 0) ? (
