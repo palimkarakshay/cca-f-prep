@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Lock } from "lucide-react";
 import { useProgress } from "@/hooks/useProgress";
 import { MasteryMeter } from "@/components/primitives/MasteryMeter";
 import { Card } from "@/components/ui/card";
@@ -10,9 +11,61 @@ import { usePack } from "@/content/pack-context";
 import { countsAsMastered } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 
+/**
+ * Per-status badge classes. Three categorical states (complete /
+ * in-progress / upcoming) plus an "available" hover for upcoming
+ * modules — picked so each carries an unambiguous hue:
+ *   - complete   → green (success)
+ *   - in-progress → terracotta accent (active focus)
+ *   - upcoming   → neutral muted (open but not started)
+ *
+ * The classes apply to the small uppercase pill in each module
+ * header so the learner can scan the list and see where they are.
+ */
+const STATUS_PILL: Record<
+  "complete" | "in-progress" | "upcoming",
+  string
+> = {
+  complete: "border-(--good)/40 bg-(--good)/10 text-(--good)",
+  "in-progress": "border-(--accent)/40 bg-(--accent)/10 text-(--accent-2)",
+  upcoming: "border-(--border) bg-(--panel-2) text-(--muted)",
+};
+
+const STATUS_LABEL: Record<
+  "complete" | "in-progress" | "upcoming",
+  string
+> = {
+  complete: "Complete",
+  "in-progress": "In progress",
+  upcoming: "Open — not started",
+};
+
+const STATUS_TONE: Record<
+  "complete" | "in-progress" | "upcoming",
+  "good" | "accent" | "default"
+> = {
+  complete: "good",
+  "in-progress": "accent",
+  upcoming: "default",
+};
+
+const STATUS_BAR: Record<
+  "complete" | "in-progress" | "upcoming",
+  string
+> = {
+  complete: "bg-(--good)",
+  "in-progress": "bg-(--accent)",
+  upcoming: "bg-(--panel-2)",
+};
+
 export function SectionList() {
-  const { progress, hydrated, conceptMastery, sectionUnlocked, sectionComplete } =
-    useProgress();
+  const {
+    progress,
+    hydrated,
+    conceptMastery,
+    sectionStatus,
+    sectionTestReady,
+  } = useProgress();
   const pack = usePack();
   const packId = usePackId();
   const copy = useCopy();
@@ -21,8 +74,10 @@ export function SectionList() {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
       {CURRICULUM.sections.map((section) => {
-        const unlocked = !hydrated || sectionUnlocked(section.id);
-        const complete = hydrated && sectionComplete(section.id);
+        const status: "complete" | "in-progress" | "upcoming" = hydrated
+          ? sectionStatus(section.id)
+          : "upcoming";
+        const testReady = sectionTestReady(section.id);
         const lastTest =
           progress.section[section.id]?.testAttempts.slice(-1)[0] ?? null;
 
@@ -35,14 +90,11 @@ export function SectionList() {
         return (
           <Card
             key={section.id}
-            tone={complete ? "good" : unlocked ? "default" : "warn"}
-            // Locked state: warn-tone left border + faded panel background
-            // (no opacity — opacity-60 nukes WCAG AA text contrast on the
-            // text inside the locked card; the warn tone + "Locked" badge
-            // communicates state visually without sacrificing contrast).
+            tone={STATUS_TONE[status]}
             className={cn(
               "flex flex-col gap-3 p-5",
-              !unlocked && "bg-(--panel-2)"
+              status === "in-progress" &&
+                "ring-1 ring-(--accent)/20"
             )}
           >
             <div className="flex items-baseline gap-3">
@@ -58,14 +110,10 @@ export function SectionList() {
               <span
                 className={cn(
                   "ml-auto rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
-                  complete
-                    ? "border-(--good)/40 bg-(--good)/10 text-(--good)"
-                    : unlocked
-                      ? "border-(--border) text-(--muted)"
-                      : "border-(--warn)/40 text-(--warn)"
+                  STATUS_PILL[status]
                 )}
               >
-                {complete ? "Complete" : unlocked ? "In progress" : "Locked"}
+                {STATUS_LABEL[status]}
               </span>
             </div>
             <p className="text-sm text-(--muted)">{section.blurb}</p>
@@ -88,7 +136,7 @@ export function SectionList() {
                 className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-(--panel-2)"
               >
                 <div
-                  className="h-full bg-(--accent) transition-all"
+                  className={cn("h-full transition-all", STATUS_BAR[status])}
                   style={{ width: `${masteredPct}%` }}
                 />
               </div>
@@ -98,7 +146,6 @@ export function SectionList() {
               {section.concepts.map((c) => {
                 const authored = Boolean(c.lesson && c.quiz);
                 const m = hydrated ? conceptMastery(c.id) : 0;
-                const disabled = !unlocked || !authored;
                 const inner = (
                   <span className="flex w-full items-center gap-3">
                     <span className="w-12 font-mono text-[11px] text-(--accent-2)">
@@ -113,13 +160,11 @@ export function SectionList() {
                     <MasteryMeter mastery={m} />
                   </span>
                 );
-                if (disabled) {
+                if (!authored) {
                   return (
                     <li
                       key={c.id}
-                      // No opacity — kills text contrast. The locked Card
-                      // tone + "Locked" status badge already convey state.
-                      className="flex cursor-not-allowed items-center gap-3 rounded-md border border-transparent px-2 py-2"
+                      className="flex cursor-not-allowed items-center gap-3 rounded-md border border-transparent px-2 py-2 opacity-80"
                     >
                       {inner}
                     </li>
@@ -142,19 +187,30 @@ export function SectionList() {
               <div
                 className={cn(
                   "rounded-md border border-dashed px-3 py-2 text-xs",
-                  unlocked && hydrated
+                  testReady && hydrated
                     ? "border-(--accent)/50 text-(--ink)"
                     : "border-(--border) text-(--muted)"
                 )}
               >
-                {copy.sectionTestSingular} ·{" "}
-                {section.sectionTest.questions.length} questions ·{" "}
-                {Math.round((section.sectionTest.passPct ?? 0.7) * 100)}% {copy.passLabel}
+                <span className="inline-flex items-center gap-1.5">
+                  {!testReady && hydrated ? (
+                    <Lock className="h-3 w-3 flex-none" aria-hidden />
+                  ) : null}
+                  {copy.sectionTestSingular} ·{" "}
+                  {section.sectionTest.questions.length} questions ·{" "}
+                  {Math.round((section.sectionTest.passPct ?? 0.7) * 100)}% {copy.passLabel}
+                </span>
                 {lastTest ? (
                   <>
                     {" "}
                     · last attempt {lastTest.score}/{lastTest.total}
                   </>
+                ) : null}
+                {!testReady && hydrated ? (
+                  <p className="mt-1 text-[11px] text-(--muted)">
+                    Read every lesson in this module first — then this test
+                    unlocks.
+                  </p>
                 ) : null}
               </div>
             ) : null}
@@ -167,20 +223,33 @@ export function SectionList() {
                   "no-underline"
                 )}
               >
-                Open section
+                Open module
               </Link>
-              {section.sectionTest && unlocked ? (
-                <Link
-                  href={`/${packId}/section/${section.id}/test`}
-                  className={cn(
-                    buttonVariants({ variant: "ghost", size: "sm" }),
-                    "no-underline"
-                  )}
-                >
-                  {lastTest
-                    ? `Re-take ${copy.sectionTestSingular.toLowerCase()}`
-                    : `Take ${copy.sectionTestSingular.toLowerCase()}`}
-                </Link>
+              {section.sectionTest ? (
+                testReady ? (
+                  <Link
+                    href={`/${packId}/section/${section.id}/test`}
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "sm" }),
+                      "no-underline"
+                    )}
+                  >
+                    {lastTest
+                      ? `Re-take ${copy.sectionTestSingular.toLowerCase()}`
+                      : `Take ${copy.sectionTestSingular.toLowerCase()}`}
+                  </Link>
+                ) : (
+                  <span
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "sm" }),
+                      "pointer-events-none gap-1.5 opacity-60"
+                    )}
+                    aria-disabled
+                  >
+                    <Lock aria-hidden className="h-3 w-3" />
+                    {copy.sectionTestSingular} locked
+                  </span>
+                )
               ) : null}
             </div>
           </Card>

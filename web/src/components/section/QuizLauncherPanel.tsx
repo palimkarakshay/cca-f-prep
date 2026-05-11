@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Award } from "lucide-react";
+import { Award, Lock } from "lucide-react";
 import { useProgress } from "@/hooks/useProgress";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
@@ -26,12 +26,12 @@ export function QuizLauncherPanel({
   packId,
   sectionTestLabel,
 }: QuizLauncherPanelProps) {
-  const { progress, hydrated } = useProgress();
+  const { progress, hydrated, sectionTestReady } = useProgress();
 
   if (!section.sectionTest) {
     return (
       <p className="text-sm text-(--muted)">
-        No {sectionTestLabel.toLowerCase()} authored for this section yet.
+        No {sectionTestLabel.toLowerCase()} authored for this module yet.
       </p>
     );
   }
@@ -40,6 +40,7 @@ export function QuizLauncherPanel({
     progress.section[section.id]?.testAttempts.slice(-1)[0] ?? null;
   const passPct = section.sectionTest.passPct ?? 0.7;
   const passed = lastTest && lastTest.score / lastTest.total >= passPct;
+  const ready = sectionTestReady(section.id);
 
   return (
     <Card tone="accent" className="flex flex-col gap-3 p-5">
@@ -56,7 +57,7 @@ export function QuizLauncherPanel({
       </div>
       <p className="text-sm text-(--muted)">
         {section.sectionTest.questions.length} questions ·{" "}
-        {Math.round(passPct * 100)}% pass-gate unlocks the next section.
+        {Math.round(passPct * 100)}% pass-gate marks this module complete.
       </p>
       {hydrated && lastTest ? (
         <p className="text-xs">
@@ -69,15 +70,27 @@ export function QuizLauncherPanel({
           </span>
         </p>
       ) : null}
-      <Link
-        href={`/${packId}/section/${section.id}/test`}
-        className={cn(
-          buttonVariants({ variant: "default", size: "sm" }),
-          "self-start no-underline"
-        )}
-      >
-        {lastTest ? `Re-take ${sectionTestLabel.toLowerCase()}` : `Take ${sectionTestLabel.toLowerCase()}`}
-      </Link>
+      {ready ? (
+        <Link
+          href={`/${packId}/section/${section.id}/test`}
+          className={cn(
+            buttonVariants({ variant: "default", size: "sm" }),
+            "self-start no-underline"
+          )}
+        >
+          {lastTest ? `Re-take ${sectionTestLabel.toLowerCase()}` : `Take ${sectionTestLabel.toLowerCase()}`}
+        </Link>
+      ) : (
+        <div className="flex flex-col gap-1.5 rounded-md border border-dashed border-(--warn)/50 bg-(--warn)/8 p-3 text-xs text-(--ink)">
+          <span className="inline-flex items-center gap-1.5 font-medium text-(--warn)">
+            <Lock aria-hidden className="h-3 w-3" />
+            {sectionTestLabel} locked
+          </span>
+          <span className="text-(--muted)">
+            Read every lesson in this module first — then the test unlocks.
+          </span>
+        </div>
+      )}
     </Card>
   );
 }
