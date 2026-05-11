@@ -6,9 +6,11 @@ export const dynamic = "force-static";
 export async function GET(): Promise<Response> {
   const base = siteConfig.url.replace(/\/$/, "");
   const lines: string[] = [];
-  lines.push(`# Learning topics`);
+  lines.push(`# Learning journeys`);
   lines.push("");
-  lines.push(`> Pick a topic at ${base}/. Each topic is a self-contained course.`);
+  lines.push(
+    `> Pick a learning journey at ${base}/. Each journey is self-contained — sections + applied practice + a way to verify mastery.`
+  );
   lines.push("");
 
   for (const pack of ALL_PACKS) {

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getMockExamFrom } from "@/content/curriculum-loader";
 import { ALL_PACK_IDS, getPack } from "@/content/pack-registry";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
+import { journeyTrail } from "@/lib/nav-trail";
 import { Container } from "@/components/ui/Container";
 import { MockExamPage } from "@/components/quiz/MockExamPage";
 import { copyFor } from "@/lib/pack-helpers";
@@ -50,11 +51,11 @@ export default async function MockRoute({
   return (
     <Container width="narrow" className="py-2">
       <Breadcrumbs
-        trail={[
-          { label: "Dashboard", href: `/${packId}` },
+        trail={journeyTrail(
+          pack,
           { label: copy.mockExamsHeading, href: `/${packId}/mock` },
-          { label: mock.title },
-        ]}
+          { label: mock.title }
+        )}
       />
       <MockExamPage mock={mock} />
     </Container>

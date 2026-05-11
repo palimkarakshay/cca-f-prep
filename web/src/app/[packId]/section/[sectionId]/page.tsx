@@ -9,6 +9,7 @@ import {
   getSectionMeta,
 } from "@/content/curriculum-loader";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
+import { journeyTrail } from "@/lib/nav-trail";
 import { SectionConceptList } from "@/components/section/SectionConceptList";
 import { SectionConceptMap } from "@/components/section/SectionConceptMap";
 import { SectionTabs } from "@/components/section/SectionTabs";
@@ -103,12 +104,7 @@ export default async function SectionPage({
 
   return (
     <Container as="article" width="wide" className="py-2">
-      <Breadcrumbs
-        trail={[
-          { label: "Dashboard", href: `/${packId}` },
-          { label: section.title },
-        ]}
-      />
+      <Breadcrumbs trail={journeyTrail(pack, { label: section.title })} />
       <SectionTabs
         activeTab={activeTab}
         panels={{
@@ -119,12 +115,16 @@ export default async function SectionPage({
           games: gamesPanel,
         }}
       />
-      <div className="mt-6">
+      <div className="mt-6 flex flex-wrap items-center gap-3 text-sm">
         <Link
           href={`/${packId}`}
-          className="text-sm text-(--muted) hover:text-(--ink)"
+          className="text-(--muted) hover:text-(--ink)"
         >
-          ← Back to dashboard
+          ← Back to {pack.config.name} journey
+        </Link>
+        <span aria-hidden className="text-(--muted)">·</span>
+        <Link href="/" className="text-(--muted) hover:text-(--ink)">
+          All journeys
         </Link>
       </div>
     </Container>

@@ -50,7 +50,7 @@ export default function PickerPage() {
           href="#lane-learner"
           Icon={GraduationCap}
           label="I want to learn for myself"
-          help="Two questions, then a shaped journey + applied practice. Pick a ready-made course, or wait for us to author yours."
+          help="Two questions, then a shaped journey + applied practice. Pick a ready-made journey, or wait for us to author yours."
         />
         <LaneTile
           href="#lane-designer"

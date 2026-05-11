@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getMockExamsFrom } from "@/content/curriculum-loader";
 import { ALL_PACK_IDS, getPack } from "@/content/pack-registry";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
+import { journeyTrail } from "@/lib/nav-trail";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/Container";
@@ -45,10 +46,7 @@ export default async function MockIndexPage({
   return (
     <Container width="prose" className="py-2">
       <Breadcrumbs
-        trail={[
-          { label: "Dashboard", href: `/${packId}` },
-          { label: copy.mockExamsHeading },
-        ]}
+        trail={journeyTrail(pack, { label: copy.mockExamsHeading })}
       />
       <header className="mb-4">
         <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-(--ink)">

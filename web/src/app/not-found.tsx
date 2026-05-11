@@ -15,7 +15,7 @@ export default function NotFound() {
         href="/"
         className="mt-6 inline-block text-sm text-(--accent-2) hover:underline"
       >
-        ← Back to dashboard
+        ← Back to all learning journeys
       </Link>
     </Container>
   );
