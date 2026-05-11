@@ -3,6 +3,15 @@
 Study material and practice for the Anthropic Claude Certified Architect –
 Foundations (CCA-F) exam.
 
+> **The repo also hosts a live learning-app shell under `web/`.** It is
+> branded **Curio** for consumers and **Adept** for B2B (the designer
+> lane). CCA-F is one of several content packs the shell delivers;
+> others include `learn-french`, `sewing-beginners`, `acme-onboarding`,
+> `workplace-comms`, `security-awareness`, and `new-manager-basics`.
+> See [`web/README.md`](web/README.md) for the architecture, the
+> two-lane home page, and the SME workbench. Vercel auto-deploys
+> `web/` on every push to `main`.
+
 ## Layout
 
 | Folder | Purpose | Exam weight |
@@ -18,6 +27,7 @@ Foundations (CCA-F) exam.
 | `08-cheat-sheets/` | When-to decision trees + training methodology (with phase model + interleaving) | — |
 | `09-progress-tracker/` | skills matrix (B-skills + architect sub-areas with calibration gap), weekly history snapshots, spaced-review queue | — |
 | `docs/` | single-file MCQ runner, served via GitHub Pages (`/docs` source) | — |
+| `web/` | Curio / Adept Next.js learning-app shell + swappable content packs (the live product) | — |
 
 ## How to use
 
