@@ -38,6 +38,12 @@ const DEPTH_HELP: Record<LessonDepth, string> = {
   deeper: "Advanced detail, edge cases, source citations. Use after the canonical lesson lands.",
 };
 
+const DEPTH_SHORT_HELP: Record<LessonDepth, string> = {
+  easy: "Plain take",
+  conceptual: "Canonical",
+  deeper: "Edge cases",
+};
+
 function DepthPicker({
   available,
   value,
@@ -52,7 +58,7 @@ function DepthPicker({
     <div
       role="radiogroup"
       aria-label="Lesson depth"
-      className="inline-flex rounded-full border border-(--border) bg-(--panel-2) p-0.5 text-xs"
+      className="flex w-full items-stretch gap-1 rounded-md border border-(--border) bg-(--panel-2) p-1 text-xs sm:inline-flex sm:w-auto"
     >
       {ORDER.map((depth) => {
         const enabled = available[depth];
@@ -72,15 +78,24 @@ function DepthPicker({
             }
             onClick={() => enabled && onChange(depth)}
             className={cn(
-              "rounded-full px-3 py-1 transition-colors",
+              "flex flex-1 flex-col items-center gap-0.5 rounded px-3 py-1.5 transition-colors sm:flex-none sm:flex-row sm:gap-1.5",
+              "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)",
               active
-                ? "bg-(--accent) font-semibold text-white"
+                ? "bg-(--accent) font-semibold text-(--panel) shadow-sm"
                 : enabled
-                  ? "text-(--ink) hover:text-(--accent)"
+                  ? "text-(--ink) hover:bg-(--panel) hover:text-(--accent-2)"
                   : "cursor-not-allowed text-(--muted) opacity-60"
             )}
           >
-            {DEPTH_LABEL[depth]}
+            <span className="font-medium">{DEPTH_LABEL[depth]}</span>
+            <span
+              className={cn(
+                "text-[10px] sm:hidden",
+                active ? "text-(--panel)/85" : "text-(--muted)"
+              )}
+            >
+              {DEPTH_SHORT_HELP[depth]}
+            </span>
           </button>
         );
       })}
@@ -183,18 +198,32 @@ export function LessonView({
               </span>
             ) : null}
             <MasteryBadge mastery={m} />
-            <div className="ml-auto">
-              <DepthPicker
-                available={available}
-                value={effectiveDepth}
-                onChange={chooseDepth}
-              />
-            </div>
           </header>
 
           <h1 className="mb-1 font-[family-name:var(--font-display)] text-2xl md:text-3xl xl:text-4xl font-semibold text-(--ink)">
             {concept.title}
           </h1>
+
+          {/* Reading-depth picker on its own row so it lays out
+              predictably on every viewport. Mobile gets a full-width
+              segmented control; desktop keeps it inline with a label
+              on the left. */}
+          <div className="mb-4 mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 text-xs text-(--muted)">
+              <span className="font-semibold uppercase tracking-wide text-(--accent-2)">
+                Reading depth
+              </span>
+              <span className="hidden sm:inline">·</span>
+              <span className="hidden sm:inline">
+                {DEPTH_HELP[effectiveDepth]}
+              </span>
+            </div>
+            <DepthPicker
+              available={available}
+              value={effectiveDepth}
+              onChange={chooseDepth}
+            />
+          </div>
 
           {/* Read-aloud (TTS) — uses the browser's Web Speech API to
               speak the lesson body for audio-leaning learners. Falls
