@@ -7,9 +7,11 @@ name: Auto-generate new fal.ai images on prompts change
 # under the operator-authorized $0.50 budget for the dashboard
 # visual-polish pass.
 #
-# Bot-loop guard: `paths-ignore` skips the image-output dir so the
-# self-commit doesn't retrigger the workflow. The actor check also
-# skips runs triggered by github-actions itself.
+# Bot-loop guard: the `paths` filter limits triggers to changes in
+# the prompt file or this workflow file — the bot's commit only
+# touches `web/public/images/**`, which doesn't match, so the
+# self-commit doesn't retrigger. The actor check is a second guard
+# against any accidental match in the future.
 
 on:
   push:
@@ -18,8 +20,6 @@ on:
     paths:
       - "web/scripts/image-prompts.json"
       - ".github/workflows/generate-images-on-prompts.yml"
-    paths-ignore:
-      - "web/public/images/**"
 
 jobs:
   generate:
