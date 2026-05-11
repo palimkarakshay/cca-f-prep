@@ -1,4 +1,15 @@
-# Implementation Plan v2
+# Implementation Plan v2 (ARCHIVED 2026-05-11)
+
+> **Archived 2026-05-11.** This was the parallel B2C micro-SaaS track
+> implementing `business-viability-mitigation-plan.md` §16 (Render Pro
+> $19/mo + $29 one-time + $19/mo + $149/yr pricing, ≤ 5 routes,
+> 6–10 months at 12 hr/wk). It has been **retired** in favour of the
+> v2-scaled-B2B shape implemented per
+> [`../commercialization-readiness-plan.md`](../commercialization-readiness-plan.md)
+> (CRP — Vercel Pro, $15 B2C + $20–25 B2B, 6-vendor cap, 8–12 weeks
+> part-time Phase 1). Kept on disk as historical record only — do not
+> follow. Operator-behaviour mitigations from §17 and the weekend
+> action list from §18 are inherited by CRP §13.
 
 > **Date.** 2026-05-05
 > **Anchored to.** `plans/iterations/final-business-plan-v2.md`
