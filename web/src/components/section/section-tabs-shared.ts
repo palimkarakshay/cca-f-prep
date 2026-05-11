@@ -8,13 +8,20 @@
    resolveTab here means both layers can import it.
 ------------------------------------------------------------------ */
 
-export type TabId = "goals" | "concepts" | "flashcards" | "quiz" | "games";
+export type TabId =
+  | "goals"
+  | "concepts"
+  | "flashcards"
+  | "quiz"
+  | "apply"
+  | "games";
 
 export const TAB_IDS: readonly TabId[] = [
   "goals",
   "concepts",
   "flashcards",
   "quiz",
+  "apply",
   "games",
 ] as const;
 

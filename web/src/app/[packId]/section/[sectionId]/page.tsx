@@ -18,6 +18,7 @@ import { GoalsPanel } from "@/components/section/GoalsPanel";
 import { QuizLauncherPanel } from "@/components/section/QuizLauncherPanel";
 import { FlashcardsPanel } from "@/components/section/FlashcardsPanel";
 import { GamesPanel } from "@/components/section/GamesPanel";
+import { AppliedPanel } from "@/components/section/AppliedPanel";
 import { Container } from "@/components/ui/Container";
 import { copyFor } from "@/lib/pack-helpers";
 
@@ -102,6 +103,8 @@ export default async function SectionPage({
 
   const gamesPanel = <GamesPanel packId={packId} sectionId={sectionId} />;
 
+  const appliedPanel = <AppliedPanel section={section} packId={packId} />;
+
   return (
     <Container as="article" width="wide" className="py-2">
       <Breadcrumbs trail={journeyTrail(pack, { label: section.title })} />
@@ -112,6 +115,7 @@ export default async function SectionPage({
           concepts: conceptsPanel,
           flashcards: flashcardsPanel,
           quiz: quizPanel,
+          apply: appliedPanel,
           games: gamesPanel,
         }}
       />
