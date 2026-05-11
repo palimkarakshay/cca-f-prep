@@ -105,6 +105,37 @@ and a post-interaction state.
   config, pack contracts) gated on owner review when the repo
   enables "Require review from Code Owners" in branch protection.
 
+### LLM boundary (single-seam discipline)
+
+All LLM calls go through `src/lib/ai/router.ts`. No
+`@anthropic-ai/sdk` / `openai` imports anywhere else in `src/`.
+The router uses `server-only` to keep itself out of the client
+bundle, and `OPENROUTER_API_KEY` is read server-side. With no
+key set, `generate()` returns a structured `not-configured`
+result rather than throwing — the disabled state is part of the
+type and every call site handles it.
+
+Prompt templates live in `web/prompts/*.md`. Inlining a system
+prompt in TypeScript is a review-blocker.
+
+### Storage driver boundary
+
+Direct `localStorage` access is restricted to `src/lib/storage/`
+and the storage-owner modules listed in
+`src/__tests__/storage-key-discipline.test.ts`. New stores use
+`createLocalDriver` (today) and the same interface for the
+server-backed drivers (v0.1+). The driver swallows quota /
+disabled-storage errors so a constrained environment never
+throws into a user flow.
+
+### Feature flags
+
+Runtime toggles read through `src/lib/feature-flags.ts`. The
+`NEXT_PUBLIC_ADEPT_ENABLED=0` flip 404s `/adept/**` +
+`/for-teams` via edge middleware and hides the designer-lane
+tile on the home page — the route gate is enforced by
+`src/middleware.ts`, not by per-component conditionals alone.
+
 ## Deferred (paid or significant ops cost)
 
 Each row carries a re-evaluation trigger so this work isn't
