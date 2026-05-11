@@ -31,6 +31,25 @@ export const ALL_PACK_IDS: string[] = Object.keys(PACK_REGISTRY);
 
 export const ALL_PACKS: ContentPack[] = Object.values(PACK_REGISTRY);
 
+/**
+ * Packs targeting individual learners. Surfaced on the public picker
+ * at `/`. A pack with no `audience` field is treated as consumer so
+ * existing packs don't need to declare it explicitly.
+ */
+export const CONSUMER_PACKS: ContentPack[] = ALL_PACKS.filter(
+  (p) => (p.config.audience ?? "consumer") === "consumer"
+);
+
+/**
+ * Packs authored for a company (SME-verified, company-approved
+ * content). Surfaced only on the Adept area at `/adept`. Kept off
+ * the consumer picker so the consumer pitch isn't muddied by
+ * single-tenant demo content.
+ */
+export const B2B_PACKS: ContentPack[] = ALL_PACKS.filter(
+  (p) => p.config.audience === "b2b"
+);
+
 export function getPack(id: string): ContentPack | null {
   // Object.hasOwn guards against prototype-key leakage — route params
   // like "toString" or "__proto__" must return null, not Object.prototype
