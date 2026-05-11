@@ -1,0 +1,105 @@
+name: Generate demo images (fal.ai)
+
+# Manual-only. Triggered from the GitHub Actions tab (mobile-friendly).
+# Generates logos, pack icons, OG card, and hero illustrations via fal.ai,
+# then commits the resulting PNGs back to the branch.
+#
+# Cost: drafts ≈ $0.003/image (FLUX.1 schnell), finals ≈ $0.04/image
+# (FLUX.1 pro v1.1). The script has a --max-images cap as a budget guard.
+#
+# Setup once: add a repository secret `FAL_KEY` under
+# Settings → Secrets and variables → Actions.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "draft (schnell, cheap) or final (pro, higher quality)"
+        required: true
+        type: choice
+        default: "draft"
+        options: ["draft", "final"]
+      only:
+        description: "Comma-separated surface ids to limit to (e.g. brand.curio-logo,packs.cca-f-prep). Leave blank for all 16 surfaces."
+        required: false
+        type: string
+        default: ""
+      variants:
+        description: "Variants per surface (drafts default 3, finals default 1)"
+        required: false
+        type: string
+        default: ""
+      max_images:
+        description: "Budget guard — refuse runs over this image count"
+        required: false
+        type: string
+        default: "60"
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate FAL_KEY present
+        run: |
+          if [ -z "${FAL_KEY}" ]; then
+            echo "::error::FAL_KEY secret not set. Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+        env:
+          FAL_KEY: ${{ secrets.FAL_KEY }}
+
+      - name: Run generator
+        env:
+          FAL_KEY: ${{ secrets.FAL_KEY }}
+          MODE: ${{ inputs.mode }}
+          ONLY: ${{ inputs.only }}
+          VARIANTS: ${{ inputs.variants }}
+          MAX_IMAGES: ${{ inputs.max_images }}
+        run: |
+          ARGS="--mode=${MODE}"
+          if [ -n "${MAX_IMAGES}" ]; then ARGS="${ARGS} --max-images=${MAX_IMAGES}"; fi
+          if [ -n "${ONLY}" ]; then ARGS="${ARGS} --only=${ONLY}"; fi
+          if [ -n "${VARIANTS}" ]; then ARGS="${ARGS} --variants=${VARIANTS}"; fi
+          echo "running: node web/scripts/generate-images.mjs ${ARGS}"
+          node web/scripts/generate-images.mjs ${ARGS}
+
+      - name: Commit generated images
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add web/public/images/
+          if git diff --cached --quiet; then
+            echo "no new images to commit"
+            exit 0
+          fi
+          MSG="chore(images): generate ${{ inputs.mode }} batch via fal.ai"
+          if [ -n "${{ inputs.only }}" ]; then
+            MSG="${MSG} (only=${{ inputs.only }})"
+          fi
+          git commit -m "${MSG}"
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Summary
+        run: |
+          echo "## Generated images" >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          find web/public/images -type f \( -name '*.png' -o -name '*.jpg' \) | sort >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          if [ -f web/public/images/manifest-${{ inputs.mode }}.json ]; then
+            echo '' >> $GITHUB_STEP_SUMMARY
+            echo "Manifest:" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat web/public/images/manifest-${{ inputs.mode }}.json >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
