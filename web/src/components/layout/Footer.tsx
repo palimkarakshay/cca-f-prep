@@ -24,6 +24,13 @@ export function Footer() {
         >
           {BRAND.b2bName} demo
         </Link>
+        {" "}·{" "}
+        <Link
+          href="/adept/onboarding"
+          className="text-(--muted) underline hover:text-(--ink)"
+        >
+          {BRAND.b2bName} onboarding
+        </Link>
         {siteConfig.repoUrl ? (
           <>
             {" "}·{" "}

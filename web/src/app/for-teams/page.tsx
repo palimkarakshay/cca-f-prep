@@ -251,6 +251,15 @@ export default function ForTeamsPage() {
             the engine + verification flow harden. Get in touch via the
             repo issue tracker for now.
           </p>
+          <p className="mt-3 text-sm">
+            <Link
+              href="/adept/onboarding"
+              className="inline-flex items-center gap-2 rounded-md bg-(--accent) px-3 py-2 font-semibold text-white no-underline shadow-sm transition-colors hover:bg-(--accent-2)"
+            >
+              See the onboarding lanes for leaders, SMEs, and learners
+              <ArrowRight aria-hidden className="h-4 w-4" />
+            </Link>
+          </p>
         </Card>
       </section>
 
