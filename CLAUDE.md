@@ -244,3 +244,48 @@ gate — don't merge `codex-blockers` without addressing findings.
     in `IMPLEMENTATION.md` / `content-pack-management-plan.md`
     headers) and inline review notes at the specific v1 claims
     that the audit struck.
+
+- 2026-05-11 — **Two-lane coherence pass on the live web app.**
+  The home page (`web/src/app/page.tsx`) introduces a "learner" vs
+  "designer" lane split with two intake forms (`LearningGoalCapture`
+  + `DesignerJourneyDecoder`). Downstream surfaces had drifted:
+  `/for-teams` (the full Adept write-up) never named the lanes,
+  the journey decoder, or the SME workbench; `/adept` floated free
+  of the lane model; the web README's route tree and feature list
+  predated the rebrand; the top-level README had no pointer to the
+  live app. Pass adds, in six small commits:
+  - `/for-teams`: "Where Adept fits — the designer lane" intro
+    card, "Two paths into Adept" library-vs-company section,
+    "Try it before you brief us" cross-link card to `/adept` +
+    `/#lane-designer`, and step 1–3 rewrites that name the
+    decoder and the workbench explicitly.
+  - `/adept`: "You're in the designer lane" callout mapping the
+    5-step framework to decoder/workspace/readout, "Back to the
+    journey decoder" header CTA, one-line addition naming the
+    workbench as "the build surface for the designer lane".
+  - `/` lead paragraph names Adept as the designer lane; the
+    designer-lane tile help text previews the decode → workbench
+    flow.
+  - `web/README.md`: "Two-lane home page (Curio / Adept)" section
+    with lane / audience / front door / build surface table; route
+    tree updated to list `/for-teams`, `/adept`, `/adept/sme/[packId]`
+    under their actual locations; available-features list now
+    covers the lane chooser, the decoders, the demo workspace, the
+    SME workbench, and the write-up route.
+  - Top-level `README.md`: one-paragraph callout above the folder
+    layout and a `web/` row pointing readers at `web/README.md`,
+    so the live product is discoverable from the repo root.
+  - **Canonical lane vocabulary** (use these terms; don't paraphrase
+    in future passes):
+    - *Learner lane* → consumer Curio surface, ready-made or
+      shaped journeys.
+    - *Designer lane* → Adept, fronted by the journey decoder,
+      built in the SME workbench, deployed via the pack-level
+      Deploy action.
+    - *General-library packs* → pre-approved baseline content
+      (workplace comms, security, manager basics, …).
+    - *Company-specific packs* → one-tenant content drafted from
+      customer source material (acme-onboarding is the example).
+  - No new routes or components introduced; copy-thread pass
+    only. Visual hierarchy on `/for-teams` left as-is — flagged
+    for a future design pass.
