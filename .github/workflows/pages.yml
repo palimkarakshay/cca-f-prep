@@ -42,7 +42,7 @@ jobs:
       # true`, which silently relies on admin scope and fails on the default
       # token. Dropped.
       - name: Configure Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload docs/ as Pages artifact
         uses: actions/upload-pages-artifact@v3
