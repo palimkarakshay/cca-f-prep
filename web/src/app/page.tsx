@@ -230,7 +230,8 @@ function LaneTile({
   return (
     <a
       href={href}
-      className="group flex h-full flex-col gap-2 rounded-lg border border-(--border) bg-(--panel) p-4 no-underline shadow-sm transition-colors hover:border-(--accent) hover:bg-(--panel-2)"
+      aria-label={`${label} — ${help}`}
+      className="group flex h-full flex-col gap-2 rounded-lg border border-(--border) bg-(--panel) p-4 no-underline shadow-sm transition-colors hover:border-(--accent) hover:bg-(--panel-2) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)"
     >
       <span className="flex items-center gap-2 text-sm font-semibold text-(--ink)">
         <Icon

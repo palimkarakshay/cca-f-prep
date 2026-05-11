@@ -20,7 +20,7 @@ export function SectionConceptList({
   const unlocked = !hydrated || sectionUnlocked(section.id);
 
   return (
-    <ul className="flex flex-col gap-1">
+    <ul className="flex flex-col gap-2">
       {section.concepts.map((c) => {
         const authored = Boolean(c.lesson && c.quiz);
         const m = hydrated ? conceptMastery(c.id) : 0;

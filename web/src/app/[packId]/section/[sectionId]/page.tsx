@@ -131,7 +131,7 @@ export default async function SectionPage({
             <Link
               href={`/${packId}/section/${prevSection.id}`}
               aria-label={`Previous section: ${prevSection.title}`}
-              className="inline-flex items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2)"
+              className="inline-flex min-h-9 items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)"
             >
               <ArrowLeft aria-hidden className="h-3 w-3" />
               <span className="hidden md:inline">
@@ -144,7 +144,7 @@ export default async function SectionPage({
             <Link
               href={`/${packId}/section/${nextSection.id}`}
               aria-label={`Next section: ${nextSection.title}`}
-              className="inline-flex items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2)"
+              className="inline-flex min-h-9 items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)"
             >
               <span className="hidden md:inline">
                 Section {nextSection.n}: {nextSection.title}
@@ -156,7 +156,7 @@ export default async function SectionPage({
           <Link
             href={`/${packId}`}
             aria-label={`Journey overview: ${pack.config.name}`}
-            className="inline-flex items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2)"
+            className="inline-flex min-h-9 items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)"
           >
             <ChevronUp aria-hidden className="h-3 w-3" />
             Journey

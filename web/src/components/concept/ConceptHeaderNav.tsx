@@ -49,7 +49,7 @@ export function ConceptHeaderNav({
     >
       <Link
         href={`/${packId}/section/${section.id}`}
-        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-(--ink) no-underline hover:bg-(--panel) hover:text-(--accent-2)"
+        className="inline-flex min-h-9 items-center gap-1 rounded-md px-2 py-1 text-(--ink) no-underline hover:bg-(--panel) hover:text-(--accent-2) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)"
       >
         <ArrowLeft aria-hidden className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">Back to</span>{" "}
@@ -68,7 +68,7 @@ export function ConceptHeaderNav({
           <Link
             href={`/${packId}/concept/${prev.section.id}/${prev.concept.id}`}
             aria-label={`Previous concept: ${prev.concept.title}`}
-            className="inline-flex items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2)"
+            className="inline-flex min-h-9 items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)"
           >
             <ArrowLeft aria-hidden className="h-3 w-3" />
             Prev
@@ -78,7 +78,7 @@ export function ConceptHeaderNav({
           <Link
             href={`/${packId}/concept/${next.section.id}/${next.concept.id}`}
             aria-label={`Next concept: ${next.concept.title}`}
-            className="inline-flex items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2)"
+            className="inline-flex min-h-9 items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)"
           >
             Next
             <ArrowRight aria-hidden className="h-3 w-3" />

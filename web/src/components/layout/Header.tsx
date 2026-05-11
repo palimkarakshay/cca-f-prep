@@ -102,9 +102,9 @@ export function Header() {
         </Link>
         <nav
           aria-label="Primary"
-          className="flex items-center gap-1 sm:gap-2 md:gap-3 text-sm"
+          className="flex items-center gap-2 sm:gap-3 text-sm"
         >
-          <ul className="hidden items-center gap-1 md:flex">
+          <ul className="hidden items-center gap-2 md:flex">
             {visibleNav.map((item) => {
               const href = prefixWithPack(item.href, packId);
               const active = isActive(item, pathname);

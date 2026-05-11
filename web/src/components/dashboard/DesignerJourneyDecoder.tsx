@@ -132,16 +132,18 @@ export function DesignerJourneyDecoder() {
         </label>
       </form>
 
-      {decoded ? (
-        <DesignerBrief decoded={decoded} audience={audience} />
-      ) : (
-        <p className="rounded-md bg-(--panel-2) p-3 text-xs text-(--muted)">
-          Fill in the capability gap + business driver above. We&apos;ll
-          decode them into a section spine, success signals, source
-          documents your SME should upload, and a recommended
-          time-on-task — live, as you type.
-        </p>
-      )}
+      <div aria-live="polite" aria-atomic="false">
+        {decoded ? (
+          <DesignerBrief decoded={decoded} audience={audience} />
+        ) : (
+          <p className="rounded-md bg-(--panel-2) p-3 text-xs text-(--muted)">
+            Fill in the capability gap + business driver above. We&apos;ll
+            decode them into a section spine, success signals, source
+            documents your SME should upload, and a recommended
+            time-on-task — live, as you type.
+          </p>
+        )}
+      </div>
     </Card>
   );
 }
