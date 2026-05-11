@@ -1,0 +1,181 @@
+{
+  "generatedAt": "2026-05-11T02:42:30.559Z",
+  "results": [
+    {
+      "id": "brand.curio-logo",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/brand/drafts/curio-logo-v1.jpg",
+        "public/images/brand/drafts/curio-logo-v2.jpg",
+        "public/images/brand/drafts/curio-logo-v3.jpg"
+      ],
+      "seed": 442322182
+    },
+    {
+      "id": "brand.curio-mark",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/brand/drafts/curio-mark-v1.jpg",
+        "public/images/brand/drafts/curio-mark-v2.jpg",
+        "public/images/brand/drafts/curio-mark-v3.jpg"
+      ],
+      "seed": 1326553909
+    },
+    {
+      "id": "brand.adept-logo",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/brand/drafts/adept-logo-v1.jpg",
+        "public/images/brand/drafts/adept-logo-v2.jpg",
+        "public/images/brand/drafts/adept-logo-v3.jpg"
+      ],
+      "seed": 1648473942
+    },
+    {
+      "id": "brand.adept-mark",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/brand/drafts/adept-mark-v1.jpg",
+        "public/images/brand/drafts/adept-mark-v2.jpg",
+        "public/images/brand/drafts/adept-mark-v3.jpg"
+      ],
+      "seed": 283177828
+    },
+    {
+      "id": "packs.cca-f-prep",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/packs/drafts/cca-f-prep-v1.jpg",
+        "public/images/packs/drafts/cca-f-prep-v2.jpg",
+        "public/images/packs/drafts/cca-f-prep-v3.jpg"
+      ],
+      "seed": 1389029425
+    },
+    {
+      "id": "packs.learn-french",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/packs/drafts/learn-french-v1.jpg",
+        "public/images/packs/drafts/learn-french-v2.jpg",
+        "public/images/packs/drafts/learn-french-v3.jpg"
+      ],
+      "seed": 1222505821
+    },
+    {
+      "id": "packs.sewing-beginners",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/packs/drafts/sewing-beginners-v1.jpg",
+        "public/images/packs/drafts/sewing-beginners-v2.jpg",
+        "public/images/packs/drafts/sewing-beginners-v3.jpg"
+      ],
+      "seed": 1598723657
+    },
+    {
+      "id": "packs.security-awareness",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/packs/drafts/security-awareness-v1.jpg",
+        "public/images/packs/drafts/security-awareness-v2.jpg",
+        "public/images/packs/drafts/security-awareness-v3.jpg"
+      ],
+      "seed": 902200139
+    },
+    {
+      "id": "packs.workplace-comms",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/packs/drafts/workplace-comms-v1.jpg",
+        "public/images/packs/drafts/workplace-comms-v2.jpg",
+        "public/images/packs/drafts/workplace-comms-v3.jpg"
+      ],
+      "seed": 145219769
+    },
+    {
+      "id": "packs.new-manager-basics",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/packs/drafts/new-manager-basics-v1.jpg",
+        "public/images/packs/drafts/new-manager-basics-v2.jpg",
+        "public/images/packs/drafts/new-manager-basics-v3.jpg"
+      ],
+      "seed": 1323049392
+    },
+    {
+      "id": "packs.acme-onboarding",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/packs/drafts/acme-onboarding-v1.jpg",
+        "public/images/packs/drafts/acme-onboarding-v2.jpg",
+        "public/images/packs/drafts/acme-onboarding-v3.jpg"
+      ],
+      "seed": 1936450561
+    },
+    {
+      "id": "packs.sample-pack",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/packs/drafts/sample-pack-v1.jpg",
+        "public/images/packs/drafts/sample-pack-v2.jpg",
+        "public/images/packs/drafts/sample-pack-v3.jpg"
+      ],
+      "seed": 1277911001
+    },
+    {
+      "id": "og.curio-og",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/og/drafts/curio-og-v1.jpg",
+        "public/images/og/drafts/curio-og-v2.jpg",
+        "public/images/og/drafts/curio-og-v3.jpg"
+      ],
+      "seed": 1044477555
+    },
+    {
+      "id": "hero.picker-hero",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/hero/drafts/picker-hero-v1.jpg",
+        "public/images/hero/drafts/picker-hero-v2.jpg",
+        "public/images/hero/drafts/picker-hero-v3.jpg"
+      ],
+      "seed": 1469723538
+    },
+    {
+      "id": "hero.for-teams-hero",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/hero/drafts/for-teams-hero-v1.jpg",
+        "public/images/hero/drafts/for-teams-hero-v2.jpg",
+        "public/images/hero/drafts/for-teams-hero-v3.jpg"
+      ],
+      "seed": 2049753752
+    },
+    {
+      "id": "hero.adept-hero",
+      "mode": "draft",
+      "model": "fal-ai/flux/schnell",
+      "saved": [
+        "public/images/hero/drafts/adept-hero-v1.jpg",
+        "public/images/hero/drafts/adept-hero-v2.jpg",
+        "public/images/hero/drafts/adept-hero-v3.jpg"
+      ],
+      "seed": 788667066
+    }
+  ]
+}
