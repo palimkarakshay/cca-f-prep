@@ -154,7 +154,7 @@ export function Header() {
           {packId ? (
             <Link
               href="/"
-              aria-label="Switch learning journey — back to all journeys"
+              aria-label="Switch course — back to all courses"
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-md border border-(--border) bg-(--panel) px-3 py-2 text-xs font-medium text-(--ink) no-underline shadow-sm",
                 "transition-colors hover:border-(--accent) hover:text-(--accent-2)",
@@ -162,8 +162,8 @@ export function Header() {
               )}
             >
               <Grid3X3 aria-hidden className="h-4 w-4" />
-              <span className="hidden sm:inline">Switch journey</span>
-              <span className="sm:hidden">Journeys</span>
+              <span className="hidden sm:inline">Switch course</span>
+              <span className="sm:hidden">Courses</span>
             </Link>
           ) : null}
           {/* Persistent For-teams CTA — visible on every route so a B2B

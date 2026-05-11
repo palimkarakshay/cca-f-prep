@@ -18,7 +18,7 @@ export type { TabId };
 
 const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
   { id: "goals", label: "Goals", icon: Compass },
-  { id: "concepts", label: "Concepts", icon: BookOpen },
+  { id: "concepts", label: "Lessons", icon: BookOpen },
   { id: "flashcards", label: "Flashcards", icon: Layers },
   { id: "quiz", label: "Quiz", icon: Award },
   { id: "apply", label: "Apply", icon: Hammer },
@@ -111,7 +111,7 @@ export function SectionTabs({ activeTab: serverActiveTab, panels }: SectionTabsP
       {/* Tab strip — horizontal under lg, sticky vertical aside at lg+. */}
       <div
         role="tablist"
-        aria-label="Section sections"
+        aria-label="Module sections"
         onKeyDown={onKey}
         className={cn(
           "mb-4 flex flex-row gap-1 overflow-x-auto scrollbar-hide",

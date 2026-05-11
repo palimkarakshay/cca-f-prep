@@ -1,11 +1,15 @@
 "use client";
 
 import { useCallback } from "react";
+import Link from "next/link";
+import { Lock } from "lucide-react";
 import { useProgress } from "@/hooks/useProgress";
 import { QuizRunner } from "./QuizRunner";
 import { getAdjacentSectionsFrom } from "@/content/curriculum-loader";
 import { useCopy, usePackId } from "@/content/pack-hooks";
 import { usePack } from "@/content/pack-context";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { Section } from "@/content/curriculum-types";
 import type { CurrentAttempt, QuizAttempt } from "@/lib/progress-types";
 
@@ -15,6 +19,7 @@ export function SectionTestPage({ section }: { section: Section }) {
     hydrated,
     recordSectionTestAttempt,
     setSectionCurrentAttempt,
+    sectionTestReady,
   } = useProgress();
   const pack = usePack();
   const packId = usePackId();
@@ -38,8 +43,36 @@ export function SectionTestPage({ section }: { section: Section }) {
   if (!section.sectionTest) {
     return (
       <p className="rounded-r-md border-l-4 border-(--warn) bg-(--warn)/10 p-4 text-sm">
-        {copy.sectionTestSingular} not yet authored for this section.
+        {copy.sectionTestSingular} not yet authored for this module.
       </p>
+    );
+  }
+
+  if (!sectionTestReady(section.id)) {
+    return (
+      <section
+        aria-label={`${copy.sectionTestSingular} locked`}
+        className="flex flex-col gap-3 rounded-r-md border-l-4 border-(--warn) bg-(--warn)/10 p-4"
+      >
+        <h1 className="flex items-center gap-2 text-base font-semibold text-(--ink)">
+          <Lock aria-hidden className="h-4 w-4 text-(--warn)" />
+          {copy.sectionTestSingular} locked
+        </h1>
+        <p className="text-sm text-(--ink)">
+          Read every lesson in <strong>{section.title}</strong> first. The
+          test unlocks once the conceptual material has been worked
+          through — it isn't gated on the previous module.
+        </p>
+        <Link
+          href={`/${packId}/section/${section.id}`}
+          className={cn(
+            buttonVariants({ variant: "default", size: "sm" }),
+            "self-start no-underline"
+          )}
+        >
+          Back to module
+        </Link>
+      </section>
     );
   }
 
@@ -52,7 +85,7 @@ export function SectionTestPage({ section }: { section: Section }) {
       title={`${section.title} — ${copy.sectionTestSingular}`}
       subtitle={`Pass-gate ${Math.round(
         passPct * 100
-      )}% · passing unlocks the next section`}
+      )}% · marks the module complete`}
       questions={section.sectionTest.questions}
       passPct={passPct}
       collectReasons={false}

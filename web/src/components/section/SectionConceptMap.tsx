@@ -64,10 +64,9 @@ export function SectionConceptMap({
   section: Section;
   packId?: string;
 }) {
-  const { hydrated, conceptMastery, sectionUnlocked } = useProgress();
+  const { hydrated, conceptMastery } = useProgress();
   const ctxPackId = usePackId();
   const packId = packIdProp ?? ctxPackId;
-  const unlocked = !hydrated || sectionUnlocked(section.id);
 
   const n = section.concepts.length;
   if (n === 0) return null;
@@ -84,7 +83,7 @@ export function SectionConceptMap({
           id={`section-map-${section.id}-h`}
           className="text-xs font-semibold uppercase tracking-wide text-(--accent-2)"
         >
-          Concept map
+          Lesson map
         </h2>
         <p className="text-xs text-(--muted)">
           {hydrated ? "Coloured by your current mastery" : "Mastery loads after hydration"}
@@ -93,7 +92,7 @@ export function SectionConceptMap({
       <div className="overflow-x-auto">
         <svg
           role="img"
-          aria-label={`Visual map of ${n} concept${n === 1 ? "" : "s"} in ${section.title}`}
+          aria-label={`Visual map of ${n} lesson${n === 1 ? "" : "s"} in ${section.title}`}
           viewBox={`0 0 ${width} ${HEIGHT + 22}`}
           width={width}
           height={HEIGHT + 22}
@@ -107,7 +106,6 @@ export function SectionConceptMap({
             y2={centerY}
             stroke="var(--border)"
             strokeWidth={2}
-            strokeDasharray={unlocked ? "0" : "4 4"}
           />
           {section.concepts.map((c, i) => {
             const cx = PADDING_X + NODE_RADIUS + i * NODE_GAP;
@@ -115,7 +113,7 @@ export function SectionConceptMap({
             const level = masteryLevels[m];
             const tone = level?.tone;
             const authored = Boolean(c.lesson && c.quiz);
-            const disabled = !unlocked || !authored;
+            const disabled = !authored;
             const fill = disabled ? "var(--panel-2)" : toneFill(tone);
             const stroke = disabled ? "var(--border)" : toneStroke(tone);
             const labelLines = c.title.split(/\s+/);
@@ -127,7 +125,7 @@ export function SectionConceptMap({
               hydrated
                 ? `Mastery: ${level?.label ?? "Not started"}.`
                 : ""
-            } ${disabled ? "Locked." : "Open lesson."}`.trim();
+            } ${disabled ? "Lesson not yet authored." : "Open lesson."}`.trim();
             const node = (
               <g key={c.id} aria-label={ariaLabel}>
                 <circle
@@ -174,7 +172,7 @@ export function SectionConceptMap({
         </svg>
       </div>
       <p className="text-xs text-(--muted)">
-        Click a node to jump to that concept. Colours track your mastery
+        Click a node to jump to that lesson. Colours track your mastery
         — neutral · below 60% · passing · strong.
       </p>
     </section>

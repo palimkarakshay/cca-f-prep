@@ -116,21 +116,30 @@ export function SimplifiedBody({
         </p>
       ) : null}
       {simplified.analogy ? (
-        <p className="my-3 leading-relaxed">{simplified.analogy}</p>
+        <p className="my-3 text-base leading-relaxed">{simplified.analogy}</p>
       ) : null}
       {simplified.paragraphs?.map((p, i) => (
-        <p key={i} className="my-3 leading-relaxed">
+        <p key={i} className="my-3 text-base leading-relaxed">
           {p}
         </p>
       ))}
       {simplified.keyPoints && simplified.keyPoints.length > 0 ? (
-        <ul className="my-2 list-disc pl-5">
-          {simplified.keyPoints.map((kp, i) => (
-            <li key={i} className="my-1">
-              {kp}
-            </li>
-          ))}
-        </ul>
+        <section
+          aria-label="Easy key points"
+          className="mt-6 rounded-lg border border-(--border) bg-(--panel-2) p-4"
+        >
+          <h2 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
+            <Lightbulb className="h-3.5 w-3.5" aria-hidden />
+            Quick takeaways
+          </h2>
+          <ul className="my-1 list-disc pl-5">
+            {simplified.keyPoints.map((kp, i) => (
+              <li key={i} className="my-1">
+                {kp}
+              </li>
+            ))}
+          </ul>
+        </section>
       ) : null}
     </div>
   );

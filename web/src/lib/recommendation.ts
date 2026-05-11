@@ -45,9 +45,11 @@ export function recommendForPack(
   copy: Required<PackCopy>,
   packId: string
 ): Recommendation {
-  // 1. Drill — any unlocked concept landed on an "underwhelm" level.
+  // 1. Drill — any concept landed on an "underwhelm" level. We no
+  // longer gate this on `sp.unlocked` because the UI treats every
+  // module as accessible; the recommendation engine should mirror
+  // that and recommend the highest-value drill across the curriculum.
   for (const section of pack.curriculum.sections) {
-    if (!ensureSection(p, section.id).unlocked) continue;
     for (const c of section.concepts) {
       if (!c.lesson || !c.quiz) continue;
       const cp = ensureConcept(p, c.id);
@@ -65,8 +67,7 @@ export function recommendForPack(
 
   // 2. Section-test ready — every authored concept counts as mastered.
   for (const section of pack.curriculum.sections) {
-    const sp = ensureSection(p, section.id);
-    if (!sp.unlocked || !section.sectionTest) continue;
+    if (!section.sectionTest) continue;
     const authored = section.concepts.filter((c) => c.lesson && c.quiz);
     if (authored.length === 0) continue;
     const allMastered = authored.every((c) =>
@@ -82,11 +83,11 @@ export function recommendForPack(
     }
   }
 
-  // 3. Continue — earliest unlocked-incomplete section's first
-  // not-yet-mastered authored concept.
+  // 3. Continue — earliest incomplete section's first not-yet-mastered
+  // authored concept.
   for (const section of pack.curriculum.sections) {
     const sp = ensureSection(p, section.id);
-    if (!sp.unlocked || sp.complete) continue;
+    if (sp.complete) continue;
     for (const c of section.concepts) {
       if (!c.lesson || !c.quiz) continue;
       const cp = ensureConcept(p, c.id);

@@ -255,13 +255,13 @@ export function ResumeLearningCard() {
       </header>
 
       {summary && summary.total > 0 ? (
-        <div aria-label="Journey progress">
+        <div aria-label="Course progress">
           <div className="mb-1 flex items-center justify-between text-xs text-(--muted)">
             <span>
               <strong className="text-(--ink)">
                 {summary.mastered} of {summary.total}
               </strong>{" "}
-              concepts mastered
+              lessons mastered
             </span>
             <span className="font-mono">{summary.pct}%</span>
           </div>
@@ -289,7 +289,7 @@ export function ResumeLearningCard() {
           )}
           aria-label={continueLabel}
         >
-          {isDeepLink ? "Continue learning" : "Open journey"}
+          {isDeepLink ? "Continue learning" : "Open course"}
           <ArrowRight aria-hidden className="h-4 w-4" />
         </Link>
         {showNextUp ? (
@@ -309,7 +309,7 @@ export function ResumeLearningCard() {
           href={`/${pack.config.id}`}
           className="text-xs text-(--muted) underline-offset-4 hover:text-(--ink) hover:underline"
         >
-          Journey overview
+          Course overview
         </Link>
       </div>
 

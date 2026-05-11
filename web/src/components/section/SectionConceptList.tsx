@@ -14,17 +14,16 @@ export function SectionConceptList({
   /** Override the URL pack id when rendered outside [packId] routes. */
   packId?: string;
 }) {
-  const { hydrated, conceptMastery, sectionUnlocked } = useProgress();
+  const { hydrated, conceptMastery } = useProgress();
   const ctxPackId = usePackId();
   const packId = packIdProp ?? ctxPackId;
-  const unlocked = !hydrated || sectionUnlocked(section.id);
 
   return (
     <ul className="flex flex-col gap-2">
       {section.concepts.map((c) => {
         const authored = Boolean(c.lesson && c.quiz);
         const m = hydrated ? conceptMastery(c.id) : 0;
-        const disabled = !unlocked || !authored;
+        const disabled = !authored;
         const inner = (
           <span className="flex w-full items-center gap-3">
             <span className="w-12 font-mono text-[11px] text-(--accent-2)">

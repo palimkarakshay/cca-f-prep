@@ -67,6 +67,48 @@
       "prompt": "Square app icon, 512x512, deep charcoal #0e0f12 background, centered terracotta #d97757 flat illustration of three stacked cards fanned out slightly, the top card showing a single abstract sparkline. Hand-drawn line work, paper grain, generous padding, no text. Editorial flat style."
     }
   },
+  "modules": {
+    "pmbok-foundations": {
+      "size": "square_hd",
+      "model": "flux-pro/v1.1",
+      "prompt": "Square editorial illustration, 1:1, soft warm cream background with subtle paper grain, hand-drawn terracotta #b04829 flat illustration of a stack of three smooth foundation stones with a small architect's ruler resting across the top and a single growing seedling pushing up through the middle stone, suggesting solid foundations that grow value. Generous margin, soft shadows, no text. Editorial flat style with single accent colour, designed as a small module thumbnail."
+    },
+    "pmbok-principles": {
+      "size": "square_hd",
+      "model": "flux-pro/v1.1",
+      "prompt": "Square editorial illustration, 1:1, soft warm cream background with subtle paper grain, hand-drawn terracotta #b04829 flat illustration of six concentric arcs radiating from a single calm centre point like a stylized compass rose viewed from above, each arc slightly different in length, suggesting six guiding principles. Generous margin, no text. Editorial flat style with single accent colour."
+    },
+    "pmbok-focus-areas": {
+      "size": "square_hd",
+      "model": "flux-pro/v1.1",
+      "prompt": "Square editorial illustration, 1:1, soft warm cream background with subtle paper grain, hand-drawn terracotta #b04829 flat illustration of a softly curving arrow path with five small flags planted along it at staged intervals, gently suggesting the project lifecycle (initiate, plan, execute, monitor, close). Generous margin, no text. Editorial flat style with single accent colour."
+    },
+    "pmbok-tailoring": {
+      "size": "square_hd",
+      "model": "flux-pro/v1.1",
+      "prompt": "Square editorial illustration, 1:1, soft warm cream background with subtle paper grain, hand-drawn terracotta #b04829 flat illustration of a tailor's measuring tape coiled in a balanced spiral around a small folded paper pattern, suggesting tailoring an approach to fit a specific project. Generous margin, no text. Editorial flat style with single accent colour."
+    },
+    "pmbok-domains-i": {
+      "size": "square_hd",
+      "model": "flux-pro/v1.1",
+      "prompt": "Square editorial illustration, 1:1, soft warm cream background with subtle paper grain, hand-drawn terracotta #b04829 flat illustration of an open ledger book lying flat with three vertical columns drawn neatly inside and a slim pen resting diagonally across the page, suggesting governance, scope, and schedule planning. Generous margin, no text. Editorial flat style with single accent colour."
+    },
+    "pmbok-domains-ii": {
+      "size": "square_hd",
+      "model": "flux-pro/v1.1",
+      "prompt": "Square editorial illustration, 1:1, soft warm cream background with subtle paper grain, hand-drawn terracotta #b04829 flat illustration of three small abstract figures arranged around a balanced two-pan scale with a single coin gently tipping one side, suggesting stakeholder balance and value tradeoffs. Generous margin, no text, no recognizable faces. Editorial flat style with single accent colour."
+    },
+    "pmbok-domains-iii": {
+      "size": "square_hd",
+      "model": "flux-pro/v1.1",
+      "prompt": "Square editorial illustration, 1:1, soft warm cream background with subtle paper grain, hand-drawn terracotta #b04829 flat illustration of a small umbrella partially opening over a neat stack of toolboxes, with a single raindrop suspended in the air above, suggesting risk preparation paired with resource readiness. Generous margin, no text. Editorial flat style with single accent colour."
+    },
+    "pmbok-exam-strategy": {
+      "size": "square_hd",
+      "model": "flux-pro/v1.1",
+      "prompt": "Square editorial illustration, 1:1, soft warm cream background with subtle paper grain, hand-drawn terracotta #b04829 flat illustration of a small analogue alarm clock paired with a partially unrolled scroll-style checklist, suggesting timed preparation and confident final review. Generous margin, no text. Editorial flat style with single accent colour."
+    }
+  },
   "og": {
     "curio-og": {
       "size": "landscape_16_9",
@@ -89,6 +131,11 @@
       "size": "landscape_16_9",
       "model": "flux/schnell",
       "prompt": "Wide editorial banner illustration, 16:9, warm cream background with soft paper grain, terracotta #d97757 flat illustration of an SME workbench scene: an architect's draft table seen from above with a stack of approved content cards, a stamped seal of approval, a measuring rule, and a single quill, suggesting expert review. Hand-drawn line work, generous negative space, no text, no people. Editorial flat style."
+    },
+    "pmbok-course-hero": {
+      "size": "landscape_16_9",
+      "model": "flux-pro/v1.1",
+      "prompt": "Wide editorial banner illustration, 16:9, soft warm cream background with subtle paper grain, hand-drawn terracotta #b04829 flat illustration of a calm architectural workspace seen from a low angle: a tilted drafting table with a large unrolled blueprint, a brass compass laid open, a slim notebook, and a single steaming mug, with a few sheets of paper drifting softly to the side. Suggests careful project preparation and disciplined study. Generous negative space, no text, no people. Editorial flat style with single accent colour."
     }
   }
 }

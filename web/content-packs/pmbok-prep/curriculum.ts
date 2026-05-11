@@ -38,6 +38,7 @@ export const CURRICULUM: Curriculum = {
       id: "s1-foundations",
       n: 1,
       title: "Foundations & value delivery",
+      iconImagePath: "/images/modules/final/pmbok-foundations.jpg",
       blurb:
         "What a project is, what value delivery means, and the system of roles, EEFs and OPAs that every PMP scenario assumes.",
       concepts: [
@@ -495,6 +496,7 @@ export const CURRICULUM: Curriculum = {
       id: "s2-principles",
       n: 2,
       title: "The six refined principles",
+      iconImagePath: "/images/modules/final/pmbok-principles.jpg",
       blurb:
         "PMBOK 8e refined the twelve 7e principles down to six. Each is a stance, not a process — and the exam tests whether you can apply them in tradeoff scenarios.",
       concepts: [
@@ -1095,6 +1097,7 @@ export const CURRICULUM: Curriculum = {
       id: "s3-focus-areas",
       n: 3,
       title: "The five focus areas",
+      iconImagePath: "/images/modules/final/pmbok-focus-areas.jpg",
       blurb:
         "PMBOK 8e renames the historic Process Groups as Focus Areas: Initiating, Planning, Executing, Monitoring & Controlling, Closing. They overlap, iterate, and are independent of approach.",
       concepts: [
@@ -1605,6 +1608,7 @@ export const CURRICULUM: Curriculum = {
       id: "s4-approaches-tailoring",
       n: 4,
       title: "Approaches & tailoring",
+      iconImagePath: "/images/modules/final/pmbok-tailoring.jpg",
       blurb:
         "Predictive, adaptive, hybrid: choose by characteristic, then tailor lifecycle / processes / engagement to the actual project.",
       concepts: [
@@ -2009,6 +2013,7 @@ export const CURRICULUM: Curriculum = {
       id: "s5-domains-1",
       n: 5,
       title: "Performance domains I — governance, scope, schedule",
+      iconImagePath: "/images/modules/final/pmbok-domains-i.jpg",
       blurb:
         "The first three of seven Performance Domains. Each domain is an outcome area, not a knowledge silo.",
       concepts: [
@@ -2340,6 +2345,7 @@ export const CURRICULUM: Curriculum = {
       id: "s6-domains-2",
       n: 6,
       title: "Performance domains II — finance & stakeholders",
+      iconImagePath: "/images/modules/final/pmbok-domains-ii.jpg",
       blurb:
         "Finance covers the project's economics — including the most-tested numeric tool, Earned Value Management. Stakeholders covers identification, analysis, and engagement.",
       concepts: [
@@ -2714,6 +2720,7 @@ export const CURRICULUM: Curriculum = {
       id: "s7-domains-3",
       n: 7,
       title: "Performance domains III — resources & risk",
+      iconImagePath: "/images/modules/final/pmbok-domains-iii.jpg",
       blurb:
         "Resources covers people and physical assets — including team formation and conflict. Risk covers both threats and opportunities, with five response strategies each.",
       concepts: [
@@ -3053,6 +3060,7 @@ export const CURRICULUM: Curriculum = {
       id: "s8-exam-strategy",
       n: 8,
       title: "Exam strategy & final review",
+      iconImagePath: "/images/modules/final/pmbok-exam-strategy.jpg",
       blurb:
         "PMI-isms, scenario triage, ethics, and a study-plan checklist for the final two weeks before the exam.",
       concepts: [

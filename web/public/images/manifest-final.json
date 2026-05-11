@@ -1,0 +1,86 @@
+{
+  "generatedAt": "2026-05-11T14:50:46.807Z",
+  "results": [
+    {
+      "id": "modules.pmbok-foundations",
+      "mode": "final",
+      "model": "fal-ai/flux-pro/v1.1",
+      "saved": [
+        "public/images/modules/final/pmbok-foundations.jpg"
+      ],
+      "seed": 3866890499
+    },
+    {
+      "id": "modules.pmbok-principles",
+      "mode": "final",
+      "model": "fal-ai/flux-pro/v1.1",
+      "saved": [
+        "public/images/modules/final/pmbok-principles.jpg"
+      ],
+      "seed": 312631394
+    },
+    {
+      "id": "modules.pmbok-focus-areas",
+      "mode": "final",
+      "model": "fal-ai/flux-pro/v1.1",
+      "saved": [
+        "public/images/modules/final/pmbok-focus-areas.jpg"
+      ],
+      "seed": 2562760498
+    },
+    {
+      "id": "modules.pmbok-tailoring",
+      "mode": "final",
+      "model": "fal-ai/flux-pro/v1.1",
+      "saved": [
+        "public/images/modules/final/pmbok-tailoring.jpg"
+      ],
+      "seed": 2220501209
+    },
+    {
+      "id": "modules.pmbok-domains-i",
+      "mode": "final",
+      "model": "fal-ai/flux-pro/v1.1",
+      "saved": [
+        "public/images/modules/final/pmbok-domains-i.jpg"
+      ],
+      "seed": 3049374937
+    },
+    {
+      "id": "modules.pmbok-domains-ii",
+      "mode": "final",
+      "model": "fal-ai/flux-pro/v1.1",
+      "saved": [
+        "public/images/modules/final/pmbok-domains-ii.jpg"
+      ],
+      "seed": 2766632627
+    },
+    {
+      "id": "modules.pmbok-domains-iii",
+      "mode": "final",
+      "model": "fal-ai/flux-pro/v1.1",
+      "saved": [
+        "public/images/modules/final/pmbok-domains-iii.jpg"
+      ],
+      "seed": 1032144720
+    },
+    {
+      "id": "modules.pmbok-exam-strategy",
+      "mode": "final",
+      "model": "fal-ai/flux-pro/v1.1",
+      "saved": [
+        "public/images/modules/final/pmbok-exam-strategy.jpg"
+      ],
+      "seed": 1399931457
+    },
+    {
+      "id": "hero.pmbok-course-hero",
+      "mode": "final",
+      "model": "fal-ai/flux-pro/v1.1",
+      "saved": [
+        "public/images/hero/final/pmbok-course-hero.jpg"
+      ],
+      "seed": 968258825
+    }
+  ]
+}

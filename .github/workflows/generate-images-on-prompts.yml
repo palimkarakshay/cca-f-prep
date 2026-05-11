@@ -1,0 +1,86 @@
+name: Auto-generate new fal.ai images on prompts change
+
+# Auto-fires when `web/scripts/image-prompts.json` changes on a feature
+# branch. Generates only the *new* PMBOK module + course-hero surfaces
+# at flux-pro quality (single variant each) and commits the images
+# back to the branch. Strict 12-image cap → ≤$0.48 per run, well
+# under the operator-authorized $0.50 budget for the dashboard
+# visual-polish pass.
+#
+# Bot-loop guard: the `paths` filter limits triggers to changes in
+# the prompt file or this workflow file — the bot's commit only
+# touches `web/public/images/**`, which doesn't match, so the
+# self-commit doesn't retrigger. The actor check is a second guard
+# against any accidental match in the future.
+
+on:
+  push:
+    branches:
+      - "claude/improve-learning-platform-**"
+    paths:
+      - "web/scripts/image-prompts.json"
+      - ".github/workflows/generate-images-on-prompts.yml"
+
+jobs:
+  generate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check FAL_KEY presence
+        id: fal_key
+        run: |
+          if [ -z "${FAL_KEY}" ]; then
+            echo "::warning::FAL_KEY secret not set. Skipping image generation."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          FAL_KEY: ${{ secrets.FAL_KEY }}
+
+      - name: Generate new module + hero images
+        if: steps.fal_key.outputs.present == 'true'
+        env:
+          FAL_KEY: ${{ secrets.FAL_KEY }}
+        run: |
+          # The script reads `image-prompts.json` and writes to
+          # `web/public/images/<group>/final/`. --max-images=12 caps
+          # spend at $0.48 even if the surface list grows; the
+          # current `only=` enumerates 8 modules + 1 course hero = 9
+          # images = $0.36 at flux-pro v1.1.
+          node web/scripts/generate-images.mjs \
+            --mode=final \
+            --max-images=12 \
+            --only=modules.pmbok-foundations,modules.pmbok-principles,modules.pmbok-focus-areas,modules.pmbok-tailoring,modules.pmbok-domains-i,modules.pmbok-domains-ii,modules.pmbok-domains-iii,modules.pmbok-exam-strategy,hero.pmbok-course-hero
+
+      - name: Commit generated images back to branch
+        if: steps.fal_key.outputs.present == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add web/public/images/
+          if git diff --cached --quiet; then
+            echo "no new images to commit"
+            exit 0
+          fi
+          git commit -m "chore(images): auto-generate PMBOK module + course-hero illustrations via fal.ai"
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Summary
+        run: |
+          echo "## Generated module + hero images" >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          find web/public/images/modules web/public/images/hero -type f \( -name '*.png' -o -name '*.jpg' \) 2>/dev/null | sort >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY

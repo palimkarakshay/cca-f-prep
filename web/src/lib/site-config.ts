@@ -28,20 +28,31 @@ export type { MasteryLevel, NavIcon, NavItem, PackCopy };
  * Packs override individual keys via `pack.config.copy`. Resolved here
  * so components can do `copy.mockExamsHeading` safely.
  */
+/* ------------------------------------------------------------------
+   Default UI copy. The curriculum unit terminology defaults to the
+   industry-standard learner ladder used by Coursera / edX / Khan
+   Academy / LinkedIn Learning / Skilljar (Anthropic Academy's CMS):
+
+       Course  ⊇  Module  ⊇  Lesson  ⊇  Quiz
+
+   Packs that prefer exam-coded vocabulary ("Section test", "Concepts
+   mastered") override only the keys that don't fit them. The shell
+   reads from `copy` so each component stays terminology-agnostic.
+------------------------------------------------------------------ */
 export const DEFAULT_COPY: Required<PackCopy> = {
-  mockExamsHeading: "Mock exams",
-  mockExamsBlurb: "Independent of section progress. Use for calibration.",
+  mockExamsHeading: "Practice exams",
+  mockExamsBlurb: "Independent of module progress. Use for calibration.",
   mockExamsMetaDescription:
-    "Independent calibration exams covering all sections. Use them to gauge readiness before the real assessment.",
-  sectionTestSingular: "Section test",
-  conceptsMasteredLabel: "Concepts mastered",
-  sectionsCompleteLabel: "Sections complete",
-  bestMockScoreLabel: "Best mock score",
+    "Independent calibration exams covering all modules. Use them to gauge readiness before the real assessment.",
+  sectionTestSingular: "Module quiz",
+  conceptsMasteredLabel: "Lessons mastered",
+  sectionsCompleteLabel: "Modules complete",
+  bestMockScoreLabel: "Best practice exam score",
   studyStreakLabel: "Study streak",
   recoDrillLabel: "Drill",
-  recoDrillTitle: "Re-take a missed concept",
-  recoSectionTestLabel: "Section test",
-  recoSectionTestTitle: "Section test ready",
+  recoDrillTitle: "Re-take a missed lesson",
+  recoSectionTestLabel: "Module quiz",
+  recoSectionTestTitle: "Module quiz ready",
   recoLessonLabel: "Continue — read lesson",
   recoLessonTitle: "Read the next lesson",
   recoQuizLabel: "Continue — take quiz",
@@ -49,10 +60,16 @@ export const DEFAULT_COPY: Required<PackCopy> = {
   recoDoneLabel: "All caught up",
   recoDoneTitle: "All authored content complete",
   recoDoneMessage:
-    "Every authored concept is passing. New content lands as it's authored.",
+    "Every authored lesson is passing. New content lands as it's authored.",
   whatYoullLearnHeading: "What you'll learn",
   passLabel: "pass",
   belowPassGateLabel: "below pass-gate",
+  courseSingular: "Course",
+  coursePlural: "Courses",
+  moduleSingular: "Module",
+  modulePlural: "Modules",
+  lessonSingular: "Lesson",
+  lessonPlural: "Lessons",
 };
 
 /**

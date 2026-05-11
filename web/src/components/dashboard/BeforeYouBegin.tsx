@@ -8,12 +8,14 @@ import {
   Square,
   ExternalLink,
   AlertTriangle,
+  Check,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
   getBeforeYouBeginState,
   getServerSnapshot,
+  setBeforeYouBeginDismissed,
   setBeforeYouBeginOpen,
   subscribeBeforeYouBegin,
   toggleBeforeYouBeginItem,
@@ -46,7 +48,7 @@ export function BeforeYouBegin({
     getSnapshot,
     getServerSnapshot
   );
-  const { items: checked, open } = state;
+  const { items: checked, open, dismissed } = state;
 
   const toggleItem = useCallback(
     (key: string) => toggleBeforeYouBeginItem(packId, key),
@@ -58,11 +60,49 @@ export function BeforeYouBegin({
     [packId, open]
   );
 
+  const dismiss = useCallback(
+    () => setBeforeYouBeginDismissed(packId, true),
+    [packId]
+  );
+
+  const reopen = useCallback(() => {
+    setBeforeYouBeginDismissed(packId, false);
+    setBeforeYouBeginOpen(packId, true);
+  }, [packId]);
+
   const total = prerequisites.requirements.length;
   const done = prerequisites.requirements.filter(
     (r) => checked[`req:${r.label}`]
   ).length;
   const allDone = done === total;
+
+  // Once the self-check is complete and dismissed, collapse into a
+  // single-line confirmation that the learner can re-expand to see
+  // what they ticked. This satisfies the "one-time only" requirement
+  // without losing the audit trail of which items were confirmed.
+  if (allDone && dismissed) {
+    return (
+      <button
+        type="button"
+        onClick={reopen}
+        aria-label="Show prerequisites I confirmed"
+        className={cn(
+          "flex w-full items-center gap-2 rounded-md border border-(--good)/30 bg-(--good)/8 px-3 py-2 text-left text-xs text-(--ink)",
+          "hover:border-(--good)/50 hover:bg-(--good)/12",
+          "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)"
+        )}
+      >
+        <Check
+          aria-hidden
+          className="h-3.5 w-3.5 flex-none text-(--good)"
+        />
+        <span className="flex-1">
+          Pre-flight self-check complete — {total}/{total} confirmed
+        </span>
+        <span className="text-[11px] text-(--muted)">Show</span>
+      </button>
+    );
+  }
 
   return (
     <Card
@@ -232,6 +272,25 @@ export function BeforeYouBegin({
                 </a>
               ))}
             </section>
+          ) : null}
+
+          {allDone ? (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-(--good)/8 px-3 py-2 text-xs">
+              <span className="inline-flex items-center gap-1.5 text-(--good)">
+                <Check aria-hidden className="h-3.5 w-3.5" />
+                All {total} confirmed — you're ready to begin.
+              </span>
+              <button
+                type="button"
+                onClick={dismiss}
+                className={cn(
+                  "rounded-md border border-(--good)/40 bg-(--panel) px-2 py-1 text-[11px] font-medium text-(--good)",
+                  "hover:bg-(--good)/8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)"
+                )}
+              >
+                Hide this for good
+              </button>
+            </div>
           ) : null}
         </div>
       ) : null}
