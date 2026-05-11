@@ -14,9 +14,20 @@
 export interface BeforeYouBeginState {
   items: Record<string, boolean>;
   open: boolean;
+  /**
+   * True once the learner has manually dismissed the card after
+   * completing the self-check. When set, the card renders as a
+   * compact one-line summary instead of the full panel, but the
+   * learner can still re-expand it to see what they ticked.
+   */
+  dismissed: boolean;
 }
 
-const DEFAULT_STATE: BeforeYouBeginState = { items: {}, open: true };
+const DEFAULT_STATE: BeforeYouBeginState = {
+  items: {},
+  open: true,
+  dismissed: false,
+};
 
 function storageKey(packId: string): string {
   return `${packId}:before-you-begin:v1`;
@@ -35,6 +46,7 @@ function load(packId: string): BeforeYouBeginState {
           ? (obj.items as Record<string, boolean>)
           : {},
       open: typeof obj.open === "boolean" ? obj.open : true,
+      dismissed: typeof obj.dismissed === "boolean" ? obj.dismissed : false,
     };
   } catch {
     return DEFAULT_STATE;
@@ -71,6 +83,7 @@ export function toggleBeforeYouBeginItem(
   const current = readCached(packId);
   const next: BeforeYouBeginState = {
     open: current.open,
+    dismissed: current.dismissed,
     items: { ...current.items, [key]: !current.items[key] },
   };
   cache.set(packId, next);
@@ -80,7 +93,26 @@ export function toggleBeforeYouBeginItem(
 
 export function setBeforeYouBeginOpen(packId: string, open: boolean): void {
   const current = readCached(packId);
-  const next: BeforeYouBeginState = { items: current.items, open };
+  const next: BeforeYouBeginState = {
+    items: current.items,
+    dismissed: current.dismissed,
+    open,
+  };
+  cache.set(packId, next);
+  save(packId, next);
+  notify();
+}
+
+export function setBeforeYouBeginDismissed(
+  packId: string,
+  dismissed: boolean
+): void {
+  const current = readCached(packId);
+  const next: BeforeYouBeginState = {
+    items: current.items,
+    open: dismissed ? false : current.open,
+    dismissed,
+  };
   cache.set(packId, next);
   save(packId, next);
   notify();
