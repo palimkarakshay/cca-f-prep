@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSiteConfig } from "@/content/pack-hooks";
 import type { NavItem } from "@/lib/site-config";
+import { BRAND } from "@/lib/brand";
 import { ThemeToggle } from "@/components/primitives/ThemeToggle";
 import { cn } from "@/lib/utils";
 
@@ -60,9 +61,11 @@ export function Header() {
           className="flex min-h-11 flex-col justify-center gap-0.5 no-underline"
         >
           <span className="font-[family-name:var(--font-display)] text-base font-semibold text-(--ink)">
-            {siteConfig.name}
+            {BRAND.name}
           </span>
-          <span className="text-xs text-(--muted)">{siteConfig.tagline}</span>
+          <span className="text-xs text-(--muted)">
+            {packId ? siteConfig.name : BRAND.tagline}
+          </span>
         </Link>
         <nav
           aria-label="Primary"

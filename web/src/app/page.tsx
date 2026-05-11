@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ALL_PACKS } from "@/content/pack-registry";
 import { Container } from "@/components/ui/Container";
 import { Card } from "@/components/ui/card";
+import { BRAND } from "@/lib/brand";
+import { LearningGoalCapture } from "@/components/dashboard/LearningGoalCapture";
 
 export const metadata: Metadata = {
   title: "Pick a topic",
@@ -13,20 +15,35 @@ export const metadata: Metadata = {
 export default function PickerPage() {
   return (
     <Container width="wide" className="flex flex-col gap-6 py-2">
-      {/* Page-level h1 (the chrome Header already shows the tagline; we
-          keep the wordmark visible here as a landmark heading but skip
-          the tagline so it doesn't duplicate-render and break strict-mode
-          locators). */}
       <header>
-        <h1 className="font-[family-name:var(--font-display)] text-2xl md:text-3xl font-semibold text-(--ink)">
+        <p className="font-[family-name:var(--font-display)] text-xs uppercase tracking-[0.18em] text-(--muted)">
+          {BRAND.name} · {BRAND.tagline}
+        </p>
+        <h1 className="mt-1 font-[family-name:var(--font-display)] text-2xl md:text-3xl font-semibold text-(--ink)">
           What do you want to learn today?
         </h1>
         <p className="mt-1 text-sm text-(--muted)">
-          Each topic is a self-contained course — pick one to start, switch any
-          time. Your progress is kept separately for each topic.
+          Tell us your goal — {BRAND.name} shapes a pack around it. Already have
+          a topic in mind? Pick one of the courses below; each is a
+          self-contained course with its own progress.
         </p>
       </header>
 
+      <LearningGoalCapture />
+
+      <section aria-labelledby="ready-to-go" className="flex flex-col gap-3">
+        <header>
+          <h2
+            id="ready-to-go"
+            className="font-[family-name:var(--font-display)] text-lg font-semibold text-(--ink)"
+          >
+            Ready-made courses
+          </h2>
+          <p className="text-sm text-(--muted)">
+            Curated topics, fully authored. Pick one to start now — switch any
+            time. Progress is kept per topic.
+          </p>
+        </header>
       <ul
         aria-label="Available topics"
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
@@ -89,10 +106,15 @@ export default function PickerPage() {
           );
         })}
       </ul>
+      </section>
 
       <footer className="mt-2 text-xs text-(--muted)">
-        Topic packs live under <code>web/content-packs/&lt;pack-id&gt;/</code>.
-        See <code>web/content-packs/README.md</code> to author one.
+        For organisations:{" "}
+        <Link href="/for-teams" className="underline hover:text-(--ink)">
+          {BRAND.b2bName} for teams
+        </Link>{" "}
+        — SME-verified, company-approved content packs with measurable
+        effectivity.
       </footer>
     </Container>
   );
