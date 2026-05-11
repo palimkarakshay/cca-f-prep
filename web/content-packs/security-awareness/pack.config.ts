@@ -78,5 +78,6 @@ export const packConfig: PackConfig = {
   },
   iconSvg: ICON_SVG,
   iconMaskableSvg: ICON_MASKABLE_SVG,
+  iconImagePath: "/images/packs/final/security-awareness.jpg",
   audience: "b2b",
 };

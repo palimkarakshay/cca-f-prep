@@ -44,6 +44,26 @@ export const metadata: Metadata = {
     title: BRAND.shortName,
     statusBarStyle: "black-translucent",
   },
+  openGraph: {
+    type: "website",
+    siteName: BRAND.name,
+    title: BRAND.name,
+    description: BRAND.description,
+    images: [
+      {
+        url: "/images/og/final/curio-og.jpg",
+        width: 1024,
+        height: 576,
+        alt: `${BRAND.name} — ${BRAND.tagline}`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: BRAND.name,
+    description: BRAND.description,
+    images: ["/images/og/final/curio-og.jpg"],
+  },
 };
 
 export const viewport: Viewport = {

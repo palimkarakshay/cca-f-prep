@@ -87,6 +87,7 @@ export const packConfig: PackConfig = {
   },
   iconSvg: ICON_SVG,
   iconMaskableSvg: ICON_MASKABLE_SVG,
+  iconImagePath: "/images/packs/final/acme-onboarding.jpg",
   // B2B audience — surfaces under /adept, not on the consumer picker.
   audience: "b2b",
 };
