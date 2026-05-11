@@ -66,13 +66,15 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
-  // Subresource Integrity — Next 16.2 emits sha-384 integrity attributes
-  // on every <script> it generates, so a CDN/supply-chain swap fails to
-  // hydrate. If the build errors on this option (the API is still
-  // flagged experimental), revert this single block.
-  experimental: {
-    sri: { algorithm: "sha384" },
-  },
+  // Subresource Integrity was previously enabled via experimental.sri.
+  // On Vercel the integrity attribute on the initial <script> chunks did
+  // not match the bytes served from the CDN (likely compression-layer
+  // differences vs. the build-time hash), so the browser blocked at
+  // least one of those scripts, React never hydrated, and every
+  // client-side interaction was inert — tabs didn't switch, the theme
+  // toggle didn't flip. Disable until per-request CSP nonces land (the
+  // tracked alternative in SECURITY.md). Re-enable only after a
+  // matching-bytes verification step in CI.
   async headers() {
     return [
       {
