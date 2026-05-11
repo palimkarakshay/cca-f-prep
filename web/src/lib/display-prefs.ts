@@ -28,7 +28,14 @@
    <html> so the rules in globals.css can target them. An inline
    init script in app/layout.tsx reads localStorage before paint to
    avoid flash-of-default-appearance.
+
+   Implementation: delegates to a `local-only` StorageDriver. The
+   public API of `prefsStore`, `readPrefs`, `writePrefs`,
+   `applyPrefsToDocument`, and `initScript` is unchanged from the
+   pre-driver implementation.
 ------------------------------------------------------------------ */
+
+import { createLocalDriver } from "./storage/local-driver";
 
 export const DISPLAY_PREFS_STORAGE_KEY = "curio:display-prefs:v1";
 
@@ -68,27 +75,22 @@ function sanitize(raw: unknown): DisplayPrefs {
   };
 }
 
+const FROZEN_DEFAULT: Readonly<DisplayPrefs> = Object.freeze({
+  ...DEFAULT_PREFS,
+});
+
+const driver = createLocalDriver<DisplayPrefs>({
+  storageKey: DISPLAY_PREFS_STORAGE_KEY,
+  initial: () => ({ ...DEFAULT_PREFS }),
+  sanitize,
+});
+
 export function readPrefs(): DisplayPrefs {
-  if (typeof window === "undefined") return { ...DEFAULT_PREFS };
-  try {
-    const raw = window.localStorage.getItem(DISPLAY_PREFS_STORAGE_KEY);
-    if (!raw) return { ...DEFAULT_PREFS };
-    return sanitize(JSON.parse(raw));
-  } catch {
-    return { ...DEFAULT_PREFS };
-  }
+  return driver.getSnapshot();
 }
 
 export function writePrefs(prefs: DisplayPrefs): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(
-      DISPLAY_PREFS_STORAGE_KEY,
-      JSON.stringify(prefs)
-    );
-  } catch {
-    // Quota or disabled storage — swallow.
-  }
+  driver.setSnapshot(prefs);
 }
 
 /**
@@ -107,6 +109,11 @@ export function applyPrefsToDocument(prefs: DisplayPrefs): void {
  * Inline script body written into <head> in app/layout.tsx so the
  * data-* attributes are present before first paint. Kept as a
  * separate export so the layout's script tag stays declarative.
+ *
+ * NOTE: this script reads localStorage *directly* (not via the
+ * driver) because it runs before any JS module imports — earlier
+ * than the driver itself. The driver becomes the source of truth
+ * after first paint.
  */
 export function initScript(): string {
   return `
@@ -126,56 +133,39 @@ export function initScript(): string {
 }
 
 /* ------------------------------------------------------------------
-   useSyncExternalStore-compatible singleton store.
+   useSyncExternalStore-compatible singleton store. Setters apply the
+   change to the <html> data-* attributes alongside persisting, so
+   the visual change is immediate.
 ------------------------------------------------------------------ */
 
-type Listener = () => void;
-
-const FROZEN_DEFAULT: Readonly<DisplayPrefs> = Object.freeze({
-  ...DEFAULT_PREFS,
-});
-
-let cached: DisplayPrefs | null = null;
-const listeners = new Set<Listener>();
-
-function snapshot(): DisplayPrefs {
-  if (typeof window === "undefined") return FROZEN_DEFAULT;
-  if (cached === null) cached = readPrefs();
-  return cached;
-}
-
-function emit(next: DisplayPrefs): void {
-  cached = next;
-  writePrefs(next);
+function applyAndWrite(next: DisplayPrefs): void {
+  driver.setSnapshot(next);
   applyPrefsToDocument(next);
-  for (const l of listeners) l();
 }
 
 export const prefsStore = {
-  subscribe(listener: Listener): () => void {
-    listeners.add(listener);
-    return () => {
-      listeners.delete(listener);
-    };
+  subscribe(listener: () => void): () => void {
+    return driver.subscribe(listener);
   },
-  get: snapshot,
+  get(): DisplayPrefs {
+    return driver.getSnapshot();
+  },
   getServerSnapshot(): DisplayPrefs {
     return FROZEN_DEFAULT;
   },
   setTextSize(value: TextSize) {
-    emit({ ...snapshot(), textSize: value });
+    applyAndWrite({ ...driver.getSnapshot(), textSize: value });
   },
   setContrast(value: Contrast) {
-    emit({ ...snapshot(), contrast: value });
+    applyAndWrite({ ...driver.getSnapshot(), contrast: value });
   },
   setMotion(value: Motion) {
-    emit({ ...snapshot(), motion: value });
+    applyAndWrite({ ...driver.getSnapshot(), motion: value });
   },
   reset() {
-    emit({ ...DEFAULT_PREFS });
+    applyAndWrite({ ...DEFAULT_PREFS });
   },
   _resetForTests() {
-    cached = null;
-    listeners.clear();
+    driver._resetForTests?.();
   },
 };

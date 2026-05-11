@@ -89,9 +89,12 @@ export function createLocalDriver<T>(
 
   function ensureStorageHandler(): void {
     if (storageHandler || typeof window === "undefined") return;
+    // Some test environments stub `window` with just `localStorage`
+    // and no event-target methods — degrade gracefully instead of
+    // throwing. Cross-tab sync is best-effort.
+    if (typeof window.addEventListener !== "function") return;
     storageHandler = (e: StorageEvent) => {
       if (e.key !== storageKey) return;
-      // Re-read so the in-memory cache picks up the cross-tab write.
       cache = readFromStorage();
       for (const l of listeners) l();
     };
@@ -100,7 +103,9 @@ export function createLocalDriver<T>(
 
   function dropStorageHandler(): void {
     if (!storageHandler || typeof window === "undefined") return;
-    window.removeEventListener("storage", storageHandler);
+    if (typeof window.removeEventListener === "function") {
+      window.removeEventListener("storage", storageHandler);
+    }
     storageHandler = null;
   }
 

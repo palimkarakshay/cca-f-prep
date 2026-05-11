@@ -10,9 +10,15 @@
      <pack-id>:lesson-depth:v1 → { [conceptId]: LessonDepth }
 
    Falls back gracefully (no-op) when localStorage is unavailable.
+
+   Implementation: delegates to a `local-only` StorageDriver per
+   pack id. The public API is unchanged from the pre-driver
+   implementation.
 ------------------------------------------------------------------ */
 
 import type { LessonDepth } from "@/content/curriculum-types";
+import type { StorageDriver } from "./storage/driver";
+import { createLocalDriver } from "./storage/local-driver";
 
 export const DEFAULT_DEPTH: LessonDepth = "conceptual";
 
@@ -22,33 +28,42 @@ function storageKey(packId: string): string {
   return `${packId}:lesson-depth:v1`;
 }
 
-function load(packId: string): Store {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = window.localStorage.getItem(storageKey(packId));
-    if (!raw) return {};
-    const obj = JSON.parse(raw) as unknown;
-    if (!obj || typeof obj !== "object") return {};
-    return obj as Store;
-  } catch {
-    return {};
-  }
+function sanitize(raw: unknown): Store {
+  if (!raw || typeof raw !== "object") return {};
+  // Trust the shape — values that aren't a LessonDepth are filtered
+  // implicitly at the read site (fall through to DEFAULT_DEPTH).
+  return raw as Store;
 }
 
-function save(packId: string, store: Store): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(storageKey(packId), JSON.stringify(store));
-  } catch {
-    /* quota / private mode — silently drop */
+const drivers = new Map<string, StorageDriver<Store>>();
+const listeners = new Set<() => void>();
+
+function driverFor(packId: string): StorageDriver<Store> {
+  let d = drivers.get(packId);
+  if (!d) {
+    d = createLocalDriver<Store>({
+      storageKey: storageKey(packId),
+      initial: () => ({}),
+      sanitize,
+    });
+    // Bubble per-pack driver notifications up to the global
+    // subscriber set — consumers of subscribeLessonDepth listen
+    // once and get notified for any pack that changes.
+    d.subscribe(notify);
+    drivers.set(packId, d);
   }
+  return d;
+}
+
+function notify(): void {
+  for (const l of listeners) l();
 }
 
 export function getLessonDepth(
   packId: string,
   conceptId: string
 ): LessonDepth {
-  return load(packId)[conceptId] ?? DEFAULT_DEPTH;
+  return driverFor(packId).getSnapshot()[conceptId] ?? DEFAULT_DEPTH;
 }
 
 export function setLessonDepth(
@@ -56,32 +71,11 @@ export function setLessonDepth(
   conceptId: string,
   depth: LessonDepth
 ): void {
-  const store = load(packId);
-  store[conceptId] = depth;
-  save(packId, store);
-  notify();
-}
-
-// useSyncExternalStore plumbing. Listeners are dispatched on ANY pack's
-// storage event since most apps render only one pack at a time; if the
-// rare cross-tab cross-pack edit happens, all subscribers re-read.
-const listeners = new Set<() => void>();
-let storageWired = false;
-
-function notify(): void {
-  for (const l of listeners) l();
-}
-
-function wireStorageOnce(): void {
-  if (storageWired || typeof window === "undefined") return;
-  storageWired = true;
-  window.addEventListener("storage", (e) => {
-    if (e.key && /:lesson-depth:v1$/.test(e.key)) notify();
-  });
+  const d = driverFor(packId);
+  d.setSnapshot({ ...d.getSnapshot(), [conceptId]: depth });
 }
 
 export function subscribeLessonDepth(cb: () => void): () => void {
-  wireStorageOnce();
   listeners.add(cb);
   return () => {
     listeners.delete(cb);

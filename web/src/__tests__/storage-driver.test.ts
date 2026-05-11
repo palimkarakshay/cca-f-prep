@@ -15,7 +15,7 @@
        complain.
 ------------------------------------------------------------------ */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createLocalDriver } from "../lib/storage/local-driver";
 
 interface Shape {
