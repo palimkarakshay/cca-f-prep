@@ -18,10 +18,13 @@
    doesn't read any client state.
 ------------------------------------------------------------------ */
 
+"use client";
+
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Home, ChevronUp } from "lucide-react";
 import { getAdjacentConceptsFrom } from "@/content/curriculum-loader";
 import { NumberedJumper } from "@/components/primitives/NumberedJumper";
+import { useCopy } from "@/content/pack-hooks";
 import type { ContentPack } from "@/content/pack-types";
 import type { Concept, Section } from "@/content/curriculum-types";
 
@@ -34,6 +37,7 @@ export function ConceptHeaderNav({
   section: Section;
   concept: Concept;
 }) {
+  const copy = useCopy();
   const conceptIndex =
     section.concepts.findIndex((c) => c.id === concept.id) + 1;
   const total = section.concepts.length;
@@ -45,7 +49,7 @@ export function ConceptHeaderNav({
   const packId = pack.config.id;
   return (
     <nav
-      aria-label="Concept navigation"
+      aria-label={`${copy.lessonSingular} navigation`}
       className="mb-4 flex flex-wrap items-center gap-2 rounded-md border border-(--border) bg-(--panel-2) p-3 text-xs"
     >
       <Link
@@ -54,18 +58,18 @@ export function ConceptHeaderNav({
       >
         <ArrowLeft aria-hidden className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">Back to</span>{" "}
-        <span className="font-medium">Section {section.n}: {section.title}</span>
+        <span className="font-medium">{copy.moduleSingular} {section.n}: {section.title}</span>
       </Link>
 
       <span aria-hidden className="text-(--muted)">·</span>
 
       <span className="text-(--muted)">
-        Concept <span className="font-mono">{conceptIndex}</span> of{" "}
+        {copy.lessonSingular} <span className="font-mono">{conceptIndex}</span> of{" "}
         <span className="font-mono">{total}</span>
       </span>
 
       <NumberedJumper
-        ariaLabel="Jump to concept"
+        ariaLabel={`Jump to ${copy.lessonSingular.toLowerCase()}`}
         activeIndex={conceptIndex - 1}
         items={section.concepts.map((c) => ({
           href: `/${packId}/concept/${section.id}/${c.id}`,
@@ -77,7 +81,7 @@ export function ConceptHeaderNav({
         {prev ? (
           <Link
             href={`/${packId}/concept/${prev.section.id}/${prev.concept.id}`}
-            aria-label={`Previous concept: ${prev.concept.title}`}
+            aria-label={`Previous ${copy.lessonSingular.toLowerCase()}: ${prev.concept.title}`}
             className="inline-flex min-h-9 items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)"
           >
             <ArrowLeft aria-hidden className="h-3 w-3" />
@@ -87,7 +91,7 @@ export function ConceptHeaderNav({
         {next ? (
           <Link
             href={`/${packId}/concept/${next.section.id}/${next.concept.id}`}
-            aria-label={`Next concept: ${next.concept.title}`}
+            aria-label={`Next ${copy.lessonSingular.toLowerCase()}: ${next.concept.title}`}
             className="inline-flex min-h-9 items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)"
           >
             Next
@@ -96,19 +100,19 @@ export function ConceptHeaderNav({
         ) : null}
         <Link
           href={`/${packId}`}
-          aria-label={`Journey overview: ${pack.config.name}`}
+          aria-label={`Course overview: ${pack.config.name}`}
           className="inline-flex items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2)"
         >
           <ChevronUp aria-hidden className="h-3 w-3" />
-          Journey
+          {copy.courseSingular}
         </Link>
         <Link
           href="/"
-          aria-label="All learning journeys"
+          aria-label={`All ${copy.coursePlural.toLowerCase()}`}
           className="inline-flex items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2)"
         >
           <Home aria-hidden className="h-3 w-3" />
-          <span className="hidden sm:inline">All journeys</span>
+          <span className="hidden sm:inline">All {copy.coursePlural.toLowerCase()}</span>
           <span className="sm:hidden">Home</span>
         </Link>
       </div>

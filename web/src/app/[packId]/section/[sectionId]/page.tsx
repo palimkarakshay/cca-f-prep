@@ -52,7 +52,7 @@ export async function generateMetadata({
   const section = getSectionFrom(pack.curriculum, sectionId);
   if (!section) return { title: "Section not found" };
   return {
-    title: `Section ${section.n}: ${section.title}`,
+    title: `Module ${section.n}: ${section.title}`,
     description: section.blurb,
   };
 }
@@ -88,7 +88,7 @@ export default async function SectionPage({
           id="concepts-heading"
           className="mb-2 text-xs font-semibold uppercase tracking-wide text-(--accent-2)"
         >
-          Concepts
+          Lessons
         </h2>
         <SectionConceptList section={section} packId={packId} />
       </div>
@@ -128,55 +128,55 @@ export default async function SectionPage({
       />
       <Breadcrumbs trail={journeyTrail(pack, { label: section.title })} />
       <nav
-        aria-label="Section navigation"
+        aria-label="Module navigation"
         className="mb-4 flex flex-wrap items-center gap-3 rounded-md border border-(--border) bg-(--panel-2) p-3 text-xs"
       >
         <span className="text-(--muted)">
-          Section <span className="font-mono">{sectionIndex}</span> of{" "}
+          Module <span className="font-mono">{sectionIndex}</span> of{" "}
           <span className="font-mono">{totalSections}</span>
         </span>
         <NumberedJumper
-          ariaLabel="Jump to section"
+          ariaLabel="Jump to module"
           activeIndex={sectionIndex - 1}
           items={pack.curriculum.sections.map((s) => ({
             href: `/${packId}/section/${s.id}`,
-            label: `Section ${s.n}: ${s.title}`,
+            label: `Module ${s.n}: ${s.title}`,
           }))}
         />
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {prevSection ? (
             <Link
               href={`/${packId}/section/${prevSection.id}`}
-              aria-label={`Previous section: ${prevSection.title}`}
+              aria-label={`Previous module: ${prevSection.title}`}
               className="inline-flex min-h-9 items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)"
             >
               <ArrowLeft aria-hidden className="h-3 w-3" />
               <span className="hidden md:inline">
-                Section {prevSection.n}: {prevSection.title}
+                Module {prevSection.n}: {prevSection.title}
               </span>
-              <span className="md:hidden">Prev section</span>
+              <span className="md:hidden">Prev module</span>
             </Link>
           ) : null}
           {nextSection ? (
             <Link
               href={`/${packId}/section/${nextSection.id}`}
-              aria-label={`Next section: ${nextSection.title}`}
+              aria-label={`Next module: ${nextSection.title}`}
               className="inline-flex min-h-9 items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)"
             >
               <span className="hidden md:inline">
-                Section {nextSection.n}: {nextSection.title}
+                Module {nextSection.n}: {nextSection.title}
               </span>
-              <span className="md:hidden">Next section</span>
+              <span className="md:hidden">Next module</span>
               <ArrowRight aria-hidden className="h-3 w-3" />
             </Link>
           ) : null}
           <Link
             href={`/${packId}`}
-            aria-label={`Journey overview: ${pack.config.name}`}
+            aria-label={`Course overview: ${pack.config.name}`}
             className="inline-flex min-h-9 items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-2 py-1 text-(--ink) no-underline hover:border-(--accent) hover:text-(--accent-2) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent)"
           >
             <ChevronUp aria-hidden className="h-3 w-3" />
-            Journey
+            Course
           </Link>
         </div>
       </nav>
@@ -196,11 +196,11 @@ export default async function SectionPage({
           href={`/${packId}`}
           className="text-(--muted) hover:text-(--ink)"
         >
-          ← Back to {pack.config.name} journey
+          ← Back to {pack.config.name} course
         </Link>
         <span aria-hidden className="text-(--muted)">·</span>
         <Link href="/" className="text-(--muted) hover:text-(--ink)">
-          All journeys
+          All courses
         </Link>
       </div>
     </Container>

@@ -25,7 +25,7 @@ export async function generateMetadata({
   const pack = getPack(packId);
   if (!pack) return { title: "Pack not found" };
   const cfg = siteConfigFor(pack);
-  return { title: "Journey overview", description: cfg.description };
+  return { title: "Course overview", description: cfg.description };
 }
 
 export default async function PackHomePage({
@@ -51,10 +51,10 @@ export default async function PackHomePage({
           className="inline-flex w-fit items-center gap-1 text-xs text-(--muted) hover:text-(--ink)"
         >
           <ArrowLeft aria-hidden className="h-3.5 w-3.5" />
-          All learning journeys
+          All courses
         </Link>
         <p className="font-[family-name:var(--font-display)] text-xs uppercase tracking-[0.18em] text-(--muted)">
-          Learning journey
+          Course
         </p>
         <h1 className="font-[family-name:var(--font-display)] text-2xl md:text-3xl font-semibold text-(--ink)">
           {cfg.name}
@@ -78,9 +78,9 @@ export default async function PackHomePage({
 
       <div className="grid gap-6 lg:grid-cols-[1fr_280px] lg:items-start">
         <div className="flex flex-col gap-6 min-w-0">
-          <section id="sections" aria-label="All sections" className="scroll-mt-24">
+          <section id="sections" aria-label="All modules" className="scroll-mt-24">
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
-              Sections
+              Modules
             </h2>
             <SectionList />
           </section>

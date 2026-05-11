@@ -83,7 +83,7 @@ export function SectionConceptMap({
           id={`section-map-${section.id}-h`}
           className="text-xs font-semibold uppercase tracking-wide text-(--accent-2)"
         >
-          Concept map
+          Lesson map
         </h2>
         <p className="text-xs text-(--muted)">
           {hydrated ? "Coloured by your current mastery" : "Mastery loads after hydration"}
@@ -92,7 +92,7 @@ export function SectionConceptMap({
       <div className="overflow-x-auto">
         <svg
           role="img"
-          aria-label={`Visual map of ${n} concept${n === 1 ? "" : "s"} in ${section.title}`}
+          aria-label={`Visual map of ${n} lesson${n === 1 ? "" : "s"} in ${section.title}`}
           viewBox={`0 0 ${width} ${HEIGHT + 22}`}
           width={width}
           height={HEIGHT + 22}
@@ -172,7 +172,7 @@ export function SectionConceptMap({
         </svg>
       </div>
       <p className="text-xs text-(--muted)">
-        Click a node to jump to that concept. Colours track your mastery
+        Click a node to jump to that lesson. Colours track your mastery
         — neutral · below 60% · passing · strong.
       </p>
     </section>
