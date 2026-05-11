@@ -56,6 +56,10 @@ import {
   type SMENewConcept,
   type SourceDocument,
 } from "@/lib/sme-edits";
+import {
+  computeLetterBiasWarnings,
+  LETTER_BIAS_THRESHOLD,
+} from "@/lib/sme-validation";
 import type { ContentPack } from "@/content/pack-types";
 import type {
   Concept,
@@ -169,9 +173,18 @@ export function SMEWorkbench({ pack }: { pack: ContentPack }) {
       pack.curriculum.sections.flatMap((s) => s.concepts.map((c) => c.id)),
     [pack.curriculum]
   );
+  const sourceConcepts = useMemo(
+    () =>
+      pack.curriculum.sections.flatMap((s) => s.concepts),
+    [pack.curriculum]
+  );
   const stats = useMemo(
     () => computeApprovalStats(conceptIds, edits),
     [conceptIds, edits]
+  );
+  const letterBiasWarnings = useMemo(
+    () => computeLetterBiasWarnings(edits, sourceConcepts),
+    [edits, sourceConcepts]
   );
 
   return (
@@ -181,6 +194,7 @@ export function SMEWorkbench({ pack }: { pack: ContentPack }) {
         store={store}
         stats={stats}
         hydrated={hydrated}
+        letterBiasWarnings={letterBiasWarnings}
       />
 
       <HowToReviewCard />
@@ -659,11 +673,13 @@ function SMEHeader({
   store,
   stats,
   hydrated,
+  letterBiasWarnings,
 }: {
   edits: SMEEdits;
   store: ReturnType<typeof getSMEStore>;
   stats: ReturnType<typeof computeApprovalStats>;
   hydrated: boolean;
+  letterBiasWarnings: ReturnType<typeof computeLetterBiasWarnings>;
 }) {
   const nameId = useId();
   const smeName = edits.smeName ?? "";
@@ -763,6 +779,39 @@ function SMEHeader({
           {hydrated && lifecycleLine ? <span>{lifecycleLine}</span> : null}
         </div>
       </div>
+
+      {letterBiasWarnings.length > 0 ? (
+        <div
+          className="flex items-start gap-2 rounded-md border border-(--warn) bg-(--panel-2) p-3 text-xs text-(--ink)"
+          role="status"
+        >
+          <AlertCircle
+            aria-hidden
+            className="mt-0.5 h-4 w-4 flex-none text-(--warn)"
+          />
+          <div className="flex-1">
+            <p className="font-semibold">
+              Correct-answer letter is skewed on{" "}
+              {letterBiasWarnings.length} concept
+              {letterBiasWarnings.length === 1 ? "" : "s"}.
+            </p>
+            <p className="mt-0.5 text-(--muted)">
+              Aim for the correct letter to land roughly evenly across
+              A/B/C/D (threshold: {Math.round(LETTER_BIAS_THRESHOLD * 100)}
+              % on a single letter). Non-blocking — you can still deploy.
+            </p>
+            <ul className="mt-1.5 list-disc pl-4">
+              {letterBiasWarnings.map((w) => (
+                <li key={w.conceptId}>
+                  <code>{w.conceptId}</code>: {w.worstLetter} ={" "}
+                  {w.counts[w.worstLetter]}/{w.total} (
+                  {Math.round(w.worstPct * 100)}%)
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ) : null}
     </Card>
   );
 }
