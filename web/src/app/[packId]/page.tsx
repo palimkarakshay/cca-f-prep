@@ -6,6 +6,7 @@ import { RecommendationBanner } from "@/components/dashboard/RecommendationBanne
 import { SectionList } from "@/components/dashboard/SectionList";
 import { MockExamPanel } from "@/components/dashboard/MockExamPanel";
 import { StatsPanel } from "@/components/dashboard/StatsPanel";
+import { ProgressCharts } from "@/components/dashboard/ProgressCharts";
 import { BeforeYouBegin } from "@/components/dashboard/BeforeYouBegin";
 import { Container } from "@/components/ui/Container";
 import { LastVisitTracker } from "@/components/layout/LastVisitTracker";
@@ -67,6 +68,10 @@ export default async function PackHomePage({
           prerequisites={pack.config.prerequisites}
         />
       ) : null}
+
+      <section id="progress" aria-label="Progress overview" className="scroll-mt-24">
+        <ProgressCharts />
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_280px] lg:items-start">
         <div className="flex flex-col gap-6 min-w-0">

@@ -96,7 +96,6 @@ export function StatsPanel({ className }: { className?: string }) {
 
   return (
     <Card
-      id="progress"
       aria-label="Your progress"
       className={cn("scroll-mt-24", className)}
     >
