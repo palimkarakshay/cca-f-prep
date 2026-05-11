@@ -137,4 +137,68 @@ export const packConfig: PackConfig = {
   iconSvg: ICON_SVG,
   iconMaskableSvg: ICON_MASKABLE_SVG,
   // No JPG image — picker falls back to iconSvg cleanly.
+  prerequisites: {
+    heading: "Before you begin",
+    intro:
+      "This journey prepares you for the Project Management Professional (PMP)® exam based on PMI's PMBOK Guide 8th Edition (2025). It's content prep — not a substitute for PMI's eligibility checks. Make sure you (or your audit-readiness file) clear the gates below before you book the test.",
+    requirements: [
+      {
+        label: "35 contact hours of project-management education",
+        detail:
+          "Required by PMI for application approval. A separate accredited course (in person, online, or self-paced) typically satisfies this — this study pack does NOT count toward the 35 hours on its own.",
+      },
+      {
+        label:
+          "Experience: 36 months leading projects (with a four-year degree) OR 60 months without one",
+        detail:
+          "Months may be non-consecutive but must be within the last 8 years. CAPM® candidates have lighter requirements; this pack is sized for PMP.",
+      },
+      {
+        label: "An active PMI account + application submitted",
+        detail:
+          "Apply at pmi.org. The application closes audit-readiness — be prepared to provide signed verification from supervisors for ~5 of your listed projects if randomly audited.",
+      },
+      {
+        label: "Comfort with English-language scenario reading",
+        detail:
+          "The exam runs in many languages but the canonical test is English. Long scenario stems (100+ words) are common — fast reading helps.",
+      },
+    ],
+    assumptions: [
+      {
+        label: "Roughly 60–80 hours of study time over 6–10 weeks",
+        detail:
+          "Most candidates report 50–100 hours total prep. This journey is sized to fit inside that range when paired with two full mock exams and targeted weak-spot drilling.",
+      },
+      {
+        label: "Exam fee: ~US $405 (PMI member) or ~US $555 (non-member)",
+        detail:
+          "PMI membership is ~US $159/year and includes a free PMBOK Guide PDF — it usually pays for itself versus the non-member exam fee.",
+      },
+      {
+        label: "Test format: 180 questions, 230 minutes, online-proctored or test-centre",
+        detail:
+          "Two optional 10-minute breaks. Three performance domains (People 42%, Process 50%, Business Environment 8%) — note the domain weights differ from PMBOK 8e content weights.",
+      },
+    ],
+    externalLinks: [
+      {
+        label: "PMI · PMP exam page",
+        href: "https://www.pmi.org/certifications/project-management-pmp",
+      },
+      {
+        label: "PMI · PMP Exam Content Outline (PDF)",
+        href: "https://www.pmi.org/-/media/pmi/documents/public/pdf/certifications/pmp-examination-content-outline.pdf",
+      },
+      {
+        label: "PMI · PMBOK Guide 8th Edition",
+        href: "https://www.pmi.org/standards/pmbok",
+      },
+    ],
+    notForYouIf: [
+      "You're brand-new to project work with no leadership exposure — PMI's experience gates will block you. Consider CAPM® first.",
+      "You only need a quick overview of PMBOK 8e without sitting the PMP — you'll still get value, but the exam-strategy section will read as overkill.",
+      "You're studying for a different certification (PRINCE2, IPMA, ITIL) — vocabulary overlaps but PMI's preferred-answer patterns are distinct and may mislead you on those exams.",
+    ],
+  },
 };
