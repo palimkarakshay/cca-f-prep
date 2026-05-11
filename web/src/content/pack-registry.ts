@@ -20,6 +20,7 @@ import { pack as acmePack } from "../../content-packs/acme-onboarding";
 import { pack as commsPack } from "../../content-packs/workplace-comms";
 import { pack as securityPack } from "../../content-packs/security-awareness";
 import { pack as managerPack } from "../../content-packs/new-manager-basics";
+import { pack as pmbokPack } from "../../content-packs/pmbok-prep";
 import type { ContentPack } from "./pack-types";
 
 export const PACK_REGISTRY: Record<string, ContentPack> = {
@@ -31,6 +32,7 @@ export const PACK_REGISTRY: Record<string, ContentPack> = {
   "workplace-comms": commsPack,
   "security-awareness": securityPack,
   "new-manager-basics": managerPack,
+  "pmbok-prep": pmbokPack,
 };
 
 export const ALL_PACK_IDS: string[] = Object.keys(PACK_REGISTRY);

@@ -3225,11 +3225,10 @@ export const CURRICULUM: Curriculum = {
         },
       ],
       questions: [
-        /* Placeholder — full 30-question bank lands in a later commit. */
         {
           n: 1,
           question:
-            "Which of these is NOT one of the six refined principles in PMBOK 8e?",
+            "Which is NOT one of the six refined principles in PMBOK 8e?",
           options: {
             A: "Adopt a Holistic View.",
             B: "Be an Accountable Leader.",
@@ -3252,7 +3251,399 @@ export const CURRICULUM: Curriculum = {
           },
           correct: "C",
           principle:
-            "Project = temporary + unique. Ongoing repetitive work = operations.",
+            "Project = temporary + unique. Ongoing + repetitive = operations.",
+        },
+        {
+          n: 3,
+          question:
+            "The customer asks the team lead directly to slip in a small change, bypassing the PM. The PMI-correct response is:",
+          options: {
+            A: "Build it — it's small.",
+            B: "Refuse and ignore the customer.",
+            C: "Route the request through the integrated change-control process.",
+            D: "Defer to the next quarterly review.",
+          },
+          correct: "C",
+          principle:
+            "All changes go through integrated change control. No 'just this once'.",
+        },
+        {
+          n: 4,
+          question:
+            "PV = 80, EV = 70, AC = 90. Calculate CPI.",
+          options: {
+            A: "1.14.",
+            B: "0.78.",
+            C: "0.88.",
+            D: "0.875.",
+          },
+          correct: "B",
+          principle:
+            "CPI = EV / AC = 70/90 ≈ 0.78. Less than 1 = over budget.",
+        },
+        {
+          n: 5,
+          question:
+            "A new EU regulation that will reshape every project in the portfolio. Risk response strategy?",
+          options: {
+            A: "Avoid.",
+            B: "Transfer.",
+            C: "Mitigate.",
+            D: "Escalate.",
+          },
+          correct: "D",
+          principle:
+            "Risks above PM authority or affecting portfolio level → escalate.",
+        },
+        {
+          n: 6,
+          question:
+            "Activity O=4, M=8, P=18. PERT expected duration:",
+          options: {
+            A: "8.",
+            B: "9.",
+            C: "10.",
+            D: "11.",
+          },
+          correct: "B",
+          principle:
+            "PERT = (O + 4M + P) / 6 = (4 + 32 + 18) / 6 = 54 / 6 = 9.",
+        },
+        {
+          n: 7,
+          question:
+            "The team adds a fancy reporting feature the customer didn't request. PMBOK calls this:",
+          options: {
+            A: "Tailoring.",
+            B: "Progressive elaboration.",
+            C: "Gold plating.",
+            D: "Scope creep.",
+          },
+          correct: "C",
+          principle:
+            "Gold plating = team voluntarily adding work. Scope creep = stakeholders adding scope without control.",
+        },
+        {
+          n: 8,
+          question:
+            "PMI's preferred default conflict-resolution style:",
+          options: {
+            A: "Force.",
+            B: "Smooth.",
+            C: "Collaborate / problem-solve.",
+            D: "Withdraw.",
+          },
+          correct: "C",
+          principle:
+            "Default conflict response: collaborate / problem-solve.",
+        },
+        {
+          n: 9,
+          question:
+            "A stakeholder has HIGH power but LOW interest. Power/interest grid strategy:",
+          options: {
+            A: "Monitor.",
+            B: "Keep informed.",
+            C: "Keep satisfied.",
+            D: "Manage closely.",
+          },
+          correct: "C",
+          principle:
+            "High power + low interest = keep satisfied.",
+        },
+        {
+          n: 10,
+          question:
+            "PMBOK's sustainability pyramid's MOST-preferred response to a negative externality:",
+          options: {
+            A: "Compensate / offset.",
+            B: "Restore the impact.",
+            C: "Minimise the impact.",
+            D: "Avoid the impact altogether.",
+          },
+          correct: "D",
+          principle:
+            "Sustainability pyramid: avoid > minimise > restore > compensate.",
+        },
+        {
+          n: 11,
+          question:
+            "Project A: NPV +£200k, IRR 18%. Project B: NPV +£400k, IRR 12%. PMI default selection:",
+          options: {
+            A: "A — higher IRR.",
+            B: "B — higher NPV.",
+            C: "Both equally.",
+            D: "Cannot decide.",
+          },
+          correct: "B",
+          principle:
+            "NPV is the safest default project-selection metric in PMBOK.",
+        },
+        {
+          n: 12,
+          question:
+            "Approach for evolving requirements + frequent feedback?",
+          options: {
+            A: "Predictive.",
+            B: "Adaptive.",
+            C: "Operations.",
+            D: "Charter-only.",
+          },
+          correct: "B",
+          principle:
+            "Adaptive fits evolving requirements and feedback-driven value.",
+        },
+        {
+          n: 13,
+          question:
+            "Tuckman's stage where the team operates at high productivity with minimal supervision:",
+          options: {
+            A: "Forming.",
+            B: "Storming.",
+            C: "Norming.",
+            D: "Performing.",
+          },
+          correct: "D",
+          principle:
+            "Performing = high productivity, minimal management overhead.",
+        },
+        {
+          n: 14,
+          question:
+            "An opportunity could be realised but the org lacks the in-house skill. A partner does. PMI strategy:",
+          options: {
+            A: "Exploit alone.",
+            B: "Mitigate.",
+            C: "Share — bring in the partner.",
+            D: "Avoid.",
+          },
+          correct: "C",
+          principle:
+            "Share = transfer opportunity to a third party better positioned to capture it.",
+        },
+        {
+          n: 15,
+          question:
+            "Internal compliance template (built by the org's QA team) is a:",
+          options: {
+            A: "EEF.",
+            B: "Risk register entry.",
+            C: "OPA.",
+            D: "Stakeholder.",
+          },
+          correct: "C",
+          principle:
+            "Internal, org-owned, reusable artefact = OPA.",
+        },
+        {
+          n: 16,
+          question:
+            "EAC formula when the current cost trend is expected to continue:",
+          options: {
+            A: "BAC × CPI.",
+            B: "BAC / CPI.",
+            C: "AC + BAC.",
+            D: "AC × SPI.",
+          },
+          correct: "B",
+          principle:
+            "EAC = BAC / CPI when trend continues.",
+        },
+        {
+          n: 17,
+          question:
+            "The business case becomes invalid mid-project. PMI-correct first action:",
+          options: {
+            A: "Continue — too much already spent.",
+            B: "Escalate to sponsor; recommend re-planning or termination.",
+            C: "Quietly reduce scope.",
+            D: "Wait for the customer to complain.",
+          },
+          correct: "B",
+          principle:
+            "When the business case dies, escalate. Continuation is not PMI-correct.",
+        },
+        {
+          n: 18,
+          question:
+            "Which is NOT a Closing-focus-area activity?",
+          options: {
+            A: "Archive project records.",
+            B: "Release team resources.",
+            C: "Develop the project charter.",
+            D: "Capture lessons learned.",
+          },
+          correct: "C",
+          principle:
+            "Charter is an Initiating artefact, not Closing.",
+        },
+        {
+          n: 19,
+          question:
+            "100% rule for the WBS says:",
+          options: {
+            A: "The WBS is 100% complete after planning.",
+            B: "Each work package is 100% defined before execution.",
+            C: "The WBS includes 100% of the project work — no more, no less.",
+            D: "All stakeholders sign off on 100% of the WBS.",
+          },
+          correct: "C",
+          principle:
+            "WBS 100% rule: every scope element in, nothing extra.",
+        },
+        {
+          n: 20,
+          question:
+            "Schedule slipping. Budget room exists; risk tolerance low. Best compression:",
+          options: {
+            A: "Crash — add resources.",
+            B: "Fast-track — parallelise.",
+            C: "Reduce scope.",
+            D: "Do nothing.",
+          },
+          correct: "A",
+          principle:
+            "Crash adds money, no extra risk. Fast-track is free but adds risk.",
+        },
+        {
+          n: 21,
+          question:
+            "Active acceptance of a threat means:",
+          options: {
+            A: "Do nothing.",
+            B: "Establish a contingency reserve.",
+            C: "Insure against the threat.",
+            D: "Eliminate the threat's cause.",
+          },
+          correct: "B",
+          principle:
+            "Active acceptance = contingency reserve. Passive acceptance = monitor only.",
+        },
+        {
+          n: 22,
+          question:
+            "Quality vs grade: low-quality phones are:",
+          options: {
+            A: "Always acceptable if customer wants them.",
+            B: "Acceptable if grade was also low.",
+            C: "Never acceptable.",
+            D: "Acceptable for low-cost projects.",
+          },
+          correct: "C",
+          principle:
+            "Low quality is always bad. Low grade can be a deliberate choice.",
+        },
+        {
+          n: 23,
+          question:
+            "Adaptive scope is governed primarily through:",
+          options: {
+            A: "The WBS.",
+            B: "The Gantt chart.",
+            C: "The product backlog + definition of done + acceptance criteria.",
+            D: "The earned-value baseline.",
+          },
+          correct: "C",
+          principle:
+            "Adaptive scope = backlog + DoD + acceptance criteria.",
+        },
+        {
+          n: 24,
+          question:
+            "A vendor offers the PM a £200 gift to expedite an invoice. Correct response:",
+          options: {
+            A: "Accept — within etiquette.",
+            B: "Decline and disclose.",
+            C: "Accept under £100 only.",
+            D: "Ignore.",
+          },
+          correct: "B",
+          principle:
+            "Conflict of interest → decline + disclose. Always.",
+        },
+        {
+          n: 25,
+          question:
+            "PMI's four ethics pillars are Responsibility, Respect, Fairness, and ___?",
+          options: {
+            A: "Honesty.",
+            B: "Speed.",
+            C: "Profitability.",
+            D: "Confidentiality.",
+          },
+          correct: "A",
+          principle:
+            "Ethics: Responsibility, Respect, Fairness, Honesty.",
+        },
+        {
+          n: 26,
+          question:
+            "PMI distinguishes deliverable from outcome from benefit. The customer experiences:",
+          options: {
+            A: "The output mostly.",
+            B: "The outcome (a change in their state) and over time the benefit (realised value).",
+            C: "Only the benefit.",
+            D: "Only the output.",
+          },
+          correct: "B",
+          principle:
+            "Output → outcome → benefit. PMBOK 8e measures success by benefit.",
+        },
+        {
+          n: 27,
+          question:
+            "EMV of a risk: probability 40%, impact £250k. EMV =",
+          options: {
+            A: "£10k.",
+            B: "£100k.",
+            C: "£250k.",
+            D: "£1M.",
+          },
+          correct: "B",
+          principle:
+            "EMV = probability × impact = 0.40 × £250k = £100k.",
+        },
+        {
+          n: 28,
+          question:
+            "Monitoring & Controlling is performed:",
+          options: {
+            A: "After Executing, before Closing.",
+            B: "In parallel with all other focus areas.",
+            C: "Only at phase gates.",
+            D: "Only when the schedule slips.",
+          },
+          correct: "B",
+          principle:
+            "M&C is parallel with all focus areas throughout the project.",
+        },
+        {
+          n: 29,
+          question:
+            "Tailoring decisions are limited by:",
+          options: {
+            A: "The PM's personal preference.",
+            B: "Team agreements alone.",
+            C: "Mandatory inputs (regulation, contract, org policy).",
+            D: "Nothing — anything can be tailored.",
+          },
+          correct: "C",
+          principle:
+            "Mandatory inputs cannot be tailored away — regulation, contract, org policy.",
+        },
+        {
+          n: 30,
+          question:
+            "Final-two-weeks daily highest-value study activity:",
+          options: {
+            A: "Re-read the whole PMBOK Guide.",
+            B: "Watch new long-form videos.",
+            C: "Targeted drill on the weakest mock-exam domain.",
+            D: "Cram new topics not yet seen.",
+          },
+          correct: "C",
+          principle:
+            "Spaced, targeted weak-spot drilling beats broad re-reading in the final fortnight.",
         },
       ],
     },

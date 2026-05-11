@@ -136,5 +136,5 @@ export const packConfig: PackConfig = {
   },
   iconSvg: ICON_SVG,
   iconMaskableSvg: ICON_MASKABLE_SVG,
-  iconImagePath: "/images/packs/final/pmbok-prep.jpg",
+  // No JPG image — picker falls back to iconSvg cleanly.
 };
