@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Compass, BookOpen, Layers, Award, Gamepad2, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { TAB_IDS, type TabId } from "./section-tabs-shared";
+import { resolveTab, TAB_IDS, type TabId } from "./section-tabs-shared";
 
 export type { TabId };
 
@@ -17,7 +17,10 @@ const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
 ];
 
 export interface SectionTabsProps {
-  /** Pre-resolved active tab from the server. Client mirrors via useSearchParams. */
+  /** Server-resolved active tab used for the first paint. After
+   *  hydration the client mirrors the URL via useSearchParams so tab
+   *  clicks switch panels even if the RSC re-fetch is delayed or
+   *  cached. */
   activeTab: TabId;
   /** Tab panels (one per tab id). Receive the active tab as a prop so
    *  each panel can decide whether to render or stay hidden. We render
@@ -34,8 +37,17 @@ export interface SectionTabsProps {
  * Pack-agnostic: takes panels as a prop. The page-level loader is the
  * only place that touches the curriculum singletons.
  */
-export function SectionTabs({ activeTab, panels }: SectionTabsProps) {
+export function SectionTabs({ activeTab: serverActiveTab, panels }: SectionTabsProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  // Mirror the URL on the client so a tab click flips the visible
+  // panel even if the RSC re-fetch is slow or served from a cache that
+  // doesn't vary on search params. Falls back to the server-resolved
+  // tab during SSR + initial hydration.
+  const searchParams = useSearchParams();
+  const activeTab: TabId = searchParams
+    ? resolveTab(searchParams.get("tab"))
+    : serverActiveTab;
   const tabRefs = useRef<Record<TabId, HTMLButtonElement | null>>({
     goals: null,
     concepts: null,
@@ -57,10 +69,13 @@ export function SectionTabs({ activeTab, panels }: SectionTabsProps) {
 
   function selectTab(next: TabId) {
     if (next === activeTab) return;
-    // The section page is the only route that uses ?tab; other params
-    // aren't expected here. If we ever add some, switch to a
-    // useSearchParams-based merge wrapped in <Suspense>.
-    const href = next === "goals" ? "?" : `?tab=${next}`;
+    // Build an absolute href tied to the current pathname so the
+    // navigation isn't ambiguous when the browser is on a trailing-
+    // slash, on a sibling segment fetched via prefetch, or has any
+    // stale `?` from a prior replace. The section page is the only
+    // route that uses `?tab`; other params aren't expected here.
+    const base = pathname ?? "";
+    const href = next === "goals" ? base : `${base}?tab=${next}`;
     router.replace(href, { scroll: false });
   }
 
