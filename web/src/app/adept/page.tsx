@@ -78,6 +78,13 @@ export default function AdeptPage() {
         </p>
         <div className="flex flex-wrap gap-2 text-sm">
           <Link
+            href="/adept/onboarding"
+            className="inline-flex items-center gap-1 rounded-md bg-(--accent) px-3 py-2 font-semibold text-white no-underline shadow-sm transition-colors hover:bg-(--accent-2)"
+          >
+            Onboarding — pick your lane
+            <ArrowRight aria-hidden className="h-4 w-4" />
+          </Link>
+          <Link
             href="/for-teams"
             className="inline-flex items-center gap-1 rounded-md border border-(--border) bg-(--panel) px-3 py-2 text-(--ink) no-underline shadow-sm hover:border-(--accent) hover:text-(--accent-2)"
           >
