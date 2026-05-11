@@ -23,7 +23,18 @@ import { pack as managerPack } from "../../content-packs/new-manager-basics";
 import { pack as pmbokPack } from "../../content-packs/pmbok-prep";
 import type { ContentPack } from "./pack-types";
 
+/*
+  Order matters: `Object.values(PACK_REGISTRY)` preserves insertion
+  order, and the consumer picker on `/` renders in that order.
+  PMBOK 8e is the most discoverable / highest-intent topic right
+  now, so it leads. The "first registered pack" fallback for
+  DEFAULT_PACK_ID also flips to `pmbok-prep`, but every pack-aware
+  surface ([packId]/* routes, useProgress() with PackContext) reads
+  the URL pack — DEFAULT_PACK_ID is only used by the back-compat
+  single-pack progressStore singleton.
+*/
 export const PACK_REGISTRY: Record<string, ContentPack> = {
+  "pmbok-prep": pmbokPack,
   "cca-f-prep": ccaPack,
   "learn-french": frenchPack,
   "sample-pack": samplePack,
@@ -32,7 +43,6 @@ export const PACK_REGISTRY: Record<string, ContentPack> = {
   "workplace-comms": commsPack,
   "security-awareness": securityPack,
   "new-manager-basics": managerPack,
-  "pmbok-prep": pmbokPack,
 };
 
 export const ALL_PACK_IDS: string[] = Object.keys(PACK_REGISTRY);

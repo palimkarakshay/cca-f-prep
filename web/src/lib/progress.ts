@@ -9,33 +9,69 @@ import {
   type SectionProgress,
 } from "./progress-types";
 
-export function newProgress(): Progress {
-  const first = CURRICULUM.sections[0];
+/**
+ * Build an empty Progress shape. If `firstSectionId` is supplied, seed
+ * that section as unlocked so its concepts render as Links instead of
+ * the disabled (no-link) "Stub/Locked" state. The zero-arg call seeds
+ * the active pack's first section — used by tests and the back-compat
+ * single-pack path. Per-pack stores call this with the *URL pack's*
+ * first section id, which fixes the cross-pack "concepts don't load"
+ * bug where every non-default pack had its real first section left
+ * locked because the default pack's id was seeded instead.
+ */
+export function newProgress(firstSectionId?: string): Progress {
+  const firstId = firstSectionId ?? CURRICULUM.sections[0]?.id;
   return {
     schemaVersion: 1,
     concept: {},
-    section: first
-      ? { [first.id]: { unlocked: true, testAttempts: [], complete: false } }
+    section: firstId
+      ? { [firstId]: { unlocked: true, testAttempts: [], complete: false } }
       : {},
     mock: {},
     location: { view: "dashboard", sectionId: null, conceptId: null, mockId: null },
   };
 }
 
-export function loadProgressFor(storageKey: string): Progress {
-  if (typeof window === "undefined") return newProgress();
+export function loadProgressFor(
+  storageKey: string,
+  firstSectionId?: string
+): Progress {
+  if (typeof window === "undefined") return newProgress(firstSectionId);
   try {
     const raw = window.localStorage.getItem(storageKey);
-    if (!raw) return newProgress();
+    if (!raw) return newProgress(firstSectionId);
     const obj = JSON.parse(raw) as Progress;
-    if (!obj || obj.schemaVersion !== 1) return newProgress();
+    if (!obj || obj.schemaVersion !== 1) return newProgress(firstSectionId);
     if (!obj.mock) obj.mock = {};
     if (obj.location && !("mockId" in (obj.location as object))) {
       obj.location.mockId = null;
     }
+    // Self-heal: an older persisted shape may pre-date the pack-aware
+    // newProgress() fix and still carry only the *default* pack's
+    // first-section id as unlocked. Two affected cases:
+    //   (a) the URL pack's first-section record is missing entirely —
+    //       seed it fresh with unlocked: true.
+    //   (b) the record exists but is { unlocked: false } — that can
+    //       happen if a side effect (e.g. starting a section test
+    //       which calls ensureSection) created a locked record before
+    //       this fix landed. Force-unlock here so concept links light
+    //       up on the next page load. Test attempts / completion
+    //       flags are preserved.
+    if (firstSectionId) {
+      const existing = obj.section[firstSectionId];
+      if (!existing) {
+        obj.section[firstSectionId] = {
+          unlocked: true,
+          testAttempts: [],
+          complete: false,
+        };
+      } else if (!existing.unlocked) {
+        existing.unlocked = true;
+      }
+    }
     return obj;
   } catch {
-    return newProgress();
+    return newProgress(firstSectionId);
   }
 }
 
