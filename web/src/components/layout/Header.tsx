@@ -10,7 +10,7 @@ import {
   Grid3X3,
   type LucideIcon,
 } from "lucide-react";
-import { useSiteConfig } from "@/content/pack-hooks";
+import { getPack } from "@/content/pack-registry";
 import type { NavIcon, NavItem } from "@/lib/site-config";
 import { BRAND } from "@/lib/brand";
 import { ThemeToggle } from "@/components/primitives/ThemeToggle";
@@ -52,14 +52,25 @@ function prefixWithPack(href: string, packId: string | null): string {
 
 export function Header() {
   const pathname = usePathname();
-  const siteConfig = useSiteConfig();
-  const packId = packIdFromPathname(pathname);
+  const firstSegment = packIdFromPathname(pathname);
+  // The chrome lives in the root layout, *outside* the [packId]
+  // PackProvider, so `usePack()`/`useSiteConfig()` falls back to the
+  // default pack and the chrome's nav would lock to that pack's
+  // items regardless of which pack the URL points at (e.g. showing
+  // "Mock" on /acme-onboarding/... even though Acme has no mock
+  // exams). Resolving the pack from the URL keeps the chrome's nav
+  // in sync with the route. Non-pack routes (e.g. /for-teams) return
+  // null from getPack and fall through to the picker-style chrome
+  // (no nav, no Switch-topic button) so the chrome doesn't pretend
+  // you're inside a pack.
+  const pack = firstSegment ? getPack(firstSegment) : null;
+  const packId = pack ? firstSegment : null;
   // Top header surfaces the actionable destinations on tablet+ where there
   // is no bottom nav. On mobile, the brand stays visible but the nav
   // collapses to the bottom-tab bar.
   //
   // On the picker (packId null), every nav item is pack-relative (the
-  // siteConfig.nav hrefs assume a pack context — e.g. "/mock" really
+  // pack.config.nav hrefs assume a pack context — e.g. "/mock" really
   // means "/<active pack>/mock"). Surfacing them un-prefixed leads
   // visitors to 404s like /mock or anchor-only pages. Hide the inline
   // nav until the user has picked a pack; the brand + ThemeToggle stay.
@@ -69,8 +80,8 @@ export function Header() {
   // on the page H1 + the Switch-topic affordance, so the top chrome
   // doesn't accidentally surface a single pack's identity (e.g. "CCA-F
   // Prep") to a visitor who is exploring multiple topics.
-  const visibleNav = packId
-    ? siteConfig.nav.filter((n) => n.href !== "/")
+  const visibleNav = pack
+    ? pack.config.nav.filter((n) => n.href !== "/")
     : [];
   const homeHref = packId ? `/${packId}` : "/";
 

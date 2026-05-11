@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Layers, Award, TrendingUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useSiteConfig } from "@/content/pack-hooks";
+import { getPack } from "@/content/pack-registry";
 import type { NavIcon, NavItem } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
@@ -46,12 +46,19 @@ function prefixWithPack(href: string, packId: string | null): string {
 
 export function BottomNav() {
   const pathname = usePathname();
-  const siteConfig = useSiteConfig();
-  const packId = packIdFromPathname(pathname);
+  const firstSegment = packIdFromPathname(pathname);
+  // BottomNav lives in the root layout, outside PackProvider — same
+  // pattern as Header. Read the pack from the URL so the mobile tabs
+  // reflect *this pack's* nav (e.g. omit "Mock" on packs with no
+  // mock exams) instead of locking to the default pack's config.
+  // Non-pack routes (/for-teams, etc.) resolve to null and hide the
+  // bottom nav entirely.
+  const pack = firstSegment ? getPack(firstSegment) : null;
+  const packId = pack ? firstSegment : null;
   // On the picker (packId null), every nav item is pack-relative —
   // surfacing them un-prefixed leads to /mock 404s and anchor-only
   // dead links. Hide the bottom nav until the user has picked a pack.
-  const items = packId ? siteConfig.nav.filter((n) => n.mobile) : [];
+  const items = pack ? pack.config.nav.filter((n) => n.mobile) : [];
 
   if (items.length === 0) return null;
 
