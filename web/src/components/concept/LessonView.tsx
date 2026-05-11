@@ -170,6 +170,15 @@ export function LessonView({
   // fall back to conceptual silently.
   const effectiveDepth: LessonDepth = available[depth] ? depth : "conceptual";
 
+  // The TOC rail only renders on the conceptual depth (its anchors
+  // point at IDs that exist only in LessonBody). On Easy/Deeper, the
+  // rail's grid column would still be reserved by the fixed
+  // `grid-cols-[200px_minmax(0,1fr)]` and the article — being the
+  // only child — would auto-place into the 200px column, producing
+  // the "small mobile version on desktop" bug. Switch to a single-
+  // column flow on those depths so the article gets the full width.
+  const showTocColumn = effectiveDepth === "conceptual";
+
   return (
     <>
       {/* Decorative scroll-progress bar across the top — duplicates browser
@@ -184,8 +193,14 @@ export function LessonView({
         />
       </div>
 
-      <div className="lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10">
-        <LessonTOC lesson={lesson} depth={effectiveDepth} />
+      <div
+        className={cn(
+          showTocColumn && "lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10"
+        )}
+      >
+        {showTocColumn ? (
+          <LessonTOC lesson={lesson} depth={effectiveDepth} />
+        ) : null}
 
         <article className="min-w-0">
           <header className="mb-4 flex flex-wrap items-center gap-2">
