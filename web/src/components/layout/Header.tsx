@@ -8,6 +8,7 @@ import {
   Award,
   TrendingUp,
   Grid3X3,
+  Briefcase,
   type LucideIcon,
 } from "lucide-react";
 import { getPack } from "@/content/pack-registry";
@@ -141,6 +142,25 @@ export function Header() {
               <span className="sm:hidden">Topics</span>
             </Link>
           ) : null}
+          {/* Persistent For-teams CTA — visible on every route so a B2B
+              prospect can find the Adept demo from anywhere in the
+              consumer surface. We surface this even *inside* a pack
+              because pack browsing is also part of the sales journey
+              (prospect tries the consumer experience, then asks "can
+              we have this for our team?"). */}
+          <Link
+            href="/adept"
+            aria-label={`${BRAND.b2bName} — ${BRAND.name} for teams`}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-md border border-(--accent)/40 bg-(--accent)/10 px-3 py-2 text-xs font-semibold text-(--accent-2) no-underline shadow-sm",
+              "transition-colors hover:border-(--accent) hover:bg-(--accent)/15",
+              "min-h-9"
+            )}
+          >
+            <Briefcase aria-hidden className="h-4 w-4" />
+            <span className="hidden sm:inline">{BRAND.b2bName} (teams)</span>
+            <span className="sm:hidden">{BRAND.b2bName}</span>
+          </Link>
           <ThemeToggle />
         </nav>
       </div>
