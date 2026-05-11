@@ -13,12 +13,14 @@
 ------------------------------------------------------------------ */
 
 import { pack as ccaPack } from "../../content-packs/cca-f-prep";
+import { pack as frenchPack } from "../../content-packs/learn-french";
 import { pack as samplePack } from "../../content-packs/sample-pack";
 import { pack as sewingPack } from "../../content-packs/sewing-beginners";
 import type { ContentPack } from "./pack-types";
 
 export const PACK_REGISTRY: Record<string, ContentPack> = {
   "cca-f-prep": ccaPack,
+  "learn-french": frenchPack,
   "sample-pack": samplePack,
   "sewing-beginners": sewingPack,
 };

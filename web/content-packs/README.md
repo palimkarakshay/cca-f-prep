@@ -23,6 +23,7 @@ Packs in this repo:
 | Pack id            | Folder                  | What it contains                                                                  |
 | ------------------ | ----------------------- | --------------------------------------------------------------------------------- |
 | `cca-f-prep`       | `cca-f-prep/`           | Original — Anthropic CCA-F exam prep (9 sections, 41 concepts, 1 diagnostic mock) |
+| `learn-french`     | `learn-french/`         | Practical beginner French for English speakers (5 modules, 15 concepts, 2 real-life scenarios) — France + Quebec aware |
 | `sample-pack`      | `sample-pack/`          | Tiny demo (2 sections, 3 concepts, 1 mock) — proves the swap mechanism            |
 | `sewing-beginners` | `sewing-beginners/`     | Non-exam topic pack (sewing 101) — proves `pack.copy` terminology overrides       |
 
