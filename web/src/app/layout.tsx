@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import { SiteChrome } from "@/components/layout/SiteChrome";
 import { siteConfig } from "@/lib/site-config";
+import { BRAND } from "@/lib/brand";
 import { THEME_STORAGE_KEY, PACK_ID } from "@/lib/storage-keys";
 import { ACTIVE_PACK } from "@/content/active-pack";
 import "./globals.css";
@@ -26,12 +27,12 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: siteConfig.name,
-    template: `%s · ${siteConfig.name}`,
+    default: BRAND.name,
+    template: `%s · ${BRAND.name}`,
   },
-  description: siteConfig.description,
+  description: BRAND.description,
   metadataBase: new URL(siteConfig.url),
-  applicationName: siteConfig.name,
+  applicationName: BRAND.name,
   authors: siteConfig.author ? [{ name: siteConfig.author }] : undefined,
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: siteConfig.shortName ?? siteConfig.name,
+    title: BRAND.shortName,
     statusBarStyle: "black-translucent",
   },
 };
