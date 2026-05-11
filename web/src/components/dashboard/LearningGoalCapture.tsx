@@ -45,10 +45,11 @@ import {
   type LearningGoalDraft,
 } from "@/lib/learning-goals";
 import {
-  decodeJourney,
+  decodeJourneyCached,
   JOURNEY_KIND_LABEL,
   type DecodedJourney,
 } from "@/lib/journey-decoder";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 const inputClass = cn(
   "w-full rounded-md border border-(--border) bg-(--panel) px-3 py-2 text-sm",
@@ -85,10 +86,17 @@ export function LearningGoalCapture() {
     goalStore.getServerSnapshot
   );
 
+  // Debounce keeps the decoder off the per-keystroke critical path —
+  // free today (cheap regex), bounded when the same call swaps to
+  // an LLM behind NEXT_PUBLIC_AI_DECODER_ENABLED.
+  const debouncedWhat = useDebouncedValue(what, 800);
+  const debouncedWhy = useDebouncedValue(why, 800);
   const decoded: DecodedJourney | null = useMemo(() => {
-    if (what.trim().length < 3 && why.trim().length < 3) return null;
-    return decodeJourney({ what, why });
-  }, [what, why]);
+    if (debouncedWhat.trim().length < 3 && debouncedWhy.trim().length < 3) {
+      return null;
+    }
+    return decodeJourneyCached({ what: debouncedWhat, why: debouncedWhy });
+  }, [debouncedWhat, debouncedWhy]);
 
   function update<K extends keyof LearningGoalDraft>(
     key: K,
