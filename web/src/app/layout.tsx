@@ -5,6 +5,7 @@ import { siteConfig } from "@/lib/site-config";
 import { BRAND } from "@/lib/brand";
 import { THEME_STORAGE_KEY, PACK_ID } from "@/lib/storage-keys";
 import { ACTIVE_PACK } from "@/content/active-pack";
+import { initScript as displayPrefsInitScript } from "@/lib/display-prefs";
 import "./globals.css";
 
 const display = Fraunces({
@@ -112,6 +113,9 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{ __html: themeInitScript }}
+        />
+        <script
+          dangerouslySetInnerHTML={{ __html: displayPrefsInitScript() }}
         />
         {packThemeCSS ? (
           <style dangerouslySetInnerHTML={{ __html: packThemeCSS }} />

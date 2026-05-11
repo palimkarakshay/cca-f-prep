@@ -15,6 +15,7 @@ import { getPack } from "@/content/pack-registry";
 import type { NavIcon, NavItem } from "@/lib/site-config";
 import { BRAND } from "@/lib/brand";
 import { ThemeToggle } from "@/components/primitives/ThemeToggle";
+import { DisplayPrefsMenu } from "@/components/primitives/DisplayPrefsMenu";
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<NavIcon, LucideIcon> = {
@@ -161,6 +162,7 @@ export function Header() {
             <span className="hidden sm:inline">{BRAND.b2bName} (teams)</span>
             <span className="sm:hidden">{BRAND.b2bName}</span>
           </Link>
+          <DisplayPrefsMenu />
           <ThemeToggle />
         </nav>
       </div>

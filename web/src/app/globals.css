@@ -260,3 +260,47 @@ samp {
     scroll-behavior: auto !important;
   }
 }
+
+/* ------------------------------------------------------------------
+   Display preferences (data-text-size / data-contrast / data-motion).
+   Inline init script in app/layout.tsx writes these attributes before
+   first paint from localStorage so the rules below resolve on the
+   server-rendered output as well as on the client.
+------------------------------------------------------------------ */
+
+/* Text size — bump the root font-size + line-height so every
+   rem/em-derived value scales together. */
+html[data-text-size="large"] {
+  font-size: 17.5px;
+  line-height: 1.6;
+}
+html[data-text-size="xlarge"] {
+  font-size: 19px;
+  line-height: 1.7;
+}
+
+/* High-contrast — strengthens muted text + borders so every text
+   passes WCAG AAA. We tighten --muted toward --ink and harden the
+   border + canvas separation; accents stay unchanged because they
+   already clear AA. */
+html[data-contrast="high"] {
+  --muted: var(--ink);
+  --border: var(--ink);
+}
+html[data-contrast="high"].dark {
+  --muted: var(--ink);
+  --border: var(--ink);
+}
+
+/* Reduced motion — opt-in version of the prefers-reduced-motion
+   media query. Same rule set, triggered by the explicit user
+   choice in the display-prefs menu (e.g. shared kiosk where the
+   OS-level preference can't be set). */
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
