@@ -15,6 +15,7 @@ import { BRAND } from "@/lib/brand";
 import { LearningGoalCapture } from "@/components/dashboard/LearningGoalCapture";
 import { DesignerJourneyDecoder } from "@/components/dashboard/DesignerJourneyDecoder";
 import { ResumeLearningCard } from "@/components/dashboard/ResumeLearningCard";
+import { isAdeptEnabled } from "@/lib/feature-flags";
 
 export const metadata: Metadata = {
   title: "Pick a learning journey",
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default function PickerPage() {
+  const adeptEnabled = isAdeptEnabled();
   return (
     <Container width="wide" className="flex flex-col gap-8 py-2">
       <Image
@@ -64,7 +66,11 @@ export default function PickerPage() {
           different audiences. */}
       <nav
         aria-label="Choose your lane"
-        className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+        className={
+          adeptEnabled
+            ? "grid grid-cols-1 gap-3 sm:grid-cols-2"
+            : "grid grid-cols-1 gap-3"
+        }
       >
         <LaneTile
           href="#lane-learner"
@@ -72,12 +78,14 @@ export default function PickerPage() {
           label="I want to learn for myself"
           help="Two questions, then a shaped journey + applied practice. Pick a ready-made journey, or wait for us to author yours."
         />
-        <LaneTile
-          href="#lane-designer"
-          Icon={Briefcase}
-          label="I’m designing for someone else"
-          help="L&D leads, instructional designers, SMEs. Decode the gap into a brief, then build the pack in the Adept SME workbench."
-        />
+        {adeptEnabled && (
+          <LaneTile
+            href="#lane-designer"
+            Icon={Briefcase}
+            label="I’m designing for someone else"
+            help="L&D leads, instructional designers, SMEs. Decode the gap into a brief, then build the pack in the Adept SME workbench."
+          />
+        )}
       </nav>
 
       {/* Learner lane */}
@@ -192,7 +200,9 @@ export default function PickerPage() {
         </section>
       </section>
 
-      {/* Designer lane */}
+      {/* Designer lane — hidden when NEXT_PUBLIC_ADEPT_ENABLED=0
+          (the v2 launch defers Adept to Phase 2). */}
+      {adeptEnabled && (
       <section
         id="lane-designer"
         aria-labelledby="lane-designer-heading"
@@ -243,6 +253,7 @@ export default function PickerPage() {
           </div>
         </Card>
       </section>
+      )}
     </Container>
   );
 }
