@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -60,6 +61,19 @@ export default async function PackHomePage({
           {cfg.name}
         </h1>
         <p className="text-sm text-(--muted)">{cfg.tagline}</p>
+        {cfg.heroImagePath ? (
+          <div className="mt-3 overflow-hidden rounded-lg border border-(--border) bg-(--panel-2)">
+            <Image
+              aria-hidden
+              src={cfg.heroImagePath}
+              alt=""
+              width={1200}
+              height={675}
+              priority
+              className="h-auto w-full object-cover"
+            />
+          </div>
+        ) : null}
       </header>
       <RecommendationBanner />
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Lock } from "lucide-react";
 import { useProgress } from "@/hooks/useProgress";
@@ -97,24 +98,36 @@ export function SectionList() {
                 "ring-1 ring-(--accent)/20"
             )}
           >
-            <div className="flex items-baseline gap-3">
-              <span className="font-mono text-xs text-(--muted)">
-                {String(section.n).padStart(2, "0")}.
-              </span>
-              <Link
-                href={`/${packId}/section/${section.id}`}
-                className="text-base font-semibold text-(--ink) no-underline hover:underline"
-              >
-                {section.title}
-              </Link>
-              <span
-                className={cn(
-                  "ml-auto rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
-                  STATUS_PILL[status]
-                )}
-              >
-                {STATUS_LABEL[status]}
-              </span>
+            <div className="flex items-start gap-3">
+              {section.iconImagePath ? (
+                <Image
+                  aria-hidden
+                  src={section.iconImagePath}
+                  alt=""
+                  width={56}
+                  height={56}
+                  className="h-14 w-14 flex-none overflow-hidden rounded-md border border-(--border) bg-(--panel-2) object-cover"
+                />
+              ) : null}
+              <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3 gap-y-1">
+                <span className="font-mono text-xs text-(--muted)">
+                  {String(section.n).padStart(2, "0")}.
+                </span>
+                <Link
+                  href={`/${packId}/section/${section.id}`}
+                  className="text-base font-semibold text-(--ink) no-underline hover:underline"
+                >
+                  {section.title}
+                </Link>
+                <span
+                  className={cn(
+                    "ml-auto rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+                    STATUS_PILL[status]
+                  )}
+                >
+                  {STATUS_LABEL[status]}
+                </span>
+              </div>
             </div>
             <p className="text-sm text-(--muted)">{section.blurb}</p>
 
