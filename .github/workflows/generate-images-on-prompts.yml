@@ -37,16 +37,20 @@ jobs:
         with:
           node-version: 20
 
-      - name: Validate FAL_KEY present
+      - name: Check FAL_KEY presence
+        id: fal_key
         run: |
           if [ -z "${FAL_KEY}" ]; then
-            echo "::error::FAL_KEY secret not set. Skipping image generation."
-            exit 0
+            echo "::warning::FAL_KEY secret not set. Skipping image generation."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
           fi
         env:
           FAL_KEY: ${{ secrets.FAL_KEY }}
 
       - name: Generate new module + hero images
+        if: steps.fal_key.outputs.present == 'true'
         env:
           FAL_KEY: ${{ secrets.FAL_KEY }}
         run: |
@@ -61,6 +65,7 @@ jobs:
             --only=modules.pmbok-foundations,modules.pmbok-principles,modules.pmbok-focus-areas,modules.pmbok-tailoring,modules.pmbok-domains-i,modules.pmbok-domains-ii,modules.pmbok-domains-iii,modules.pmbok-exam-strategy,hero.pmbok-course-hero
 
       - name: Commit generated images back to branch
+        if: steps.fal_key.outputs.present == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

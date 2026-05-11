@@ -169,11 +169,14 @@ export function useProgress() {
   );
 
   /**
-   * Is the section's test eligible to take? True when every authored
-   * concept in the section has been read (lesson visited) — i.e. the
-   * "conceptual part" of the section is complete. Stub concepts (no
-   * lesson + no quiz) are skipped so a partially authored section
-   * can still gate on the work that actually exists.
+   * Is the section's test eligible to take? True when every readable
+   * lesson in the section has been visited — i.e. the "conceptual
+   * part" of the section is complete. A concept counts as readable
+   * if it has a `lesson` (quiz is optional; some packs ship lesson-
+   * only concepts in partially authored modules). Concepts with no
+   * lesson at all are pure stubs and can't be read, so they're
+   * skipped so a section that has lesson-only entries still gates
+   * correctly on the work the learner can actually do.
    *
    * This is the *new* lock — sections themselves never lock, but the
    * end-of-section test does until the conceptual material has been
@@ -185,11 +188,9 @@ export function useProgress() {
       if (!hydrated) return true;
       const section = pack.curriculum.sections.find((s) => s.id === sectionId);
       if (!section) return false;
-      const authored = section.concepts.filter(
-        (c) => c.lesson && c.quiz
-      );
-      if (authored.length === 0) return true;
-      return authored.every((c) => {
+      const readable = section.concepts.filter((c) => c.lesson);
+      if (readable.length === 0) return true;
+      return readable.every((c) => {
         const cp = progress.concept[c.id];
         return Boolean(cp?.lessonRead || (cp?.quizAttempts.length ?? 0) > 0);
       });
