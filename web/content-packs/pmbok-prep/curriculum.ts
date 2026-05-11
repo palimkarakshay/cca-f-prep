@@ -1901,6 +1901,660 @@ export const CURRICULUM: Curriculum = {
         ],
       },
     },
+    /* ============================================================
+       Section 5 — Performance Domains I: Governance, Scope, Schedule
+       ============================================================ */
+    {
+      id: "s5-domains-1",
+      n: 5,
+      title: "Performance domains I — governance, scope, schedule",
+      blurb:
+        "The first three of seven Performance Domains. Each domain is an outcome area, not a knowledge silo.",
+      concepts: [
+        {
+          id: "c5-1-governance",
+          code: "PD5.1",
+          title: "Governance domain",
+          bloom: "U",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "The Governance Performance Domain covers the framework, functions, and processes that direct the project. PMBOK 8e splits governance into three layers: portfolio governance (which projects to fund), program governance (how to coordinate related projects), and project governance (how to make decisions inside this project).",
+              "Project governance produces decision rights, escalation paths, change-control authority, and metrics for steering. The classic governance artefact is a steering committee or Change Control Board (CCB). The PM's job is to ensure governance is *right-sized*: enough to keep stakeholders aligned and unblock decisions, not so heavy it becomes bureaucracy that prevents value delivery.",
+              "On the exam, governance questions test (a) who can authorise what (sponsor vs PM vs CCB), (b) which artefacts govern which decisions (charter vs PM plan vs change log), and (c) when escalation is appropriate (threshold exceeded, authority insufficient, cross-program conflict).",
+            ],
+            keyPoints: [
+              "Three layers: portfolio / program / project governance.",
+              "Right-sized governance: enough rigour, no bureaucracy.",
+              "CCB / steering committee handles change requests above PM threshold.",
+              "PM escalates when decision exceeds their authority or cross-program impact.",
+            ],
+            simplified: {
+              oneLiner:
+                "Governance is the system of who-decides-what. Make it appropriate for the project's risk and size.",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "A change request exceeds the PM's signing threshold. PMI-correct next step is:",
+                options: {
+                  A: "Authorise it anyway to keep the project moving.",
+                  B: "Escalate to the Change Control Board or sponsor per governance.",
+                  C: "Refuse outright.",
+                  D: "Approve a smaller version of the request to fit the threshold.",
+                },
+                correct: "B",
+                principle:
+                  "Decisions above PM threshold escalate to the CCB or sponsor.",
+              },
+              {
+                kind: "true-false",
+                n: 2,
+                question:
+                  "Governance is the same as project management.",
+                correct: false,
+                explanationFalse:
+                  "Right — governance is the framework of decision rights and steering. PM is execution inside that framework.",
+                explanationTrue:
+                  "Actually no — governance is the framework, PM is execution within it.",
+                principle:
+                  "Governance = framework. PM = execution.",
+              },
+              {
+                n: 3,
+                question:
+                  "Which is a sign that governance is too heavy on a small low-risk project?",
+                options: {
+                  A: "All small decisions need 5+ approvers.",
+                  B: "Stakeholders are well-aligned.",
+                  C: "Risk register is reviewed weekly.",
+                  D: "Sponsor receives a monthly status report.",
+                },
+                correct: "A",
+                principle:
+                  "Over-governance: decision velocity slows, value delivery stalls.",
+              },
+            ],
+          },
+        },
+        {
+          id: "c5-2-scope",
+          code: "PD5.2",
+          title: "Scope domain (and the WBS)",
+          bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "The Scope Performance Domain manages what is and isn't in the project. Key artefacts: requirements documentation, scope statement, and the Work Breakdown Structure (WBS). The WBS is a hierarchical decomposition of the *total* scope of work into deliverable-oriented work packages — the smallest units that can be estimated and managed.",
+              "PMBOK distinguishes scope creep (uncontrolled expansion of scope without change control) from gold plating (the team voluntarily adds work the customer didn't ask for). Both are anti-patterns; both reduce value-per-investment. The correct response to either is to surface it, run impact analysis, and (for scope changes) route the decision through change control.",
+              "The 100% rule is the classic WBS test: the WBS includes 100% of the work — no more, no less. Anything not in the WBS is not in scope, by definition. The WBS is the foundation for schedule (every work package gets activities), cost (every work package gets an estimate), and quality (every deliverable gets acceptance criteria).",
+            ],
+            keyPoints: [
+              "WBS = hierarchical decomposition of *all* scope. Deliverable-oriented.",
+              "100% rule: WBS contains 100% of the work, nothing extra.",
+              "Scope creep = uncontrolled stakeholder additions. Gold plating = team-added extras.",
+              "Not in WBS = not in scope.",
+            ],
+            simplified: {
+              oneLiner:
+                "Scope is what you're committed to building. The WBS lists it. Anything not on the list isn't your job.",
+            },
+            deeper: {
+              oneLiner:
+                "Adaptive (agile) scope uses a product backlog instead of a fixed WBS, but the underlying principle — 'this is what we're committed to' — is the same.",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "Mid-project, the team voluntarily adds a fancy animation the customer didn't request. PMBOK calls this:",
+                options: {
+                  A: "Scope creep.",
+                  B: "Gold plating.",
+                  C: "Tailoring.",
+                  D: "Progressive elaboration.",
+                },
+                correct: "B",
+                explanations: {
+                  A: "Scope creep is *stakeholder*-driven and uncontrolled. This is *team*-driven.",
+                  B: "Right — team adding unrequested work = gold plating.",
+                  C: "Tailoring is choosing process — not adding work.",
+                  D: "Progressive elaboration is plan refinement, not unrequested feature addition.",
+                },
+                principle:
+                  "Scope creep = stakeholder, uncontrolled. Gold plating = team, voluntary.",
+              },
+              {
+                kind: "fill-in",
+                n: 2,
+                question:
+                  "The 100% rule of WBS construction says the WBS must include exactly what percent of the project work?",
+                acceptedAnswers: ["100", "100%", "one hundred", "100 percent"],
+                placeholder: "e.g. 100",
+                principle:
+                  "100% rule: WBS contains 100% of the work, no more, no less.",
+              },
+              {
+                kind: "true-false",
+                n: 3,
+                question:
+                  "An adaptive project doesn't manage scope.",
+                correct: false,
+                explanationFalse:
+                  "Right — adaptive manages scope via the product backlog, definition of done, and acceptance criteria. The shape differs from a WBS; the concept doesn't.",
+                explanationTrue:
+                  "Actually no — adaptive uses product backlog + DoD + acceptance criteria. Scope is still managed.",
+                principle:
+                  "Adaptive manages scope through backlog + DoD, not via a fixed WBS.",
+              },
+            ],
+          },
+        },
+        {
+          id: "c5-3-schedule",
+          code: "PD5.3",
+          title: "Schedule domain (critical path basics)",
+          bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "The Schedule Performance Domain plans activities, sequences them, estimates durations, and produces a schedule baseline. The classic technique is critical-path method (CPM): identify activities, draw the dependency network, calculate the longest path from start to finish. The activities on that path have zero float — any delay there delays the whole project.",
+              "Three estimation techniques the exam expects: analogous (use a similar past project — fast but imprecise), parametric (rate × quantity — better when historical rates are reliable), and three-point/PERT (optimistic + 4×most-likely + pessimistic, all divided by 6 — better when uncertainty is high). On adaptive projects, velocity (story points per sprint) replaces date-based estimation.",
+              "Two compressions PMI tests: crashing (add more resources to reduce duration — costs more, doesn't change scope) and fast-tracking (perform sequential activities in parallel — increases risk, doesn't change cost). Both are valid; both have trade-offs. The exam rewards picking the right tool for the constraint.",
+            ],
+            keyPoints: [
+              "Critical path = longest sequence; zero float.",
+              "Estimate: analogous, parametric, PERT (3-point) = (O + 4M + P)/6.",
+              "Compress: crash (more $, same risk profile) vs fast-track (more risk, same $).",
+              "Adaptive uses velocity instead of date-based estimation.",
+            ],
+            simplified: {
+              oneLiner:
+                "The critical path is the chain that controls when you finish. To go faster, either spend more (crash) or take on risk (fast-track).",
+            },
+            deeper: {
+              oneLiner:
+                "PERT expected duration: E = (O + 4M + P) / 6. Standard deviation: σ = (P - O) / 6. Variance: σ² = ((P - O) / 6)².",
+              examples: [
+                {
+                  title: "PERT example",
+                  body: "Task estimate: optimistic 4 days, most-likely 6 days, pessimistic 14 days. PERT expected = (4 + 4×6 + 14)/6 = (4 + 24 + 14)/6 = 42/6 = 7 days.",
+                },
+              ],
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "An activity has optimistic = 3 days, most-likely = 6 days, pessimistic = 15 days. Calculate the PERT expected duration.",
+                options: {
+                  A: "6 days.",
+                  B: "7 days.",
+                  C: "8 days.",
+                  D: "9 days.",
+                },
+                correct: "B",
+                explanations: {
+                  A: "That's the most-likely, not PERT.",
+                  B: "Right — (3 + 4×6 + 15) / 6 = (3 + 24 + 15) / 6 = 42 / 6 = 7.",
+                  C: "Try the formula again: O + 4M + P, then ÷ 6.",
+                  D: "Try the formula again: O + 4M + P, then ÷ 6.",
+                },
+                principle:
+                  "PERT = (O + 4M + P) / 6. Memorise this — exam regular.",
+              },
+              {
+                n: 2,
+                question:
+                  "The schedule is slipping. The project has budget room but cannot accept additional risk. Best compression choice?",
+                options: {
+                  A: "Crash — add resources.",
+                  B: "Fast-track — parallelise sequential activities.",
+                  C: "Reduce scope.",
+                  D: "Do nothing — let it slip.",
+                },
+                correct: "A",
+                principle:
+                  "Crashing costs money, doesn't add risk. Fast-tracking is free but adds risk. Pick the lever that matches the constraint.",
+              },
+              {
+                kind: "true-false",
+                n: 3,
+                question:
+                  "Activities on the critical path have zero float.",
+                correct: true,
+                explanationTrue:
+                  "Right — by definition. Any delay on a critical-path activity delays project completion.",
+                explanationFalse:
+                  "Actually yes — by definition, critical-path activities have zero float.",
+                principle:
+                  "Critical path = the longest chain. Zero float by definition.",
+              },
+            ],
+          },
+        },
+      ],
+      sectionTest: {
+        passPct: 0.7,
+        questions: [
+          {
+            n: 1,
+            question:
+              "Which artefact governs which scope items are 'in' vs 'out'?",
+            options: {
+              A: "Project charter.",
+              B: "Stakeholder register.",
+              C: "WBS (Work Breakdown Structure).",
+              D: "Risk register.",
+            },
+            correct: "C",
+            principle:
+              "WBS = the authoritative decomposition of all in-scope work.",
+          },
+          {
+            n: 2,
+            question:
+              "A team adds an unrequested feature on top of the customer's spec. PMBOK calls this:",
+            options: {
+              A: "Progressive elaboration.",
+              B: "Gold plating.",
+              C: "Tailoring.",
+              D: "Critical-path crashing.",
+            },
+            correct: "B",
+            principle:
+              "Gold plating = unrequested additions by the team.",
+          },
+          {
+            n: 3,
+            question:
+              "PERT expected duration formula:",
+            options: {
+              A: "(O + M + P) / 3.",
+              B: "(O + 4M + P) / 6.",
+              C: "(O + 2M + P) / 4.",
+              D: "O + M + P.",
+            },
+            correct: "B",
+            principle:
+              "PERT three-point: (Optimistic + 4 × Most-likely + Pessimistic) / 6.",
+          },
+          {
+            n: 4,
+            question:
+              "Budget room exists; risk tolerance is low; schedule is slipping. Choose:",
+            options: {
+              A: "Fast-track.",
+              B: "Crash.",
+              C: "Reduce scope.",
+              D: "Add gold-plating.",
+            },
+            correct: "B",
+            principle:
+              "Crash adds cost, no extra risk. Fast-track is free but adds risk.",
+          },
+          {
+            n: 5,
+            question:
+              "A change request exceeds the PM's authority threshold. PMI-correct:",
+            options: {
+              A: "Approve it informally.",
+              B: "Reject outright.",
+              C: "Escalate to the CCB / sponsor.",
+              D: "Wait until project closure.",
+            },
+            correct: "C",
+            principle:
+              "Above-threshold changes go to the CCB or sponsor per governance.",
+          },
+        ],
+      },
+    },
+    /* ============================================================
+       Section 6 — Performance Domains II: Finance & Stakeholders
+       ============================================================ */
+    {
+      id: "s6-domains-2",
+      n: 6,
+      title: "Performance domains II — finance & stakeholders",
+      blurb:
+        "Finance covers the project's economics — including the most-tested numeric tool, Earned Value Management. Stakeholders covers identification, analysis, and engagement.",
+      concepts: [
+        {
+          id: "c6-1-finance",
+          code: "PD6.1",
+          title: "Finance domain — business case, NPV, IRR, payback",
+          bloom: "U",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "The Finance Performance Domain covers business-case justification, budgeting, cost estimation, funding, and benefits realisation. The four financial metrics PMI most often tests are: NPV (Net Present Value — sum of discounted future cash flows minus initial investment; positive is good), IRR (Internal Rate of Return — the discount rate that makes NPV zero; higher is better), payback period (how long until the project pays for itself; shorter is better), and ROI (Return on Investment — net benefit divided by cost).",
+              "When the exam pits projects against each other, the heuristic ladder is: higher NPV > higher IRR > shorter payback > higher ROI. NPV is the most rigorous because it accounts for the time value of money. Payback is the least rigorous (ignores cash flows after payback). PMI's preferred metric depends on context but NPV is the safest default answer.",
+              "Two cost concepts the exam abuses: sunk costs (money already spent — never relevant to forward-looking decisions) and opportunity costs (the value of the *next-best alternative not chosen* — implicit in every project selection). 'We already spent £1M' is not a reason to continue; that's sunk-cost fallacy.",
+            ],
+            keyPoints: [
+              "NPV > IRR > payback > ROI in rigour. NPV is the safest default.",
+              "NPV positive = value-adding. Higher NPV is better.",
+              "Sunk costs are irrelevant to forward decisions.",
+              "Opportunity cost = value of the next-best alternative not chosen.",
+            ],
+            simplified: {
+              oneLiner:
+                "NPV high and positive = good. Sunk cost = ignore it. Compare projects by what they'll add, not what was spent.",
+            },
+            deeper: {
+              oneLiner:
+                "On benefits-vs-cost questions: choose the project with the highest NPV unless the question specifies a different metric. If asked about payback alone, shorter wins.",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "Project A: NPV +£500k, IRR 14%, payback 3 years. Project B: NPV +£700k, IRR 11%, payback 5 years. Which does PMI default to selecting?",
+                options: {
+                  A: "Project A — higher IRR + shorter payback.",
+                  B: "Project B — higher NPV.",
+                  C: "Neither — both are too risky.",
+                  D: "Both — diversify investment.",
+                },
+                correct: "B",
+                explanations: {
+                  A: "Higher IRR + shorter payback are seductive but NPV is the more rigorous metric.",
+                  B: "Right — NPV is PMI's safest default unless another metric is specified.",
+                  C: "Both have positive NPV; both add value.",
+                  D: "Diversification is a portfolio question, not a project-selection one.",
+                },
+                principle:
+                  "When NPV conflicts with IRR/payback, NPV wins — it accounts for time value of money correctly.",
+              },
+              {
+                kind: "true-false",
+                n: 2,
+                question:
+                  "'We've already spent £2M, so we should finish the project' is a valid PMI argument.",
+                correct: false,
+                explanationFalse:
+                  "Right — that's sunk-cost fallacy. Forward decisions consider future costs and benefits, not past spend.",
+                explanationTrue:
+                  "Actually no — sunk costs are irrelevant. Past spend doesn't change whether future spend adds value.",
+                principle:
+                  "Sunk costs are irrelevant to forward-looking decisions.",
+              },
+              {
+                n: 3,
+                question:
+                  "Opportunity cost in project selection refers to:",
+                options: {
+                  A: "The cost of the project's risks.",
+                  B: "The value of the next-best project you didn't pick.",
+                  C: "Money already spent.",
+                  D: "Sponsor's preferred budget ceiling.",
+                },
+                correct: "B",
+                principle:
+                  "Opportunity cost = value of the option you didn't choose.",
+              },
+            ],
+          },
+        },
+        {
+          id: "c6-2-evm",
+          code: "PD6.2",
+          title: "Earned Value Management (EVM)",
+          bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "Earned Value Management (EVM) is the most-tested numeric framework on the PMP exam. Three core values: Planned Value (PV) — budget for work planned by this date; Earned Value (EV) — budget for work actually completed by this date; Actual Cost (AC) — money actually spent so far.",
+              "From those three, four indicators: Cost Variance CV = EV - AC (positive = under budget); Schedule Variance SV = EV - PV (positive = ahead); Cost Performance Index CPI = EV / AC (>1 = under budget); Schedule Performance Index SPI = EV / PV (>1 = ahead). Memorise: a < 1 index or negative variance = trouble.",
+              "Estimate at Completion (EAC) projects total project cost. Several formulas, but the exam-typical: EAC = BAC / CPI, where BAC = Budget at Completion (total approved budget). This assumes the trend continues. The 'to-complete performance index' (TCPI) tells you what efficiency the team needs from here to hit the budget — useful for spotting unrecoverable overruns.",
+            ],
+            keyPoints: [
+              "Three values: PV (planned), EV (earned), AC (actual).",
+              "Cost Variance = EV - AC. Schedule Variance = EV - PV.",
+              "CPI = EV / AC. SPI = EV / PV. Both: >1 good, <1 bad.",
+              "EAC = BAC / CPI (typical formula when trend continues).",
+            ],
+            simplified: {
+              oneLiner:
+                "EVM compares what you planned (PV), what you earned (EV), and what you spent (AC). Indices >1 are good.",
+            },
+            deeper: {
+              oneLiner:
+                "Memorisation aid: 'EV minus' for variances; 'EV over' for indices. CPI and SPI both put EV on top — when EV exceeds what was planned or spent, you're doing well.",
+              examples: [
+                {
+                  title: "Worked example",
+                  body: "BAC = £100k. By mid-project the team has done £40k of planned work (PV=£40k), actually delivered £35k of value (EV=£35k), and spent £42k (AC=£42k). CV = 35-42 = -£7k (over). SV = 35-40 = -£5k (behind). CPI = 35/42 = 0.83. SPI = 35/40 = 0.875. EAC = 100/0.83 ≈ £120k.",
+                },
+              ],
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "A project has PV = £40k, EV = £35k, AC = £42k. Calculate CPI.",
+                options: {
+                  A: "1.20.",
+                  B: "0.83.",
+                  C: "0.875.",
+                  D: "1.05.",
+                },
+                correct: "B",
+                explanations: {
+                  A: "CPI is EV/AC, not AC/EV.",
+                  B: "Right — CPI = EV / AC = 35 / 42 ≈ 0.83. Under 1 = over budget.",
+                  C: "That's SPI (EV / PV), not CPI.",
+                  D: "Check the formula: CPI = EV / AC.",
+                },
+                principle:
+                  "CPI = EV / AC. Less than 1 = over budget.",
+              },
+              {
+                kind: "fill-in",
+                n: 2,
+                question:
+                  "Standard formula for Estimate at Completion (EAC) when the current trend continues:",
+                acceptedAnswers: [
+                  "BAC / CPI",
+                  "BAC/CPI",
+                  "bac/cpi",
+                  "bac / cpi",
+                ],
+                placeholder: "e.g. BAC / CPI",
+                principle:
+                  "EAC = BAC / CPI when the cost-performance trend is assumed to continue.",
+              },
+              {
+                n: 3,
+                question:
+                  "A team has SPI = 1.1 and CPI = 0.92. The project is:",
+                options: {
+                  A: "Ahead of schedule, over budget.",
+                  B: "Behind schedule, under budget.",
+                  C: "Ahead of schedule, under budget.",
+                  D: "Behind schedule, over budget.",
+                },
+                correct: "A",
+                explanations: {
+                  A: "Right — SPI > 1 = ahead of schedule. CPI < 1 = over budget.",
+                  B: "Reversed — SPI > 1 = ahead. CPI < 1 = over budget.",
+                  C: "CPI < 1 means over budget, not under.",
+                  D: "SPI > 1 means ahead, not behind.",
+                },
+                principle:
+                  "SPI > 1 ahead; SPI < 1 behind. CPI > 1 under budget; CPI < 1 over budget.",
+              },
+            ],
+          },
+        },
+        {
+          id: "c6-3-stakeholders",
+          code: "PD6.3",
+          title: "Stakeholders domain — identify, analyse, engage",
+          bloom: "An",
+          lesson: {
+            status: "ready",
+            paragraphs: [
+              "The Stakeholders Performance Domain manages who's involved, what they care about, and how they're engaged. The cycle is identify → analyse → engage → monitor. Identification happens early (in Initiating) and continues throughout; analysis classifies stakeholders by influence, interest, and impact; engagement plans calibrate communication and influence per stakeholder.",
+              "Two analysis tools the exam tests: the power/interest grid (a 2×2 of low/high power against low/high interest, producing four engagement strategies: monitor / keep informed / keep satisfied / manage closely) and the salience model (three attributes: power, legitimacy, urgency — combinations like 'dominant' (power + legitimacy), 'definitive' (all three) are the classic stakeholders who must be engaged).",
+              "Engagement levels PMBOK names: unaware → resistant → neutral → supportive → leading. The PM compares 'current' to 'desired' engagement level for each stakeholder and plans interventions to close the gap. Most engagement issues on the exam are answered by 'engage proactively and tailor the message to the audience'.",
+            ],
+            keyPoints: [
+              "Cycle: identify → analyse → engage → monitor.",
+              "Power/interest grid: monitor / keep informed / keep satisfied / manage closely.",
+              "Salience model: power + legitimacy + urgency.",
+              "Engagement levels: unaware → resistant → neutral → supportive → leading.",
+            ],
+            simplified: {
+              oneLiner:
+                "Map stakeholders to a 2×2 of power and interest, then engage each quadrant the way it needs.",
+            },
+            deeper: {
+              oneLiner:
+                "PMI's most-tested stakeholder pattern: a low-power but high-interest stakeholder is dissatisfied. Correct answer is usually 'keep informed' — not 'manage closely' (that's for high-power high-interest) and not 'ignore'.",
+            },
+          },
+          quiz: {
+            questions: [
+              {
+                n: 1,
+                question:
+                  "A stakeholder has high power but low interest in the project. On the power/interest grid, the engagement strategy is:",
+                options: {
+                  A: "Manage closely.",
+                  B: "Keep informed.",
+                  C: "Keep satisfied.",
+                  D: "Monitor.",
+                },
+                correct: "C",
+                explanations: {
+                  A: "Manage closely is for high power + high interest.",
+                  B: "Keep informed is for low power + high interest.",
+                  C: "Right — high power + low interest = keep satisfied (don't overwhelm them; protect their support).",
+                  D: "Monitor is for low power + low interest.",
+                },
+                principle:
+                  "Power-interest quadrants: low/low monitor; low/high keep informed; high/low keep satisfied; high/high manage closely.",
+              },
+              {
+                kind: "true-false",
+                n: 2,
+                question:
+                  "Once the stakeholder register is built during Initiating, it doesn't need to be updated.",
+                correct: false,
+                explanationFalse:
+                  "Right — stakeholder register is updated continuously as new stakeholders emerge and engagement levels change.",
+                explanationTrue:
+                  "Actually no — stakeholders change, perceptions change, and the register is updated throughout.",
+                principle:
+                  "Stakeholder register is a living document.",
+              },
+              {
+                n: 3,
+                question:
+                  "The salience model classifies stakeholders by three attributes. Which set is correct?",
+                options: {
+                  A: "Power, legitimacy, urgency.",
+                  B: "Cost, time, scope.",
+                  C: "Power, interest, impact.",
+                  D: "Sponsor, customer, regulator.",
+                },
+                correct: "A",
+                principle:
+                  "Salience model = power + legitimacy + urgency. Combinations name the classic stakeholder types (latent, expectant, definitive).",
+              },
+            ],
+          },
+        },
+      ],
+      sectionTest: {
+        passPct: 0.7,
+        questions: [
+          {
+            n: 1,
+            question:
+              "Two projects: A has NPV +£300k, B has NPV +£550k. Other metrics: A has higher IRR and shorter payback. Default PMI selection:",
+            options: {
+              A: "A — higher IRR.",
+              B: "B — higher NPV.",
+              C: "Both equally.",
+              D: "Cannot decide without sponsor input.",
+            },
+            correct: "B",
+            principle:
+              "NPV is PMI's safest default project-selection metric.",
+          },
+          {
+            n: 2,
+            question:
+              "CV = -£8k. CPI = 0.85. The project is:",
+            options: {
+              A: "Under budget.",
+              B: "Over budget.",
+              C: "On budget.",
+              D: "Cannot tell.",
+            },
+            correct: "B",
+            principle:
+              "Negative CV and CPI < 1 both mean over budget.",
+          },
+          {
+            n: 3,
+            question:
+              "EAC formula when trend continues:",
+            options: {
+              A: "BAC × CPI.",
+              B: "BAC / CPI.",
+              C: "AC + (BAC - EV).",
+              D: "AC × SPI.",
+            },
+            correct: "B",
+            principle:
+              "EAC = BAC / CPI (trend continues).",
+          },
+          {
+            n: 4,
+            question:
+              "A high-power high-interest stakeholder is unhappy. PMI-aligned response:",
+            options: {
+              A: "Monitor.",
+              B: "Keep informed.",
+              C: "Keep satisfied.",
+              D: "Manage closely.",
+            },
+            correct: "D",
+            principle:
+              "High power + high interest = manage closely.",
+          },
+          {
+            n: 5,
+            question:
+              "Sunk costs in PMBOK 8e are:",
+            options: {
+              A: "Always relevant to the decision to continue.",
+              B: "Never relevant to forward-looking decisions.",
+              C: "Sometimes relevant, depending on size.",
+              D: "Relevant only in adaptive projects.",
+            },
+            correct: "B",
+            principle:
+              "Sunk costs are irrelevant — forward decisions consider future costs and benefits only.",
+          },
+        ],
+      },
+    },
   ],
   /* ============================================================
      Mock exams — full list authored after the section content.
