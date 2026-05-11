@@ -23,6 +23,7 @@ import { FlashcardsPanel } from "@/components/section/FlashcardsPanel";
 import { GamesPanel } from "@/components/section/GamesPanel";
 import { AppliedPanel } from "@/components/section/AppliedPanel";
 import { Container } from "@/components/ui/Container";
+import { LastVisitTracker } from "@/components/layout/LastVisitTracker";
 import { copyFor } from "@/lib/pack-helpers";
 
 type Params = { packId: string; sectionId: string };
@@ -118,6 +119,13 @@ export default async function SectionPage({
 
   return (
     <Container as="article" width="wide" className="py-2">
+      <LastVisitTracker
+        packId={pack.config.id}
+        packName={pack.config.name}
+        sectionId={section.id}
+        sectionTitle={section.title}
+        href={`/${pack.config.id}/section/${section.id}`}
+      />
       <Breadcrumbs trail={journeyTrail(pack, { label: section.title })} />
       <nav
         aria-label="Section navigation"

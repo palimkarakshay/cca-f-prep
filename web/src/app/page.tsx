@@ -14,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { BRAND } from "@/lib/brand";
 import { LearningGoalCapture } from "@/components/dashboard/LearningGoalCapture";
 import { DesignerJourneyDecoder } from "@/components/dashboard/DesignerJourneyDecoder";
+import { ResumeLearningCard } from "@/components/dashboard/ResumeLearningCard";
 
 export const metadata: Metadata = {
   title: "Pick a learning journey",
@@ -33,6 +34,14 @@ export default function PickerPage() {
         sizes="(min-width: 1024px) 1024px, 100vw"
         className="w-full rounded-lg border border-(--border) object-cover"
       />
+      {/* Resume card — surfaces only when the visitor has a saved
+          last-visit record (returning learner). Lives ABOVE the
+          "What do you want to learn?" header so a returner can jump
+          straight back into their journey without scrolling past
+          the picker. The card itself is a client component and
+          renders null on first paint, so first-time visitors see
+          the picker exactly as before. */}
+      <ResumeLearningCard />
       <header>
         <p className="font-[family-name:var(--font-display)] text-xs uppercase tracking-[0.18em] text-(--muted)">
           {BRAND.name} · {BRAND.tagline}
