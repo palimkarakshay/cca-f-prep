@@ -5,6 +5,8 @@ import { getConceptFrom } from "@/content/curriculum-loader";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
 import { Container } from "@/components/ui/Container";
 import { LessonView } from "@/components/concept/LessonView";
+import { ConceptHeaderNav } from "@/components/concept/ConceptHeaderNav";
+import { journeyTrail } from "@/lib/nav-trail";
 
 type Params = { packId: string; sectionId: string; conceptId: string };
 
@@ -53,15 +55,16 @@ export default async function ConceptPage({
   return (
     <Container width="widest" className="py-2">
       <Breadcrumbs
-        trail={[
-          { label: "Dashboard", href: `/${packId}` },
+        trail={journeyTrail(
+          pack,
           {
             label: section.title,
             href: `/${packId}/section/${section.id}`,
           },
-          { label: concept.title },
-        ]}
+          { label: concept.title }
+        )}
       />
+      <ConceptHeaderNav pack={pack} section={section} concept={concept} />
       <LessonView section={section} concept={concept} />
     </Container>
   );

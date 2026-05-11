@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { RecommendationBanner } from "@/components/dashboard/RecommendationBanner";
 import { SectionList } from "@/components/dashboard/SectionList";
 import { MockExamPanel } from "@/components/dashboard/MockExamPanel";
@@ -19,7 +21,7 @@ export async function generateMetadata({
   const pack = getPack(packId);
   if (!pack) return { title: "Pack not found" };
   const cfg = siteConfigFor(pack);
-  return { title: "Dashboard", description: cfg.description };
+  return { title: "Journey overview", description: cfg.description };
 }
 
 export default async function PackHomePage({
@@ -34,11 +36,21 @@ export default async function PackHomePage({
 
   return (
     <Container width="wide" className="flex flex-col gap-6 py-2">
-      <header>
+      <header className="flex flex-col gap-2">
+        <Link
+          href="/"
+          className="inline-flex w-fit items-center gap-1 text-xs text-(--muted) hover:text-(--ink)"
+        >
+          <ArrowLeft aria-hidden className="h-3.5 w-3.5" />
+          All learning journeys
+        </Link>
+        <p className="font-[family-name:var(--font-display)] text-xs uppercase tracking-[0.18em] text-(--muted)">
+          Learning journey
+        </p>
         <h1 className="font-[family-name:var(--font-display)] text-2xl md:text-3xl font-semibold text-(--ink)">
           {cfg.name}
         </h1>
-        <p className="mt-1 text-sm text-(--muted)">{cfg.tagline}</p>
+        <p className="text-sm text-(--muted)">{cfg.tagline}</p>
       </header>
       <RecommendationBanner />
 

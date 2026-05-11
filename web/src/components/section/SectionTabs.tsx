@@ -2,7 +2,15 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Compass, BookOpen, Layers, Award, Gamepad2, type LucideIcon } from "lucide-react";
+import {
+  Compass,
+  BookOpen,
+  Layers,
+  Award,
+  Gamepad2,
+  Hammer,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { resolveTab, TAB_IDS, type TabId } from "./section-tabs-shared";
 
@@ -13,6 +21,7 @@ const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
   { id: "concepts", label: "Concepts", icon: BookOpen },
   { id: "flashcards", label: "Flashcards", icon: Layers },
   { id: "quiz", label: "Quiz", icon: Award },
+  { id: "apply", label: "Apply", icon: Hammer },
   { id: "games", label: "Games", icon: Gamepad2 },
 ];
 
@@ -53,6 +62,7 @@ export function SectionTabs({ activeTab: serverActiveTab, panels }: SectionTabsP
     concepts: null,
     flashcards: null,
     quiz: null,
+    apply: null,
     games: null,
   });
 

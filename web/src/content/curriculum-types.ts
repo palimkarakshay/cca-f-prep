@@ -164,6 +164,36 @@ export interface Section {
   blurb: string;
   concepts: Concept[];
   sectionTest: SectionTest | null;
+  /**
+   * Optional applied-experience prompts. Each section should give the
+   * learner one or more *real-world tasks* to do with the section's
+   * material — write a snippet, hold a conversation, sort scenarios,
+   * teach the idea back. If the pack author hasn't supplied any,
+   * `getAppliedExperiences(section)` generates a sensible default
+   * spine from the concept list at read time.
+   */
+  appliedExperience?: AppliedExperience[];
+}
+
+/**
+ * One applied-experience prompt — a real-world task that closes the
+ * loop between learning and doing.
+ */
+export interface AppliedExperience {
+  /** Stable id so progress can be keyed across sessions later. */
+  id: string;
+  /** Short verb-led title ("Refactor this snippet"). */
+  title: string;
+  /** What the learner does, in 1–3 sentences. */
+  prompt: string;
+  /** "Done when…" criterion — observable, not vague. */
+  doneWhen: string;
+  /** Rough effort in minutes. */
+  minutes: number;
+  /** Optional cross-reference to a concept the task draws on. */
+  conceptId?: string;
+  /** Cognitive level — mostly Apply / Analyse / Evaluate / Create. */
+  level?: "apply" | "analyse" | "evaluate" | "create";
 }
 
 export interface ScoreBand {

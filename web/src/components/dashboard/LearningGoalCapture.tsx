@@ -1,33 +1,37 @@
 "use client";
 
 /* ------------------------------------------------------------------
-   LearningGoalCapture — umbrella-level "what do you want to learn?"
-   form, rendered above the topic-pack grid on `/`.
+   LearningGoalCapture — learner-lane "shape my journey" form on `/`.
 
-   Form structure follows backward design (Wiggins & McTighe,
-   *Understanding by Design*):
-     1. Topic         — the learner names the desired capability.
-     2. Success       — the observable evidence of mastery (the
-                        criterion that ends the loop).
-     3. End-use       — the transfer context, i.e. the real-world
-                        application that justifies the learning.
-   Optional SMART-goal sharpeners (Doran 1981 + Locke & Latham
-   goal-setting theory) live behind an "Add detail" disclosure so
-   the primary form isn't overwhelming on first contact:
-     - current level   — Vygotsky's zone of proximal development
-                         starting point.
-     - motivation      — self-determination theory autonomy cue.
-     - validation      — formative assessment hook.
-     - timeline        — temporal SMART anchor.
+   Two simple questions only:
+     1. What do you want to learn?
+     2. Why do you want to learn it?
 
-   Submitted goals persist in localStorage under
-   `curio:learning-goals:v1`. They render below the form as a
-   read-back list with delete affordance so the learner has a
-   visible record of what they committed to.
+   Once the learner answers both, we run `decodeJourney` locally and
+   render their shaped *learning journey* — outcomes, the section
+   spine they'll see, applied-experience prompts per section, and an
+   estimated time-on-task. Submitting saves the goal to
+   localStorage (the read-back list is preserved from the previous
+   iteration so a returning learner sees what they committed to).
+
+   This component intentionally pares back the previous SMART-goal
+   sharpeners (current level, motivation, validation, timeline)
+   into the optional `details` disclosure to keep the home page
+   uncluttered. The optional fields still persist on the saved
+   goal — they're just not the first thing the learner sees.
 ------------------------------------------------------------------ */
 
-import { useId, useState, useSyncExternalStore } from "react";
-import { Sparkles, Target, Lightbulb, Trash2 } from "lucide-react";
+import { useId, useMemo, useState, useSyncExternalStore } from "react";
+import {
+  Sparkles,
+  Compass,
+  Trash2,
+  Lightbulb,
+  Target,
+  CheckCircle2,
+  Clock,
+  Hammer,
+} from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useHydrated } from "@/hooks/useHydrated";
@@ -40,6 +44,11 @@ import {
   type LearningGoal,
   type LearningGoalDraft,
 } from "@/lib/learning-goals";
+import {
+  decodeJourney,
+  JOURNEY_KIND_LABEL,
+  type DecodedJourney,
+} from "@/lib/journey-decoder";
 
 const inputClass = cn(
   "w-full rounded-md border border-(--border) bg-(--panel) px-3 py-2 text-sm",
@@ -49,12 +58,6 @@ const inputClass = cn(
 
 const labelClass = "flex flex-col gap-1 text-sm font-medium text-(--ink)";
 const helpClass = "text-xs font-normal text-(--muted)";
-
-const REQUIRED_FIELDS: Array<keyof LearningGoalDraft> = [
-  "topic",
-  "success",
-  "endUse",
-];
 
 function emptyDraft(): LearningGoalDraft {
   return {
@@ -70,8 +73,10 @@ function emptyDraft(): LearningGoalDraft {
 
 export function LearningGoalCapture() {
   const formId = useId();
-  const [draft, setDraft] = useState<LearningGoalDraft>(emptyDraft);
+  const [what, setWhat] = useState("");
+  const [why, setWhy] = useState("");
   const [showDetail, setShowDetail] = useState(false);
+  const [draft, setDraft] = useState<LearningGoalDraft>(emptyDraft);
   const [justSaved, setJustSaved] = useState<string | null>(null);
   const hydrated = useHydrated();
   const goals = useSyncExternalStore<LearningGoal[]>(
@@ -79,6 +84,11 @@ export function LearningGoalCapture() {
     goalStore.get,
     goalStore.getServerSnapshot
   );
+
+  const decoded: DecodedJourney | null = useMemo(() => {
+    if (what.trim().length < 3 && why.trim().length < 3) return null;
+    return decodeJourney({ what, why });
+  }, [what, why]);
 
   function update<K extends keyof LearningGoalDraft>(
     key: K,
@@ -89,23 +99,29 @@ export function LearningGoalCapture() {
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const trimmed: LearningGoalDraft = {
-      topic: draft.topic.trim(),
-      success: draft.success.trim(),
-      endUse: draft.endUse.trim(),
+    if (!what.trim() || !why.trim()) return;
+    const goal = makeGoal({
+      topic: what.trim(),
+      // We re-use `success` to capture the first decoded success signal
+      // so the saved goal stays useful even when the learner doesn't
+      // open the optional details. Falls back to the why if the
+      // decoder hasn't run yet.
+      success:
+        draft.success.trim() ||
+        decoded?.successSignals[0] ||
+        `Can demonstrate "${what.trim()}" in real use`,
+      endUse: why.trim(),
       currentLevel: draft.currentLevel,
       motivation: draft.motivation?.trim() || undefined,
       validation: draft.validation?.trim() || undefined,
       timeline: draft.timeline?.trim() || undefined,
-    };
-    if (REQUIRED_FIELDS.some((k) => !(trimmed[k] as string))) return;
-    const goal = makeGoal(trimmed);
+    });
     goalStore.add(goal);
+    setWhat("");
+    setWhy("");
     setDraft(emptyDraft());
     setShowDetail(false);
     setJustSaved(goal.id);
-    // Surface success transiently so screen readers don't keep
-    // re-announcing the same status on subsequent renders.
     window.setTimeout(() => setJustSaved(null), 4000);
   }
 
@@ -113,27 +129,19 @@ export function LearningGoalCapture() {
     goalStore.remove(id);
   }
 
-  const canSubmit =
-    draft.topic.trim().length > 0 &&
-    draft.success.trim().length > 0 &&
-    draft.endUse.trim().length > 0;
+  const canSubmit = what.trim().length > 0 && why.trim().length > 0;
 
   return (
     <Card tone="accent" className="flex flex-col gap-4">
       <header className="flex items-start gap-3">
-        <Sparkles
-          aria-hidden
-          className="h-5 w-5 flex-none text-(--accent)"
-        />
+        <Compass aria-hidden className="h-5 w-5 flex-none text-(--accent)" />
         <div>
           <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold text-(--ink)">
-            Shape a custom pack
+            Shape your learning journey
           </h2>
           <p className="mt-0.5 text-sm text-(--muted)">
-            Describe the capability you want and the evidence that proves
-            you have it. We&apos;ll use this to author a pack matched to
-            your goal — sectioned lessons, practice, and a way to verify
-            mastery.
+            Two questions. We&apos;ll sketch a journey for you — sections,
+            applied practice, and a way to verify you got there.
           </p>
         </div>
       </header>
@@ -142,71 +150,54 @@ export function LearningGoalCapture() {
         id={formId}
         onSubmit={handleSubmit}
         className="grid grid-cols-1 gap-3 md:grid-cols-2"
-        aria-describedby={`${formId}-evidence`}
+        aria-describedby={`${formId}-explain`}
       >
-        <label className={cn(labelClass, "md:col-span-2")}>
+        <label className={labelClass}>
           What do you want to learn?
           <span className={helpClass}>
-            Be concrete. &ldquo;Conversational French for a 2-week Paris
-            trip&rdquo; beats &ldquo;French&rdquo;.
+            Be concrete. &ldquo;SQL window functions for analytics
+            dashboards&rdquo; beats &ldquo;SQL&rdquo;.
           </span>
           <input
             required
             type="text"
-            name="topic"
-            value={draft.topic}
-            onChange={(e) => update("topic", e.target.value)}
-            placeholder="e.g. SQL window functions for analytics dashboards"
+            name="what"
+            value={what}
+            onChange={(e) => setWhat(e.target.value)}
+            placeholder="e.g. Conversational French for a Paris trip"
             className={inputClass}
             autoComplete="off"
           />
         </label>
 
         <label className={labelClass}>
-          What does success look like?
+          Why do you want to learn it?
           <span className={helpClass}>
-            Observable + specific. The criterion that ends the loop.
+            The real-world end-use. This is the criterion that ends the loop.
           </span>
-          <textarea
+          <input
             required
-            name="success"
-            value={draft.success}
-            onChange={(e) => update("success", e.target.value)}
-            placeholder="e.g. I can write a 5-step ROW_NUMBER query unaided in under 10 min"
-            rows={3}
+            type="text"
+            name="why"
+            value={why}
+            onChange={(e) => setWhy(e.target.value)}
+            placeholder="e.g. Two-week trip in October — I want to order, ask, and chat"
             className={inputClass}
           />
         </label>
 
-        <label className={labelClass}>
-          How will you use it after you finish?
-          <span className={helpClass}>
-            The real-world context. Forces transfer, not just recall.
-          </span>
-          <textarea
-            required
-            name="endUse"
-            value={draft.endUse}
-            onChange={(e) => update("endUse", e.target.value)}
-            placeholder="e.g. Rebuild the cohort-retention dashboard at work without a senior engineer"
-            rows={3}
-            className={inputClass}
-          />
-        </label>
-
-        <div
-          id={`${formId}-evidence`}
+        <p
+          id={`${formId}-explain`}
           className="md:col-span-2 flex items-start gap-2 rounded-md bg-(--panel-2) p-3 text-xs text-(--muted)"
         >
-          <Target aria-hidden className="mt-0.5 h-4 w-4 flex-none" />
-          <p>
-            <strong className="text-(--ink)">Backward design.</strong>{" "}
-            Naming the outcome and the use-case before you study makes the
-            target self-correcting — every quiz, lesson, or drill can be
-            judged against it. Add the optional details below to sharpen
-            the goal further (SMART criteria).
-          </p>
-        </div>
+          <Lightbulb aria-hidden className="mt-0.5 h-4 w-4 flex-none" />
+          <span>
+            Naming <strong className="text-(--ink)">what</strong> and{" "}
+            <strong className="text-(--ink)">why</strong> before you start
+            keeps every lesson and quiz pointed at the real outcome —
+            not at content for its own sake.
+          </span>
+        </p>
 
         <div className="md:col-span-2">
           <button
@@ -216,7 +207,7 @@ export function LearningGoalCapture() {
             aria-controls={`${formId}-detail`}
             className="inline-flex items-center gap-2 text-sm text-(--accent-2) underline-offset-4 hover:underline"
           >
-            <Lightbulb aria-hidden className="h-4 w-4" />
+            <Sparkles aria-hidden className="h-4 w-4" />
             {showDetail ? "Hide detail" : "Add detail (optional)"}
           </button>
         </div>
@@ -255,21 +246,6 @@ export function LearningGoalCapture() {
             </fieldset>
 
             <label className={labelClass}>
-              Why now?
-              <span className={helpClass}>
-                Motivation. Drives sustained effort more than ability.
-              </span>
-              <input
-                type="text"
-                name="motivation"
-                value={draft.motivation ?? ""}
-                onChange={(e) => update("motivation", e.target.value)}
-                placeholder="e.g. Promotion review in October needs this"
-                className={inputClass}
-              />
-            </label>
-
-            <label className={labelClass}>
               How will you verify mastery?
               <span className={helpClass}>
                 Project, certificate, teach-back, code review…
@@ -279,7 +255,7 @@ export function LearningGoalCapture() {
                 name="validation"
                 value={draft.validation ?? ""}
                 onChange={(e) => update("validation", e.target.value)}
-                placeholder="e.g. Ship the analytics dashboard + peer review"
+                placeholder="e.g. Hold a 5-min French conversation"
                 className={inputClass}
               />
             </label>
@@ -294,7 +270,7 @@ export function LearningGoalCapture() {
                 name="timeline"
                 value={draft.timeline ?? ""}
                 onChange={(e) => update("timeline", e.target.value)}
-                placeholder="e.g. By end of July"
+                placeholder="e.g. By October 15"
                 className={inputClass}
               />
             </label>
@@ -303,23 +279,25 @@ export function LearningGoalCapture() {
 
         <div className="md:col-span-2 flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={!canSubmit}>
-            Save my goal
+            Save my journey
           </Button>
           <span aria-live="polite" className="text-xs text-(--muted)">
             {justSaved
-              ? "Goal saved locally. We'll use it to author your pack."
+              ? "Journey saved locally. Pick a ready-made course below to start now, or wait for us to author yours."
               : "Saved in this browser. No account required."}
           </span>
         </div>
       </form>
 
+      {decoded ? <DecodedJourneyPreview decoded={decoded} /> : null}
+
       {hydrated && goals.length > 0 ? (
         <section
-          aria-label="Your saved learning goals"
+          aria-label="Your saved learning journeys"
           className="flex flex-col gap-2 border-t border-dashed border-(--border) pt-4"
         >
           <h3 className="text-sm font-semibold text-(--ink)">
-            Your saved goals ({goals.length})
+            Your saved journeys ({goals.length})
           </h3>
           <ul className="flex flex-col gap-2">
             {goals.map((g) => (
@@ -328,14 +306,12 @@ export function LearningGoalCapture() {
                 className="flex items-start gap-3 rounded-md border border-(--border) bg-(--panel-2) p-3"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-(--ink)">
-                    {g.topic}
+                  <p className="text-sm font-medium text-(--ink)">{g.topic}</p>
+                  <p className="mt-0.5 text-xs text-(--muted)">
+                    <strong>Why:</strong> {g.endUse}
                   </p>
                   <p className="mt-0.5 text-xs text-(--muted)">
-                    <strong>Success:</strong> {g.success}
-                  </p>
-                  <p className="mt-0.5 text-xs text-(--muted)">
-                    <strong>End-use:</strong> {g.endUse}
+                    <strong>Done when:</strong> {g.success}
                   </p>
                   {g.currentLevel ? (
                     <p className="mt-0.5 text-xs text-(--muted)">
@@ -352,7 +328,7 @@ export function LearningGoalCapture() {
                 <button
                   type="button"
                   onClick={() => handleDelete(g.id)}
-                  aria-label={`Delete goal: ${g.topic}`}
+                  aria-label={`Delete journey: ${g.topic}`}
                   className="flex-none rounded-md p-2 text-(--muted) hover:bg-(--panel) hover:text-(--bad)"
                 >
                   <Trash2 aria-hidden className="h-4 w-4" />
@@ -363,5 +339,76 @@ export function LearningGoalCapture() {
         </section>
       ) : null}
     </Card>
+  );
+}
+
+function DecodedJourneyPreview({ decoded }: { decoded: DecodedJourney }) {
+  return (
+    <section
+      aria-label="Your journey, decoded"
+      className="rounded-md border border-(--border) bg-(--panel-2) p-4"
+    >
+      <header className="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="text-sm font-semibold text-(--ink)">
+          Your journey, decoded
+        </h3>
+        <span className="rounded-full border border-(--accent)/40 bg-(--accent)/10 px-2 py-0.5 text-xs font-medium text-(--accent-2)">
+          {JOURNEY_KIND_LABEL[decoded.kind]}
+        </span>
+      </header>
+      <p className="mt-2 text-sm text-(--ink)">{decoded.headline}</p>
+
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
+          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
+            <CheckCircle2 aria-hidden className="h-3.5 w-3.5" />
+            You&apos;ll know you&apos;re there when
+          </p>
+          <ul className="mt-1 flex flex-col gap-1 text-xs text-(--muted)">
+            {decoded.successSignals.map((s) => (
+              <li key={s} className="flex items-start gap-1.5">
+                <Target aria-hidden className="mt-0.5 h-3 w-3 flex-none text-(--accent)" />
+                <span>{s}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
+            <Clock aria-hidden className="h-3.5 w-3.5" />
+            Rough time on task
+          </p>
+          <p className="mt-1 text-xs text-(--muted)">
+            ~{decoded.estimatedHours.low}–{decoded.estimatedHours.high} hours,
+            split across roughly {decoded.sectionSpine.length} sections.
+          </p>
+          {decoded.recommendsExpiry ? (
+            <p className="mt-2 text-xs text-(--warn)">
+              This kind of journey usually expires — plan a refresh date.
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="mt-3">
+        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
+          <Hammer aria-hidden className="h-3.5 w-3.5" />
+          Sections you&apos;ll move through (each ends with applied practice)
+        </p>
+        <ol className="mt-1 flex flex-col gap-1 text-xs text-(--muted)">
+          {decoded.sectionSpine.map((s, i) => (
+            <li key={s.title} className="flex items-start gap-2">
+              <span className="mt-0.5 font-mono text-[10px] text-(--accent-2)">
+                {String(i + 1).padStart(2, "0")}.
+              </span>
+              <span>
+                <span className="font-medium text-(--ink)">{s.title}</span> —{" "}
+                <span className="italic">{s.applied}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
   );
 }

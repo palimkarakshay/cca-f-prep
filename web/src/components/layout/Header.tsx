@@ -102,9 +102,9 @@ export function Header() {
         </Link>
         <nav
           aria-label="Primary"
-          className="flex items-center gap-1 sm:gap-2 md:gap-3 text-sm"
+          className="flex items-center gap-2 sm:gap-3 text-sm"
         >
-          <ul className="hidden items-center gap-1 md:flex">
+          <ul className="hidden items-center gap-2 md:flex">
             {visibleNav.map((item) => {
               const href = prefixWithPack(item.href, packId);
               const active = isActive(item, pathname);
@@ -131,7 +131,7 @@ export function Header() {
           {packId ? (
             <Link
               href="/"
-              aria-label="Switch topic — back to all topics"
+              aria-label="Switch learning journey — back to all journeys"
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-md border border-(--border) bg-(--panel) px-3 py-2 text-xs font-medium text-(--ink) no-underline shadow-sm",
                 "transition-colors hover:border-(--accent) hover:text-(--accent-2)",
@@ -139,8 +139,8 @@ export function Header() {
               )}
             >
               <Grid3X3 aria-hidden className="h-4 w-4" />
-              <span className="hidden sm:inline">Switch topic</span>
-              <span className="sm:hidden">Topics</span>
+              <span className="hidden sm:inline">Switch journey</span>
+              <span className="sm:hidden">Journeys</span>
             </Link>
           ) : null}
           {/* Persistent For-teams CTA — visible on every route so a B2B

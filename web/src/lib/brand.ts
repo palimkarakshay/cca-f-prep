@@ -20,7 +20,7 @@ export const BRAND = {
   tagline: "Learn anything.",
   /** Longer description used in metadata + open graph. */
   description:
-    "Pick a topic and learn it with sectioned lessons, quizzes, drills, and mock exams. Curio is a content-agnostic learning shell — bring your own goal.",
+    "Tell us what you want to learn and why. Curio shapes a learning journey for you — sectioned lessons, applied practice per section, quizzes, drills, and a way to verify mastery.",
   /** B2B variant name. Same shell, company-approved content. */
   b2bName: "Adept",
   b2bTagline: "Curio for teams.",

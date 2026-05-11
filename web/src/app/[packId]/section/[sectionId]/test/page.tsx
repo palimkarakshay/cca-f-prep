@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ALL_PACK_IDS, getPack } from "@/content/pack-registry";
 import { getSectionFrom } from "@/content/curriculum-loader";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
+import { journeyTrail } from "@/lib/nav-trail";
 import { Container } from "@/components/ui/Container";
 import { SectionTestPage } from "@/components/quiz/SectionTestPage";
 import { copyFor } from "@/lib/pack-helpers";
@@ -50,11 +51,11 @@ export default async function SectionTestRoute({
   return (
     <Container width="narrow" className="py-2">
       <Breadcrumbs
-        trail={[
-          { label: "Dashboard", href: `/${packId}` },
+        trail={journeyTrail(
+          pack,
           { label: section.title, href: `/${packId}/section/${section.id}` },
-          { label: copy.sectionTestSingular },
-        ]}
+          { label: copy.sectionTestSingular }
+        )}
       />
       <SectionTestPage section={section} />
     </Container>

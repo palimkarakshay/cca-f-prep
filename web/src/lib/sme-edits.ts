@@ -79,12 +79,79 @@ export interface SMENewConcept {
   approvedAt?: string;
 }
 
+/**
+ * Approval-chain step. A real journey ships through multiple reviewers
+ * — the SME signs the content, the L&D lead signs the structure, and
+ * (for compliance journeys) a compliance reviewer signs the final
+ * shape. Each step records who signed and when.
+ */
+export type ReviewRole = "sme" | "ld-lead" | "compliance";
+
+export interface ReviewLevel {
+  role: ReviewRole;
+  signedBy?: string;
+  signedAt?: string;
+}
+
+export const REVIEW_ROLE_LABEL: Record<ReviewRole, string> = {
+  sme: "Subject-matter expert",
+  "ld-lead": "L&D lead",
+  compliance: "Compliance reviewer",
+};
+
+export const REVIEW_ROLE_DESCRIPTION: Record<ReviewRole, string> = {
+  sme: "Signs that the content is factually accurate against the source documents.",
+  "ld-lead":
+    "Signs that the structure, success criteria, and applied practice are sound.",
+  compliance:
+    "Signs (for compliance / regulated journeys) that wording matches the controlling policy.",
+};
+
+/**
+ * A single source document the SME uploaded as raw material for the
+ * pack. We don't store the binary in the demo — just the metadata —
+ * so the workbench can show "what was used" without server storage.
+ */
+export interface SourceDocument {
+  id: string;
+  /** Display name (file name or short title). */
+  name: string;
+  /** Free-form label of who this is for ("L1 support, NA + EMEA"). */
+  audience: string;
+  /** Free-form notes ("revision 2026-04-17, signed by Compliance"). */
+  notes?: string;
+  /** ISO timestamp it was added to the workbench. */
+  addedAt: string;
+  /** Who added it. */
+  addedBy?: string;
+}
+
 export interface SMEEdits {
   smeName?: string;
   concepts: Record<string, SMEConceptOverlay>;
   newConcepts: Record<string, SMENewConcept[]>;
   deployedAt?: string;
   deployedBy?: string;
+  /**
+   * When the *current* deploy went live to learners. Set to the same
+   * ISO as `deployedAt` on deploy; null before first deploy. Kept as a
+   * separate field so a future "rollback" action can decouple
+   * "deployed" (snapshot exists) from "live" (it's serving learners).
+   */
+  liveSince?: string;
+  /**
+   * ISO date the current live snapshot expires. Pack types with an
+   * expiry recommendation (compliance, certification, tool adoption)
+   * default to a year from `liveSince`; others stay undefined unless
+   * the L&D lead sets one explicitly.
+   */
+  expiresAt?: string;
+  /** Days-from-deploy used to compute the next `expiresAt`. */
+  expiryDays?: number;
+  /** Approval-chain steps (SME → L&D Lead → Compliance). */
+  reviewLevels?: ReviewLevel[];
+  /** Uploaded source documents with audience tagging. */
+  sources?: SourceDocument[];
 }
 
 export function emptyEdits(): SMEEdits {
@@ -131,6 +198,52 @@ export function readEdits(packId: string): SMEEdits {
         }
       }
     }
+    const reviewLevelsRaw = (parsed as { reviewLevels?: unknown }).reviewLevels;
+    const reviewLevels: ReviewLevel[] | undefined = Array.isArray(reviewLevelsRaw)
+      ? reviewLevelsRaw
+          .filter(
+            (l): l is Record<string, unknown> =>
+              typeof l === "object" && l !== null
+          )
+          .filter(
+            (l) =>
+              typeof l.role === "string" &&
+              ["sme", "ld-lead", "compliance"].includes(l.role as string)
+          )
+          .map((l) => ({
+            role: l.role as ReviewRole,
+            signedBy:
+              typeof l.signedBy === "string" ? l.signedBy : undefined,
+            signedAt:
+              typeof l.signedAt === "string" ? l.signedAt : undefined,
+          }))
+      : undefined;
+
+    const sourcesRaw = (parsed as { sources?: unknown }).sources;
+    const sources: SourceDocument[] | undefined = Array.isArray(sourcesRaw)
+      ? sourcesRaw
+          .filter(
+            (s): s is Record<string, unknown> =>
+              typeof s === "object" && s !== null
+          )
+          .filter(
+            (s) =>
+              typeof s.id === "string" &&
+              typeof s.name === "string" &&
+              typeof s.audience === "string" &&
+              typeof s.addedAt === "string"
+          )
+          .map((s) => ({
+            id: s.id as string,
+            name: s.name as string,
+            audience: s.audience as string,
+            notes: typeof s.notes === "string" ? s.notes : undefined,
+            addedAt: s.addedAt as string,
+            addedBy:
+              typeof s.addedBy === "string" ? s.addedBy : undefined,
+          }))
+      : undefined;
+
     const out: SMEEdits = {
       concepts,
       newConcepts,
@@ -146,6 +259,20 @@ export function readEdits(packId: string): SMEEdits {
         typeof (parsed as { deployedBy?: unknown }).deployedBy === "string"
           ? ((parsed as { deployedBy: string }).deployedBy)
           : undefined,
+      liveSince:
+        typeof (parsed as { liveSince?: unknown }).liveSince === "string"
+          ? ((parsed as { liveSince: string }).liveSince)
+          : undefined,
+      expiresAt:
+        typeof (parsed as { expiresAt?: unknown }).expiresAt === "string"
+          ? ((parsed as { expiresAt: string }).expiresAt)
+          : undefined,
+      expiryDays:
+        typeof (parsed as { expiryDays?: unknown }).expiryDays === "number"
+          ? ((parsed as { expiryDays: number }).expiryDays)
+          : undefined,
+      reviewLevels,
+      sources,
     };
     return out;
   } catch {
@@ -199,7 +326,23 @@ type PerPackStore = {
   ) => void;
   revertConcept: (conceptId: string) => void;
   addNewConcept: (sectionId: string, concept: SMENewConcept) => void;
+  /**
+   * Pack-level deploy. Stamps deployedAt + liveSince and, if
+   * `expiryDays` is set, computes the next `expiresAt`. Wipes any
+   * previously-signed review levels so the new snapshot has to be
+   * re-signed top-to-bottom — fail-closed on chain-of-custody.
+   */
   deploy: (smeName: string) => void;
+  /** Set the expiry policy (days) — updates `expiresAt` if live. */
+  setExpiryDays: (days: number | undefined) => void;
+  /** Sign one level of the approval chain. */
+  signReviewLevel: (role: ReviewRole, signerName: string) => void;
+  /** Unwind a single level (e.g. when a higher-level rejects). */
+  unsignReviewLevel: (role: ReviewRole) => void;
+  /** Add a source document. */
+  addSource: (source: SourceDocument) => void;
+  /** Remove a source document by id. */
+  removeSource: (id: string) => void;
   _resetForTests: () => void;
 };
 
@@ -320,11 +463,69 @@ export function getSMEStore(packId: string): PerPackStore {
       });
     },
     deploy(smeName) {
+      const current = snapshot();
+      const now = new Date();
+      const nowIso = now.toISOString();
+      const expiresAt =
+        current.expiryDays && current.expiryDays > 0
+          ? new Date(
+              now.getTime() + current.expiryDays * 24 * 60 * 60 * 1000
+            ).toISOString()
+          : undefined;
       emit({
-        ...snapshot(),
-        deployedAt: new Date().toISOString(),
+        ...current,
+        deployedAt: nowIso,
         deployedBy: smeName,
+        liveSince: nowIso,
+        expiresAt,
+        // Reset the review chain — every new deploy needs fresh
+        // signatures so the audit trail never reuses an old sign-off
+        // against a new snapshot.
+        reviewLevels: undefined,
       });
+    },
+    setExpiryDays(days) {
+      const current = snapshot();
+      const next: SMEEdits = { ...current, expiryDays: days };
+      if (current.liveSince && days && days > 0) {
+        const live = new Date(current.liveSince);
+        next.expiresAt = new Date(
+          live.getTime() + days * 24 * 60 * 60 * 1000
+        ).toISOString();
+      } else if (!days || days <= 0) {
+        next.expiresAt = undefined;
+      }
+      emit(next);
+    },
+    signReviewLevel(role, signerName) {
+      const current = snapshot();
+      const levels = current.reviewLevels ?? [];
+      const next: ReviewLevel[] = [
+        ...levels.filter((l) => l.role !== role),
+        {
+          role,
+          signedBy: signerName,
+          signedAt: new Date().toISOString(),
+        },
+      ];
+      emit({ ...current, reviewLevels: next });
+    },
+    unsignReviewLevel(role) {
+      const current = snapshot();
+      const next = (current.reviewLevels ?? []).filter(
+        (l) => l.role !== role
+      );
+      emit({ ...current, reviewLevels: next });
+    },
+    addSource(source) {
+      const current = snapshot();
+      const sources = current.sources ?? [];
+      emit({ ...current, sources: [...sources, source] });
+    },
+    removeSource(id) {
+      const current = snapshot();
+      const sources = (current.sources ?? []).filter((s) => s.id !== id);
+      emit({ ...current, sources });
     },
     _resetForTests() {
       cached = null;
@@ -358,6 +559,82 @@ export interface ApprovalStats {
   draft: number;
   rejected: number;
   readyToDeploy: boolean;
+}
+
+/* ------------------------------------------------------------------
+   Review hints — deterministic checks that point the SME at the
+   parts of an AI-drafted concept most worth scrutinising. These are
+   not warnings; they're prompts. The workbench surfaces them
+   per-concept so the SME knows *what to look for*, instead of
+   reading every lesson cold and hoping to spot issues.
+------------------------------------------------------------------ */
+
+export interface ReviewHint {
+  /** Short hint label ("Verify against source"). */
+  label: string;
+  /** What the SME should actually check. */
+  guidance: string;
+}
+
+/**
+ * Yield review hints for an AI-drafted concept. The checks are
+ * pure, deterministic, and content-free — they look at length,
+ * presence/absence of key shapes, and the quiz structure. This is
+ * what the workbench shows under "How to review this concept".
+ */
+export function reviewHintsForConcept(
+  concept: {
+    title: string;
+    lesson?: { paragraphs?: string[]; simplified?: { oneLiner?: string } } | null;
+    quiz?: { questions: Array<{ kind?: string }> } | null;
+  }
+): ReviewHint[] {
+  const hints: ReviewHint[] = [];
+  const paragraphs = concept.lesson?.paragraphs ?? [];
+  const lessonChars = paragraphs.join(" ").length;
+
+  if (lessonChars < 240) {
+    hints.push({
+      label: "Lesson body is short",
+      guidance:
+        "Under ~240 characters. Check whether enough context is given for a learner who's seeing this for the first time.",
+    });
+  }
+  if (lessonChars > 1800) {
+    hints.push({
+      label: "Lesson body is long",
+      guidance:
+        "Over ~1800 characters. Look for paragraphs that can be split into a separate concept or trimmed to a single idea each.",
+    });
+  }
+  if (!concept.lesson?.simplified?.oneLiner) {
+    hints.push({
+      label: "No one-line summary",
+      guidance:
+        "Add a one-line plain-English summary. It's the anchor the learner re-reads when they're stuck.",
+    });
+  }
+  const questions = concept.quiz?.questions ?? [];
+  if (questions.length === 0) {
+    hints.push({
+      label: "No quiz authored",
+      guidance: "Add at least one MCQ that maps to the concept's principle, not just recall.",
+    });
+  } else if (questions.length < 2) {
+    hints.push({
+      label: "Only one quiz question",
+      guidance:
+        "Consider a second question that probes the *opposite* shape — e.g., when this concept does *not* apply.",
+    });
+  }
+
+  hints.push({
+    label: "Verify against source",
+    guidance:
+      "Read the matching paragraph in the source documents above. The SME signature on this concept means \"the lesson matches that source as of today\".",
+  });
+
+  return hints;
 }
 
 export function computeApprovalStats(

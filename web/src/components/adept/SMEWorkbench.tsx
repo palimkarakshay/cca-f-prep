@@ -30,6 +30,12 @@ import {
   ShieldCheck,
   X,
   AlertCircle,
+  CalendarClock,
+  FileUp,
+  Trash2,
+  Workflow,
+  HelpCircle,
+  Users,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,11 +44,17 @@ import { useHydrated } from "@/hooks/useHydrated";
 import {
   computeApprovalStats,
   getSMEStore,
+  REVIEW_ROLE_DESCRIPTION,
+  REVIEW_ROLE_LABEL,
+  reviewHintsForConcept,
   type OptionLetter,
+  type ReviewLevel,
+  type ReviewRole,
   type SMEEdits,
   type SMEStatus,
   type SMEConceptOverlay,
   type SMENewConcept,
+  type SourceDocument,
 } from "@/lib/sme-edits";
 import type { ContentPack } from "@/content/pack-types";
 import type {
@@ -171,6 +183,14 @@ export function SMEWorkbench({ pack }: { pack: ContentPack }) {
         hydrated={hydrated}
       />
 
+      <HowToReviewCard />
+
+      <ApprovalChainCard edits={edits} store={store} hydrated={hydrated} />
+
+      <LifecycleCard edits={edits} store={store} hydrated={hydrated} />
+
+      <SourceDocumentsCard edits={edits} store={store} hydrated={hydrated} />
+
       <div className="flex flex-col gap-6">
         {pack.curriculum.sections.map((section) => (
           <SectionGroup
@@ -182,6 +202,455 @@ export function SMEWorkbench({ pack }: { pack: ContentPack }) {
         ))}
       </div>
     </div>
+  );
+}
+
+function HowToReviewCard() {
+  return (
+    <Card tone="accent">
+      <header className="flex items-start gap-3">
+        <HelpCircle aria-hidden className="h-5 w-5 flex-none text-(--accent)" />
+        <div>
+          <h3 className="text-base font-semibold text-(--ink)">
+            How do I know what to edit and approve?
+          </h3>
+          <p className="mt-0.5 text-sm text-(--muted)">
+            Every AI-drafted concept below carries a short list of
+            review hints — short prompts pointing you at the part most
+            worth scrutinising (lesson length, missing summaries,
+            single-question quizzes, etc.). Use them as a checklist,
+            not a finish line.
+          </p>
+        </div>
+      </header>
+      <ul className="mt-3 grid grid-cols-1 gap-2 text-sm text-(--muted) sm:grid-cols-2">
+        <li className="flex items-start gap-2">
+          <span aria-hidden className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-(--accent)" />
+          <span>
+            <strong className="text-(--ink)">Check facts against the
+            source documents</strong> you uploaded — your signature
+            means &ldquo;this matches that source today&rdquo;.
+          </span>
+        </li>
+        <li className="flex items-start gap-2">
+          <span aria-hidden className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-(--accent)" />
+          <span>
+            <strong className="text-(--ink)">Edit before you approve</strong>
+            — saved edits move a concept to &ldquo;edited — needs
+            approval&rdquo;; an explicit Approve click signs and
+            timestamps it.
+          </span>
+        </li>
+        <li className="flex items-start gap-2">
+          <span aria-hidden className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-(--accent)" />
+          <span>
+            <strong className="text-(--ink)">Reject anything you
+            can&apos;t validate</strong>. Rejected concepts don&apos;t
+            ship in the next deploy.
+          </span>
+        </li>
+        <li className="flex items-start gap-2">
+          <span aria-hidden className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-(--accent)" />
+          <span>
+            <strong className="text-(--ink)">Deploys reset signatures</strong>
+            — every new deploy needs fresh sign-offs across the
+            approval chain. Old signatures never apply to a new
+            snapshot.
+          </span>
+        </li>
+      </ul>
+    </Card>
+  );
+}
+
+const REVIEW_CHAIN: ReviewRole[] = ["sme", "ld-lead", "compliance"];
+
+function ApprovalChainCard({
+  edits,
+  store,
+  hydrated,
+}: {
+  edits: SMEEdits;
+  store: ReturnType<typeof getSMEStore>;
+  hydrated: boolean;
+}) {
+  const levels = edits.reviewLevels ?? [];
+  function signed(role: ReviewRole): ReviewLevel | undefined {
+    return levels.find((l) => l.role === role);
+  }
+  function handleSign(role: ReviewRole) {
+    const who = window.prompt(
+      `Sign off as ${REVIEW_ROLE_LABEL[role]} — your name?`,
+      role === "sme" ? edits.smeName ?? "" : ""
+    );
+    if (!who || !who.trim()) return;
+    store.signReviewLevel(role, who.trim());
+  }
+  function handleUnsign(role: ReviewRole) {
+    if (
+      !window.confirm(
+        `Remove the ${REVIEW_ROLE_LABEL[role]} sign-off? This may invalidate later levels too.`
+      )
+    ) {
+      return;
+    }
+    store.unsignReviewLevel(role);
+  }
+  return (
+    <Card>
+      <header className="flex items-start gap-3">
+        <Workflow aria-hidden className="h-5 w-5 flex-none text-(--accent)" />
+        <div>
+          <h3 className="text-base font-semibold text-(--ink)">
+            Approval chain
+          </h3>
+          <p className="mt-0.5 text-sm text-(--muted)">
+            A demo of the multi-level sign-off a production rollout
+            uses. Each level signs against what they own — content,
+            structure, policy. Deploying clears every signature.
+          </p>
+        </div>
+      </header>
+      <ol className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+        {REVIEW_CHAIN.map((role, i) => {
+          const sig = signed(role);
+          const tone = sig ? "good" : "default";
+          return (
+            <li key={role}>
+              <Card tone={tone} flat className="flex h-full flex-col gap-2">
+                <p className="flex items-center gap-2 text-xs uppercase tracking-wide text-(--muted)">
+                  <span
+                    aria-hidden
+                    className="flex h-5 w-5 items-center justify-center rounded-full bg-(--panel-2) text-[10px] font-semibold text-(--accent-2)"
+                  >
+                    {i + 1}
+                  </span>
+                  {REVIEW_ROLE_LABEL[role]}
+                </p>
+                <p className="text-xs text-(--muted)">
+                  {REVIEW_ROLE_DESCRIPTION[role]}
+                </p>
+                {sig ? (
+                  <p className="mt-auto text-xs text-(--good)">
+                    <ShieldCheck
+                      aria-hidden
+                      className="mr-1 inline h-3.5 w-3.5 align-text-bottom"
+                    />
+                    Signed by {sig.signedBy} ·{" "}
+                    {hydrated && sig.signedAt
+                      ? new Date(sig.signedAt).toLocaleString()
+                      : "—"}
+                  </p>
+                ) : (
+                  <p className="mt-auto text-xs text-(--muted)">
+                    Not yet signed.
+                  </p>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant={sig ? "secondary" : "default"}
+                    size="sm"
+                    onClick={() => handleSign(role)}
+                  >
+                    <Check aria-hidden className="h-4 w-4" />
+                    {sig ? "Re-sign" : "Sign off"}
+                  </Button>
+                  {sig ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleUnsign(role)}
+                    >
+                      <X aria-hidden className="h-4 w-4" /> Remove
+                    </Button>
+                  ) : null}
+                </div>
+              </Card>
+            </li>
+          );
+        })}
+      </ol>
+    </Card>
+  );
+}
+
+function LifecycleCard({
+  edits,
+  store,
+  hydrated,
+}: {
+  edits: SMEEdits;
+  store: ReturnType<typeof getSMEStore>;
+  hydrated: boolean;
+}) {
+  const liveSince = edits.liveSince;
+  const expiresAt = edits.expiresAt;
+  const expiryDays = edits.expiryDays;
+  // We only show the expired badge after hydration so SSR + first
+  // client render match. Date.now() is impure but its result only
+  // gates a visual badge — gating on `hydrated` keeps the first
+  // commit deterministic.
+  // eslint-disable-next-line react-hooks/purity
+  const expired = !!expiresAt && hydrated && new Date(expiresAt).getTime() < Date.now();
+  return (
+    <Card tone={expired ? "warn" : "default"}>
+      <header className="flex items-start gap-3">
+        <CalendarClock
+          aria-hidden
+          className="h-5 w-5 flex-none text-(--accent)"
+        />
+        <div>
+          <h3 className="text-base font-semibold text-(--ink)">
+            Live-since &amp; expiration
+          </h3>
+          <p className="mt-0.5 text-sm text-(--muted)">
+            When did the current snapshot go live to learners — and
+            when must it be refreshed? Compliance and certification
+            journeys typically expire after a year; others stay
+            live until the source material changes.
+          </p>
+        </div>
+      </header>
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Tile
+          label="Live since"
+          value={
+            hydrated && liveSince
+              ? new Date(liveSince).toLocaleDateString()
+              : liveSince
+                ? "—"
+                : "Not deployed"
+          }
+          tone={liveSince ? "good" : "neutral"}
+        />
+        <Tile
+          label="Expires"
+          value={
+            hydrated && expiresAt
+              ? new Date(expiresAt).toLocaleDateString()
+              : expiresAt
+                ? "—"
+                : expiryDays
+                  ? "On next deploy"
+                  : "No expiry set"
+          }
+          tone={expired ? "bad" : expiresAt ? "warn" : "neutral"}
+        />
+        <Tile
+          label="Refresh window"
+          value={
+            expiryDays && expiryDays > 0
+              ? `${expiryDays} days`
+              : "—"
+          }
+          tone={expiryDays ? "neutral" : "neutral"}
+        />
+      </div>
+      <fieldset className="mt-3 flex flex-wrap items-end gap-3 border-t border-dashed border-(--border) pt-3 text-sm">
+        <legend className="sr-only">Set expiry policy</legend>
+        <label className="flex flex-col gap-1 text-xs font-medium text-(--ink)">
+          Set refresh window (days)
+          <input
+            type="number"
+            min={0}
+            step={30}
+            defaultValue={expiryDays ?? ""}
+            placeholder="365"
+            className={cn(inputClass, "w-32")}
+            onBlur={(e) => {
+              const raw = e.currentTarget.value.trim();
+              if (raw === "") {
+                store.setExpiryDays(undefined);
+                return;
+              }
+              const n = Number(raw);
+              if (!Number.isFinite(n) || n < 0) return;
+              store.setExpiryDays(n);
+            }}
+          />
+        </label>
+        <span className="text-xs text-(--muted)">
+          Compliance / cert / tool-adoption packs: 90–365 days.
+          Onboarding / language / domain: leave blank.
+        </span>
+      </fieldset>
+      {expired ? (
+        <p className="mt-3 inline-flex items-center gap-1 text-xs text-(--warn)">
+          <AlertCircle aria-hidden className="h-3.5 w-3.5" />
+          This snapshot has expired. Re-verify source documents and
+          deploy a fresh snapshot.
+        </p>
+      ) : null}
+    </Card>
+  );
+}
+
+function SourceDocumentsCard({
+  edits,
+  store,
+  hydrated,
+}: {
+  edits: SMEEdits;
+  store: ReturnType<typeof getSMEStore>;
+  hydrated: boolean;
+}) {
+  const [name, setName] = useState("");
+  const [audience, setAudience] = useState("");
+  const [notes, setNotes] = useState("");
+  const sources = edits.sources ?? [];
+
+  function handleAdd() {
+    const trimmedName = name.trim();
+    const trimmedAudience = audience.trim();
+    if (!trimmedName || !trimmedAudience) return;
+    const source: SourceDocument = {
+      id: `src-${Date.now().toString(36)}-${Math.random()
+        .toString(36)
+        .slice(2, 6)}`,
+      name: trimmedName,
+      audience: trimmedAudience,
+      notes: notes.trim() || undefined,
+      addedAt: new Date().toISOString(),
+      addedBy: edits.smeName,
+    };
+    store.addSource(source);
+    setName("");
+    setAudience("");
+    setNotes("");
+  }
+
+  return (
+    <Card>
+      <header className="flex items-start gap-3">
+        <FileUp aria-hidden className="h-5 w-5 flex-none text-(--accent)" />
+        <div>
+          <h3 className="text-base font-semibold text-(--ink)">
+            Source documents — what to upload, and for whom
+          </h3>
+          <p className="mt-0.5 text-sm text-(--muted)">
+            The pack is only as accurate as the source material the
+            SME signs against. Upload the documents that anchor each
+            section, and tag the <em>audience</em> each one is for —
+            the same word &ldquo;policy&rdquo; means different things
+            to L1 support, to engineers, and to the compliance team.
+          </p>
+        </div>
+      </header>
+
+      <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+        <Card tone="accent" flat>
+          <p className="text-sm font-semibold text-(--ink)">
+            <Users aria-hidden className="mr-1 inline h-4 w-4 align-text-bottom" />
+            Pick the right document for the audience
+          </p>
+          <ul className="mt-2 flex flex-col gap-1.5 text-xs text-(--muted)">
+            <li>
+              <strong className="text-(--ink)">Compliance/regulated</strong>
+              {" — "}upload the *policy text + revision date*, plus your
+              internal control mapping. Generic vendor whitepapers don&apos;t
+              count as source-of-truth.
+            </li>
+            <li>
+              <strong className="text-(--ink)">Role onboarding</strong>
+              {" — "}upload SOPs the role actually uses, the runbooks they
+              follow, and the 30/60/90-day checklist. Not the job-ad text.
+            </li>
+            <li>
+              <strong className="text-(--ink)">Tool adoption</strong>
+              {" — "}vendor docs <em>plus</em> your internal config
+              decisions (which features are on/off in your tenant).
+            </li>
+            <li>
+              <strong className="text-(--ink)">Coding skill</strong>
+              {" — "}redacted production code samples, internal style guide,
+              and review comments from real PRs.
+            </li>
+            <li>
+              <strong className="text-(--ink)">Certification</strong>
+              {" — "}official exam blueprint, past scenarios, and the
+              vendor reference for the version learners will sit.
+            </li>
+          </ul>
+        </Card>
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-semibold text-(--ink)">Add a source</p>
+          <label className="flex flex-col gap-1 text-xs font-medium text-(--ink)">
+            Document name / title
+            <input
+              type="text"
+              className={inputClass}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Refund policy v3 (2026-04-17)"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-medium text-(--ink)">
+            Who is this for?
+            <input
+              type="text"
+              className={inputClass}
+              value={audience}
+              onChange={(e) => setAudience(e.target.value)}
+              placeholder="e.g. L1 support, NA + EMEA"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-medium text-(--ink)">
+            Notes <span className="text-(--muted)">(optional)</span>
+            <input
+              type="text"
+              className={inputClass}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="e.g. signed-off by Compliance 2026-04-18"
+            />
+          </label>
+          <Button
+            type="button"
+            onClick={handleAdd}
+            disabled={!name.trim() || !audience.trim()}
+          >
+            <Plus aria-hidden className="h-4 w-4" /> Add source
+          </Button>
+        </div>
+      </div>
+
+      {sources.length > 0 ? (
+        <ul className="mt-3 flex flex-col gap-2 border-t border-dashed border-(--border) pt-3">
+          {sources.map((s) => (
+            <li
+              key={s.id}
+              className="flex items-start gap-3 rounded-md border border-(--border) bg-(--panel-2) p-3"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-(--ink)">{s.name}</p>
+                <p className="mt-0.5 text-xs text-(--muted)">
+                  <Users
+                    aria-hidden
+                    className="mr-1 inline h-3 w-3 align-text-bottom"
+                  />
+                  Audience: {s.audience}
+                </p>
+                {s.notes ? (
+                  <p className="mt-0.5 text-xs text-(--muted)">{s.notes}</p>
+                ) : null}
+                <p className="mt-0.5 text-[10px] text-(--muted)">
+                  Added {hydrated ? new Date(s.addedAt).toLocaleDateString() : "—"}
+                  {s.addedBy ? ` · by ${s.addedBy}` : ""}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => store.removeSource(s.id)}
+                aria-label={`Remove source ${s.name}`}
+                className="flex-none rounded-md p-2 text-(--muted) hover:bg-(--panel) hover:text-(--bad)"
+              >
+                <Trash2 aria-hidden className="h-4 w-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </Card>
   );
 }
 
@@ -217,6 +686,24 @@ function SMEHeader({
   const deployedLine = edits.deployedAt
     ? `Deployed ${new Date(edits.deployedAt).toLocaleString()} by ${edits.deployedBy ?? "unknown"}.`
     : "Not yet deployed.";
+  const lifecycleLine = (() => {
+    if (!edits.liveSince) return "";
+    const parts: string[] = [];
+    parts.push(
+      `Live since ${new Date(edits.liveSince).toLocaleDateString()}`
+    );
+    if (edits.expiresAt) {
+      const exp = new Date(edits.expiresAt);
+      // Same pattern as LifecycleCard: gate the impure clock read on
+      // `hydrated` so SSR + first client render render identically.
+      // eslint-disable-next-line react-hooks/purity
+      const expired = hydrated && exp.getTime() < Date.now();
+      parts.push(
+        `${expired ? "Expired" : "Expires"} ${exp.toLocaleDateString()}`
+      );
+    }
+    return parts.join(" · ");
+  })();
 
   return (
     <Card tone="accent" className="flex flex-col gap-4">
@@ -271,7 +758,10 @@ function SMEHeader({
             but not yet approved — deploy will skip them.
           </span>
         ) : null}
-        <span className="ml-auto text-xs text-(--muted)">{deployedLine}</span>
+        <div className="ml-auto flex flex-col items-end gap-0.5 text-xs text-(--muted)">
+          <span>{deployedLine}</span>
+          {hydrated && lifecycleLine ? <span>{lifecycleLine}</span> : null}
+        </div>
       </div>
     </Card>
   );
@@ -283,7 +773,7 @@ function Tile({
   tone,
 }: {
   label: string;
-  value: number;
+  value: number | string;
   tone: "neutral" | "good" | "warn" | "bad";
 }) {
   const toneClasses: Record<typeof tone, string> = {
@@ -359,7 +849,9 @@ function ConceptRow({
   store: ReturnType<typeof getSMEStore>;
 }) {
   const [editing, setEditing] = useState(false);
+  const [showHints, setShowHints] = useState(false);
   const status = overlay?.status ?? "draft";
+  const hints = useMemo(() => reviewHintsForConcept(concept), [concept]);
 
   function handleApprove() {
     if (!smeName.trim()) {
@@ -419,32 +911,64 @@ function ConceptRow({
         </header>
 
         {!editing ? (
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setEditing(true)}
-            >
-              <PencilLine aria-hidden className="h-4 w-4" /> Edit
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleApprove}
-              disabled={status === "approved"}
-            >
-              <Check aria-hidden className="h-4 w-4" />
-              {status === "approved" ? "Approved" : "Approve"}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleReject}>
-              <X aria-hidden className="h-4 w-4" /> Reject
-            </Button>
-            {overlay ? (
-              <Button variant="ghost" size="sm" onClick={handleRevert}>
-                <RotateCcw aria-hidden className="h-4 w-4" /> Revert
+          <>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setEditing(true)}
+              >
+                <PencilLine aria-hidden className="h-4 w-4" /> Edit
               </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleApprove}
+                disabled={status === "approved"}
+              >
+                <Check aria-hidden className="h-4 w-4" />
+                {status === "approved" ? "Approved" : "Approve"}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleReject}>
+                <X aria-hidden className="h-4 w-4" /> Reject
+              </Button>
+              {overlay ? (
+                <Button variant="ghost" size="sm" onClick={handleRevert}>
+                  <RotateCcw aria-hidden className="h-4 w-4" /> Revert
+                </Button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => setShowHints((v) => !v)}
+                aria-expanded={showHints}
+                aria-controls={`hints-${concept.id}`}
+                className="ml-auto inline-flex items-center gap-1 text-xs text-(--accent-2) underline-offset-4 hover:underline"
+              >
+                <HelpCircle aria-hidden className="h-3.5 w-3.5" />
+                {showHints
+                  ? `Hide review hints (${hints.length})`
+                  : `Show review hints (${hints.length})`}
+              </button>
+            </div>
+            {showHints ? (
+              <div
+                id={`hints-${concept.id}`}
+                className="mt-3 rounded-md border border-dashed border-(--border) bg-(--panel-2) p-3"
+              >
+                <p className="text-xs font-semibold uppercase tracking-wide text-(--accent-2)">
+                  What to check before signing
+                </p>
+                <ul className="mt-2 flex flex-col gap-1.5 text-xs text-(--muted)">
+                  {hints.map((h) => (
+                    <li key={h.label}>
+                      <strong className="text-(--ink)">{h.label}.</strong>{" "}
+                      {h.guidance}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ) : null}
-          </div>
+          </>
         ) : (
           <ConceptEditor
             concept={concept}

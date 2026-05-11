@@ -7,6 +7,7 @@ import {
   getSectionFrom,
 } from "@/content/curriculum-loader";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
+import { journeyTrail } from "@/lib/nav-trail";
 import { Container } from "@/components/ui/Container";
 import { FlashcardBattleGame } from "@/components/games/flashcard-battle/FlashcardBattleGame";
 
@@ -55,12 +56,12 @@ export default async function FlashcardBattlePage({
   return (
     <Container as="article" width="prose" className="py-2">
       <Breadcrumbs
-        trail={[
-          { label: "Dashboard", href: `/${packId}` },
+        trail={journeyTrail(
+          pack,
           { label: section.title, href: `/${packId}/section/${section.id}` },
           { label: "Games", href: `/${packId}/section/${section.id}?tab=games` },
-          { label: "Flashcard Battle" },
-        ]}
+          { label: "Flashcard Battle" }
+        )}
       />
       <FlashcardBattleGame section={section} cards={cards} packId={packId} />
       <div className="mt-6">

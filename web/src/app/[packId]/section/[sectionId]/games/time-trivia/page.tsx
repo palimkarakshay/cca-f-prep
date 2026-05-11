@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ALL_PACK_IDS, getPack } from "@/content/pack-registry";
 import { getSectionFrom } from "@/content/curriculum-loader";
 import { Breadcrumbs } from "@/components/primitives/Breadcrumbs";
+import { journeyTrail } from "@/lib/nav-trail";
 import { Container } from "@/components/ui/Container";
 import { TimeTriviaGame } from "@/components/games/time-trivia/TimeTriviaGame";
 
@@ -51,12 +52,12 @@ export default async function TimeTriviaPage({
   return (
     <Container as="article" width="prose" className="py-2">
       <Breadcrumbs
-        trail={[
-          { label: "Dashboard", href: `/${packId}` },
+        trail={journeyTrail(
+          pack,
           { label: section.title, href: `/${packId}/section/${section.id}` },
           { label: "Games", href: `/${packId}/section/${section.id}?tab=games` },
-          { label: "Time Trivia" },
-        ]}
+          { label: "Time Trivia" }
+        )}
       />
       <TimeTriviaGame section={section} packId={packId} />
       <div className="mt-6">
