@@ -48,15 +48,26 @@ export function loadProgressFor(
     }
     // Self-heal: an older persisted shape may pre-date the pack-aware
     // newProgress() fix and still carry only the *default* pack's
-    // first-section id as unlocked. If the caller knows this pack's
-    // real first-section id and it isn't present, unlock it here so
-    // the user can actually start the journey.
-    if (firstSectionId && !obj.section[firstSectionId]) {
-      obj.section[firstSectionId] = {
-        unlocked: true,
-        testAttempts: [],
-        complete: false,
-      };
+    // first-section id as unlocked. Two affected cases:
+    //   (a) the URL pack's first-section record is missing entirely —
+    //       seed it fresh with unlocked: true.
+    //   (b) the record exists but is { unlocked: false } — that can
+    //       happen if a side effect (e.g. starting a section test
+    //       which calls ensureSection) created a locked record before
+    //       this fix landed. Force-unlock here so concept links light
+    //       up on the next page load. Test attempts / completion
+    //       flags are preserved.
+    if (firstSectionId) {
+      const existing = obj.section[firstSectionId];
+      if (!existing) {
+        obj.section[firstSectionId] = {
+          unlocked: true,
+          testAttempts: [],
+          complete: false,
+        };
+      } else if (!existing.unlocked) {
+        existing.unlocked = true;
+      }
     }
     return obj;
   } catch {
