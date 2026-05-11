@@ -1,10 +1,24 @@
-import type { Lesson } from "@/content/curriculum-types";
+import type { Lesson, LessonDepth } from "@/content/curriculum-types";
 
 /**
  * Lesson table-of-contents rail. Auto-derived from which lesson sections
  * are populated. Renders nothing if there are no anchored sections.
+ *
+ * The TOC anchors point at IDs (`#key-points`, `#examples`, `#pitfalls`)
+ * that only exist in LessonBody (the canonical "Conceptual" depth body).
+ * SimplifiedBody + DeeperBody render unanchored prose, so on those
+ * depths the rail would scroll to nowhere. Render nothing unless the
+ * learner is on the conceptual body.
  */
-export function LessonTOC({ lesson }: { lesson: Lesson }) {
+export function LessonTOC({
+  lesson,
+  depth,
+}: {
+  lesson: Lesson;
+  depth: LessonDepth;
+}) {
+  if (depth !== "conceptual") return null;
+
   const items: { id: string; label: string }[] = [];
   if (lesson.keyPoints && lesson.keyPoints.length > 0) {
     items.push({ id: "key-points", label: "Key points" });

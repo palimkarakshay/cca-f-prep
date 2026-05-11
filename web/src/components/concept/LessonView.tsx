@@ -169,7 +169,7 @@ export function LessonView({
       </div>
 
       <div className="lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10">
-        <LessonTOC lesson={lesson} />
+        <LessonTOC lesson={lesson} depth={effectiveDepth} />
 
         <article className="min-w-0">
           <header className="mb-4 flex flex-wrap items-center gap-2">
