@@ -1,5 +1,13 @@
 # Business Viability — Mitigation Plan
 
+> **Reading order (added 2026-05-11).** This is the problem→mitigation
+> map that drove [`v2-scaled-b2b-plan.md`](./v2-scaled-b2b-plan.md) (the
+> business shape). For code on `/web/`, read
+> [`commercialization-readiness-plan.md`](./commercialization-readiness-plan.md).
+> §16's B2C micro-SaaS alternative track (formerly `IMPLEMENTATION-v2.md`)
+> was retired 2026-05-11 — see
+> [`archive-2026-05-04/IMPLEMENTATION-v2.md`](./archive-2026-05-04/IMPLEMENTATION-v2.md).
+
 > **Companion to.** `business-viability-negative-study.md` — the hostile review.
 > This document does the opposite job: for each identified problem, it proposes
 > the safest available mitigation. Where no safe mitigation exists, it says so

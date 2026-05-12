@@ -289,3 +289,57 @@ gate — don't merge `codex-blockers` without addressing findings.
   - No new routes or components introduced; copy-thread pass
     only. Visual hierarchy on `/for-teams` left as-is — flagged
     for a future design pass.
+
+- 2026-05-11 (later) — **Commercialization-plan coherency pass.**
+  `plans/commercialization-readiness-plan.md` (CRP) was committed via
+  PR #47 (commit `e2e037e`) as the implementation lens applying
+  `v2-scaled-b2b-plan.md` to the code under `web/`. Nothing yet
+  pointed at it. This pass routes a fresh reader to it from every
+  related document and resolves the loose ends a gap-audit surfaced.
+  Six small commits:
+  - **CRP self-extended.** New `## 0. Status` block (canonical as of
+    2026-05-11), new `## 12. Gap analysis vs prior plans` table
+    (covers all 9 fatal problems from the negative study, names the
+    5 mitigations that lived only in the mitigation plan, lists the
+    3 drifts between CRP and the now-archived `IMPLEMENTATION-v2.md`,
+    and resolves the two open design questions inline), new `## 13.
+    Operator-behaviour kills` restating the four binding stop-signals
+    from v2 §11 + the anti-promise list, so they are in CRP itself
+    and not just in mitigation-plan / decisions.md.
+  - **Banners on prior plan docs.** A 2–3 line "Reading order" header
+    added to `v2-scaled-b2b-plan.md`, `business-viability-negative-
+    study.md`, `business-viability-mitigation-plan.md`, `business-
+    viability-research-notes.md`, and `decisions.md` — each routes
+    the reader to CRP for code, v2 for business shape.
+  - **Root `README.md`.** New "Live product roadmap" callout under
+    the existing `web/` block + a `plans/` row in the layout table.
+  - **`web/README.md`.** New "## Commercialization roadmap" section
+    cross-linking CRP + v2 and ticking off the 12 immediate-wins
+    items (all 12 landed in PR #46 / follow-ups).
+  - **`IMPLEMENTATION-v2.md` archived.** `git mv`'d into
+    `plans/archive-2026-05-04/` with an "Archived 2026-05-11" banner.
+    It was the parallel B2C micro-SaaS / Render Pro / $29-one-time
+    track from mitigation-plan §16. CRP follows the v2-scaled-B2B
+    track instead (Vercel Pro, $15 B2C + $20–25 B2B, 6-vendor cap).
+    Inbound references from `v2-scaled-b2b-plan.md`,
+    `business-viability-mitigation-plan.md`, and `decisions.md`
+    updated to the new archive path.
+  - **Resolved open design questions** (inline in CRP §12):
+    - GDPR erasure vs immutable `pack_deploy.snapshot` →
+      tombstone-actor policy from mitigation-plan §8; snapshot body
+      stays intact, identifying fields swapped for an `erasure_event`
+      pointer. `/api/data-delete` ships in v0.5.
+    - Static `curriculum.ts` vs DB-backed `pack_registry` →
+      `pack_registry` is a registry of *which packs exist for which
+      tenant*, not the curriculum body; curriculum stays in TS until
+      v0.6 when AI-generated drafts require persistence.
+  - **Net answers to the operator's four questions** (now living in
+    CRP §12.E): the new plan addresses all 9 fatal problems
+    structurally; pilot-pricing inversion is inherited from v2 but
+    not foregrounded in CRP; operator-behaviour mitigations were
+    missing from CRP and have now been imported as §13; no new
+    risks introduced. The B2C-only track is retired, not preserved.
+  - **Doc set is now coherent.** A fresh reader hits root README →
+    `web/` block → CRP §0 → §1–§11 → §12 audit → §13 kills. v1 /
+    retired tracks are reachable only via the explicit banner in
+    each prior doc that names them as superseded.

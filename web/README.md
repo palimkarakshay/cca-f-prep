@@ -228,6 +228,37 @@ content out of the consumer pitch.
 > `curriculum-types.ts` and the renderers go in `src/components/`,
 > keeping packs free of UI code.
 
+## Commercialization roadmap
+
+The canonical plan for turning this app into a paying product is
+[`../plans/commercialization-readiness-plan.md`](../plans/commercialization-readiness-plan.md)
+— the *implementation lens* with file paths, effort estimates, and a
+v0.1→v0.5 sequence. It applies the *business shape* in
+[`../plans/v2-scaled-b2b-plan.md`](../plans/v2-scaled-b2b-plan.md) to
+the code under this directory.
+
+**Status of the §6 immediate-wins list** (12 items, all landed in
+PR #46 except where noted):
+
+- ✅ CI re-enabled on PR + push (`.github/workflows/ci.yml`)
+- ✅ `.env.example` + secrets policy in this README's *Environment
+  variables* section
+- ✅ `web/src/lib/ai/router.ts` stub + `web/prompts/` markdown templates
+- ✅ `web/src/lib/storage/driver.ts` + `local-only` driver, with
+  `display-prefs`, `lesson-depth`, `before-you-begin` migrated
+- ✅ `SyncMeta` + `WithSyncMeta` forward-compat types on every store
+- ✅ `decodeJourney` debounce + LRU result cache
+- ✅ `web/src/app/api/health/route.ts`
+- ✅ `/privacy` + `/terms` placeholder pages
+- ✅ `NEXT_PUBLIC_ADEPT_ENABLED` flag gating Adept / SME / for-teams
+- ✅ Letter-bias validator on SME workbench saves
+- ✅ `web/CONTRIBUTING.md` + extended `SECURITY.md`
+- ✅ Observability single-seam shim + `instrumentation.ts`
+
+Next up (v0.1): Clerk auth, Neon + Drizzle schema, `/api/progress`,
+`/api/auth/adopt`, Vercel Pro project. See CRP §7 for the full
+versioned roadmap and §13 for the binding stop-signals.
+
 ## Adding content (within a pack)
 
 Edit the active pack's `curriculum.ts`. Add a concept by pushing into

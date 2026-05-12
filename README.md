@@ -11,6 +11,16 @@ Foundations (CCA-F) exam.
 > See [`web/README.md`](web/README.md) for the architecture, the
 > two-lane home page, and the SME workbench. Vercel auto-deploys
 > `web/` on every push to `main`.
+>
+> **Live product roadmap.** The commercialization plan for `web/` is
+> [`plans/commercialization-readiness-plan.md`](plans/commercialization-readiness-plan.md)
+> (the implementation lens — file paths, effort, immediate wins,
+> v0.1→v0.5 sequencing). The business shape it implements is
+> [`plans/v2-scaled-b2b-plan.md`](plans/v2-scaled-b2b-plan.md). The
+> hostile review that produced both is in
+> [`plans/business-viability-negative-study.md`](plans/business-viability-negative-study.md)
+> with the response in
+> [`plans/business-viability-mitigation-plan.md`](plans/business-viability-mitigation-plan.md).
 
 ## Layout
 
@@ -27,6 +37,7 @@ Foundations (CCA-F) exam.
 | `08-cheat-sheets/` | When-to decision trees + training methodology (with phase model + interleaving) | — |
 | `09-progress-tracker/` | skills matrix (B-skills + architect sub-areas with calibration gap), weekly history snapshots, spaced-review queue | — |
 | `docs/` | single-file MCQ runner, served via GitHub Pages (`/docs` source) | — |
+| `plans/` | commercialization roadmap (canonical: `commercialization-readiness-plan.md` + `v2-scaled-b2b-plan.md`), hostile review, mitigations, decision log; retired tracks under `archive-2026-05-04/` | — |
 | `web/` | Curio / Adept Next.js learning-app shell + swappable content packs (the live product) | — |
 
 ## How to use
